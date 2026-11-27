@@ -5580,6 +5580,518 @@
         "acknowledged"
       ],
       "note": "SDK frame wrapper around SSE event name and data. Dart decodes the event wire shape directly."
+    },
+    "AudioAgentConfigurationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioAgentConfiguration",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioAgentConfigurationRequest",
+      "tags": []
+    },
+    "AudioAgentConfigurationResponseConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioAgentConfigurationSnapshot",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioAgentConfigurationResponseConfig",
+      "tags": []
+    },
+    "AudioLLMConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioLlmConfig",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioLLMConfig",
+      "tags": []
+    },
+    "AudioSTTConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSttConfig",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioSTTConfig",
+      "tags": []
+    },
+    "AudioTTSConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTtsConfig",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioTTSConfig",
+      "tags": []
+    },
+    "AudioTurnConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTurnConfig",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioTurnConfig",
+      "tags": []
+    },
+    "AudioTurnDetectionConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTurnDetectionConfig",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioTurnDetectionConfig",
+      "tags": []
+    },
+    "AudioInactivityConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioInactivityConfig",
+      "file": "lib/src/models/audio_agents/audio_agent_config.dart",
+      "schema": "AudioInactivityConfig",
+      "tags": []
+    },
+    "VoiceAgentWebSearchTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentWebSearchTool",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "VoiceAgentWebSearchTool",
+      "tags": [],
+      "parent": "VoiceAgentTool"
+    },
+    "VoiceAgentDocumentLibraryTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentDocumentLibraryTool",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "VoiceAgentDocumentLibraryTool",
+      "tags": [],
+      "parent": "VoiceAgentTool"
+    },
+    "VoiceAgentCustomConnector": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentCustomConnector",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "VoiceAgentCustomConnector",
+      "tags": [],
+      "parent": "VoiceAgentTool"
+    },
+    "VoiceAgentFunctionTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentFunctionTool",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "VoiceAgentFunctionTool",
+      "tags": [],
+      "parent": "VoiceAgentTool"
+    },
+    "TransferCallTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TransferCallTool",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "TransferCallTool",
+      "tags": [],
+      "parent": "VoiceAgentTool"
+    },
+    "HangUpTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "HangUpTool",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "HangUpTool",
+      "tags": [],
+      "parent": "VoiceAgentTool"
+    },
+    "StaticToolFiller": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "StaticToolFiller",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "StaticToolFiller",
+      "tags": [],
+      "parent": "ToolFiller"
+    },
+    "GeneratedToolFiller": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GeneratedToolFiller",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "GeneratedToolFiller",
+      "tags": [],
+      "parent": "ToolFiller"
+    },
+    "PhoneDestination": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PhoneDestination",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "PhoneDestination",
+      "tags": [],
+      "parent": "TransferDestination"
+    },
+    "SipDestination": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SipDestination",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "SipDestination",
+      "tags": [],
+      "parent": "TransferDestination"
+    },
+    "TransferTarget": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TransferTarget",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "TransferTarget",
+      "tags": []
+    },
+    "VoiceAgentFunction": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceAgentFunction",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "Function",
+      "tags": [],
+      "note": "Voice tools require a typed function declaration including strict and a parameter schema."
+    },
+    "AudioAgentCreateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAudioAgentRequest",
+      "file": "lib/src/models/audio_agents/audio_agent.dart",
+      "schema": "AudioAgentCreateRequest",
+      "tags": []
+    },
+    "AudioAgentUpdateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAudioAgentRequest",
+      "file": "lib/src/models/audio_agents/audio_agent.dart",
+      "schema": "AudioAgentUpdateRequest",
+      "tags": []
+    },
+    "AudioAgentResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioAgent",
+      "file": "lib/src/models/audio_agents/audio_agent.dart",
+      "schema": "AudioAgentResponse",
+      "tags": []
+    },
+    "AudioAgentListPage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioAgentListPage",
+      "file": "lib/src/models/audio_agents/audio_agent.dart",
+      "schema": "AudioAgentListPage",
+      "tags": []
+    },
+    "AudioAgentSessionListPage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioAgentSessionListPage",
+      "file": "lib/src/models/audio_agents/audio_agent.dart",
+      "schema": "AudioAgentSessionListPage",
+      "tags": []
+    },
+    "AudioAgentSessionSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioAgentSessionSummary",
+      "file": "lib/src/models/audio_agents/audio_agent.dart",
+      "schema": "AudioAgentSessionSummary",
+      "tags": []
+    },
+    "AudioSessionCreateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAudioSessionRequest",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionCreateRequest",
+      "tags": []
+    },
+    "AudioSessionCreateResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSessionCredentials",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionCreateResponse",
+      "tags": []
+    },
+    "AudioSessionUpdateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAudioSessionRequest",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionUpdateRequest",
+      "tags": []
+    },
+    "AudioSessionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSession",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionResponse",
+      "tags": []
+    },
+    "AudioSessionUpdateResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSessionUpdate",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionUpdateResponse",
+      "tags": []
+    },
+    "AmazonConnectContact": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AmazonConnectContact",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AmazonConnectContact",
+      "tags": []
+    },
+    "AudioSessionPhoneCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSessionPhoneCall",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionPhoneCall",
+      "tags": []
+    },
+    "AudioSessionPhoneNumber": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSessionPhoneNumber",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionPhoneNumber",
+      "tags": []
+    },
+    "AudioSessionTurnUpdate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSessionTurnUpdate",
+      "file": "lib/src/models/audio_agents/audio_session.dart",
+      "schema": "AudioSessionTurnUpdate",
+      "tags": []
+    },
+    "AudioUserTranscriptTurn": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AudioUserTranscriptTurn",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": "AudioUserTranscriptTurn",
+      "tags": [],
+      "parent": "AudioTranscriptTurn"
+    },
+    "AudioAssistantTranscriptTurn": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AudioAssistantTranscriptTurn",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": "AudioAssistantTranscriptTurn",
+      "tags": [],
+      "parent": "AudioTranscriptTurn"
+    },
+    "AudioToolTranscriptTurn": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AudioToolTranscriptTurn",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": "AudioToolTranscriptTurn",
+      "tags": [],
+      "parent": "AudioTranscriptTurn"
+    },
+    "AudioToolTranscriptTurnStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AudioToolTranscriptTurnStatus",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": "AudioToolTranscriptTurnStatus",
+      "tags": []
+    },
+    "AudioLatencyBreakdownAssistant": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioLatencyBreakdownAssistant",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": "AudioLatencyBreakdownAssistant",
+      "tags": []
+    },
+    "AudioLatencyBreakdownUser": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioLatencyBreakdownUser",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": "AudioLatencyBreakdownUser",
+      "tags": []
+    },
+    "AudioToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioToolCall",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": "AudioToolCall",
+      "tags": []
+    },
+    "VoiceAgentToolCallStartedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentToolCallStartedEvent",
+      "file": "lib/src/models/audio_agents/voice_agent_event.dart",
+      "schema": "VoiceAgentToolCallStartedEvent",
+      "tags": [],
+      "parent": "VoiceAgentEvent"
+    },
+    "VoiceAgentToolCallEndedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentToolCallEndedEvent",
+      "file": "lib/src/models/audio_agents/voice_agent_event.dart",
+      "schema": "VoiceAgentToolCallEndedEvent",
+      "tags": [],
+      "parent": "VoiceAgentEvent"
+    },
+    "VoiceAgentErrorEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentErrorEvent",
+      "file": "lib/src/models/audio_agents/voice_agent_event.dart",
+      "schema": "VoiceAgentErrorEvent",
+      "tags": [],
+      "parent": "VoiceAgentEvent"
+    },
+    "VoiceAgentTranscriptEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentTranscriptEvent",
+      "file": "lib/src/models/audio_agents/voice_agent_event.dart",
+      "schema": "VoiceAgentTranscriptEvent",
+      "tags": [],
+      "parent": "VoiceAgentEvent",
+      "excluded_properties": [
+        "final"
+      ],
+      "note": "Wire 'final' maps to Dart isFinal because final is reserved. Covered by offline event fixtures."
+    },
+    "VoiceAgentStateChangedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentStateChangedEvent",
+      "file": "lib/src/models/audio_agents/voice_agent_event.dart",
+      "schema": "VoiceAgentStateChangedEvent",
+      "tags": [],
+      "parent": "VoiceAgentEvent"
+    },
+    "VoiceAgentSessionUpdatedEvent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "VoiceAgentSessionUpdatedEvent",
+      "file": "lib/src/models/audio_agents/voice_agent_event.dart",
+      "schema": null,
+      "tags": [
+        "acknowledged"
+      ],
+      "parent": "VoiceAgentEvent",
+      "note": "Supplemental pinned TypeScript room event absent from OpenAPI. Its payload and discriminator are verified with room fixtures."
+    },
+    "VoiceAgentTool": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "VoiceAgentTool",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "VoiceAgentWebSearchTool": "web_search",
+          "VoiceAgentDocumentLibraryTool": "document_library",
+          "VoiceAgentCustomConnector": "connector",
+          "VoiceAgentFunctionTool": "function",
+          "TransferCallTool": "transfer_call",
+          "HangUpTool": "hang_up"
+        }
+      }
+    },
+    "ToolFiller": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ToolFiller",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "StaticToolFiller": "static",
+          "GeneratedToolFiller": "generated"
+        }
+      }
+    },
+    "TransferDestination": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TransferDestination",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "PhoneDestination": "phone",
+          "SipDestination": "sip"
+        }
+      }
+    },
+    "AudioTranscriptTurn": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AudioTranscriptTurn",
+      "file": "lib/src/models/audio_agents/audio_session_transcript.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "role",
+        "mapping": {
+          "AudioUserTranscriptTurn": "user",
+          "AudioAssistantTranscriptTurn": "assistant",
+          "AudioToolTranscriptTurn": "tool"
+        }
+      },
+      "excluded_properties": [
+        "latency"
+      ],
+      "note": "Assistant latency covers LLM/TTS while user latency covers transcription and end of turn. Their separately verified variants have different wire schemas."
+    },
+    "VoiceAgentEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "VoiceAgentEvent",
+      "file": "lib/src/models/audio_agents/voice_agent_event.dart",
+      "schema": "VoiceAgentEvent",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "VoiceAgentToolCallStartedEvent": "tool_call.started",
+          "VoiceAgentToolCallEndedEvent": "tool_call.ended",
+          "VoiceAgentErrorEvent": "error",
+          "VoiceAgentTranscriptEvent": "transcription.segment",
+          "VoiceAgentStateChangedEvent": "agent.state.changed",
+          "VoiceAgentSessionUpdatedEvent": "session.updated"
+        }
+      }
+    },
+    "VoiceAgentFunctionToolRequest": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VoiceAgentFunctionTool",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "VoiceAgentFunctionToolRequest",
+      "tags": [],
+      "parent": "VoiceAgentTool"
+    },
+    "FunctionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceAgentFunction",
+      "file": "lib/src/models/audio_agents/audio_agent_tools.dart",
+      "schema": "FunctionRequest",
+      "tags": [],
+      "note": "Voice tools require a typed function declaration including strict and a parameter schema."
     }
   }
 }

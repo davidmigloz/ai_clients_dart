@@ -39,7 +39,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 ### Tools and media
 
 - Built-in web search, code interpreter, and document library tools
-- Audio transcription, text-to-speech, voice management, and realtime WebSockets
+- Audio transcription, text-to-speech, voice management, realtime WebSockets, and Voice Agents
 - OCR, moderations, and classifications
 
 ### Operational APIs
@@ -871,6 +871,77 @@ final connection = await browser.audio.realtime.connect(
 
 </details>
 
+### How do I use Voice Agents?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.audio.agents` to manage versioned voice agents and
+`client.audio.sessions` to create, inspect, update, and stop their sessions
+on Mistral-hosted infrastructure. The session API also starts sessions with
+inline settings. Both are separate from the text agent API at `client.agents`.
+
+```dart
+// Backend. Authenticate the app user before creating a room.
+final session = await backend.audio.sessions.create(
+  request: CreateAudioSessionRequest(agentId: agentId),
+);
+final handoff = VoiceAgentRoomCredentials.fromSession(session).toJson();
+// Return handoff only to the authenticated app user.
+```
+
+The app joins LiveKit using the server URL and short-lived participant token.
+Keep the workspace API key on the backend. Treat the handoff as a credential.
+Use your LiveKit media SDK to capture microphone audio and play the remote
+tracks. An adapter supplied to `VoiceAgentConnection` translates room
+packets and RPC calls into Dart types without adding a media dependency to
+this package.
+
+```dart
+final connection = await VoiceAgentConnection.connect(
+  credentials: VoiceAgentRoomCredentials.fromJson(handoff),
+  transport: liveKitAdapter, // Implements VoiceAgentRoomTransport.
+  closeSession: closeSessionOnBackend,
+  functions: {
+    'lookup_order': (args) => lookupOrderOnBackend(args['order_id'] as String),
+  },
+);
+try {
+  await for (final event in connection.events) {
+    if (event case VoiceAgentTranscriptEvent(isFinal: true, :final content)) {
+      print(content);
+    }
+  }
+} finally {
+  await connection.close();
+}
+```
+
+Your adapter should identify the agent from trusted LiveKit participant
+metadata, subscribe to its `voice_agent.events` packets, and close the packet
+stream when the room disconnects. Register `mistral.function_tool` before
+publishing the microphone. Convert `VoiceAgentRpcError` to the media SDK's RPC
+error with the same code. Function handlers should enforce application
+permissions. Save their declarations on the agent or include them when
+creating the session.
+
+For a runtime update, call `backend.audio.sessions.update()` over REST or
+`connection.update()` to send `mistral.session_update` to the room's agent.
+The room RPC returns the committed configuration as a
+`VoiceAgentSessionUpdatedEvent`. Instructions and tools apply at the next
+turn boundary. The app owns the connection and calls `close()` to release
+the LiveKit room and stop the server session through the backend callback.
+
+SIP calling requires Enterprise access. The public contract covers transfer
+and hang-up tool declarations and phone metadata on sessions. Phone number
+provisioning and webhook subscriptions are configured outside this client.
+[Mistral browser guide](https://docs.mistral.ai/studio/audio/voice-agents/browser) ·
+[Telephony guide](https://docs.mistral.ai/studio/audio/voice-agents/telephony)
+
+→ [Full example](example/voice_agents_example.dart)
+
+</details>
+
 ### How do I use agents?
 
 <details>
@@ -1437,6 +1508,7 @@ See the [example/](example/) directory for complete examples:
 | [`ocr_example.dart`](example/ocr_example.dart) | OCR 4.1 with block confidence |
 | [`audio_example.dart`](example/audio_example.dart) | Voxtral file transcription, SSE, speech, voice search, and WAV samples |
 | [`realtime_audio_example.dart`](example/realtime_audio_example.dart) | Realtime Voxtral transcription and speech over WebSockets |
+| [`voice_agents_example.dart`](example/voice_agents_example.dart) | Mistral-hosted Voice Agents and audio sessions |
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
 | [`libraries_example.dart`](example/libraries_example.dart) | Library and document uploads (beta) |
@@ -1475,6 +1547,7 @@ See the [example/](example/) directory for complete examples:
 | OCR | ✅ Full |
 | Audio (Transcription, Speech, Voices) | ✅ Full |
 | Voxtral realtime transcription and speech | Public Preview. Native STT and TTS, browser STT with a scoped token |
+| Voice Agents (audio agents and sessions) | Mistral-hosted REST and LiveKit handoff. Enterprise SIP access |
 | Agents (Beta) | ✅ Full |
 | Conversations (Beta) | ✅ Full |
 | Libraries (Beta) | ✅ Full |

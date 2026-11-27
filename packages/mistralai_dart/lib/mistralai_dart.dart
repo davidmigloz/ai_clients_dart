@@ -97,6 +97,13 @@ export 'src/models/audio/voice_list_response.dart';
 export 'src/models/audio/voice_response.dart';
 export 'src/models/audio/voice_update_request.dart';
 
+// --- Models: Audio Agents ---
+export 'src/models/audio_agents/audio_agent.dart';
+export 'src/models/audio_agents/audio_agent_config.dart';
+export 'src/models/audio_agents/audio_agent_tools.dart';
+export 'src/models/audio_agents/audio_session.dart';
+export 'src/models/audio_agents/audio_session_transcript.dart';
+export 'src/models/audio_agents/voice_agent_event.dart';
 // --- Models: Batch ---
 export 'src/models/batch/batch_error.dart';
 export 'src/models/batch/batch_job.dart';
@@ -576,6 +583,8 @@ export 'src/models/workflows/workflow_update_response.dart';
 export 'src/models/workflows/workflow_with_worker_status.dart';
 export 'src/models/workflows/workflows_worker_spec_update.dart';
 // --- Resources ---
+export 'src/resources/audio_agents/audio_agents_resource.dart';
+export 'src/resources/audio_agents/voice_agent_connection.dart';
 export 'src/resources/managed_search_indexes_resource.dart';
 export 'src/resources/realtime/realtime_audio.dart';
 export 'src/resources/realtime/realtime_resource.dart';

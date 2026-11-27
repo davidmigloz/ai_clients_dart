@@ -32,6 +32,7 @@
     "moderations": "moderation",
     "fineTuningModels": "fine_tuning",
     "transcriptions": "audio",
+    "audioAgents": "voice_agents",
     "managed_search_indexes": "managed_search_indexes",
     "realtime": "realtime_audio"
   },
