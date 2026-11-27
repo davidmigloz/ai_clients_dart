@@ -728,7 +728,7 @@ class ConversationToolExecutionDone extends ConversationEvent {
     name: name ?? this.name,
     info: info == unsetCopyWithValue
         ? this.info
-        : info as Map<String, dynamic>?,
+        : (info as Map?)?.cast<String, dynamic>(),
     createdAt: createdAt == unsetCopyWithValue
         ? this.createdAt
         : createdAt as String?,

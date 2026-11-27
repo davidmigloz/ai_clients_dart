@@ -206,13 +206,15 @@ class Conversation {
       instructions: instructions == unsetCopyWithValue
           ? this.instructions
           : instructions as String?,
-      tools: tools == unsetCopyWithValue ? this.tools : tools as List<Tool>?,
+      tools: tools == unsetCopyWithValue
+          ? this.tools
+          : (tools as List?)?.cast<Tool>(),
       completionArgs: completionArgs == unsetCopyWithValue
           ? this.completionArgs
           : completionArgs as CompletionArgs?,
       guardrails: guardrails == unsetCopyWithValue
           ? this.guardrails
-          : guardrails as List<GuardrailConfig>?,
+          : (guardrails as List?)?.cast<GuardrailConfig>(),
     );
   }
 

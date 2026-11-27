@@ -148,7 +148,7 @@ class UsageInfo {
         : connectorTokens as int?,
     connectors: connectors == unsetCopyWithValue
         ? this.connectors
-        : connectors as Map<String, int>?,
+        : (connectors as Map?)?.cast<String, int>(),
     serviceTier: serviceTier == unsetCopyWithValue
         ? this.serviceTier
         : serviceTier as String?,

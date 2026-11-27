@@ -123,7 +123,7 @@ class UpdateAgentRequest {
         : completionArgs as CompletionArgs?,
     handoffs: handoffs == unsetCopyWithValue
         ? this.handoffs
-        : handoffs as List<String>?,
+        : (handoffs as List?)?.cast<String>(),
     deploymentChat: deploymentChat == unsetCopyWithValue
         ? this.deploymentChat
         : deploymentChat as bool?,

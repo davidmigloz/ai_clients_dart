@@ -735,10 +735,10 @@ class RestartConversationRequest {
           : agentVersion,
       inputs: inputs == unsetCopyWithValue
           ? this.inputs
-          : inputs as List<ConversationEntry>?,
+          : (inputs as List?)?.cast<ConversationEntry>(),
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, dynamic>?,
+          : (metadata as Map?)?.cast<String, dynamic>(),
     );
   }
 

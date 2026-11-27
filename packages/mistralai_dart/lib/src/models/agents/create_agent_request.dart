@@ -116,7 +116,7 @@ class CreateAgentRequest {
         : completionArgs as CompletionArgs?,
     handoffs: handoffs == unsetCopyWithValue
         ? this.handoffs
-        : handoffs as List<String>?,
+        : (handoffs as List?)?.cast<String>(),
   );
 
   @override

@@ -468,7 +468,7 @@ class FunctionCallEntry extends ConversationEntry {
       model: model ?? this.model,
       argumentsObject: argumentsObject == unsetCopyWithValue
           ? (arguments == null ? this.argumentsObject : null)
-          : argumentsObject as Map<String, dynamic>?,
+          : (argumentsObject as Map?)?.cast<String, dynamic>(),
       object: object == unsetCopyWithValue ? this.object : object as String?,
       createdAt: createdAt == unsetCopyWithValue
           ? this.createdAt
@@ -731,7 +731,7 @@ class ToolExecutionEntry extends ConversationEntry {
           : arguments as String?,
       info: info == unsetCopyWithValue
           ? (output == null ? this.info : null)
-          : info as Map<String, dynamic>?,
+          : (info as Map?)?.cast<String, dynamic>(),
       object: object == unsetCopyWithValue ? this.object : object as String?,
       createdAt: createdAt == unsetCopyWithValue
           ? this.createdAt
