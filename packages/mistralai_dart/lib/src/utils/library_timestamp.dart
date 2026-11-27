@@ -1,13 +1,19 @@
-/// Reads the API's ISO 8601 timestamp or a previously serialized Unix value.
-int? parseLibraryTimestamp(Object? value) => switch (value) {
-  final int seconds => seconds,
-  final String iso => DateTime.parse(iso).millisecondsSinceEpoch ~/ 1000,
+/// Reads library timestamps from earlier integer and current ISO 8601 JSON.
+DateTime? parseLibraryTimestamp(Object? value) => switch (value) {
+  final DateTime date => date,
+  final int seconds => DateTime.fromMillisecondsSinceEpoch(
+    seconds * 1000,
+    isUtc: true,
+  ),
+  final String iso => DateTime.parse(iso),
   null => null,
   _ => throw const FormatException('Expected a library timestamp.'),
 };
 
-/// Encodes Unix seconds as the ISO 8601 timestamps used by Libraries.
-String formatLibraryTimestamp(int value) => DateTime.fromMillisecondsSinceEpoch(
-  value * 1000,
-  isUtc: true,
-).toIso8601String();
+/// Preserves the package's epoch-second getters.
+int? libraryTimestampSeconds(Object? value) => switch (value) {
+  final int seconds => seconds,
+  final DateTime date =>
+    date.microsecondsSinceEpoch ~/ Duration.microsecondsPerSecond,
+  _ => null,
+};

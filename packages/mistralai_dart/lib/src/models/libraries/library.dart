@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/library_timestamp.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../observability/pagination_info.dart';
-import '../../utils/library_timestamp.dart';
 
 /// A document library for RAG (Retrieval-Augmented Generation).
 ///
@@ -21,10 +21,20 @@ class Library {
   final String? description;
 
   /// When this library was created (Unix timestamp).
-  final int? createdAt;
+  int? get createdAt => libraryTimestampSeconds(_createdAt);
+
+  /// When this item was created, including fractional seconds.
+  DateTime? get createdAtDateTime => parseLibraryTimestamp(_createdAt);
+
+  final Object? _createdAt;
 
   /// When this library was last updated (Unix timestamp).
-  final int? updatedAt;
+  int? get updatedAt => libraryTimestampSeconds(_updatedAt);
+
+  /// When this item was last updated, including fractional seconds.
+  DateTime? get updatedAtDateTime => parseLibraryTimestamp(_updatedAt);
+
+  final Object? _updatedAt;
 
   /// The ID of the library owner.
   final String? ownerId;
@@ -64,8 +74,10 @@ class Library {
     required this.id,
     required this.name,
     this.description,
-    this.createdAt,
-    this.updatedAt,
+    int? createdAt,
+    DateTime? createdAtDateTime,
+    int? updatedAt,
+    DateTime? updatedAtDateTime,
     this.ownerId,
     this.ownerType,
     this.totalSize,
@@ -77,7 +89,8 @@ class Library {
     this.generatedDescription,
     this.generatedName,
     this.orgSharingRole,
-  });
+  }) : _createdAt = createdAtDateTime ?? createdAt,
+       _updatedAt = updatedAtDateTime ?? updatedAt;
 
   /// Creates a [Library] from JSON.
   factory Library.fromJson(Map<String, dynamic> json) {
@@ -85,8 +98,8 @@ class Library {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
-      createdAt: parseLibraryTimestamp(json['created_at']),
-      updatedAt: parseLibraryTimestamp(json['updated_at']),
+      createdAtDateTime: parseLibraryTimestamp(json['created_at']),
+      updatedAtDateTime: parseLibraryTimestamp(json['updated_at']),
       ownerId: json['owner_id'] as String?,
       ownerType: json['owner_type'] as String?,
       totalSize: json['total_size'] as int?,
@@ -108,8 +121,8 @@ class Library {
       'id': id,
       'name': name,
       if (description != null) 'description': description,
-      if (createdAt != null) 'created_at': formatLibraryTimestamp(createdAt!),
-      if (updatedAt != null) 'updated_at': formatLibraryTimestamp(updatedAt!),
+      'created_at': ?createdAtDateTime?.toUtc().toIso8601String(),
+      'updated_at': ?updatedAtDateTime?.toUtc().toIso8601String(),
       if (ownerId != null) 'owner_id': ownerId,
       if (ownerType != null) 'owner_type': ownerType,
       if (totalSize != null) 'total_size': totalSize,
@@ -133,7 +146,9 @@ class Library {
     String? name,
     Object? description = unsetCopyWithValue,
     Object? createdAt = unsetCopyWithValue,
+    Object? createdAtDateTime = unsetCopyWithValue,
     Object? updatedAt = unsetCopyWithValue,
+    Object? updatedAtDateTime = unsetCopyWithValue,
     Object? ownerId = unsetCopyWithValue,
     Object? ownerType = unsetCopyWithValue,
     Object? totalSize = unsetCopyWithValue,
@@ -152,12 +167,14 @@ class Library {
       description: description == unsetCopyWithValue
           ? this.description
           : description as String?,
-      createdAt: createdAt == unsetCopyWithValue
-          ? this.createdAt
-          : createdAt as int?,
-      updatedAt: updatedAt == unsetCopyWithValue
-          ? this.updatedAt
-          : updatedAt as int?,
+      createdAt: createdAt == unsetCopyWithValue ? null : createdAt as int?,
+      createdAtDateTime: createdAtDateTime != unsetCopyWithValue
+          ? createdAtDateTime as DateTime?
+          : (createdAt == unsetCopyWithValue ? this.createdAtDateTime : null),
+      updatedAt: updatedAt == unsetCopyWithValue ? null : updatedAt as int?,
+      updatedAtDateTime: updatedAtDateTime != unsetCopyWithValue
+          ? updatedAtDateTime as DateTime?
+          : (updatedAt == unsetCopyWithValue ? this.updatedAtDateTime : null),
       ownerId: ownerId == unsetCopyWithValue
           ? this.ownerId
           : ownerId as String?,
@@ -207,8 +224,8 @@ class Library {
           id == other.id &&
           name == other.name &&
           description == other.description &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt &&
+          createdAtDateTime == other.createdAtDateTime &&
+          updatedAtDateTime == other.updatedAtDateTime &&
           ownerId == other.ownerId &&
           ownerType == other.ownerType &&
           totalSize == other.totalSize &&
@@ -227,8 +244,8 @@ class Library {
     id,
     name,
     description,
-    createdAt,
-    updatedAt,
+    createdAtDateTime,
+    updatedAtDateTime,
     ownerId,
     ownerType,
     totalSize,

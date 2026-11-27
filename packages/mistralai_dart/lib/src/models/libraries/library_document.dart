@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/library_timestamp.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../observability/pagination_info.dart';
-import '../../utils/library_timestamp.dart';
 
 /// A document within a library.
 @immutable
@@ -14,8 +14,15 @@ class LibraryDocument {
   /// The name of the document.
   final String name;
 
-  /// The processing status of the document.
-  final LibraryDocumentStatus status;
+  /// The normalized processing status, derived from [processStatus] when set.
+  LibraryDocumentStatus get status {
+    final value = processStatus;
+    return value == null
+        ? _legacyStatus
+        : LibraryDocumentStatus.fromJson(value);
+  }
+
+  final LibraryDocumentStatus _legacyStatus;
 
   /// The MIME type of the document.
   final String? mimeType;
@@ -27,10 +34,20 @@ class LibraryDocument {
   final String? hash;
 
   /// When this document was created (Unix timestamp).
-  final int? createdAt;
+  int? get createdAt => libraryTimestampSeconds(_createdAt);
+
+  /// When this item was created, including fractional seconds.
+  DateTime? get createdAtDateTime => parseLibraryTimestamp(_createdAt);
+
+  final Object? _createdAt;
 
   /// When this document was last updated (Unix timestamp).
-  final int? updatedAt;
+  int? get updatedAt => libraryTimestampSeconds(_updatedAt);
+
+  /// When this item was last updated, including fractional seconds.
+  DateTime? get updatedAtDateTime => parseLibraryTimestamp(_updatedAt);
+
+  final Object? _updatedAt;
 
   /// Number of pages in the document.
   final int? numberOfPages;
@@ -83,12 +100,14 @@ class LibraryDocument {
   const LibraryDocument({
     required this.id,
     required this.name,
-    required this.status,
+    required LibraryDocumentStatus status,
     this.mimeType,
     this.size,
     this.hash,
-    this.createdAt,
-    this.updatedAt,
+    int? createdAt,
+    DateTime? createdAtDateTime,
+    int? updatedAt,
+    DateTime? updatedAtDateTime,
     this.numberOfPages,
     this.summary,
     this.tokensProcessingTotal,
@@ -104,7 +123,9 @@ class LibraryDocument {
     this.url,
     this.tokensProcessingMainContent,
     this.tokensProcessingSummary,
-  });
+  }) : _legacyStatus = status,
+       _createdAt = createdAtDateTime ?? createdAt,
+       _updatedAt = updatedAtDateTime ?? updatedAt;
 
   /// Creates a [LibraryDocument] from JSON.
   factory LibraryDocument.fromJson(Map<String, dynamic> json) {
@@ -112,15 +133,13 @@ class LibraryDocument {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       status: LibraryDocumentStatus.fromJson(
-        json['process_status'] as String? ??
-            json['processing_status'] as String? ??
-            'unknown',
+        json['processing_status'] as String? ?? 'unknown',
       ),
       mimeType: json['mime_type'] as String?,
       size: json['size'] as int?,
       hash: json['hash'] as String?,
-      createdAt: parseLibraryTimestamp(json['created_at']),
-      updatedAt: parseLibraryTimestamp(json['updated_at']),
+      createdAtDateTime: parseLibraryTimestamp(json['created_at']),
+      updatedAtDateTime: parseLibraryTimestamp(json['updated_at']),
       numberOfPages: json['number_of_pages'] as int?,
       summary: json['summary'] as String?,
       tokensProcessingTotal: json['tokens_processing_total'] as int?,
@@ -149,8 +168,8 @@ class LibraryDocument {
       if (mimeType != null) 'mime_type': mimeType,
       if (size != null) 'size': size,
       if (hash != null) 'hash': hash,
-      if (createdAt != null) 'created_at': formatLibraryTimestamp(createdAt!),
-      if (updatedAt != null) 'updated_at': formatLibraryTimestamp(updatedAt!),
+      'created_at': ?createdAtDateTime?.toUtc().toIso8601String(),
+      'updated_at': ?updatedAtDateTime?.toUtc().toIso8601String(),
       if (numberOfPages != null) 'number_of_pages': numberOfPages,
       if (summary != null) 'summary': summary,
       if (tokensProcessingTotal != null)
@@ -173,6 +192,10 @@ class LibraryDocument {
   ///
   /// Optional nullable fields can be explicitly set to null by passing `null`.
   /// To keep the original value, omit the parameter.
+  ///
+  /// Setting [status] also updates the machine and display status unless
+  /// their values are supplied explicitly. [processStatus] takes precedence
+  /// over the legacy [status] when both are supplied.
   LibraryDocument copyWith({
     String? id,
     String? name,
@@ -181,7 +204,9 @@ class LibraryDocument {
     Object? size = unsetCopyWithValue,
     Object? hash = unsetCopyWithValue,
     Object? createdAt = unsetCopyWithValue,
+    Object? createdAtDateTime = unsetCopyWithValue,
     Object? updatedAt = unsetCopyWithValue,
+    Object? updatedAtDateTime = unsetCopyWithValue,
     Object? numberOfPages = unsetCopyWithValue,
     Object? summary = unsetCopyWithValue,
     Object? tokensProcessingTotal = unsetCopyWithValue,
@@ -198,6 +223,12 @@ class LibraryDocument {
     Object? tokensProcessingMainContent = unsetCopyWithValue,
     Object? tokensProcessingSummary = unsetCopyWithValue,
   }) {
+    final legacyStatusChanged = status != null && status != this.status;
+    final nextProcessStatus = processStatus == unsetCopyWithValue
+        ? (legacyStatusChanged ? status._machineValue : this.processStatus)
+        : processStatus as String?;
+    final statusChanged =
+        legacyStatusChanged || nextProcessStatus != this.processStatus;
     return LibraryDocument(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -207,12 +238,14 @@ class LibraryDocument {
           : mimeType as String?,
       size: size == unsetCopyWithValue ? this.size : size as int?,
       hash: hash == unsetCopyWithValue ? this.hash : hash as String?,
-      createdAt: createdAt == unsetCopyWithValue
-          ? this.createdAt
-          : createdAt as int?,
-      updatedAt: updatedAt == unsetCopyWithValue
-          ? this.updatedAt
-          : updatedAt as int?,
+      createdAt: createdAt == unsetCopyWithValue ? null : createdAt as int?,
+      createdAtDateTime: createdAtDateTime != unsetCopyWithValue
+          ? createdAtDateTime as DateTime?
+          : (createdAt == unsetCopyWithValue ? this.createdAtDateTime : null),
+      updatedAt: updatedAt == unsetCopyWithValue ? null : updatedAt as int?,
+      updatedAtDateTime: updatedAtDateTime != unsetCopyWithValue
+          ? updatedAtDateTime as DateTime?
+          : (updatedAt == unsetCopyWithValue ? this.updatedAtDateTime : null),
       numberOfPages: numberOfPages == unsetCopyWithValue
           ? this.numberOfPages
           : numberOfPages as int?,
@@ -228,11 +261,9 @@ class LibraryDocument {
       extension: extension == unsetCopyWithValue
           ? this.extension
           : extension as String?,
-      processStatus: processStatus == unsetCopyWithValue
-          ? this.processStatus
-          : processStatus as String?,
+      processStatus: nextProcessStatus,
       processingStatus: processingStatus == unsetCopyWithValue
-          ? _processingStatus
+          ? (statusChanged ? null : _processingStatus)
           : processingStatus as String?,
       uploadedById: uploadedById == unsetCopyWithValue
           ? this.uploadedById
@@ -277,8 +308,8 @@ class LibraryDocument {
           mimeType == other.mimeType &&
           size == other.size &&
           hash == other.hash &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt &&
+          createdAtDateTime == other.createdAtDateTime &&
+          updatedAtDateTime == other.updatedAtDateTime &&
           numberOfPages == other.numberOfPages &&
           summary == other.summary &&
           tokensProcessingTotal == other.tokensProcessingTotal &&
@@ -303,8 +334,8 @@ class LibraryDocument {
     mimeType,
     size,
     hash,
-    createdAt,
-    updatedAt,
+    createdAtDateTime,
+    updatedAtDateTime,
     numberOfPages,
     summary,
     tokensProcessingTotal,
@@ -346,6 +377,13 @@ enum LibraryDocumentStatus {
   final String value;
 
   const LibraryDocumentStatus(this.value);
+
+  String? get _machineValue => switch (this) {
+    running => 'in_progress',
+    completed => 'done',
+    failed => 'error',
+    unknown => null,
+  };
 
   /// Creates a [LibraryDocumentStatus] from a JSON string.
   factory LibraryDocumentStatus.fromJson(String value) {

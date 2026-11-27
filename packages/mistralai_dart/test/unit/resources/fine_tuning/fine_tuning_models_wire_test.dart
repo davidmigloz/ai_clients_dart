@@ -78,6 +78,52 @@ void main() {
     });
   }
 
+  test('sends explicit nulls for model metadata only by request', () async {
+    final requests = <http.Request>[];
+    final transport = MockClient((request) async {
+      requests.add(request);
+      return http.Response(
+        jsonEncode({
+          'id': _modelId,
+          'created': 1795766400,
+          'owned_by': 'mistral',
+          'workspace_id': 'workspace-1',
+          'root': 'mistral-small',
+          'root_version': '2506',
+          'archived': false,
+          'capabilities': <String, Object>{},
+          'model_type': 'completion',
+        }),
+        200,
+      );
+    });
+    addTearDown(transport.close);
+    final client = MistralClient.withApiKey('fake-key', httpClient: transport);
+    addTearDown(client.close);
+
+    await client.fineTuning.models.update(modelId: _modelId);
+    expect(jsonDecode(requests.single.body), isEmpty);
+    await client.fineTuning.models.update(
+      modelId: _modelId,
+      clearName: true,
+      clearDescription: true,
+    );
+    expect(requests.last.method, 'PATCH');
+    expect(jsonDecode(requests.last.body), {'name': null, 'description': null});
+    expect(UpdateFTModelRequest.fromJson(const {'name': null}).toJson(), {
+      'name': null,
+    });
+    await expectLater(
+      client.fineTuning.models.update(
+        modelId: _modelId,
+        name: 'Conflicting name',
+        clearName: true,
+      ),
+      throwsArgumentError,
+    );
+    expect(requests, hasLength(2));
+  });
+
   test(
     'archive and unarchive choose the operation-specific server default',
     () async {

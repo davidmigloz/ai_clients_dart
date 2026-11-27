@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 const Map<String, Object?> _library = {
   'id': 'library-1',
   'name': 'Manuals',
-  'created_at': '2026-11-27T08:00:00Z',
+  'created_at': '2026-11-27T08:00:00.123456Z',
   'updated_at': '2026-11-27T08:15:00Z',
   'owner_id': null,
   'owner_type': 'Workspace',
@@ -22,7 +22,7 @@ const Map<String, Object?> _document = {
   'id': 'doc-1',
   'library_id': 'library-1',
   'name': 'manual.txt',
-  'created_at': '2026-11-27T08:00:00Z',
+  'created_at': '2026-11-27T08:00:00.123456Z',
   'hash': 'sample-hash',
   'extension': 'txt',
   'mime_type': 'text/plain',
@@ -81,6 +81,28 @@ void main() {
     return client;
   }
 
+  test('keeps status changes coherent across a document round-trip', () {
+    final runningPayload = Map<String, dynamic>.of(_document)
+      ..['process_status'] = 'in_progress'
+      ..['processing_status'] = 'Extraction in progress';
+    final running = LibraryDocument.fromJson(runningPayload);
+    expect(running.status, LibraryDocumentStatus.running);
+
+    final legacyUpdate = running.copyWith(
+      status: LibraryDocumentStatus.completed,
+    );
+    expect(legacyUpdate.toJson()['process_status'], 'done');
+    expect(legacyUpdate.toJson()['processing_status'], 'Completed');
+    final restored = LibraryDocument.fromJson(legacyUpdate.toJson());
+    expect(restored, legacyUpdate);
+    expect(restored.status, LibraryDocumentStatus.completed);
+
+    final wireUpdate = running.copyWith(processStatus: 'done');
+    expect(wireUpdate, legacyUpdate);
+    expect(wireUpdate.isCompleted, isTrue);
+    expect(wireUpdate.copyWith(name: 'other.txt').isCompleted, isTrue);
+  });
+
   test(
     'creates, lists, retrieves and updates libraries using the pinned shape',
     () async {
@@ -111,6 +133,11 @@ void main() {
       });
       expect(library.chunkSize, 512);
       expect(library.createdAt, 1795766400);
+      expect(library.createdAtDateTime?.microsecond, 456);
+      expect(
+        library.copyWith(name: 'renamed').toJson()['created_at'],
+        '2026-11-27T08:00:00.123456Z',
+      );
       expect(library.explicitWorkspaceMembersCount, 1);
 
       final list = await client.libraries.list(
@@ -185,6 +212,11 @@ void main() {
       expect(directUpload.body, contains('\r\nHi\r\n'));
       expect(document.libraryId, 'library-1');
       expect(document.createdAt, 1795766400);
+      expect(document.createdAtDateTime?.microsecond, 456);
+      expect(
+        document.copyWith(name: 'renamed').toJson()['created_at'],
+        '2026-11-27T08:00:00.123456Z',
+      );
       expect(document.processingStatus, 'Extraction complete');
       expect(document.processStatus, 'done');
       expect(document.isCompleted, isTrue);

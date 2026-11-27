@@ -152,7 +152,8 @@ final sameLibrary = previousLibrary.id == library.id;
 ```
 
 Library models keep epoch-second Dart getters and use ISO 8601 timestamps
-in JSON. The deprecated PUT methods are still available. Prefer
+in JSON. Read precise timestamps with `createdAtDateTime` and
+`updatedAtDateTime`. The deprecated PUT methods are still available. Prefer
 `updatePartial` for library and document PATCH requests.
 
 ---
