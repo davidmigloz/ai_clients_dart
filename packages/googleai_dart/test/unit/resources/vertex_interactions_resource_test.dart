@@ -140,6 +140,32 @@ void main() {
     });
 
     test(
+      'selects the Cloud beta version independently of model routes',
+      () async {
+        final client = _client(
+          GoogleAIConfig.vertexAI(
+            projectId: 'project',
+            location: 'eu',
+            interactionsApiVersion: ApiVersion.v1beta1,
+            authProvider: const BearerTokenProvider('test-token'),
+          ),
+          (request) async {
+            expect(
+              request.url.toString(),
+              'https://aiplatform.eu.rep.googleapis.com/v1beta1/projects/project/locations/eu/interactions',
+            );
+            expect(request.headers['authorization'], 'Bearer test-token');
+            expect(request.headers['api-revision'], isNull);
+            return _jsonResponse(_interaction);
+          },
+        );
+
+        expect(client.config.apiVersion, ApiVersion.v1);
+        await client.interactions.create(model: _model, input: _input);
+      },
+    );
+
+    test(
       'lists stored interaction metadata and forwards the page token',
       () async {
         final requests = <http.Request>[];
@@ -222,6 +248,8 @@ void main() {
             }
             return _jsonResponse({
               ..._interaction,
+              if (request.url.path == path && request.method == 'POST')
+                'status': 'queued',
               if (request.url.path.endsWith('/cancel')) 'status': 'cancelled',
             });
           },
@@ -238,9 +266,13 @@ void main() {
         final event = await client.interactions
             .resumeStream(created.id, lastEventId: 'before-1')
             .single;
-        final cancelled = await client.interactions.cancel(created.id);
+        final cancelled = await client.interactions.cancel(
+          'another-running-interaction',
+        );
 
         expect(created.serviceTier, ServiceTier.deferred);
+        expect(created.status, InteractionStatus.queued);
+        expect(created.toJson()['status'], 'queued');
         expect(polled.status, InteractionStatus.inProgress);
         expect(event, isA<InteractionCompletedEvent>());
         expect(cancelled.status, InteractionStatus.cancelled);
@@ -248,7 +280,7 @@ void main() {
           'POST $path',
           'GET $path/${created.id}',
           'GET $path/${created.id}',
-          'POST $path/${created.id}/cancel',
+          'POST $path/another-running-interaction/cancel',
         ]);
         expect(jsonDecode(requests.first.body), {
           'model': _model,
@@ -262,6 +294,43 @@ void main() {
           'last_event_id': 'before-1',
         });
         expect(requests[2].headers['authorization'], 'Bearer test-token');
+      },
+    );
+
+    test(
+      'rejects streaming creation and managed-agent requests before sending',
+      () async {
+        final client = _client(
+          GoogleAIConfig.vertexAI(
+            projectId: 'project',
+            location: 'global',
+            authProvider: const BearerTokenProvider('test-token'),
+          ),
+          (_) async => throw StateError('Unexpected HTTP request'),
+        );
+
+        await expectLater(
+          client.interactions
+              .createStream(
+                model: _model,
+                input: _input,
+                serviceTier: ServiceTier.deferred,
+                background: true,
+                store: true,
+              )
+              .toList(),
+          throwsArgumentError,
+        );
+        await expectLater(
+          client.interactions.createWithAgent(
+            agent: 'deep-research-preview-04-2026',
+            input: _input,
+            serviceTier: ServiceTier.deferred,
+            background: true,
+            store: true,
+          ),
+          throwsArgumentError,
+        );
       },
     );
 

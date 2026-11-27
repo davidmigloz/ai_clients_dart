@@ -193,6 +193,8 @@ to:
 
 The `ServiceTier.deferred` enum member represents the global Vertex AI
 Interactions Deferred tier. Add a case for it in exhaustive switches.
+Add `InteractionStatus.queued` to status switches and poll until the call
+starts before attaching an SSE stream.
 
 ```dart
 // Before

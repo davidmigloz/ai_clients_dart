@@ -345,8 +345,9 @@ availability. `us` and `eu` select dedicated multi-region endpoints.
 
 For asynchronous model calls on the Deferred tier, use global Interactions
 `v1` with `ServiceTier.deferred`, `background: true`, and `store: true`.
-Poll with `get(...)`, follow updates with `resumeStream(...)`, or cancel
-with `cancel(...)`.
+Start the call with `create(...)`. Poll with `get(...)` while the call is
+queued. Once it reports `InteractionStatus.inProgress`, you can attach with
+`resumeStream(...)`. Use `cancel(...)` to stop a queued or running call.
 
 Cloud API keys can use `ApiKeyProvider(..., placement: AuthPlacement.header)`
 with the documented project and location. The client also follows the pinned
@@ -357,7 +358,7 @@ the project-scoped API.
 [Interactions example](example/vertex_interactions_example.dart) ·
 [GenerateContent example](example/vertex_ai_example.dart) ·
 [Cloud Interactions developer guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/interactions/developer-guide) ·
-[Deferred tier release notes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/release-notes#November_16_2026)
+[Deferred tier and supported models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deferred-tier)
 
 </details>
 

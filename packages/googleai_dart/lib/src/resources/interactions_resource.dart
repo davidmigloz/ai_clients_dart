@@ -420,10 +420,13 @@ class InteractionsResource extends ResourceBase with StreamingResource {
         (config.apiMode != ApiMode.vertexAI ||
             config.location != 'global' ||
             _apiVersion != ApiVersion.v1 ||
+            stream ||
+            body['model'] == null ||
             body['background'] != true ||
             body['store'] != true)) {
       throw ArgumentError(
-        'The Deferred tier requires global Vertex AI Interactions v1, '
+        'The Deferred tier requires a nonstreaming Vertex AI Interactions '
+        'v1 model request in global with '
         'background: true, and store: true.',
       );
     }

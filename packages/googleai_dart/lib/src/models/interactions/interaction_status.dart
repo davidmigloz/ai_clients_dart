@@ -22,7 +22,10 @@ enum InteractionStatus {
   budgetExceeded,
 
   /// The interaction reached a long-decode boundary and needs another request.
-  requiresContinuation;
+  requiresContinuation,
+
+  /// The interaction is queued and waiting for execution capacity.
+  queued;
 
   /// Creates an [InteractionStatus] from a JSON string.
   static InteractionStatus fromString(String? value) =>
@@ -39,6 +42,7 @@ enum InteractionStatus {
       'incomplete' => InteractionStatus.incomplete,
       'budget_exceeded' => InteractionStatus.budgetExceeded,
       'requires_continuation' => InteractionStatus.requiresContinuation,
+      'queued' => InteractionStatus.queued,
       _ => null,
     };
   }
@@ -54,6 +58,7 @@ enum InteractionStatus {
       InteractionStatus.incomplete => 'incomplete',
       InteractionStatus.budgetExceeded => 'budget_exceeded',
       InteractionStatus.requiresContinuation => 'requires_continuation',
+      InteractionStatus.queued => 'queued',
     };
   }
 }
