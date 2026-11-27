@@ -2,16 +2,38 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/exceptions.dart';
 import '../models/rag/summary_field_response.dart';
 import '../models/rag/summary_language.dart';
 import '../models/rag/summary_stream_event.dart';
 import '../models/rag/update_summary_request.dart';
 import '../models/search/managed_index.dart';
+import '../models/search/managed_search_query_error.dart';
 import '../models/search/search_documents.dart';
 import '../models/search/search_query.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
+
+/// The search service reported one or more query validation issues.
+final class ManagedSearchQueryException extends ApiException {
+  ManagedSearchQueryException._(
+    ApiException error,
+    List<ManagedSearchQueryError> errors,
+  ) : errors = List.unmodifiable(errors),
+      super(
+        statusCode: error.statusCode,
+        message: error.message,
+        details: error.details,
+        requestMetadata: error.requestMetadata,
+        responseMetadata: error.responseMetadata,
+        stackTrace: error.stackTrace,
+        cause: error.cause,
+      );
+
+  /// Validation issues in server order.
+  final List<ManagedSearchQueryError> errors;
+}
 
 /// Managed Search indexes and their documents (Mistral-hosted Public Preview).
 ///
@@ -107,15 +129,34 @@ class ManagedSearchIndexesResource extends ResourceBase with StreamingResource {
   );
 
   /// Runs a keyword, vector, or hybrid search.
+  ///
+  /// Throws [ManagedSearchQueryException] when the server returns a validation
+  /// array. Each entry identifies a problem with the query or its index fields.
   Future<ManagedSearchResults> search({
     required String indexName,
     required ManagedSearchRequest request,
-  }) => _json(
-    'POST',
-    '${_index(indexName)}/search',
-    ManagedSearchResults.fromJson,
-    body: request.toJson(),
-  );
+  }) async {
+    try {
+      return await _json(
+        'POST',
+        '${_index(indexName)}/search',
+        ManagedSearchResults.fromJson,
+        body: request.toJson(),
+      );
+    } on ApiException catch (error, stack) {
+      if (error.statusCode != 400 ||
+          error.responseMetadata == null ||
+          error.details.isNotEmpty) {
+        rethrow;
+      }
+      final errors = _queryErrors(error.message);
+      if (errors == null) rethrow;
+      Error.throwWithStackTrace(
+        ManagedSearchQueryException._(error, errors),
+        stack,
+      );
+    }
+  }
 
   /// Finds chunks before or after a selected range.
   Future<SearchNavigationResponse> navigate({
@@ -241,5 +282,22 @@ class ManagedSearchIndexesResource extends ResourceBase with StreamingResource {
           );
     if (body != null) request.body = jsonEncode(body);
     return interceptorChain.execute(request);
+  }
+}
+
+List<ManagedSearchQueryError>? _queryErrors(String message) {
+  // The shared interceptor retains top-level JSON arrays as the complete
+  // error message. ResponseMetadata.bodyExcerpt can be truncated.
+  try {
+    final decoded = jsonDecode(message);
+    if (decoded is! List<Object?>) return null;
+    final errors = <ManagedSearchQueryError>[];
+    for (final entry in decoded) {
+      if (entry is! Map<String, dynamic>) return null;
+      errors.add(ManagedSearchQueryError.fromJson(entry));
+    }
+    return errors;
+  } on FormatException {
+    return null;
   }
 }

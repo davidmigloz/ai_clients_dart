@@ -1323,6 +1323,12 @@ and vector search, navigation, and streamed summary generation. The old
 routes from an earlier API snapshot. Managed indexes require their own
 configuration and ingestion.
 
+A rejected search can return several validation issues in
+`ManagedSearchQueryException.errors`. Each issue has typed fields, such as
+`SearchTopKTooLarge.limit` or `SearchIncorrectFieldType.expectedType`.
+`ManagedSearchQueryException` extends `ApiException`, so existing HTTP
+error handlers still catch it.
+
 → [Full example](example/managed_search_indexes_example.dart)
 
 </details>
