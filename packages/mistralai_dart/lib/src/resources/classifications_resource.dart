@@ -36,7 +36,7 @@ class ClassificationsResource extends ResourceBase {
   Future<ClassificationResponse> create({
     required ClassificationRequest request,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/classifiers');
+    final url = requestBuilder.buildUrl('/v1/classifications');
 
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -58,7 +58,7 @@ class ClassificationsResource extends ResourceBase {
   Future<ClassificationResponse> createChat({
     required ChatClassificationRequest request,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/chat/classifiers');
+    final url = requestBuilder.buildUrl('/v1/chat/classifications');
 
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
