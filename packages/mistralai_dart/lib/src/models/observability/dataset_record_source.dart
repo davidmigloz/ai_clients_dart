@@ -12,6 +12,9 @@ enum DatasetRecordSource {
   /// From the playground.
   playground('PLAYGROUND'),
 
+  /// From an OpenTelemetry span.
+  telemetrySpan('TELEMETRY_SPAN'),
+
   /// Unknown source (forward-compatible fallback).
   unknown('UNKNOWN');
 

@@ -10,7 +10,9 @@ import '../../models/observability/dataset_import_tasks.dart';
 import '../../models/observability/dataset_preview.dart';
 import '../../models/observability/dataset_previews.dart';
 import '../../models/observability/dataset_record.dart';
+import '../../models/observability/dataset_record_batch.dart';
 import '../../models/observability/dataset_records.dart';
+import '../../models/observability/dataset_span_import.dart';
 import '../../models/observability/patch_dataset_in_schema.dart';
 import '../../models/observability/post_dataset_import_from_campaign_in_schema.dart';
 import '../../models/observability/post_dataset_import_from_dataset_in_schema.dart';
@@ -19,6 +21,7 @@ import '../../models/observability/post_dataset_import_from_file_in_schema.dart'
 import '../../models/observability/post_dataset_import_from_playground_in_schema.dart';
 import '../../models/observability/post_dataset_in_schema.dart';
 import '../base_resource.dart';
+import 'observability_http.dart';
 
 /// Resource for observability dataset operations.
 ///
@@ -35,12 +38,9 @@ import '../base_resource.dart';
 ///   ),
 /// );
 ///
-/// // Import from explorer
-/// await client.observability.datasets.importFromExplorer(
+/// final records = await client.observability.datasets.listRecords(
 ///   datasetId: dataset.id,
-///   request: PostDatasetImportFromExplorerInSchema(
-///     completionEventIds: ['event-1', 'event-2'],
-///   ),
+///   pageSize: 20,
 /// );
 /// ```
 class DatasetsResource extends ResourceBase {
@@ -53,19 +53,18 @@ class DatasetsResource extends ResourceBase {
     super.ensureNotClosed,
   });
 
-  /// Lists all datasets.
-  Future<DatasetPreviews> list() async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/observability/datasets');
-    final headers = requestBuilder.buildHeaders();
-
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    final response = await interceptorChain.execute(httpRequest);
-
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return DatasetPreviews.fromJson(responseBody);
-  }
+  /// Lists datasets with optional search and pagination.
+  Future<DatasetPreviews> list({int? page, int? pageSize, String? query}) =>
+      readObservability(
+        'GET',
+        'datasets',
+        DatasetPreviews.fromJson,
+        query: {
+          'page': ?page?.toString(),
+          'page_size': ?pageSize?.toString(),
+          'q': ?query,
+        },
+      );
 
   /// Creates a new empty dataset.
   Future<Dataset> create({required PostDatasetInSchema request}) async {
@@ -89,7 +88,7 @@ class DatasetsResource extends ResourceBase {
   Future<DatasetPreview> get({required String datasetId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -105,7 +104,7 @@ class DatasetsResource extends ResourceBase {
   Future<void> delete({required String datasetId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -121,7 +120,7 @@ class DatasetsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -143,7 +142,7 @@ class DatasetsResource extends ResourceBase {
   Future<DatasetExport> exportToJsonl({required String datasetId}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/exports/to-jsonl',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/exports/to-jsonl',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -156,13 +155,15 @@ class DatasetsResource extends ResourceBase {
   }
 
   /// Imports records from a campaign.
+  ///
+  /// Historical API. New applications can use [importFromSpans].
   Future<DatasetImportTask> importFromCampaign({
     required String datasetId,
     required PostDatasetImportFromCampaignInSchema request,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/imports/from-campaign',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/imports/from-campaign',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -185,7 +186,7 @@ class DatasetsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/imports/from-dataset',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/imports/from-dataset',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -208,7 +209,7 @@ class DatasetsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/imports/from-explorer',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/imports/from-explorer',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -231,7 +232,7 @@ class DatasetsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/imports/from-file',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/imports/from-file',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -248,13 +249,15 @@ class DatasetsResource extends ResourceBase {
   }
 
   /// Imports records from the playground.
+  ///
+  /// Historical API. New applications can use [importFromSpans].
   Future<DatasetImportTask> importFromPlayground({
     required String datasetId,
     required PostDatasetImportFromPlaygroundInSchema request,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/imports/from-playground',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/imports/from-playground',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -271,20 +274,16 @@ class DatasetsResource extends ResourceBase {
   }
 
   /// Lists records in a dataset.
-  Future<DatasetRecords> listRecords({required String datasetId}) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/records',
-    );
-    final headers = requestBuilder.buildHeaders();
-
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    final response = await interceptorChain.execute(httpRequest);
-
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return DatasetRecords.fromJson(responseBody);
-  }
+  Future<DatasetRecords> listRecords({
+    required String datasetId,
+    int? page,
+    int? pageSize,
+  }) => readObservability(
+    'GET',
+    'datasets/${Uri.encodeComponent(datasetId)}/records',
+    DatasetRecords.fromJson,
+    query: {'page': ?page?.toString(), 'page_size': ?pageSize?.toString()},
+  );
 
   /// Adds a conversation to a dataset.
   Future<DatasetRecord> createRecord({
@@ -293,7 +292,7 @@ class DatasetsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/records',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/records',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -310,20 +309,16 @@ class DatasetsResource extends ResourceBase {
   }
 
   /// Lists import tasks for a dataset.
-  Future<DatasetImportTasks> listTasks({required String datasetId}) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/tasks',
-    );
-    final headers = requestBuilder.buildHeaders();
-
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    final response = await interceptorChain.execute(httpRequest);
-
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return DatasetImportTasks.fromJson(responseBody);
-  }
+  Future<DatasetImportTasks> listTasks({
+    required String datasetId,
+    int? page,
+    int? pageSize,
+  }) => readObservability(
+    'GET',
+    'datasets/${Uri.encodeComponent(datasetId)}/tasks',
+    DatasetImportTasks.fromJson,
+    query: {'page': ?page?.toString(), 'page_size': ?pageSize?.toString()},
+  );
 
   /// Gets the status of a dataset import task.
   Future<DatasetImportTask> getTask({
@@ -332,7 +327,7 @@ class DatasetsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/$datasetId/tasks/$taskId',
+      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}/tasks/${Uri.encodeComponent(taskId)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -343,4 +338,26 @@ class DatasetsResource extends ResourceBase {
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return DatasetImportTask.fromJson(responseBody);
   }
+
+  /// Creates a batch of dataset records.
+  Future<CreateDatasetRecordsResponse> createRecords({
+    required String datasetId,
+    required CreateDatasetRecordsRequest request,
+  }) => readObservability(
+    'POST',
+    'datasets/${Uri.encodeComponent(datasetId)}/records/bulk',
+    CreateDatasetRecordsResponse.fromJson,
+    body: request.toJson(),
+  );
+
+  /// Starts an import of telemetry spans using a versioned mapping contract.
+  Future<DatasetImportTask> importFromSpans({
+    required String datasetId,
+    required ImportDatasetFromSpansRequest request,
+  }) => readObservability(
+    'POST',
+    'datasets/${Uri.encodeComponent(datasetId)}/imports/from-spans',
+    DatasetImportTask.fromJson,
+    body: request.toJson(),
+  );
 }

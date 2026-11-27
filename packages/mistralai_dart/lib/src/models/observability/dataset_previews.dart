@@ -26,6 +26,10 @@ class DatasetPreviews {
     'datasets': datasets.toJson((e) => e.toJson()),
   };
 
+  /// Creates a copy with replaced values.
+  DatasetPreviews copyWith({PaginatedResult<DatasetPreview>? datasets}) =>
+      DatasetPreviews(datasets: datasets ?? this.datasets);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

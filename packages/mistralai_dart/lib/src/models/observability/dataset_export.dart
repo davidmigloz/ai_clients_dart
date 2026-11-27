@@ -16,6 +16,10 @@ class DatasetExport {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'file_url': fileUrl};
 
+  /// Creates a copy with replaced values.
+  DatasetExport copyWith({String? fileUrl}) =>
+      DatasetExport(fileUrl: fileUrl ?? this.fileUrl);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

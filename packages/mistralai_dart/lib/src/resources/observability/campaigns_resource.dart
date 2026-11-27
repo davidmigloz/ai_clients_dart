@@ -9,6 +9,9 @@ import '../../models/observability/campaign_status.dart';
 import '../../models/observability/post_campaign_in_schema.dart';
 import '../base_resource.dart';
 
+/// Historical API. The current Observability API exposes traces,
+/// scorers, and live evaluation pipelines.
+///
 /// Resource for observability campaign operations.
 ///
 /// Campaigns evaluate chat completion events using a judge. They select

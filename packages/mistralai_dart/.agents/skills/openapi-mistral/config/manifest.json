@@ -509,18 +509,14 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "BaseTaskStatus": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "BaseTaskStatus",
       "file": "lib/src/models/observability/base_task_status.dart",
-      "schema": "BaseTaskStatus",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API"
+      "schema": "BaseTaskStatus"
     },
     "BatchExecutionBody": {
       "spec": "main",
@@ -577,7 +573,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets/campaigns"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "CampaignPreviews": {
       "spec": "main",
@@ -588,7 +584,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets/campaigns"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "CampaignSelectedEvents": {
       "spec": "main",
@@ -599,7 +595,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets/campaigns"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "CampaignStatus": {
       "spec": "main",
@@ -610,7 +606,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets/campaigns"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "ChatCompletionEvent": {
       "spec": "main",
@@ -1039,14 +1035,10 @@
     },
     "Dataset": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Dataset",
       "file": "lib/src/models/observability/dataset.dart",
-      "schema": "Dataset",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
+      "schema": "Dataset"
     },
     "DatasetExport": {
       "spec": "main",
@@ -1057,18 +1049,14 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "DatasetImportTask": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "DatasetImportTask",
       "file": "lib/src/models/observability/dataset_import_task.dart",
-      "schema": "DatasetImportTask",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
+      "schema": "DatasetImportTask"
     },
     "DatasetImportTasks": {
       "spec": "main",
@@ -1079,18 +1067,14 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "DatasetPreview": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "DatasetPreview",
       "file": "lib/src/models/observability/dataset_preview.dart",
-      "schema": "DatasetPreview",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
+      "schema": "DatasetPreview"
     },
     "DatasetPreviews": {
       "spec": "main",
@@ -1101,18 +1085,14 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "DatasetRecord": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "DatasetRecord",
       "file": "lib/src/models/observability/dataset_record.dart",
-      "schema": "DatasetRecord",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
+      "schema": "DatasetRecord"
     },
     "DatasetRecordPayload": {
       "spec": "main",
@@ -1127,36 +1107,24 @@
     },
     "DatasetRecordSource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "DatasetRecordSource",
       "file": "lib/src/models/observability/dataset_record_source.dart",
-      "schema": "DatasetRecordSource",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API"
+      "schema": "DatasetRecordSource"
     },
     "CreateDatasetRecordRequest": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "CreateDatasetRecordRequest",
       "file": "lib/src/models/observability/create_dataset_record_request.dart",
-      "schema": "CreateDatasetRecordRequest",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
+      "schema": "CreateDatasetRecordRequest"
     },
     "UpdateDatasetRecordPayloadRequest": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "UpdateDatasetRecordPayloadRequest",
       "file": "lib/src/models/observability/update_dataset_record_payload_request.dart",
-      "schema": "UpdateDatasetRecordPayloadRequest",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 datasets"
+      "schema": "UpdateDatasetRecordPayloadRequest"
     },
     "DatasetRecords": {
       "spec": "main",
@@ -1167,7 +1135,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "DeleteDatasetRecordsInSchema": {
       "spec": "main",
@@ -1178,7 +1146,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "DeploymentDetailResponse": {
       "spec": "main",
@@ -1377,7 +1345,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 filtering"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "FieldOptionCountItem": {
       "spec": "main",
@@ -1388,7 +1356,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 filtering"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "FieldOptionCounts": {
       "spec": "main",
@@ -1399,7 +1367,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 filtering"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "FieldOptionCountsInSchema": {
       "spec": "main",
@@ -1410,7 +1378,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 filtering"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "FTModelCard": {
       "spec": "main",
@@ -1448,7 +1416,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 filtering"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "FilterGroup": {
       "spec": "main",
@@ -1459,7 +1427,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 filtering"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "FilterPayload": {
       "spec": "main",
@@ -1470,7 +1438,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 filtering"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "FIMCompletionRequest": {
       "spec": "main",
@@ -1671,7 +1639,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "JudgeClassificationOutputOption": {
       "spec": "main",
@@ -1682,15 +1650,18 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "JudgeConversationRequest": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "JudgeConversationRequest",
       "file": "lib/src/models/observability/judge_conversation_request.dart",
       "schema": "JudgeConversationRequest",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical requests for old judging routes outside the November public OpenAPI snapshot."
     },
     "JudgeOutput": {
       "spec": "main",
@@ -1701,7 +1672,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "JudgeOutputType": {
       "spec": "main",
@@ -1712,7 +1683,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "JudgePreview": {
       "spec": "main",
@@ -1723,7 +1694,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "JudgePreviews": {
       "spec": "main",
@@ -1734,7 +1705,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "JudgeRegressionOutput": {
       "spec": "main",
@@ -1745,7 +1716,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "ListWorkflowEventResponse": {
       "spec": "main",
@@ -2131,7 +2102,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 pagination"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PaginatedResult_ChatCompletionEventPreview_": {
       "spec": "main",
@@ -2142,7 +2113,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 pagination"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PaginatedResult_DatasetImportTask_": {
       "spec": "main",
@@ -2153,7 +2124,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 pagination"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PaginatedResult_DatasetPreview_": {
       "spec": "main",
@@ -2164,7 +2135,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 pagination"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PaginatedResult_DatasetRecord_": {
       "spec": "main",
@@ -2175,7 +2146,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 pagination"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PaginatedResult_JudgePreview_": {
       "spec": "main",
@@ -2186,7 +2157,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 pagination"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PaginationInfo": {
       "spec": "main",
@@ -2216,7 +2187,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostCampaignInSchema": {
       "spec": "main",
@@ -2227,7 +2198,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 campaigns"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostChatCompletionEventJudgingInSchema": {
       "spec": "main",
@@ -2249,7 +2220,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostDatasetImportFromDatasetInSchema": {
       "spec": "main",
@@ -2260,7 +2231,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostDatasetImportFromExplorerInSchema": {
       "spec": "main",
@@ -2271,7 +2242,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostDatasetImportFromFileInSchema": {
       "spec": "main",
@@ -2282,7 +2253,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostDatasetImportFromPlaygroundInSchema": {
       "spec": "main",
@@ -2293,7 +2264,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostDatasetInSchema": {
       "spec": "main",
@@ -2304,7 +2275,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostDatasetRecordJudgingInSchema": {
       "spec": "main",
@@ -2315,7 +2286,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PostJudgeInSchema": {
       "spec": "main",
@@ -2326,7 +2297,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PromptTokensDetails": {
       "spec": "main",
@@ -2345,7 +2316,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 datasets"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PutJudgeInSchema": {
       "spec": "main",
@@ -2356,7 +2327,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API \u2014 judges"
+      "note": "Historical Observability model used by retained compatibility methods. The November public OpenAPI snapshot omits this schema."
     },
     "PartialScheduleDefinition": {
       "spec": "main",
@@ -3862,46 +3833,46 @@
     "FeedResultGetTrace": {
       "spec": "main",
       "kind": "skip",
-      "dart_class": "FeedResultGetTrace",
+      "dart_class": "FeedResult",
       "file": "lib/src/models/observability/feed_result.dart",
       "schema": "FeedResultGetTrace",
       "tags": [
         "acknowledged"
       ],
-      "note": "Reuses generic FeedResult<T>"
+      "note": "Generic Dart cursor page preserving the cursor, next token, and typed results."
     },
     "FeedResultGetSpan": {
       "spec": "main",
       "kind": "skip",
-      "dart_class": "FeedResultGetSpan",
+      "dart_class": "FeedResult",
       "file": "lib/src/models/observability/feed_result.dart",
       "schema": "FeedResultGetSpan",
       "tags": [
         "acknowledged"
       ],
-      "note": "Reuses generic FeedResult<T>"
+      "note": "Generic Dart cursor page preserving the cursor, next token, and typed results."
     },
     "FeedResultGetSpanEvaluation": {
       "spec": "main",
       "kind": "skip",
-      "dart_class": "FeedResultGetSpanEvaluation",
+      "dart_class": "FeedResult",
       "file": "lib/src/models/observability/feed_result.dart",
       "schema": "FeedResultGetSpanEvaluation",
       "tags": [
         "acknowledged"
       ],
-      "note": "Reuses generic FeedResult<T>"
+      "note": "Generic Dart cursor page preserving the cursor, next token, and typed results."
     },
     "FeedResultGetLog": {
       "spec": "main",
       "kind": "skip",
-      "dart_class": "FeedResultGetLog",
+      "dart_class": "FeedResult",
       "file": "lib/src/models/observability/feed_result.dart",
       "schema": "FeedResultGetLog",
       "tags": [
         "acknowledged"
       ],
-      "note": "Reuses generic FeedResult<T>"
+      "note": "Generic Dart cursor page preserving the cursor, next token, and typed results."
     },
     "AliasList": {
       "spec": "main",
@@ -5580,6 +5551,1181 @@
         "acknowledged"
       ],
       "note": "SDK frame wrapper around SSE event name and data. Dart decodes the event wire shape directly."
+    },
+    "ListDatasetsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DatasetPreviews",
+      "file": "lib/src/models/observability/dataset_previews.dart",
+      "schema": "ListDatasetsResponse"
+    },
+    "ListDatasetRecordsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DatasetRecords",
+      "file": "lib/src/models/observability/dataset_records.dart",
+      "schema": "ListDatasetRecordsResponse"
+    },
+    "ListDatasetImportTasksResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DatasetImportTasks",
+      "file": "lib/src/models/observability/dataset_import_tasks.dart",
+      "schema": "ListDatasetImportTasksResponse"
+    },
+    "CreateDatasetRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PostDatasetInSchema",
+      "file": "lib/src/models/observability/post_dataset_in_schema.dart",
+      "schema": "CreateDatasetRequest"
+    },
+    "UpdateDatasetRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PatchDatasetInSchema",
+      "file": "lib/src/models/observability/patch_dataset_in_schema.dart",
+      "schema": "UpdateDatasetRequest"
+    },
+    "ImportDatasetFromFileRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PostDatasetImportFromFileInSchema",
+      "file": "lib/src/models/observability/post_dataset_import_from_file_in_schema.dart",
+      "schema": "ImportDatasetFromFileRequest"
+    },
+    "ImportDatasetFromDatasetRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PostDatasetImportFromDatasetInSchema",
+      "file": "lib/src/models/observability/post_dataset_import_from_dataset_in_schema.dart",
+      "schema": "ImportDatasetFromDatasetRequest"
+    },
+    "DeleteDatasetRecordsRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeleteDatasetRecordsInSchema",
+      "file": "lib/src/models/observability/delete_dataset_records_in_schema.dart",
+      "schema": "DeleteDatasetRecordsRequest"
+    },
+    "UpdateDatasetRecordPropertiesRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PutDatasetRecordPropertiesInSchema",
+      "file": "lib/src/models/observability/put_dataset_record_properties_in_schema.dart",
+      "schema": "UpdateDatasetRecordPropertiesRequest"
+    },
+    "ExportDatasetResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DatasetExport",
+      "file": "lib/src/models/observability/dataset_export.dart",
+      "schema": "ExportDatasetResponse"
+    },
+    "CreateDatasetRecordsItem": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateDatasetRecordsItem",
+      "file": "lib/src/models/observability/dataset_record_batch.dart",
+      "schema": "CreateDatasetRecordsItem"
+    },
+    "CreateDatasetRecordsRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateDatasetRecordsRequest",
+      "file": "lib/src/models/observability/dataset_record_batch.dart",
+      "schema": "CreateDatasetRecordsRequest"
+    },
+    "CreateDatasetRecordsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateDatasetRecordsResponse",
+      "file": "lib/src/models/observability/dataset_record_batch.dart",
+      "schema": "CreateDatasetRecordsResponse"
+    },
+    "DatasetImportResult": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DatasetImportResult",
+      "file": "lib/src/models/observability/dataset_record_batch.dart",
+      "schema": "DatasetImportResult"
+    },
+    "ImportDatasetFromSpansRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ImportDatasetFromSpansRequest",
+      "file": "lib/src/models/observability/dataset_span_import.dart",
+      "schema": "ImportDatasetFromSpansRequest"
+    },
+    "SpanDatasetMapping": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpanDatasetMapping",
+      "file": "lib/src/models/observability/dataset_span_import.dart",
+      "schema": "SpanDatasetMapping"
+    },
+    "SpanDatasetMappingContract": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpanDatasetMappingContract",
+      "file": "lib/src/models/observability/dataset_span_import.dart",
+      "schema": "SpanDatasetMappingContract"
+    },
+    "SpanDatasetSourceNamespace": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SpanDatasetSourceNamespace",
+      "file": "lib/src/models/observability/dataset_span_import.dart",
+      "schema": "SpanDatasetSourceNamespace"
+    },
+    "SpanDatasetSourceReference": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpanDatasetSourceReference",
+      "file": "lib/src/models/observability/dataset_span_import.dart",
+      "schema": "SpanDatasetSourceReference"
+    },
+    "TelemetrySpanReference": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TelemetrySpanReference",
+      "file": "lib/src/models/observability/dataset_span_import.dart",
+      "schema": "TelemetrySpanReference"
+    },
+    "ContentSearchFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContentSearchFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "ContentSearchFilter"
+    },
+    "ContentSearchFilterGroup": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContentSearchFilterGroup",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "ContentSearchFilterGroup"
+    },
+    "ContentSearchOperator": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ContentSearchOperator",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "ContentSearchOperator"
+    },
+    "EvaluationRunFilterInput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRunFilterInput",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "EvaluationRunFilterInput"
+    },
+    "EvaluationRunRecordFilterInput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRunRecordFilterInput",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "EvaluationRunRecordFilterInput"
+    },
+    "FieldSortInput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FieldSortInput",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "FieldSortInput"
+    },
+    "FilterCombinator": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "FilterCombinator",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "FilterCombinator"
+    },
+    "GoalStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "GoalStatus",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "GoalStatus"
+    },
+    "GoalStatusFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GoalStatusFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "GoalStatusFilter"
+    },
+    "GoalStatusFilterGroup": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GoalStatusFilterGroup",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "GoalStatusFilterGroup"
+    },
+    "MetadataFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MetadataFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "MetadataFilter"
+    },
+    "MetadataFilterGroup": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MetadataFilterGroup",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "MetadataFilterGroup"
+    },
+    "RecordSortField": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "RecordSortField",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "RecordSortField"
+    },
+    "RunOwnershipFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RunOwnershipFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "RunOwnershipFilter"
+    },
+    "ScoreFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScoreFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "ScoreFilter"
+    },
+    "ScoreFilterGroup": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScoreFilterGroup",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "ScoreFilterGroup"
+    },
+    "ScoreOperator": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ScoreOperator",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "ScoreOperator"
+    },
+    "ScoreSortInput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScoreSortInput",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "ScoreSortInput"
+    },
+    "SortDirection": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SortDirection",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "SortDirection"
+    },
+    "SystemFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "SystemFilter"
+    },
+    "SystemNameFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemNameFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "SystemNameFilter"
+    },
+    "SystemNameFilterGroup": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemNameFilterGroup",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "SystemNameFilterGroup"
+    },
+    "SystemParamFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemParamFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "SystemParamFilter"
+    },
+    "SystemParamFilterGroup": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SystemParamFilterGroup",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "SystemParamFilterGroup"
+    },
+    "SystemParamOperator": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SystemParamOperator",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "SystemParamOperator"
+    },
+    "TagFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TagFilter",
+      "file": "lib/src/models/observability/evaluation_filters.dart",
+      "schema": "TagFilter"
+    },
+    "CategoricalStatistics": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CategoricalStatistics",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "CategoricalStatistics"
+    },
+    "ClassificationStatisticSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ClassificationStatisticSpec",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "ClassificationStatisticSpec"
+    },
+    "ConfusionMatrix": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConfusionMatrix",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "ConfusionMatrix"
+    },
+    "DisplayFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "DisplayFormat",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "DisplayFormat"
+    },
+    "DisplaySpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DisplaySpec",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "DisplaySpec"
+    },
+    "EvaluatorStatistics": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EvaluatorStatistics",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "EvaluatorStatistics",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The sealed union resolves the discriminator and preserves unknown alternatives."
+    },
+    "GoalResult": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GoalResult",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "GoalResult"
+    },
+    "GoalResultItem": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GoalResultItem",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "GoalResultItem"
+    },
+    "GoalSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GoalSpec",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "GoalSpec"
+    },
+    "MetricDirectionSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MetricDirectionSpec",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "MetricDirectionSpec"
+    },
+    "MissingGoalItem": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MissingGoalItem",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "MissingGoalItem"
+    },
+    "NumericScoreMetric": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "NumericScoreMetric",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "NumericScoreMetric"
+    },
+    "NumericStatistics": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "NumericStatistics",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "NumericStatistics"
+    },
+    "PercentileStatisticSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PercentileStatisticSpec",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "PercentileStatisticSpec"
+    },
+    "RunStatisticsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RunStatisticsResponse",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "RunStatisticsResponse"
+    },
+    "ScalarStatisticValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScalarStatisticValue",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "ScalarStatisticValue"
+    },
+    "SimpleNumericStatisticSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SimpleNumericStatisticSpec",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "SimpleNumericStatisticSpec"
+    },
+    "UnsupportedStatistics": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UnsupportedStatistics",
+      "file": "lib/src/models/observability/evaluation_statistics.dart",
+      "schema": "UnsupportedStatistics"
+    },
+    "EvaluationRunGenerationV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRunGeneration",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluationRunGenerationV2"
+    },
+    "EvaluationRunOutputRecordV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRunOutputRecord",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluationRunOutputRecordV2"
+    },
+    "EvaluationRunRecordV2Response": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRunRecord",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluationRunRecordV2Response",
+      "excluded_properties": [
+        "input"
+      ],
+      "note": "The required input property references the unconstrained JSON value schema; Dart preserves an explicit JSON null."
+    },
+    "EvaluationRunRunScoreV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRunSummaryScore",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluationRunRunScoreV2"
+    },
+    "EvaluationRunScoreV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRecordScore",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluationRunScoreV2"
+    },
+    "EvaluationRunV2Response": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationRun",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluationRunV2Response"
+    },
+    "EvaluationRunV2WithRefsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchEvaluationRun",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluationRunV2WithRefsResponse"
+    },
+    "EvaluatorV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ObservabilityEvaluator",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "EvaluatorV2"
+    },
+    "ListEvaluationRunRecordsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListEvaluationRunRecordsResponse",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "ListEvaluationRunRecordsResponse"
+    },
+    "ListEvaluationRunsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListEvaluationRunsResponse",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "ListEvaluationRunsResponse"
+    },
+    "RunEvaluationSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RunEvaluationSummary",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "RunEvaluationSummary"
+    },
+    "RunOptimizationRef": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RunOptimizationRef",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "RunOptimizationRef"
+    },
+    "RunProjectSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RunProjectSummary",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "RunProjectSummary"
+    },
+    "ScoreMetric": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScoreMetric",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "ScoreMetric"
+    },
+    "SearchAllEvaluationRunsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchAllEvaluationRunsResponse",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "SearchAllEvaluationRunsResponse"
+    },
+    "SystemV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationSystem",
+      "file": "lib/src/models/observability/evaluation_results.dart",
+      "schema": "SystemV2"
+    },
+    "EvaluationV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ObservabilityEvaluation",
+      "file": "lib/src/models/observability/evaluation_projects.dart",
+      "schema": "EvaluationV2"
+    },
+    "EvaluationsV2": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ObservabilityEvaluations",
+      "file": "lib/src/models/observability/evaluation_projects.dart",
+      "schema": "EvaluationsV2"
+    },
+    "Project": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationProject",
+      "file": "lib/src/models/observability/evaluation_projects.dart",
+      "schema": "Project"
+    },
+    "ProjectEvaluationSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ProjectEvaluationSummary",
+      "file": "lib/src/models/observability/evaluation_projects.dart",
+      "schema": "ProjectEvaluationSummary"
+    },
+    "Projects": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationProjects",
+      "file": "lib/src/models/observability/evaluation_projects.dart",
+      "schema": "Projects"
+    },
+    "ListOptimizationTrialsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListOptimizationTrialsResponse",
+      "file": "lib/src/models/observability/evaluation_optimizations.dart",
+      "schema": "ListOptimizationTrialsResponse"
+    },
+    "ListOptimizationsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListOptimizationsResponse",
+      "file": "lib/src/models/observability/evaluation_optimizations.dart",
+      "schema": "ListOptimizationsResponse"
+    },
+    "Optimization": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationOptimization",
+      "file": "lib/src/models/observability/evaluation_optimizations.dart",
+      "schema": "Optimization"
+    },
+    "OptimizationDetail": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationOptimizationDetail",
+      "file": "lib/src/models/observability/evaluation_optimizations.dart",
+      "schema": "OptimizationDetail"
+    },
+    "OptimizationReference": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OptimizationReference",
+      "file": "lib/src/models/observability/evaluation_optimizations.dart",
+      "schema": "OptimizationReference"
+    },
+    "OptimizationTrialObservation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OptimizationTrialObservation",
+      "file": "lib/src/models/observability/evaluation_optimizations.dart",
+      "schema": "OptimizationTrialObservation"
+    },
+    "OptimizationTrialWithObservations": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OptimizationTrialWithObservations",
+      "file": "lib/src/models/observability/evaluation_optimizations.dart",
+      "schema": "OptimizationTrialWithObservations"
+    },
+    "AttributeHashSampling": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AttributeHashSampling",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "AttributeHashSampling"
+    },
+    "CreatePipelineRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreatePipelineRequest",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "CreatePipelineRequest"
+    },
+    "DetectionDefinitionV1": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DetectionDefinitionV1",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "DetectionDefinitionV1"
+    },
+    "DetectionPattern": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DetectionPattern",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "DetectionPattern"
+    },
+    "EnumConstraints": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EnumConstraints",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "EnumConstraints"
+    },
+    "ExportDefinitionV1": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ExportDefinitionV1",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "ExportDefinitionV1"
+    },
+    "FloatConstraints": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FloatConstraints",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "FloatConstraints"
+    },
+    "GetPipelineResultFields": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetPipelineResultFields",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "GetPipelineResultFields"
+    },
+    "GetPipelineResults": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetPipelineResults",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "GetPipelineResults"
+    },
+    "JudgeDefinitionV1": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JudgeDefinitionV1",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "JudgeDefinitionV1"
+    },
+    "LlmJudgeReference": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LlmJudgeReference",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "LlmJudgeReference"
+    },
+    "ModerationDefinitionV1": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationDefinitionV1",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "ModerationDefinitionV1"
+    },
+    "OTLPDestination": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OtlpDestination",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "OTLPDestination"
+    },
+    "OtelEnumFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OtelEnumFieldDefinition",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "OtelEnumFieldDefinition"
+    },
+    "OtelFloatFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OtelFloatFieldDefinition",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "OtelFloatFieldDefinition"
+    },
+    "Pipeline": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Pipeline",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "Pipeline"
+    },
+    "PipelineConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PipelineConfig",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineConfig"
+    },
+    "PipelineConfigDefinition": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PipelineConfigDefinition",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineConfigDefinition",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Discriminator is pipeline_kind on the parent pipeline configuration."
+    },
+    "PipelineConfigHeader": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PipelineConfigHeader",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineConfigHeader"
+    },
+    "PipelineConfigSampling": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PipelineConfigSampling",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineConfigSampling",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The sealed union resolves the discriminator and preserves unknown alternatives."
+    },
+    "PipelineConfigScope": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PipelineConfigScope",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineConfigScope"
+    },
+    "PipelineConfigSelector": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PipelineConfigSelector",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineConfigSelector"
+    },
+    "PipelineKind": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PipelineKind",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineKind"
+    },
+    "PipelineResult": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PipelineResult",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineResult"
+    },
+    "PipelineResultsRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PipelineResultsRequest",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelineResultsRequest"
+    },
+    "PipelinesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PipelinesResponse",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "PipelinesResponse"
+    },
+    "ProbabilisticSampling": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ProbabilisticSampling",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "ProbabilisticSampling"
+    },
+    "SourceKind": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PipelineSourceKind",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "SourceKind"
+    },
+    "UpdatePipelineRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdatePipelineRequest",
+      "file": "lib/src/models/observability/online_evaluation.dart",
+      "schema": "UpdatePipelineRequest"
+    },
+    "CreateScorerRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateScorerRequest",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "CreateScorerRequest"
+    },
+    "EditScorerRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EditScorerRequest",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "EditScorerRequest"
+    },
+    "EvaluationBooleanResultSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationBooleanResultSpec",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "EvaluationBooleanResultSpec"
+    },
+    "EvaluationCategoricalResultSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationCategoricalResultSpec",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "EvaluationCategoricalResultSpec"
+    },
+    "EvaluationNumericResultSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EvaluationNumericResultSpec",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "EvaluationNumericResultSpec"
+    },
+    "EvaluationResultSpec": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EvaluationResultSpec",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "EvaluationResultSpec",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The sealed union resolves the discriminator and preserves unknown alternatives."
+    },
+    "ListScorersResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListScorersResponse",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "ListScorersResponse"
+    },
+    "LlmJudgeConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LlmJudgeConfig",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "LlmJudgeConfig"
+    },
+    "LlmJudgeParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LlmJudgeParams",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "LlmJudgeParams"
+    },
+    "Scorer": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Scorer",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "Scorer"
+    },
+    "ScorerKind": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ScorerKind",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "ScorerKind"
+    },
+    "ScorerSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScorerSummary",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "ScorerSummary"
+    },
+    "ScorerVersion": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScorerVersion",
+      "file": "lib/src/models/observability/online_scorers.dart",
+      "schema": "ScorerVersion"
+    },
+    "Aggregation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Aggregation",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "Aggregation"
+    },
+    "AggregationMeta": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AggregationMeta",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "AggregationMeta"
+    },
+    "AggregationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AggregationRequest",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "AggregationRequest"
+    },
+    "AggregationRow": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AggregationRow",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "AggregationRow"
+    },
+    "Granularity": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AggregationGranularity",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "Granularity"
+    },
+    "MetricAggregation": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "MetricAggregation",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "MetricAggregation"
+    },
+    "MetricDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AggregationMetric",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "MetricDefinition"
+    },
+    "OrderByClause": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AggregationOrder",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "OrderByClause"
+    },
+    "TimeDimension": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AggregationTimeDimension",
+      "file": "lib/src/models/observability/telemetry_aggregation.dart",
+      "schema": "TimeDimension"
+    },
+    "FeedResultGetPipelineResult": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FeedResult",
+      "file": "lib/src/models/observability/feed_result.dart",
+      "schema": "FeedResultGetPipelineResult",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart cursor page preserving the cursor, next token, and typed results."
+    },
+    "PaginatedResultDatasetImportTask": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultDatasetImportTask",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultDatasetPreview": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultDatasetPreview",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultDatasetRecord": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultDatasetRecord",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultEvaluationRunRecordV2Response": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultEvaluationRunRecordV2Response",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultEvaluationRunV2Response": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultEvaluationRunV2Response",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultEvaluationRunV2WithRefsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultEvaluationRunV2WithRefsResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultEvaluationV2": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultEvaluationV2",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultOptimization": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultOptimization",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultOptimizationTrialWithObservations": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultOptimizationTrialWithObservations",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultPipeline": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultPipeline",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultProject": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultProject",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "PaginatedResultScorerSummary": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult",
+      "file": "lib/src/models/observability/paginated_result.dart",
+      "schema": "PaginatedResultScorerSummary",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Generic Dart page preserving count, links and typed results."
+    },
+    "JsonValue": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Object",
+      "file": "",
+      "schema": "JsonValue",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Maps to Dart JSON primitives, lists, maps, and null."
     }
   }
 }

@@ -33,7 +33,12 @@
     "fineTuningModels": "fine_tuning",
     "transcriptions": "audio",
     "managed_search_indexes": "managed_search_indexes",
-    "realtime": "realtime_audio"
+    "realtime": "realtime_audio",
+    "projects": "observability",
+    "evaluations": "observability",
+    "scorers": "observability",
+    "pipelines": "observability",
+    "optimizations": "observability"
   },
   "excluded_from_examples": [],
   "drift_patterns": []
