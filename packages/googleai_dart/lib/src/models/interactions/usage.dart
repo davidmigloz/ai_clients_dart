@@ -7,6 +7,9 @@ class InteractionUsage {
   /// Number of tokens in the prompt (context).
   final int? totalInputTokens;
 
+  /// Number of input tokens used in the first turn.
+  final int? initialInputTokens;
+
   /// A breakdown of input token usage by modality.
   final List<ModalityTokens>? inputTokensByModality;
 
@@ -40,6 +43,7 @@ class InteractionUsage {
   /// Creates an [InteractionUsage] instance.
   const InteractionUsage({
     this.totalInputTokens,
+    this.initialInputTokens,
     this.inputTokensByModality,
     this.totalCachedTokens,
     this.cachedTokensByModality,
@@ -56,6 +60,7 @@ class InteractionUsage {
   factory InteractionUsage.fromJson(Map<String, dynamic> json) =>
       InteractionUsage(
         totalInputTokens: json['total_input_tokens'] as int?,
+        initialInputTokens: json['initial_input_tokens'] as int?,
         inputTokensByModality:
             (json['input_tokens_by_modality'] as List<dynamic>?)
                 ?.map((e) => ModalityTokens.fromJson(e as Map<String, dynamic>))
@@ -85,6 +90,7 @@ class InteractionUsage {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (totalInputTokens != null) 'total_input_tokens': totalInputTokens,
+    if (initialInputTokens != null) 'initial_input_tokens': initialInputTokens,
     if (inputTokensByModality != null)
       'input_tokens_by_modality': inputTokensByModality!
           .map((e) => e.toJson())
@@ -115,6 +121,7 @@ class InteractionUsage {
   /// Creates a copy with replaced values.
   InteractionUsage copyWith({
     Object? totalInputTokens = unsetCopyWithValue,
+    Object? initialInputTokens = unsetCopyWithValue,
     Object? inputTokensByModality = unsetCopyWithValue,
     Object? totalCachedTokens = unsetCopyWithValue,
     Object? cachedTokensByModality = unsetCopyWithValue,
@@ -130,6 +137,9 @@ class InteractionUsage {
       totalInputTokens: totalInputTokens == unsetCopyWithValue
           ? this.totalInputTokens
           : totalInputTokens as int?,
+      initialInputTokens: initialInputTokens == unsetCopyWithValue
+          ? this.initialInputTokens
+          : initialInputTokens as int?,
       inputTokensByModality: inputTokensByModality == unsetCopyWithValue
           ? this.inputTokensByModality
           : inputTokensByModality as List<ModalityTokens>?,

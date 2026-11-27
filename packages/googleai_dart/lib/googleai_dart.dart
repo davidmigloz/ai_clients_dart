@@ -80,6 +80,13 @@ export 'src/models/corpus/document.dart';
 export 'src/models/corpus/document_state.dart';
 export 'src/models/corpus/list_corpora_response.dart';
 export 'src/models/corpus/list_documents_response.dart';
+// Models - Decisions API
+export 'src/models/decisions/create_decision_request.dart';
+export 'src/models/decisions/create_decision_response.dart';
+export 'src/models/decisions/decision_answer.dart';
+export 'src/models/decisions/decision_input.dart';
+export 'src/models/decisions/decision_prompt_feedback.dart';
+export 'src/models/decisions/decision_question.dart';
 // Models - Embeddings
 export 'src/models/embeddings/batch_embed_contents_request.dart';
 export 'src/models/embeddings/batch_embed_contents_response.dart';
@@ -270,6 +277,7 @@ export 'src/models/tools/tool_type.dart';
 export 'src/models/tools/url_context.dart';
 // Models - Webhooks API (Experimental)
 export 'src/models/webhooks/webhooks.dart';
+export 'src/resources/decisions_resource.dart';
 // Utilities
 export 'src/utils/lro_poller.dart';
 export 'src/utils/paginator.dart';

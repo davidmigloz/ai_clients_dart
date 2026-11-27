@@ -13,6 +13,7 @@ import '../resources/auth_tokens_resource.dart';
 import '../resources/batches_resource.dart';
 import '../resources/cached_contents_resource.dart';
 import '../resources/corpora_resource.dart';
+import '../resources/decisions_resource.dart';
 import '../resources/environments_resource.dart';
 import '../resources/file_search_stores/file_search_stores_resource.dart';
 import '../resources/files/files_resource.dart';
@@ -134,6 +135,11 @@ class GoogleAIClient {
   /// [GoogleAIConfig.interactionsApiVersion] selects the version for this
   /// resource independently of other API calls.
   late final InteractionsResource interactions;
+
+  /// Resource for binary, multiple-choice, and rubric decisions.
+  ///
+  /// Available on the Gemini Developer API with [ApiVersion.v1beta].
+  late final DecisionsResource decisions;
 
   /// Resource for agents API (experimental).
   ///
@@ -271,6 +277,14 @@ class GoogleAIClient {
     );
 
     interactions = InteractionsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    decisions = DecisionsResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
