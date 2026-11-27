@@ -28,6 +28,7 @@ class AuthenticationConfiguration {
 
   /// Creates an [AuthenticationConfiguration].
   const AuthenticationConfiguration({
+    this.creatorId,
     required this.name,
     required this.authenticationType,
     required this.scope,
@@ -39,6 +40,7 @@ class AuthenticationConfiguration {
   /// Creates an [AuthenticationConfiguration] from JSON.
   factory AuthenticationConfiguration.fromJson(Map<String, dynamic> json) =>
       AuthenticationConfiguration(
+        creatorId: json['creator_id'] as String?,
         name: json['name'] as String? ?? '',
         authenticationType: OutboundAuthenticationType.fromJson(
           json['authentication_type'] as String?,
@@ -53,6 +55,7 @@ class AuthenticationConfiguration {
 
   /// Converts this object to JSON.
   Map<String, dynamic> toJson() => {
+    if (creatorId != null) 'creator_id': creatorId,
     'name': name,
     'authentication_type': authenticationType.toJson(),
     'scope': scope.toJson(),
@@ -61,10 +64,14 @@ class AuthenticationConfiguration {
     if (title != null) 'title': title,
   };
 
+  /// Identifier of the principal that configured the credential.
+  final String? creatorId;
+
   /// Creates a copy with the given fields replaced.
   ///
   /// Pass `null` for nullable fields to clear them explicitly; omit to keep.
   AuthenticationConfiguration copyWith({
+    Object? creatorId = unsetCopyWithValue,
     String? name,
     OutboundAuthenticationType? authenticationType,
     ConsumerType? scope,
@@ -72,6 +79,9 @@ class AuthenticationConfiguration {
     bool? isDefault,
     Object? title = unsetCopyWithValue,
   }) => AuthenticationConfiguration(
+    creatorId: creatorId == unsetCopyWithValue
+        ? this.creatorId
+        : creatorId as String?,
     name: name ?? this.name,
     authenticationType: authenticationType ?? this.authenticationType,
     scope: scope ?? this.scope,
@@ -86,6 +96,7 @@ class AuthenticationConfiguration {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AuthenticationConfiguration &&
+          creatorId == other.creatorId &&
           runtimeType == other.runtimeType &&
           name == other.name &&
           authenticationType == other.authenticationType &&
@@ -95,12 +106,19 @@ class AuthenticationConfiguration {
           title == other.title;
 
   @override
-  int get hashCode =>
-      Object.hash(name, authenticationType, scope, status, isDefault, title);
+  int get hashCode => Object.hashAll([
+    name,
+    authenticationType,
+    scope,
+    status,
+    isDefault,
+    title,
+    creatorId,
+  ]);
 
   @override
   String toString() =>
-      'AuthenticationConfiguration('
+      'AuthenticationConfiguration(creatorId: $creatorId, '
       'name: $name, '
       'authenticationType: $authenticationType, '
       'scope: $scope, '

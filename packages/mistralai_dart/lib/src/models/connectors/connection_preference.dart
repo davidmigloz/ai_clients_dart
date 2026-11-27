@@ -19,8 +19,12 @@ class ConnectionPreference {
   /// The scope at which this preference applies.
   final ConsumerType? consumerType;
 
+  /// Whether HTTP proxying is enabled for this connection.
+  final bool? httpProxyEnabled;
+
   /// Creates a [ConnectionPreference].
   const ConnectionPreference({
+    this.httpProxyEnabled,
     required this.name,
     required this.toolConfiguration,
     this.isDefault,
@@ -30,6 +34,7 @@ class ConnectionPreference {
   /// Creates a [ConnectionPreference] from JSON.
   factory ConnectionPreference.fromJson(Map<String, dynamic> json) =>
       ConnectionPreference(
+        httpProxyEnabled: json['http_proxy_enabled'] as bool?,
         name: json['name'] as String? ?? '',
         toolConfiguration: ToolExecutionConfiguration.fromJson(
           (json['tool_configuration'] as Map<String, dynamic>?) ?? const {},
@@ -42,6 +47,7 @@ class ConnectionPreference {
 
   /// Converts this object to JSON.
   Map<String, dynamic> toJson() => {
+    if (httpProxyEnabled != null) 'http_proxy_enabled': httpProxyEnabled,
     'name': name,
     'tool_configuration': toolConfiguration.toJson(),
     if (isDefault != null) 'is_default': isDefault,
@@ -52,11 +58,15 @@ class ConnectionPreference {
   ///
   /// Pass `null` for nullable fields to clear them explicitly; omit to keep.
   ConnectionPreference copyWith({
+    Object? httpProxyEnabled = unsetCopyWithValue,
     String? name,
     ToolExecutionConfiguration? toolConfiguration,
     Object? isDefault = unsetCopyWithValue,
     Object? consumerType = unsetCopyWithValue,
   }) => ConnectionPreference(
+    httpProxyEnabled: httpProxyEnabled == unsetCopyWithValue
+        ? this.httpProxyEnabled
+        : httpProxyEnabled as bool?,
     name: name ?? this.name,
     toolConfiguration: toolConfiguration ?? this.toolConfiguration,
     isDefault: isDefault == unsetCopyWithValue
@@ -71,6 +81,7 @@ class ConnectionPreference {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ConnectionPreference &&
+          httpProxyEnabled == other.httpProxyEnabled &&
           runtimeType == other.runtimeType &&
           name == other.name &&
           toolConfiguration == other.toolConfiguration &&
@@ -78,12 +89,17 @@ class ConnectionPreference {
           consumerType == other.consumerType;
 
   @override
-  int get hashCode =>
-      Object.hash(name, toolConfiguration, isDefault, consumerType);
+  int get hashCode => Object.hashAll([
+    name,
+    toolConfiguration,
+    isDefault,
+    consumerType,
+    httpProxyEnabled,
+  ]);
 
   @override
   String toString() =>
-      'ConnectionPreference('
+      'ConnectionPreference(httpProxyEnabled: $httpProxyEnabled, '
       'name: $name, '
       'toolConfiguration: $toolConfiguration, '
       'isDefault: $isDefault, '

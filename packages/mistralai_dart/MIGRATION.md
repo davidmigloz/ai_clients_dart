@@ -422,6 +422,38 @@ record sources. When replacing a historical event importer, use
 to dataset record keys. Current datasets report slugs and principal types.
 [Observability guide](https://docs.mistral.ai/studio/observability)
 
+### Use scoped Connector credential operations
+
+The existing `createOrUpdate...Credentials` methods use the current PATCH
+upsert operation. Use `createCredentials` for creation-only POST requests at
+user or workspace scope.
+
+```dart
+// Before
+await client.connectors.createOrUpdateUserCredentials(
+  connectorIdOrName: connectorId,
+  request: credentials,
+);
+
+// After
+await client.connectors.updateCredentials(
+  connectorIdOrName: connectorId,
+  scope: ConnectorConsumerScope.user,
+  request: credentials,
+);
+```
+
+`CreateConnectorRequest.authData` and `UpdateConnectorRequest.authData` use
+the authorization-code entry in `auth_methods`. New integrations can pass
+`OAuthAuthorizationCodeConnectorAuthMethod(authData: data)` explicitly.
+Use `ConnectorOAuthClientCredentials` for the client credentials grant.
+
+Mistral soft-deprecated `callTool`. Configure the connector's stored
+credentials and pass `CustomConnectorTool(connectorId: connectorId)` in
+the model request's `tools` list. Add
+`CredentialsStatusErrorReason.blankBearerToken` to exhaustive switches over
+credential status reasons. [Beta Connectors API](https://docs.mistral.ai/api/endpoint/beta/connectors)
+
 ## Migrating from v7.x to v8.0.0
 
 v8.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

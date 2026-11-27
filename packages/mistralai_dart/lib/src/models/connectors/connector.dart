@@ -5,8 +5,10 @@ import '../common/equality_helpers.dart';
 import 'authentication_configuration.dart';
 import 'connection_preference.dart';
 import 'connector_locale.dart';
+import 'connector_metadata.dart';
 import 'connector_protocol.dart';
 import 'connector_tool.dart';
+import 'consumer_type.dart';
 import 'pagination_response.dart';
 import 'public_authentication_method.dart';
 import 'public_connection_config.dart';
@@ -37,6 +39,11 @@ class Connector {
 
   /// The type of the connector owner.
   final ResourceType ownerType;
+
+  /// The string-valued owner scope in the current connector API.
+  ///
+  /// Historical responses can provide only [ownerType].
+  final ConsumerType? ownerScope;
 
   /// The visibility of the connector.
   final ResourceVisibility visibility;
@@ -102,14 +109,27 @@ class Connector {
   /// connector, when available.
   final PublicExecutionEnv? executionEnv;
 
+  /// Whether the connector exposes an MCP-compatible tool interface.
+  final bool? supportsMcp;
+
+  /// Scopes where the connector has been disabled.
+  final List<ConsumerType>? blockedBy;
+
+  /// Source of the HTTP connector OpenAPI document.
+  final ConnectorOpenApiSpec? openapiSpec;
+
   /// Creates a [Connector].
   const Connector({
+    this.supportsMcp,
+    this.blockedBy,
+    this.openapiSpec,
     required this.id,
     required this.name,
     required this.description,
     required this.createdAt,
     required this.modifiedAt,
     required this.ownerType,
+    this.ownerScope,
     required this.visibility,
     required this.privateToolExecution,
     this.title,
@@ -135,6 +155,15 @@ class Connector {
 
   /// Creates a [Connector] from JSON.
   factory Connector.fromJson(Map<String, dynamic> json) => Connector(
+    supportsMcp: json['supports_mcp'] as bool?,
+    blockedBy: (json['blocked_by'] as List<Object?>?)
+        ?.map((value) => ConsumerType.fromJson(value as String?))
+        .toList(),
+    openapiSpec: json['openapi_spec'] == null
+        ? null
+        : ConnectorOpenApiSpec.fromJson(
+            json['openapi_spec'] as Map<String, dynamic>,
+          ),
     id: json['id'] as String? ?? '',
     name: json['name'] as String? ?? '',
     description: json['description'] as String? ?? '',
@@ -144,7 +173,14 @@ class Connector {
     modifiedAt:
         DateTime.tryParse(json['modified_at'] as String? ?? '') ??
         DateTime.utc(1970),
-    ownerType: ResourceType.fromJson(json['owner_type'] as int?),
+    ownerType: switch (json['owner_type']) {
+      final int owner => ResourceType.fromJson(owner),
+      final String owner => _legacyOwnerType(ConsumerType.fromJson(owner)),
+      _ => ResourceType.unknown,
+    },
+    ownerScope: json['owner_type'] is String
+        ? ConsumerType.fromJson(json['owner_type'] as String)
+        : null,
     visibility: ResourceVisibility.fromJson(json['visibility'] as String?),
     privateToolExecution: json['private_tool_execution'] as bool? ?? false,
     title: json['title'] as String?,
@@ -193,14 +229,26 @@ class Connector {
         : null,
   );
 
+  static ResourceType _legacyOwnerType(ConsumerType scope) => switch (scope) {
+    ConsumerType.user => ResourceType.user,
+    ConsumerType.org => ResourceType.org,
+    ConsumerType.workspace => ResourceType.workspace,
+    ConsumerType.system => ResourceType.system,
+    ConsumerType.unknown => ResourceType.unknown,
+  };
+
   /// Converts this connector to JSON.
   Map<String, dynamic> toJson() => {
+    if (supportsMcp != null) 'supports_mcp': supportsMcp,
+    if (blockedBy != null)
+      'blocked_by': blockedBy!.map((value) => value.toJson()).toList(),
+    if (openapiSpec != null) 'openapi_spec': openapiSpec!.toJson(),
     'id': id,
     'name': name,
     'description': description,
     'created_at': createdAt.toIso8601String(),
     'modified_at': modifiedAt.toIso8601String(),
-    'owner_type': ownerType.toJson(),
+    'owner_type': ownerScope?.toJson() ?? ownerType.toJson(),
     'visibility': visibility.toJson(),
     'private_tool_execution': privateToolExecution,
     if (title != null) 'title': title,
@@ -238,12 +286,16 @@ class Connector {
   ///
   /// Pass `null` for nullable fields to clear them explicitly; omit to keep.
   Connector copyWith({
+    Object? supportsMcp = unsetCopyWithValue,
+    Object? blockedBy = unsetCopyWithValue,
+    Object? openapiSpec = unsetCopyWithValue,
     String? id,
     String? name,
     String? description,
     DateTime? createdAt,
     DateTime? modifiedAt,
     ResourceType? ownerType,
+    Object? ownerScope = unsetCopyWithValue,
     ResourceVisibility? visibility,
     bool? privateToolExecution,
     Object? title = unsetCopyWithValue,
@@ -266,12 +318,28 @@ class Connector {
     Object? creatorId = unsetCopyWithValue,
     Object? executionEnv = unsetCopyWithValue,
   }) => Connector(
+    supportsMcp: supportsMcp == unsetCopyWithValue
+        ? this.supportsMcp
+        : supportsMcp as bool?,
+    blockedBy: blockedBy == unsetCopyWithValue
+        ? this.blockedBy
+        : (blockedBy as List<Object?>?)?.cast<ConsumerType>(),
+    openapiSpec: openapiSpec == unsetCopyWithValue
+        ? this.openapiSpec
+        : openapiSpec as ConnectorOpenApiSpec?,
     id: id ?? this.id,
     name: name ?? this.name,
     description: description ?? this.description,
     createdAt: createdAt ?? this.createdAt,
     modifiedAt: modifiedAt ?? this.modifiedAt,
-    ownerType: ownerType ?? this.ownerType,
+    ownerType:
+        ownerType ??
+        (ownerScope is ConsumerType
+            ? _legacyOwnerType(ownerScope)
+            : this.ownerType),
+    ownerScope: ownerScope == unsetCopyWithValue
+        ? (ownerType == null ? this.ownerScope : null)
+        : ownerScope as ConsumerType?,
     visibility: visibility ?? this.visibility,
     privateToolExecution: privateToolExecution ?? this.privateToolExecution,
     title: title == unsetCopyWithValue ? this.title : title as String?,
@@ -325,6 +393,9 @@ class Connector {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Connector &&
+          supportsMcp == other.supportsMcp &&
+          listsEqual(blockedBy, other.blockedBy) &&
+          openapiSpec == other.openapiSpec &&
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
@@ -332,6 +403,7 @@ class Connector {
           createdAt == other.createdAt &&
           modifiedAt == other.modifiedAt &&
           ownerType == other.ownerType &&
+          ownerScope == other.ownerScope &&
           visibility == other.visibility &&
           privateToolExecution == other.privateToolExecution &&
           title == other.title &&
@@ -356,44 +428,50 @@ class Connector {
 
   @override
   int get hashCode => Object.hashAll([
-    id,
-    name,
-    description,
-    createdAt,
-    modifiedAt,
-    ownerType,
-    visibility,
-    privateToolExecution,
-    title,
-    server,
-    protocol,
-    iconUrl,
-    mapDeepHashCode(serverCard),
-    ownerId,
-    locale,
-    systemPrompt,
-    listHash(supportedAuthMethods),
-    listHash(connectionPreferences),
-    listHash(connectionCredentials),
-    active,
-    mistral,
-    isAuthenticated,
-    listHash(tools),
-    systemPromptRoute,
-    connectionConfig,
-    creatorId,
-    executionEnv,
+    Object.hashAll([
+      id,
+      name,
+      description,
+      createdAt,
+      modifiedAt,
+      ownerType,
+      ownerScope,
+      visibility,
+      privateToolExecution,
+      title,
+      server,
+      protocol,
+      iconUrl,
+      mapDeepHashCode(serverCard),
+      ownerId,
+      locale,
+      systemPrompt,
+      listHash(supportedAuthMethods),
+      listHash(connectionPreferences),
+      listHash(connectionCredentials),
+      active,
+      mistral,
+      isAuthenticated,
+      listHash(tools),
+      systemPromptRoute,
+      connectionConfig,
+      creatorId,
+      executionEnv,
+    ]),
+    supportsMcp,
+    listHash(blockedBy),
+    openapiSpec,
   ]);
 
   @override
   String toString() =>
-      'Connector('
+      'Connector(supportsMcp: $supportsMcp, blockedBy: ${blockedBy?.length}, openapiSpec: $openapiSpec, '
       'id: $id, '
       'name: $name, '
       'description: $description, '
       'createdAt: $createdAt, '
       'modifiedAt: $modifiedAt, '
-      'ownerType: $ownerType, '
+      'ownerType: $ownerType, ownerScope: $ownerScope, '
       'visibility: $visibility, '
       'privateToolExecution: $privateToolExecution, '
       'title: $title, '

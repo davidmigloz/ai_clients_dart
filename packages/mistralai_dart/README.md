@@ -1122,47 +1122,33 @@ await client.skills.delete(skillId: skill.id);
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.connectors` to manage MCP connectors (Beta): create and configure connectors, manage their credentials, activate or deactivate them at the organization, workspace, or user level, share a private connector with the workspace, and list or call their tools.
+Use `client.connectors` to manage MCP and HTTP connectors in Public Preview. Connector visibility and the API key's connector scope determine which connectors are available. Organization sharing requires the relevant organization permission. [Connector access and management](https://docs.mistral.ai/studio/connectors/management)
 
 ```dart
-// Create an MCP connector
-final connector = await client.connectors.create(
-  request: const CreateConnectorRequest(
-    name: 'my_connector',
-    description: 'My MCP connector',
-    server: 'https://mcp.example.com',
-    visibility: PublicResourceVisibility.sharedOrg,
+final connectors = await client.connectors.list(
+  queryFilters: const ConnectorsQueryFilters(supportsMcp: true),
+  pageSize: 20,
+);
+final connector = connectors.items.first;
+final tools = await client.connectors.listMcpTools(
+  connectorIdOrName: connector.id,
+);
+print(tools.map((tool) => tool.name));
+```
+
+Use `CreateConnectorRequest(protocol: 'http', ...)` and `UpdateConnectorRequest(protocol: 'http', ...)` for HTTP connector CRUD. Import the OpenAPI document in Studio. Read its source from `connector.openapiSpec` when Mistral exposes it. [HTTP connector setup](https://docs.mistral.ai/studio/connectors/http-connectors)
+
+Use `createCredentials` to create credentials at user or workspace scope, and `updateCredentials` to create or update them at any supported scope. Use `getAuthUrl` for delegated OAuth with the supported method and an optional credential name and title.
+
+Mistral soft-deprecated direct `callTool` calls. Configure credentials through `client.connectors` and pass a connector in the model request's `tools` list. [Beta Connectors API](https://docs.mistral.ai/api/endpoint/beta/connectors)
+
+```dart
+final answer = await client.chat.create(
+  request: ChatCompletionRequest(
+    model: 'mistral-small-latest',
+    messages: [ChatMessage.user('Find the catalog entry for a field notebook.')],
+    tools: [CustomConnectorTool(connectorId: connector.id)],
   ),
-);
-
-// Configure user-level credentials
-await client.connectors.createOrUpdateUserCredentials(
-  connectorIdOrName: connector.id,
-  request: const CredentialsCreateOrUpdate(
-    name: 'my-cred',
-    credentials: ConnectionCredentials(bearerToken: 'secret-token'),
-  ),
-);
-
-// Activate the connector for the organization
-await client.connectors.activateForOrganization(connectorId: connector.id);
-
-// Share a private connector with the current workspace
-await client.connectors.share(connectorId: connector.id);
-
-// Remove all user-level credentials for the connector
-await client.connectors.deleteAllUserCredentials(
-  connectorIdOrName: connector.id,
-);
-
-// List and call the connector's tools
-final tools = await client.connectors.listTools(
-  connectorIdOrName: connector.id,
-);
-final result = await client.connectors.callTool(
-  connectorIdOrName: connector.id,
-  toolName: 'search',
-  request: const ConnectorCallToolRequest(arguments: {'query': 'mistral'}),
 );
 ```
 
@@ -1560,7 +1546,7 @@ See the [example/](example/) directory for complete examples:
 | [`libraries_example.dart`](example/libraries_example.dart) | Library and document uploads (beta) |
 | [`prompts_example.dart`](example/prompts_example.dart) | Versioned prompt templates (beta) |
 | [`skills_example.dart`](example/skills_example.dart) | Versioned model instructions and assets (beta) |
-| [`connectors_example.dart`](example/connectors_example.dart) | MCP connector management (beta) |
+| [`connectors_example.dart`](example/connectors_example.dart) | MCP and HTTP connector management (Public Preview) |
 | [`observability_example.dart`](example/observability_example.dart) | Observability projects, datasets, scorers, and telemetry |
 | [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and management |
 | [`workflow_deployment_archive_example.dart`](example/workflow_deployment_archive_example.dart) | Signed archive upload and managed deployment (Public Preview) |
@@ -1599,7 +1585,7 @@ See the [example/](example/) directory for complete examples:
 | Agents (legacy beta) | Entities, versions, aliases, and completions |
 | Conversations (legacy beta) | JSON, typed SSE, history, and messages |
 | Libraries (Beta) | ✅ Full |
-| Connectors (Beta) | ✅ Full |
+| Connectors (Public Preview) | ✅ Public API |
 | Prompts (Beta) | ✅ Full |
 | Skills (Beta) | ✅ Full |
 | Observability (Enterprise Public Preview) | ✅ Public API |

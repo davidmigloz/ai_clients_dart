@@ -274,28 +274,31 @@ void main() {
       ]);
     });
 
-    test('createOrUpdateUserCredentials POSTs to the user path', () async {
-      final client = clientReturning({'message': 'ok'});
-      addTearDown(client.close);
+    test(
+      'createOrUpdateUserCredentials uses the current PATCH route',
+      () async {
+        final client = clientReturning({'message': 'ok'});
+        addTearDown(client.close);
 
-      final result = await client.connectors.createOrUpdateUserCredentials(
-        connectorIdOrName: 'c-1',
-        request: const CredentialsCreateOrUpdate(
-          name: 'my-cred',
-          isDefault: true,
-          credentials: ConnectionCredentials(bearerToken: 'secret'),
-        ),
-      );
+        final result = await client.connectors.createOrUpdateUserCredentials(
+          connectorIdOrName: 'c-1',
+          request: const CredentialsCreateOrUpdate(
+            name: 'my-cred',
+            isDefault: true,
+            credentials: ConnectionCredentials(bearerToken: 'secret'),
+          ),
+        );
 
-      expect(captured.method, 'POST');
-      expect(captured.url.path, '/v1/connectors/c-1/user/credentials');
-      expect(jsonDecode(captured.body), {
-        'name': 'my-cred',
-        'is_default': true,
-        'credentials': {'bearer_token': 'secret'},
-      });
-      expect(result.message, 'ok');
-    });
+        expect(captured.method, 'PATCH');
+        expect(captured.url.path, '/v1/connectors/c-1/user/credentials');
+        expect(jsonDecode(captured.body), {
+          'name': 'my-cred',
+          'is_default': true,
+          'credentials': {'bearer_token': 'secret'},
+        });
+        expect(result.message, 'ok');
+      },
+    );
 
     test('deleteWorkspaceCredentials hits the workspace path', () async {
       final client = clientReturning({'message': 'removed'});

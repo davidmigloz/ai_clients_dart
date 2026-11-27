@@ -39,7 +39,7 @@
 /// - **Audio**: Speech-to-text transcription, text-to-speech synthesis, realtime WebSockets, and voice management
 /// - **Agents** (Beta): Pre-configured AI assistants
 /// - **Conversations** (Beta): Flexible multi-turn interactions
-/// - **Connectors** (Beta): MCP connector management
+/// - **Connectors** (Public Preview): MCP and HTTP connector management
 /// - **Libraries** (Beta): Document storage for RAG
 /// - **Prompts** (Beta): Versioned, shareable prompt templates
 /// - **Skills** (Beta): Versioned, shareable model instructions and assets
@@ -103,7 +103,6 @@ export 'src/models/audio/voice_list_page.dart';
 export 'src/models/audio/voice_list_response.dart';
 export 'src/models/audio/voice_response.dart';
 export 'src/models/audio/voice_update_request.dart';
-
 // --- Models: Batch ---
 export 'src/models/batch/batch_error.dart';
 export 'src/models/batch/batch_job.dart';
@@ -138,9 +137,13 @@ export 'src/models/connectors/connection_config_type.dart';
 export 'src/models/connectors/connection_credentials.dart';
 export 'src/models/connectors/connection_preference.dart';
 export 'src/models/connectors/connector.dart';
+export 'src/models/connectors/connector_auth_method.dart';
 export 'src/models/connectors/connector_authentication_header.dart';
 export 'src/models/connectors/connector_call_tool_request.dart';
+export 'src/models/connectors/connector_consumer_scope.dart';
 export 'src/models/connectors/connector_locale.dart';
+export 'src/models/connectors/connector_metadata.dart';
+export 'src/models/connectors/connector_oauth.dart';
 export 'src/models/connectors/connector_protocol.dart';
 export 'src/models/connectors/connector_tool.dart';
 export 'src/models/connectors/connector_tool_call_response.dart';
@@ -152,6 +155,7 @@ export 'src/models/connectors/credentials_response.dart';
 export 'src/models/connectors/credentials_status.dart';
 export 'src/models/connectors/credentials_status_error_reason.dart';
 export 'src/models/connectors/execution_tool.dart';
+export 'src/models/connectors/mcp_connector_tool.dart';
 export 'src/models/connectors/message_response.dart';
 export 'src/models/connectors/oauth2_token.dart';
 export 'src/models/connectors/outbound_authentication_type.dart';
