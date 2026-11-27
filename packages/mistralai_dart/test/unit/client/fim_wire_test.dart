@@ -9,6 +9,8 @@ const _request = FimCompletionRequest(
   model: 'codestral-latest',
   prompt: 'return ',
   suffix: ';',
+  minTokens: 1,
+  promptCacheKey: 'codestral-fixture',
 );
 
 const Map<String, Object> _logprobs = {
@@ -45,7 +47,11 @@ void main() {
         expect(request.method, 'POST');
         expect(request.url.path, '/v1/fim/completions');
         expect(jsonDecode(request.body), {
-          ..._request.toJson(),
+          'model': 'codestral-latest',
+          'prompt': 'return ',
+          'suffix': ';',
+          'min_tokens': 1,
+          'prompt_cache_key': 'codestral-fixture',
           'stream': false,
         });
         return http.Response(jsonEncode(payload), 200);
@@ -82,7 +88,11 @@ void main() {
         expect(request.url.path, '/v1/fim/completions');
         expect(request.headers['accept'], 'text/event-stream');
         expect(jsonDecode(request.body), {
-          ..._request.toJson(),
+          'model': 'codestral-latest',
+          'prompt': 'return ',
+          'suffix': ';',
+          'min_tokens': 1,
+          'prompt_cache_key': 'codestral-fixture',
           'stream': true,
         });
         final events = [

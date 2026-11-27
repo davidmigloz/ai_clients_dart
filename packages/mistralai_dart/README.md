@@ -263,7 +263,9 @@ final response = await client.chat.create(
 <details>
 <summary><b>Show example</b></summary>
 
-Define custom tools with JSON Schema parameters, or use built-in tools like web search, code interpreter, and document library. Send tool results back in a follow-up message turn.
+Define custom functions with JSON Schema parameters and send their results
+in a follow-up message. Chat Completions also accepts image generation,
+document library, and connector tools where available.
 
 ```dart
 // Define tools
@@ -316,29 +318,6 @@ if (response.hasToolCalls) {
     );
   }
 }
-```
-
-```dart
-// Web search tool
-final webTool = Tool.webSearch();
-
-// Code interpreter
-final codeTool = Tool.codeInterpreter();
-
-// Image generation
-final imageTool = Tool.imageGeneration();
-
-// Document library (for RAG)
-final docTool = Tool.documentLibrary(libraryIds: ['lib-123']);
-
-final response = await client.chat.create(
-  request: ChatCompletionRequest(
-    model: 'mistral-large-latest',
-    messages: [ChatMessage.user('Search for latest AI news')],
-    tools: [webTool],
-    toolChoice: const ToolChoiceAuto(),
-  ),
-);
 ```
 
 → [Full example](example/tool_calling_example.dart)
@@ -760,7 +739,9 @@ print('Created voice: ${voice.id}');
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.agents` to create, list, update, and delete agents. Agents can use tools and follow custom instructions. Use `complete(...)` to chat with an agent.
+Use `client.agents` to create, list, update, and delete agents. An agent can
+follow custom instructions and use configured tools such as web search or
+the code interpreter. Use `complete(...)` to chat with an agent.
 
 ```dart
 // Create an agent
