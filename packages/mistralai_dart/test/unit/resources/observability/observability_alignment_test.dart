@@ -516,17 +516,25 @@ void main() {
     const omitted = PatchDatasetInSchema();
     final parsed = PatchDatasetInSchema.fromJson(payload);
     const constructed = PatchDatasetInSchema(
-      name: null,
-      description: null,
-      metadata: null,
+      sendNullName: true,
+      sendNullDescription: true,
+      sendNullMetadata: true,
     );
     expect(omitted.copyWith().toJson(), isEmpty);
     expect(parsed, constructed);
     expect(parsed.hashCode, constructed.hashCode);
     expect(parsed, isNot(omitted));
     expect(
-      omitted.copyWith(name: null, description: null, metadata: null),
-      parsed,
+      omitted.copyWith(name: null, description: null, metadata: null).toJson(),
+      isEmpty,
+    );
+    expect(
+      const PatchDatasetInSchema(
+        name: null,
+        description: null,
+        metadata: null,
+      ).toJson(),
+      isEmpty,
     );
     await client.observability.datasets.update(
       datasetId: 'ds-1',

@@ -8,47 +8,52 @@ import '../common/equality_helpers.dart';
 class PatchDatasetInSchema {
   /// Creates a dataset patch.
   ///
-  /// Omit a field to leave it out of the request. An explicit null is sent
-  /// as a JSON null.
+  /// Null fields are omitted unless their corresponding send-null flag is set.
   const PatchDatasetInSchema({
-    this._name = unsetCopyWithValue,
-    this._description = unsetCopyWithValue,
-    this._metadata = unsetCopyWithValue,
+    this.name,
+    this.description,
+    this.metadata,
+    this.sendNullName = false,
+    this.sendNullDescription = false,
+    this.sendNullMetadata = false,
   });
 
-  final Object? _name;
-  final Object? _description;
-  final Object? _metadata;
-
   /// Updated dataset name.
-  String? get name => _name == unsetCopyWithValue ? null : _name as String?;
+  final String? name;
 
   /// Updated dataset description.
-  String? get description =>
-      _description == unsetCopyWithValue ? null : _description as String?;
+  final String? description;
 
   /// Additional JSON metadata supplied by the caller.
-  Map<String, dynamic>? get metadata => _metadata == unsetCopyWithValue
-      ? null
-      : (_metadata as Map<Object?, Object?>?)?.cast<String, dynamic>();
+  final Map<String, dynamic>? metadata;
 
-  /// Creates a [PatchDatasetInSchema] from JSON.
+  /// Sends the name field when its value is null.
+  final bool sendNullName;
+
+  /// Sends the description field when its value is null.
+  final bool sendNullDescription;
+
+  /// Sends the metadata field when its value is null.
+  final bool sendNullMetadata;
+
+  /// Creates a [PatchDatasetInSchema] from JSON, preserving explicit nulls.
   factory PatchDatasetInSchema.fromJson(Map<String, dynamic> json) =>
       PatchDatasetInSchema(
-        name: json.containsKey('name') ? json['name'] : unsetCopyWithValue,
-        description: json.containsKey('description')
-            ? json['description']
-            : unsetCopyWithValue,
-        metadata: json.containsKey('metadata')
-            ? json['metadata']
-            : unsetCopyWithValue,
+        name: json['name'] as String?,
+        description: json['description'] as String?,
+        metadata: json['metadata'] as Map<String, dynamic>?,
+        sendNullName: json.containsKey('name') && json['name'] == null,
+        sendNullDescription:
+            json.containsKey('description') && json['description'] == null,
+        sendNullMetadata:
+            json.containsKey('metadata') && json['metadata'] == null,
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (_metadata != unsetCopyWithValue) 'metadata': metadata,
-    if (_name != unsetCopyWithValue) 'name': name,
-    if (_description != unsetCopyWithValue) 'description': description,
+    if (name != null || sendNullName) 'name': name,
+    if (description != null || sendNullDescription) 'description': description,
+    if (metadata != null || sendNullMetadata) 'metadata': metadata,
   };
 
   /// Creates a copy with replaced values.
@@ -56,10 +61,20 @@ class PatchDatasetInSchema {
     Object? name = unsetCopyWithValue,
     Object? description = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
+    bool? sendNullName,
+    bool? sendNullDescription,
+    bool? sendNullMetadata,
   }) => PatchDatasetInSchema(
-    name: name == unsetCopyWithValue ? _name : name,
-    description: description == unsetCopyWithValue ? _description : description,
-    metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
+    name: name == unsetCopyWithValue ? this.name : name as String?,
+    description: description == unsetCopyWithValue
+        ? this.description
+        : description as String?,
+    metadata: metadata == unsetCopyWithValue
+        ? this.metadata
+        : (metadata as Map<Object?, Object?>?)?.cast<String, dynamic>(),
+    sendNullName: sendNullName ?? this.sendNullName,
+    sendNullDescription: sendNullDescription ?? this.sendNullDescription,
+    sendNullMetadata: sendNullMetadata ?? this.sendNullMetadata,
   );
 
   @override
@@ -67,16 +82,26 @@ class PatchDatasetInSchema {
       identical(this, other) ||
       other is PatchDatasetInSchema &&
           runtimeType == other.runtimeType &&
-          _name == other._name &&
-          _description == other._description &&
-          valuesDeepEqual(_metadata, other._metadata);
+          name == other.name &&
+          description == other.description &&
+          mapsDeepEqual(metadata, other.metadata) &&
+          sendNullName == other.sendNullName &&
+          sendNullDescription == other.sendNullDescription &&
+          sendNullMetadata == other.sendNullMetadata;
 
   @override
-  int get hashCode =>
-      Object.hash(_name, _description, valueDeepHashCode(_metadata));
+  int get hashCode => Object.hash(
+    name,
+    description,
+    mapDeepHashCode(metadata),
+    sendNullName,
+    sendNullDescription,
+    sendNullMetadata,
+  );
 
   @override
   String toString() =>
       'PatchDatasetInSchema(name: $name, description: $description, '
-      'metadata: ${metadata?.length})';
+      'metadata: ${metadata?.length}, sendNullName: $sendNullName, '
+      'sendNullDescription: $sendNullDescription, sendNullMetadata: $sendNullMetadata)';
 }

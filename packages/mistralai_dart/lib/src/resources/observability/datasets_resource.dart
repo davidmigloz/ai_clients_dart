@@ -117,24 +117,12 @@ class DatasetsResource extends ResourceBase {
   Future<DatasetPreview> update({
     required String datasetId,
     required PatchDatasetInSchema request,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/observability/datasets/${Uri.encodeComponent(datasetId)}',
-    );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
-
-    final httpRequest = http.Request('PATCH', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return DatasetPreview.fromJson(responseBody);
-  }
+  }) => readObservability(
+    'PATCH',
+    'datasets/${Uri.encodeComponent(datasetId)}',
+    DatasetPreview.fromJson,
+    body: request.toJson(),
+  );
 
   /// Exports a dataset to JSONL format.
   ///
