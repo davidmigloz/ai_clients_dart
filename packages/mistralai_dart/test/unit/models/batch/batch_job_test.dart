@@ -266,7 +266,7 @@ void main() {
     });
 
     group('equality', () {
-      test('jobs with same id are equal', () {
+      test('jobs with the same ID and different state are distinct', () {
         const job1 = BatchJob(
           id: 'batch-123',
           inputFiles: ['file-a'],
@@ -282,8 +282,7 @@ void main() {
           status: BatchJobStatus.success, // Different status
         );
 
-        expect(job1, equals(job2));
-        expect(job1.hashCode, equals(job2.hashCode));
+        expect(job1, isNot(equals(job2)));
       });
 
       test('jobs with different ids are not equal', () {

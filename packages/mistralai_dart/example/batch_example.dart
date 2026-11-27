@@ -17,8 +17,8 @@ import 'package:mistralai_dart/mistralai_dart.dart';
 /// - Running overnight jobs
 /// - Cost optimization (batch requests may be discounted)
 ///
-/// Note: Batch jobs require an input file in JSONL format to be uploaded first.
-/// See the files_example.dart for how to upload files.
+/// Jobs accept inline requests or a file of JSONL requests.
+/// See files_example.dart for file uploads.
 void main() async {
   final apiKey = Platform.environment['MISTRAL_API_KEY'];
   if (apiKey == null) {
@@ -32,7 +32,11 @@ void main() async {
     // --- Example 1: List existing batch jobs ---
     print('=== List Batch Jobs ===\n');
 
-    final jobs = await client.batch.jobs.list();
+    final jobs = await client.batch.jobs.list(
+      page: 0,
+      pageSize: 20,
+      statuses: [BatchJobStatus.success, BatchJobStatus.timedOut],
+    );
     print('Total jobs: ${jobs.data.length}');
 
     for (final job in jobs.data) {
@@ -59,7 +63,7 @@ Example code:
 
 // Upload the input file
 final inputFile = await client.files.upload(
-  file: File('batch_requests.jsonl'),
+  filePath: 'batch_requests.jsonl',
   purpose: FilePurpose.batch,
 );
 
@@ -79,7 +83,10 @@ print('Created job: ${job.id}');
     if (jobs.data.isNotEmpty) {
       print('\n=== Retrieve Job Details ===\n');
 
-      final job = await client.batch.jobs.retrieve(jobId: jobs.data.first.id);
+      final job = await client.batch.jobs.retrieve(
+        jobId: jobs.data.first.id,
+        inline: true,
+      );
 
       print('Job ID: ${job.id}');
       print('Model: ${job.model}');
@@ -87,6 +94,7 @@ print('Created job: ${job.id}');
       print('Status: ${job.status.value}');
       print('Input Files: ${job.inputFiles}');
       print('Output File: ${job.outputFileId ?? "N/A"}');
+      print('Inline results: ${job.outputs?.length ?? 0}');
       print('Error File: ${job.errorFileId ?? "N/A"}');
 
       print('\nProgress:');

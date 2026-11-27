@@ -59,7 +59,7 @@ import 'retry_wrapper.dart';
 /// - [users] - Current authenticated user identity (Beta)
 /// - [rag] - RAG ingestion pipelines and legacy index registration (Beta)
 /// - [managedSearchIndexes] - Managed Search indexes (Public Preview)
-/// - [workflows] - Workflow execution, scheduling, management (Beta)
+/// - [workflows] - Workflow execution, scheduling, and management
 /// - [models] - Model listing and management
 /// - [moderations] - Content moderation
 ///

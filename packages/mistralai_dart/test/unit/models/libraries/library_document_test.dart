@@ -84,8 +84,14 @@ void main() {
         expect(json['mime_type'], 'application/pdf');
         expect(json['size'], 2048000);
         expect(json['hash'], 'hashvalue123');
-        expect(json['created_at'], 1703980800);
-        expect(json['updated_at'], 1703984400);
+        expect(
+          DateTime.parse(json['created_at'] as String).millisecondsSinceEpoch,
+          1703980800000,
+        );
+        expect(
+          DateTime.parse(json['updated_at'] as String).millisecondsSinceEpoch,
+          1703984400000,
+        );
         expect(json['number_of_pages'], 50);
         expect(json['summary'], 'Document summary');
         expect(json['tokens_processing_total'], 10000);
@@ -207,19 +213,16 @@ void main() {
     });
 
     group('equality', () {
-      test('equals with same id', () {
+      test('equal fields compare equal and changed fields remain distinct', () {
         const doc1 = LibraryDocument(
           id: 'doc-123',
           name: 'a.pdf',
           status: LibraryDocumentStatus.running,
         );
-        const doc2 = LibraryDocument(
-          id: 'doc-123',
-          name: 'different.pdf',
-          status: LibraryDocumentStatus.completed,
-        );
+        final doc2 = LibraryDocument.fromJson(doc1.toJson());
         expect(doc1, equals(doc2));
         expect(doc1.hashCode, doc2.hashCode);
+        expect(doc1.copyWith(name: 'different.pdf'), isNot(doc1));
       });
 
       test('not equals with different id', () {
@@ -246,7 +249,7 @@ void main() {
         );
         expect(
           doc.toString(),
-          'LibraryDocument(id: doc-xyz, name: report.pdf, status: LibraryDocumentStatus.completed)',
+          'LibraryDocument(id: doc-xyz, name: report.pdf, status: LibraryDocumentStatus.completed, libraryId: null, processStatus: null)',
         );
       });
     });
@@ -461,9 +464,9 @@ void main() {
         const list2 = LibraryDocumentList(
           data: [
             LibraryDocument(
-              id: '1', // Same id = equal document
-              name: 'b',
-              status: LibraryDocumentStatus.running,
+              id: '1',
+              name: 'a',
+              status: LibraryDocumentStatus.completed,
             ),
           ],
         );

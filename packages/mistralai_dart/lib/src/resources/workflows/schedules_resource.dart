@@ -31,12 +31,14 @@ class SchedulesResource extends ResourceBase {
   /// - [workflowName] filters by workflow name.
   /// - [userId] filters by user ID (pass `current` for the authenticated user).
   /// - [status] filters by schedule status (`active` or `paused`).
+  /// - [search] fuzzy-matches the workflow name, display name, description, or ID.
   /// - [pageSize] is the number of items per page.
   /// - [nextPageToken] is the token for the next page of results.
   Future<WorkflowScheduleListResponse> list({
     String? workflowName,
     String? userId,
     String? status,
+    String? search,
     int? pageSize,
     String? nextPageToken,
   }) async {
@@ -45,6 +47,7 @@ class SchedulesResource extends ResourceBase {
     if (workflowName != null) queryParams['workflow_name'] = workflowName;
     if (userId != null) queryParams['user_id'] = userId;
     if (status != null) queryParams['status'] = status;
+    if (search != null) queryParams['search'] = search;
     if (pageSize != null) queryParams['page_size'] = pageSize.toString();
     if (nextPageToken != null) queryParams['next_page_token'] = nextPageToken;
 

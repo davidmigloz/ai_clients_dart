@@ -13,8 +13,13 @@ import 'dart:convert';
 ///   print(json); // Each event parsed as Map<String, dynamic>
 /// }
 /// ```
-Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) =>
-    _parseLines(byteStream, _SseSink.new);
+Stream<Map<String, dynamic>> parseSSE(
+  Stream<List<int>> byteStream, {
+  bool includeEventId = false,
+}) => _parseLines(
+  byteStream,
+  (sink) => _SseSink(sink, includeEventId: includeEventId),
+);
 
 // Queue parsed events before delivering done so normal HTTP EOF can be
 // observed before automatic subscription cleanup. Explicit cancellation still
@@ -44,11 +49,13 @@ Stream<Map<String, dynamic>> _parseLines(
 /// Per-subscription parser state with cancellation forwarded to the byte stream.
 class _SseSink implements EventSink<String> {
   final EventSink<Map<String, dynamic>> _sink;
+  final bool _includeEventId;
   final _dataBuffer = StringBuffer();
   String? _event;
+  String? _lastEventId;
   bool _closed = false;
 
-  _SseSink(this._sink);
+  _SseSink(this._sink, {required this._includeEventId});
 
   void _flush() {
     if (_dataBuffer.isEmpty) return;
@@ -57,6 +64,11 @@ class _SseSink implements EventSink<String> {
     try {
       final json = jsonDecode(data) as Map<String, dynamic>;
       if (_event != null) json['_event'] = _event;
+      if (_includeEventId) {
+        // SSE metadata is supplied by the transport, not the JSON payload.
+        json.remove('_event_id');
+        if (_lastEventId != null) json['_event_id'] = _lastEventId;
+      }
       _sink.add(json);
     } catch (_) {
       if (_event == 'error') {
@@ -74,6 +86,12 @@ class _SseSink implements EventSink<String> {
     if (_closed || line.startsWith(':')) return;
     if (line.startsWith('event:')) {
       _event = line.substring(6).trim();
+    } else if (_includeEventId && (line == 'id' || line.startsWith('id:'))) {
+      var value = line.length <= 3 ? '' : line.substring(3);
+      if (value.startsWith(' ')) value = value.substring(1);
+      if (!value.contains('\u0000')) {
+        _lastEventId = value.isEmpty ? null : value;
+      }
     } else if (line.startsWith('data:')) {
       final data = line.substring(5).trim();
       if (data == '[DONE]') {

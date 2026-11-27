@@ -12,6 +12,9 @@ enum FilePurpose {
   /// File for audio processing.
   audio,
 
+  /// File for an agentic safety task.
+  agenticSafety,
+
   /// Unknown purpose.
   unknown,
 }
@@ -27,6 +30,8 @@ String filePurposeToString(FilePurpose purpose) {
       return 'ocr';
     case FilePurpose.audio:
       return 'audio';
+    case FilePurpose.agenticSafety:
+      return 'agentic_safety';
     case FilePurpose.unknown:
       return 'unknown';
   }
@@ -43,6 +48,8 @@ FilePurpose filePurposeFromString(String? value) {
       return FilePurpose.ocr;
     case 'audio':
       return FilePurpose.audio;
+    case 'agentic_safety':
+      return FilePurpose.agenticSafety;
     default:
       return FilePurpose.unknown;
   }

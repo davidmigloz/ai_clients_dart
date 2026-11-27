@@ -1,7 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/library_timestamp.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../observability/pagination_info.dart';
 
 /// A document within a library.
 @immutable
@@ -12,8 +14,15 @@ class LibraryDocument {
   /// The name of the document.
   final String name;
 
-  /// The processing status of the document.
-  final LibraryDocumentStatus status;
+  /// The normalized processing status, derived from [processStatus] when set.
+  LibraryDocumentStatus get status {
+    final value = processStatus;
+    return value == null
+        ? _legacyStatus
+        : LibraryDocumentStatus.fromJson(value);
+  }
+
+  final LibraryDocumentStatus _legacyStatus;
 
   /// The MIME type of the document.
   final String? mimeType;
@@ -25,10 +34,20 @@ class LibraryDocument {
   final String? hash;
 
   /// When this document was created (Unix timestamp).
-  final int? createdAt;
+  int? get createdAt => libraryTimestampSeconds(_createdAt);
+
+  /// When this item was created, including fractional seconds.
+  DateTime? get createdAtDateTime => parseLibraryTimestamp(_createdAt);
+
+  final Object? _createdAt;
 
   /// When this document was last updated (Unix timestamp).
-  final int? updatedAt;
+  int? get updatedAt => libraryTimestampSeconds(_updatedAt);
+
+  /// When this item was last updated, including fractional seconds.
+  DateTime? get updatedAtDateTime => parseLibraryTimestamp(_updatedAt);
+
+  final Object? _updatedAt;
 
   /// Number of pages in the document.
   final int? numberOfPages;
@@ -39,20 +58,74 @@ class LibraryDocument {
   /// Total tokens used for processing.
   final int? tokensProcessingTotal;
 
+  /// ID of the library containing this document.
+  final String? libraryId;
+
+  /// File extension of the document.
+  final String? extension;
+
+  /// Machine-readable status of the processing operation.
+  final String? processStatus;
+
+  /// Display label for the processing status.
+  String get processingStatus => _processingStatus ?? status.value;
+
+  final String? _processingStatus;
+
+  /// ID of the uploader, when available.
+  final String? uploadedById;
+
+  /// Type of the uploader.
+  final String? uploadedByType;
+
+  /// ISO 8601 timestamp of the last processing operation.
+  final String? lastProcessedAt;
+
+  /// ISO 8601 timestamp when the document expires.
+  final String? expiresAt;
+
+  /// JSON attributes associated with the document.
+  final Map<String, dynamic>? attributes;
+
+  /// Source URL when supplied by the service.
+  final String? url;
+
+  /// Tokens for processing the main text.
+  final int? tokensProcessingMainContent;
+
+  /// Tokens for processing the summary.
+  final int? tokensProcessingSummary;
+
   /// Creates a [LibraryDocument].
   const LibraryDocument({
     required this.id,
     required this.name,
-    required this.status,
+    required LibraryDocumentStatus status,
     this.mimeType,
     this.size,
     this.hash,
-    this.createdAt,
-    this.updatedAt,
+    int? createdAt,
+    DateTime? createdAtDateTime,
+    int? updatedAt,
+    DateTime? updatedAtDateTime,
     this.numberOfPages,
     this.summary,
     this.tokensProcessingTotal,
-  });
+    this.libraryId,
+    this.extension,
+    this.processStatus,
+    this._processingStatus,
+    this.uploadedById,
+    this.uploadedByType,
+    this.lastProcessedAt,
+    this.expiresAt,
+    this.attributes,
+    this.url,
+    this.tokensProcessingMainContent,
+    this.tokensProcessingSummary,
+  }) : _legacyStatus = status,
+       _createdAt = createdAtDateTime ?? createdAt,
+       _updatedAt = updatedAtDateTime ?? updatedAt;
 
   /// Creates a [LibraryDocument] from JSON.
   factory LibraryDocument.fromJson(Map<String, dynamic> json) {
@@ -65,11 +138,24 @@ class LibraryDocument {
       mimeType: json['mime_type'] as String?,
       size: json['size'] as int?,
       hash: json['hash'] as String?,
-      createdAt: json['created_at'] as int?,
-      updatedAt: json['updated_at'] as int?,
+      createdAtDateTime: parseLibraryTimestamp(json['created_at']),
+      updatedAtDateTime: parseLibraryTimestamp(json['updated_at']),
       numberOfPages: json['number_of_pages'] as int?,
       summary: json['summary'] as String?,
       tokensProcessingTotal: json['tokens_processing_total'] as int?,
+      libraryId: json['library_id'] as String?,
+      extension: json['extension'] as String?,
+      processStatus: json['process_status'] as String?,
+      processingStatus: json['processing_status'] as String?,
+      uploadedById: json['uploaded_by_id'] as String?,
+      uploadedByType: json['uploaded_by_type'] as String?,
+      lastProcessedAt: json['last_processed_at'] as String?,
+      expiresAt: json['expires_at'] as String?,
+      attributes: json['attributes'] as Map<String, dynamic>?,
+      url: json['url'] as String?,
+      tokensProcessingMainContent:
+          json['tokens_processing_main_content'] as int?,
+      tokensProcessingSummary: json['tokens_processing_summary'] as int?,
     );
   }
 
@@ -78,16 +164,27 @@ class LibraryDocument {
     return {
       'id': id,
       'name': name,
-      'processing_status': status.value,
+      'processing_status': processingStatus,
       if (mimeType != null) 'mime_type': mimeType,
       if (size != null) 'size': size,
       if (hash != null) 'hash': hash,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
+      'created_at': ?createdAtDateTime?.toUtc().toIso8601String(),
+      'updated_at': ?updatedAtDateTime?.toUtc().toIso8601String(),
       if (numberOfPages != null) 'number_of_pages': numberOfPages,
       if (summary != null) 'summary': summary,
       if (tokensProcessingTotal != null)
         'tokens_processing_total': tokensProcessingTotal,
+      'library_id': ?libraryId,
+      'extension': ?extension,
+      'process_status': ?processStatus,
+      'uploaded_by_id': ?uploadedById,
+      'uploaded_by_type': ?uploadedByType,
+      'last_processed_at': ?lastProcessedAt,
+      'expires_at': ?expiresAt,
+      'attributes': ?attributes,
+      'url': ?url,
+      'tokens_processing_main_content': ?tokensProcessingMainContent,
+      'tokens_processing_summary': ?tokensProcessingSummary,
     };
   }
 
@@ -95,6 +192,10 @@ class LibraryDocument {
   ///
   /// Optional nullable fields can be explicitly set to null by passing `null`.
   /// To keep the original value, omit the parameter.
+  ///
+  /// Setting [status] also updates the machine and display status unless
+  /// their values are supplied explicitly. [processStatus] takes precedence
+  /// over the legacy [status] when both are supplied.
   LibraryDocument copyWith({
     String? id,
     String? name,
@@ -103,11 +204,31 @@ class LibraryDocument {
     Object? size = unsetCopyWithValue,
     Object? hash = unsetCopyWithValue,
     Object? createdAt = unsetCopyWithValue,
+    Object? createdAtDateTime = unsetCopyWithValue,
     Object? updatedAt = unsetCopyWithValue,
+    Object? updatedAtDateTime = unsetCopyWithValue,
     Object? numberOfPages = unsetCopyWithValue,
     Object? summary = unsetCopyWithValue,
     Object? tokensProcessingTotal = unsetCopyWithValue,
+    Object? libraryId = unsetCopyWithValue,
+    Object? extension = unsetCopyWithValue,
+    Object? processStatus = unsetCopyWithValue,
+    Object? processingStatus = unsetCopyWithValue,
+    Object? uploadedById = unsetCopyWithValue,
+    Object? uploadedByType = unsetCopyWithValue,
+    Object? lastProcessedAt = unsetCopyWithValue,
+    Object? expiresAt = unsetCopyWithValue,
+    Object? attributes = unsetCopyWithValue,
+    Object? url = unsetCopyWithValue,
+    Object? tokensProcessingMainContent = unsetCopyWithValue,
+    Object? tokensProcessingSummary = unsetCopyWithValue,
   }) {
+    final legacyStatusChanged = status != null && status != this.status;
+    final nextProcessStatus = processStatus == unsetCopyWithValue
+        ? (legacyStatusChanged ? status._machineValue : this.processStatus)
+        : processStatus as String?;
+    final statusChanged =
+        legacyStatusChanged || nextProcessStatus != this.processStatus;
     return LibraryDocument(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -117,12 +238,14 @@ class LibraryDocument {
           : mimeType as String?,
       size: size == unsetCopyWithValue ? this.size : size as int?,
       hash: hash == unsetCopyWithValue ? this.hash : hash as String?,
-      createdAt: createdAt == unsetCopyWithValue
-          ? this.createdAt
-          : createdAt as int?,
-      updatedAt: updatedAt == unsetCopyWithValue
-          ? this.updatedAt
-          : updatedAt as int?,
+      createdAt: createdAt == unsetCopyWithValue ? null : createdAt as int?,
+      createdAtDateTime: createdAtDateTime != unsetCopyWithValue
+          ? createdAtDateTime as DateTime?
+          : (createdAt == unsetCopyWithValue ? this.createdAtDateTime : null),
+      updatedAt: updatedAt == unsetCopyWithValue ? null : updatedAt as int?,
+      updatedAtDateTime: updatedAtDateTime != unsetCopyWithValue
+          ? updatedAtDateTime as DateTime?
+          : (updatedAt == unsetCopyWithValue ? this.updatedAtDateTime : null),
       numberOfPages: numberOfPages == unsetCopyWithValue
           ? this.numberOfPages
           : numberOfPages as int?,
@@ -132,6 +255,39 @@ class LibraryDocument {
       tokensProcessingTotal: tokensProcessingTotal == unsetCopyWithValue
           ? this.tokensProcessingTotal
           : tokensProcessingTotal as int?,
+      libraryId: libraryId == unsetCopyWithValue
+          ? this.libraryId
+          : libraryId as String?,
+      extension: extension == unsetCopyWithValue
+          ? this.extension
+          : extension as String?,
+      processStatus: nextProcessStatus,
+      processingStatus: processingStatus == unsetCopyWithValue
+          ? (statusChanged ? null : _processingStatus)
+          : processingStatus as String?,
+      uploadedById: uploadedById == unsetCopyWithValue
+          ? this.uploadedById
+          : uploadedById as String?,
+      uploadedByType: uploadedByType == unsetCopyWithValue
+          ? this.uploadedByType
+          : uploadedByType as String?,
+      lastProcessedAt: lastProcessedAt == unsetCopyWithValue
+          ? this.lastProcessedAt
+          : lastProcessedAt as String?,
+      expiresAt: expiresAt == unsetCopyWithValue
+          ? this.expiresAt
+          : expiresAt as String?,
+      attributes: attributes == unsetCopyWithValue
+          ? this.attributes
+          : attributes as Map<String, dynamic>?,
+      url: url == unsetCopyWithValue ? this.url : url as String?,
+      tokensProcessingMainContent:
+          tokensProcessingMainContent == unsetCopyWithValue
+          ? this.tokensProcessingMainContent
+          : tokensProcessingMainContent as int?,
+      tokensProcessingSummary: tokensProcessingSummary == unsetCopyWithValue
+          ? this.tokensProcessingSummary
+          : tokensProcessingSummary as int?,
     );
   }
 
@@ -146,13 +302,61 @@ class LibraryDocument {
       identical(this, other) ||
       other is LibraryDocument &&
           runtimeType == other.runtimeType &&
-          id == other.id;
+          id == other.id &&
+          name == other.name &&
+          status == other.status &&
+          mimeType == other.mimeType &&
+          size == other.size &&
+          hash == other.hash &&
+          createdAtDateTime == other.createdAtDateTime &&
+          updatedAtDateTime == other.updatedAtDateTime &&
+          numberOfPages == other.numberOfPages &&
+          summary == other.summary &&
+          tokensProcessingTotal == other.tokensProcessingTotal &&
+          libraryId == other.libraryId &&
+          extension == other.extension &&
+          processStatus == other.processStatus &&
+          processingStatus == other.processingStatus &&
+          uploadedById == other.uploadedById &&
+          uploadedByType == other.uploadedByType &&
+          lastProcessedAt == other.lastProcessedAt &&
+          expiresAt == other.expiresAt &&
+          mapsDeepEqual(attributes, other.attributes) &&
+          url == other.url &&
+          tokensProcessingMainContent == other.tokensProcessingMainContent &&
+          tokensProcessingSummary == other.tokensProcessingSummary;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hashAll([
+    id,
+    name,
+    status,
+    mimeType,
+    size,
+    hash,
+    createdAtDateTime,
+    updatedAtDateTime,
+    numberOfPages,
+    summary,
+    tokensProcessingTotal,
+    libraryId,
+    extension,
+    processStatus,
+    processingStatus,
+    uploadedById,
+    uploadedByType,
+    lastProcessedAt,
+    expiresAt,
+    mapDeepHashCode(attributes),
+    url,
+    tokensProcessingMainContent,
+    tokensProcessingSummary,
+  ]);
 
   @override
-  String toString() => 'LibraryDocument(id: $id, name: $name, status: $status)';
+  String toString() =>
+      'LibraryDocument(id: $id, name: $name, status: $status, '
+      'libraryId: $libraryId, processStatus: $processStatus)';
 }
 
 /// Processing status of a library document.
@@ -174,10 +378,23 @@ enum LibraryDocumentStatus {
 
   const LibraryDocumentStatus(this.value);
 
+  String? get _machineValue => switch (this) {
+    running => 'in_progress',
+    completed => 'done',
+    failed => 'error',
+    unknown => null,
+  };
+
   /// Creates a [LibraryDocumentStatus] from a JSON string.
   factory LibraryDocumentStatus.fromJson(String value) {
+    final normalized = switch (value.toLowerCase()) {
+      'todo' || 'in_progress' || 'waiting_for_capacity' => 'running',
+      'done' || 'noop' || 'self_managed' => 'completed',
+      'error' || 'missing_content' => 'failed',
+      final String other => other,
+    };
     return LibraryDocumentStatus.values.firstWhere(
-      (e) => e.value.toLowerCase() == value.toLowerCase(),
+      (e) => e.value.toLowerCase() == normalized,
       orElse: () => LibraryDocumentStatus.unknown,
     );
   }
@@ -198,16 +415,24 @@ class LibraryDocumentList {
   /// Whether there are more documents to fetch.
   final bool? hasMore;
 
+  /// Pagination details returned for an offset page.
+  final PaginationInfo? pagination;
+
   /// Creates a [LibraryDocumentList].
   const LibraryDocumentList({
     this.object = 'list',
     required this.data,
     this.total,
     this.hasMore,
+    this.pagination,
   });
 
   /// Creates a [LibraryDocumentList] from JSON.
   factory LibraryDocumentList.fromJson(Map<String, dynamic> json) {
+    final paginationJson = json['pagination'] as Map<String, dynamic>?;
+    final pagination = paginationJson == null
+        ? null
+        : PaginationInfo.fromJson(paginationJson);
     return LibraryDocumentList(
       object: json['object'] as String? ?? 'list',
       data:
@@ -215,8 +440,9 @@ class LibraryDocumentList {
               ?.map((e) => LibraryDocument.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      total: json['total'] as int?,
-      hasMore: json['has_more'] as bool?,
+      total: pagination?.totalItems ?? json['total'] as int?,
+      hasMore: pagination?.hasMore ?? json['has_more'] as bool?,
+      pagination: pagination,
     );
   }
 
@@ -225,8 +451,9 @@ class LibraryDocumentList {
     return {
       'object': object,
       'data': data.map((e) => e.toJson()).toList(),
-      if (total != null) 'total': total,
-      if (hasMore != null) 'has_more': hasMore,
+      if (pagination != null) 'pagination': pagination!.toJson(),
+      if (pagination == null && total != null) 'total': total,
+      if (pagination == null && hasMore != null) 'has_more': hasMore,
     };
   }
 
@@ -247,10 +474,12 @@ class LibraryDocumentList {
           object == other.object &&
           listsEqual(data, other.data) &&
           total == other.total &&
+          pagination == other.pagination &&
           hasMore == other.hasMore;
 
   @override
-  int get hashCode => Object.hash(object, Object.hashAll(data), total, hasMore);
+  int get hashCode =>
+      Object.hash(object, Object.hashAll(data), total, hasMore, pagination);
 
   @override
   String toString() => 'LibraryDocumentList(count: $length, total: $total)';

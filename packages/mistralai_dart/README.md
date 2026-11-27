@@ -47,7 +47,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Agents, conversations, connectors, and libraries (beta)
 - Prompts and skills: versioned, shareable templates and instructions (beta)
 - Observability: campaigns, datasets, judges, and chat completion events (beta)
-- Workflows: execution, scheduling, managed deployments, and management (beta)
+- Workflows: execution, scheduling, management, and managed deployments (Public Preview)
 - Managed Search indexes, document ingestion, and retrieval (Mistral-hosted Public Preview)
 - RAG ingestion pipeline configuration (beta)
 - Users: current authenticated user identity (beta)
@@ -483,25 +483,34 @@ await client.fineTuning.models.unarchive(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.files` to upload, list, download, and delete files. File-path uploads are native-only; on web, use byte-based uploads instead.
-
-> **Note**: File-path based uploads (`filePath`) are only available on native platforms. On web, use byte-based uploads (`bytes`) instead. Other file operations (list, retrieve, download, delete) are supported on all platforms.
+Use `client.files` to upload, list, download, and delete files, or to request
+a signed download URL. File paths and input streams require a native platform.
+Use bytes with a filename in a browser.
 
 ```dart
 // Upload a file
 final file = await client.files.upload(
-  filePath: 'training_data.jsonl',
-  purpose: FilePurpose.fineTune,
+  filePath: 'batch_requests.jsonl',
+  purpose: FilePurpose.batch,
+  visibility: FileVisibility.workspace,
+  mimeType: 'application/jsonl',
 );
 
-// List files
-final files = await client.files.list();
+// List files from an upload
+final files = await client.files.list(
+  purpose: FilePurpose.batch,
+  sources: ['upload'],
+  pageSize: 20,
+);
 
 // Download file content
 final content = await client.files.download(fileId: file.id);
 
-// Delete file
-await client.files.delete(fileId: file.id);
+final signed = await client.files.getSignedUrl(
+  fileId: file.id,
+  expiryHours: 1,
+);
+print(signed.url);
 ```
 
 → [Full example](example/files_example.dart)
@@ -513,7 +522,10 @@ await client.files.delete(fileId: file.id);
 <details>
 <summary><b>Show example</b></summary>
 
-The fine-tuning jobs API has been removed upstream; use `client.fineTuning.models` to manage the fine-tuned models that result from training runs launched outside this client, and `client.batch.jobs` for batch processing. Batch jobs support a polling helper for long-running operations.
+Mistral retired the fine-tuning jobs API. Version 6 removed job creation
+and polling. Use `client.fineTuning.models` to update, archive, or restore
+existing fine-tuned models. Use `client.batch.jobs` for batch inference.
+[Mistral's legacy fine-tuning notice](https://docs.mistral.ai/resources/deprecated/customization)
 
 ```dart
 // Update a fine-tuned model's metadata
@@ -526,15 +538,6 @@ final updated = await client.fineTuning.models.update(
 await client.fineTuning.models.archive(modelId: updated.id);
 await client.fineTuning.models.unarchive(modelId: updated.id);
 
-// List available models with pagination
-final paginator = Paginator<AgentList, Agent>(
-  fetcher: (page, size) => client.agents.list(page: page, pageSize: size),
-  getItems: (response) => response.data,
-);
-
-await for (final agent in paginator.items()) {
-  print('Agent: ${agent.id}');
-}
 ```
 
 ```dart
@@ -551,11 +554,25 @@ final job = await client.batch.jobs.create(
 final poller = BatchJobPoller(client: client, jobId: job.id);
 final completed = await poller.poll();
 
-// Download results
-final results = await client.files.download(fileId: completed.outputFile!);
+final outputFileId = completed.outputFileId;
+if (outputFileId != null) {
+  final results = await client.files.download(fileId: outputFileId);
+  print('Downloaded ${results.length} bytes');
+}
+
+// List one page of completed or timed-out jobs.
+final page = await client.batch.jobs.list(
+  page: 0,
+  pageSize: 20,
+  statuses: [BatchJobStatus.success, BatchJobStatus.timedOut],
+);
+print(page.data.length);
 ```
 
-→ [Full example](example/fine_tuning_example.dart)
+For jobs with inline results, call `retrieve(jobId: id, inline: true)` and
+read `outputs`.
+
+→ [Fine-tuned models](example/fine_tuning_example.dart) · [Batch](example/batch_example.dart)
 
 </details>
 
@@ -801,7 +818,9 @@ final details = await client.conversations.retrieve(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.libraries` to create document libraries for RAG. Upload files first, add them as documents, then reference the library in chat via `Tool.documentLibrary(...)`.
+Use `client.libraries` (beta) to create document libraries for retrieval. Upload
+document bytes and wait for processing before querying with
+`Tool.documentLibrary(...)`.
 
 ```dart
 // Create a library
@@ -809,16 +828,18 @@ final library = await client.libraries.create(
   name: 'Research Papers',
 );
 
-// Add a document (file must be uploaded first via client.files.upload())
-final doc = await client.libraries.documents.create(
+// Upload a document directly. This example uses ASCII bytes for "AI notes".
+final doc = await client.libraries.documents.upload(
   libraryId: library.id,
-  fileId: fileId, // ID from client.files.upload()
+  bytes: [65, 73, 32, 110, 111, 116, 101, 115],
+  fileName: 'notes.txt',
+  mimeType: 'text/plain',
 );
 
-// List documents
 final docs = await client.libraries.documents.list(libraryId: library.id);
+print(docs.data.firstOrNull?.processingStatus);
 
-// Use library with chat
+// Once the document is processed, use the library with Chat Completions.
 final response = await client.chat.create(
   request: ChatCompletionRequest(
     model: 'mistral-large-latest',
@@ -841,6 +862,11 @@ await client.libraries.delete(libraryId: library.id);
 <summary><b>Show example</b></summary>
 
 Use `client.prompts` to manage versioned, shareable prompt templates (Beta). Each prompt has one or more versions; aliases (e.g. `production`) let you point consumers at a specific version without changing their code.
+
+Use `sortBy` and `sortDirection` to order lists. Select the fields you need
+with `fields`. For a workspace prompt, set
+`workspaceRelation: RegistryShareRelation.reader` to grant read access.
+Omitting the relation uses Mistral's writer default.
 
 ```dart
 // Create a prompt
@@ -892,6 +918,10 @@ await client.prompts.delete(promptId: prompt.id);
 <summary><b>Show example</b></summary>
 
 Use `client.skills` to manage versioned, shareable model instructions with optional file assets (Beta). Skills follow the same version/alias model as prompts.
+
+Skill lists can project `definition.description`. Retrieve an individual
+skill to read its body and assets. A workspace skill can grant read access
+with `workspaceRelation: RegistryShareRelation.reader`.
 
 ```dart
 // Create a skill with a text asset
@@ -1108,7 +1138,7 @@ await client.rag.ingestionPipelineConfigurations.updateRunInfo(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.workflows` to manage and execute workflows via the workflowCore resource, check execution status, list registrations, monitor runs, view metrics, inspect workers, and configure schedules.
+Use `client.workflows` to manage and execute workflows via the workflow core resource (`client.workflows.core`), check execution status, list registrations, monitor runs, view metrics, inspect workers, and configure schedules.
 
 ```dart
 // List registered workflows
@@ -1138,8 +1168,11 @@ final metrics = await client.workflows.metrics.get(
   workflowName: 'my-workflow',
 );
 
-// Check worker status
-final worker = await client.workflows.workers.whoami();
+// List workers and continue with workers.nextCursor.
+final workers = await client.workflows.deployments.listWorkers(
+  name: 'my-deployment',
+  workerStatus: 'active',
+);
 
 // List registrations
 final registrations = await client.workflows.registrations.list();
@@ -1152,7 +1185,7 @@ final deployment = await client.workflows.deployments.create(
   request: const CreateDeploymentRequest(
     name: 'my-deployment',
     spec: DeploymentWorkerSpecInput(
-      githubUrl: 'https://github.com/my-org/my-worker',
+      repositoryUrl: 'https://github.com/my-org/my-worker',
     ),
   ),
 );
@@ -1170,7 +1203,20 @@ await for (final log in client.workflows.deployments.streamLogs(
 }
 ```
 
-→ [Full example](example/workflows_example.dart)
+Managed Deployments are a Mistral-hosted Public Preview for eligible paid
+workspaces and are subject to quotas. To deploy from an archive, request a
+signed URL with `deployments.createArchive`, PUT the raw gzipped tar file
+using a separate HTTP client and the signed headers, then create or update a
+deployment with the returned `archiveId`. Keep signed URLs and headers private.
+[Mistral Managed Deployments](https://docs.mistral.ai/resources/release-note/2026-10-09-managed-deployments-public-preview)
+
+Use `workflows.core.executeAsync` or `executeSync` with a workflow identifier
+in place of the deprecated registration execution route. Use
+`DeploymentLogType.build` in `deployments.getLogs` for managed build output.
+Streamed logs expose `eventId` for resuming from `lastEventId`.
+
+[Workflow example](example/workflows_example.dart) ·
+[Archive deployment example](example/workflow_deployment_archive_example.dart)
 
 </details>
 
@@ -1244,21 +1290,22 @@ See the [example/](example/) directory for complete examples:
 | [`vision_example.dart`](example/vision_example.dart) | Multimodal inputs |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
 | [`fim_example.dart`](example/fim_example.dart) | Code completion |
-| [`files_example.dart`](example/files_example.dart) | File management |
+| [`files_example.dart`](example/files_example.dart) | File uploads, filters, and signed URLs |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuned model management |
-| [`batch_example.dart`](example/batch_example.dart) | Batch processing |
+| [`batch_example.dart`](example/batch_example.dart) | Batch filtering, inline results, and polling |
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
 | [`classification_example.dart`](example/classification_example.dart) | Text classification |
 | [`ocr_example.dart`](example/ocr_example.dart) | Document text extraction |
 | [`audio_example.dart`](example/audio_example.dart) | Voxtral file transcription, SSE, speech, voice search, and WAV samples |
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
-| [`libraries_example.dart`](example/libraries_example.dart) | Document storage (beta) |
+| [`libraries_example.dart`](example/libraries_example.dart) | Library and document uploads (beta) |
 | [`prompts_example.dart`](example/prompts_example.dart) | Versioned prompt templates (beta) |
 | [`skills_example.dart`](example/skills_example.dart) | Versioned model instructions and assets (beta) |
 | [`connectors_example.dart`](example/connectors_example.dart) | MCP connector management (beta) |
 | [`observability_example.dart`](example/observability_example.dart) | Observability: datasets, judges, campaigns (beta) |
-| [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and managed deployments (beta) |
+| [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and management |
+| [`workflow_deployment_archive_example.dart`](example/workflow_deployment_archive_example.dart) | Signed archive upload and managed deployment (Public Preview) |
 | [`managed_search_indexes_example.dart`](example/managed_search_indexes_example.dart) | Mistral-hosted Managed Search |
 | [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipeline configuration (beta) |
 | [`users_example.dart`](example/users_example.dart) | Current authenticated user identity (beta) |
@@ -1293,7 +1340,7 @@ See the [example/](example/) directory for complete examples:
 | Prompts (Beta) | ✅ Full |
 | Skills (Beta) | ✅ Full |
 | Observability (Beta) | ✅ Full |
-| Workflows (Beta) | ✅ Full |
+| Workflows | ✅ Supported |
 | Managed Search | Mistral-hosted Public Preview |
 | RAG (Beta) | Ingestion pipeline configuration and legacy index wrappers |
 | Users (Beta) | ✅ Full |

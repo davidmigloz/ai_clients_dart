@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import 'deployment_observed_state.dart';
 import 'deployment_resource_config.dart';
 import 'deployment_worker_spec_response.dart';
+import 'principal_type.dart';
 
 /// The live managed service state for a managed workflow deployment.
 @immutable
@@ -47,8 +48,20 @@ class ManagedDeploymentResponse {
   /// Who last updated the deployment.
   final String? updatedBy;
 
+  /// Whether the deployment uses a separate runtime credential.
+  final bool isHardened;
+
+  /// Identifier of the deployment runtime credential.
+  final String? runtimeCredentialId;
+
+  /// Type of principal used by the worker.
+  final PrincipalType? runtimePrincipalType;
+
   /// Creates a [ManagedDeploymentResponse].
   const ManagedDeploymentResponse({
+    this.isHardened = false,
+    this.runtimeCredentialId,
+    this.runtimePrincipalType,
     required this.serviceId,
     required this.name,
     required this.spec,
@@ -109,6 +122,11 @@ class ManagedDeploymentResponse {
       );
     }
     return ManagedDeploymentResponse(
+      isHardened: json['is_hardened'] as bool? ?? false,
+      runtimeCredentialId: json['runtime_credential_id'] as String?,
+      runtimePrincipalType: PrincipalType.fromJson(
+        json['runtime_principal_type'] as String?,
+      ),
       serviceId: serviceId,
       name: name,
       spec: DeploymentWorkerSpecResponse.fromJson(specJson),
@@ -127,6 +145,11 @@ class ManagedDeploymentResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    'is_hardened': isHardened,
+    if (runtimeCredentialId != null)
+      'runtime_credential_id': runtimeCredentialId,
+    if (runtimePrincipalType != null)
+      'runtime_principal_type': runtimePrincipalType!.value,
     'service_id': serviceId,
     'name': name,
     'spec': spec.toJson(),
@@ -144,6 +167,9 @@ class ManagedDeploymentResponse {
 
   /// Creates a copy with replaced values.
   ManagedDeploymentResponse copyWith({
+    bool? isHardened,
+    Object? runtimeCredentialId = unsetCopyWithValue,
+    Object? runtimePrincipalType = unsetCopyWithValue,
     String? serviceId,
     String? name,
     DeploymentWorkerSpecResponse? spec,
@@ -159,6 +185,13 @@ class ManagedDeploymentResponse {
     Object? updatedBy = unsetCopyWithValue,
   }) {
     return ManagedDeploymentResponse(
+      isHardened: isHardened ?? this.isHardened,
+      runtimeCredentialId: runtimeCredentialId == unsetCopyWithValue
+          ? this.runtimeCredentialId
+          : runtimeCredentialId as String?,
+      runtimePrincipalType: runtimePrincipalType == unsetCopyWithValue
+          ? this.runtimePrincipalType
+          : runtimePrincipalType as PrincipalType?,
       serviceId: serviceId ?? this.serviceId,
       name: name ?? this.name,
       spec: spec ?? this.spec,
@@ -190,7 +223,10 @@ class ManagedDeploymentResponse {
     if (identical(this, other)) return true;
     if (other is! ManagedDeploymentResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return serviceId == other.serviceId &&
+    return isHardened == other.isHardened &&
+        runtimeCredentialId == other.runtimeCredentialId &&
+        runtimePrincipalType == other.runtimePrincipalType &&
+        serviceId == other.serviceId &&
         name == other.name &&
         spec == other.spec &&
         resources == other.resources &&
@@ -206,7 +242,7 @@ class ManagedDeploymentResponse {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     serviceId,
     name,
     spec,
@@ -218,11 +254,14 @@ class ManagedDeploymentResponse {
     deployedAt,
     deployedBy,
     Object.hash(rolloutStatus, stopped, updatedBy),
-  );
+    isHardened,
+    runtimeCredentialId,
+    runtimePrincipalType,
+  ]);
 
   @override
   String toString() =>
-      'ManagedDeploymentResponse('
+      'ManagedDeploymentResponse(isHardened: $isHardened, runtimeCredentialId: $runtimeCredentialId, runtimePrincipalType: $runtimePrincipalType, '
       'serviceId: $serviceId, '
       'name: $name, '
       'spec: $spec, '

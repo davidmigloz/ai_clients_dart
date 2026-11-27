@@ -32,10 +32,10 @@ class BatchRequest {
       other is BatchRequest &&
           runtimeType == other.runtimeType &&
           customId == other.customId &&
-          mapsEqual(body, other.body);
+          mapsDeepEqual(body, other.body);
 
   @override
-  int get hashCode => Object.hash(customId, mapHash(body));
+  int get hashCode => Object.hash(customId, mapDeepHashCode(body));
 
   @override
   String toString() => 'BatchRequest(customId: $customId)';

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// A single log record emitted by a deployment worker.
@@ -23,8 +24,12 @@ class DeploymentLogRecord {
   /// Additional structured log attributes.
   final Map<String, String> logAttributes;
 
+  /// Resume cursor supplied in the SSE envelope.
+  final String? eventId;
+
   /// Creates a [DeploymentLogRecord].
   DeploymentLogRecord({
+    this.eventId,
     required this.timestamp,
     required this.traceId,
     required this.spanId,
@@ -54,6 +59,7 @@ class DeploymentLogRecord {
       );
     }
     return DeploymentLogRecord(
+      eventId: json['_event_id'] as String?,
       timestamp: require('timestamp'),
       traceId: require('trace_id'),
       spanId: require('span_id'),
@@ -75,6 +81,7 @@ class DeploymentLogRecord {
 
   /// Creates a copy with replaced values.
   DeploymentLogRecord copyWith({
+    Object? eventId = unsetCopyWithValue,
     String? timestamp,
     String? traceId,
     String? spanId,
@@ -83,6 +90,9 @@ class DeploymentLogRecord {
     Map<String, String>? logAttributes,
   }) {
     return DeploymentLogRecord(
+      eventId: eventId == unsetCopyWithValue
+          ? this.eventId
+          : eventId as String?,
       timestamp: timestamp ?? this.timestamp,
       traceId: traceId ?? this.traceId,
       spanId: spanId ?? this.spanId,
@@ -97,7 +107,8 @@ class DeploymentLogRecord {
     if (identical(this, other)) return true;
     if (other is! DeploymentLogRecord) return false;
     if (runtimeType != other.runtimeType) return false;
-    return timestamp == other.timestamp &&
+    return eventId == other.eventId &&
+        timestamp == other.timestamp &&
         traceId == other.traceId &&
         spanId == other.spanId &&
         severityText == other.severityText &&
@@ -106,18 +117,19 @@ class DeploymentLogRecord {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     timestamp,
     traceId,
     spanId,
     severityText,
     body,
     mapHash(logAttributes),
-  );
+    eventId,
+  ]);
 
   @override
   String toString() =>
-      'DeploymentLogRecord('
+      'DeploymentLogRecord(eventId: $eventId, '
       'timestamp: $timestamp, '
       'traceId: $traceId, '
       'spanId: $spanId, '

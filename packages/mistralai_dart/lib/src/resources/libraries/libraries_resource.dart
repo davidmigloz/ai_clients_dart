@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../../models/libraries/entity_type.dart';
 import '../../models/libraries/library.dart';
@@ -12,6 +13,7 @@ import '../../models/libraries/sharing_response.dart';
 import '../../models/libraries/update_document_request.dart';
 import '../../models/libraries/update_library_request.dart';
 import '../base_resource.dart';
+import '../files/files_resource.dart';
 
 /// Resource for managing document libraries (Beta).
 ///
@@ -29,9 +31,10 @@ import '../base_resource.dart';
 /// print('Library ID: ${library.id}');
 ///
 /// // Add a document to the library
-/// final document = await client.libraries.documents.create(
+/// final document = await client.libraries.documents.upload(
 ///   libraryId: library.id,
-///   fileId: 'file-abc123', // Previously uploaded file
+///   bytes: utf8.encode('An excerpt from the documentation.'),
+///   fileName: 'excerpt.txt',
 /// );
 /// print('Document: ${document.name}');
 ///
@@ -64,13 +67,25 @@ class LibrariesResource extends ResourceBase {
   ///
   /// [name] is the name for the library.
   /// [description] is an optional description of the library contents.
-  Future<Library> create({required String name, String? description}) async {
+  /// [chunkSize] is the document chunk size in tokens.
+  /// [ownerType] allows User or Workspace ownership.
+  Future<Library> create({
+    required String name,
+    String? description,
+    int? chunkSize,
+    EntityType? ownerType,
+  }) async {
     final url = requestBuilder.buildUrl('/v1/libraries');
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
 
-    final body = <String, dynamic>{'name': name, 'description': ?description};
+    final body = <String, dynamic>{
+      'name': name,
+      'description': ?description,
+      'chunk_size': ?chunkSize,
+      'owner_type': ?ownerType?.value,
+    };
 
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
@@ -93,12 +108,14 @@ class LibrariesResource extends ResourceBase {
     int? page,
     int? pageSize,
     String? pageToken,
+    String? search,
     bool? filterOwnedByMe,
   }) async {
     final queryParams = <String, String>{
       if (page != null) 'page': page.toString(),
       if (pageSize != null) 'page_size': pageSize.toString(),
       'page_token': ?pageToken,
+      'search': ?search,
       if (filterOwnedByMe != null)
         'filter_owned_by_me': filterOwnedByMe.toString(),
     };
@@ -120,7 +137,9 @@ class LibrariesResource extends ResourceBase {
   ///
   /// [libraryId] is the unique identifier of the library.
   Future<Library> retrieve({required String libraryId}) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId');
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}',
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
@@ -140,7 +159,9 @@ class LibrariesResource extends ResourceBase {
     String? name,
     String? description,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId');
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
@@ -167,7 +188,9 @@ class LibrariesResource extends ResourceBase {
     required String libraryId,
     required UpdateLibraryRequest request,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId');
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
@@ -185,7 +208,9 @@ class LibrariesResource extends ResourceBase {
   ///
   /// [libraryId] is the unique identifier of the library to delete.
   Future<void> delete({required String libraryId}) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId');
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}',
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
@@ -197,7 +222,9 @@ class LibrariesResource extends ResourceBase {
   ///
   /// [libraryId] is the unique identifier of the library.
   Future<SharingList> listSharing({required String libraryId}) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId/share');
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/share',
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
@@ -219,7 +246,9 @@ class LibrariesResource extends ResourceBase {
     required String libraryId,
     required SharingRequest request,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId/share');
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/share',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
@@ -248,7 +277,9 @@ class LibrariesResource extends ResourceBase {
     required EntityType shareWithType,
     String? orgId,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId/share');
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/share',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
@@ -280,33 +311,64 @@ class LibraryDocumentsResource extends ResourceBase {
     super.ensureNotClosed,
   });
 
-  /// Adds a document to a library.
+  /// Uploads a document directly into a library as multipart bytes.
   ///
-  /// [libraryId] is the ID of the library to add the document to.
-  /// [fileId] is the ID of a previously uploaded file to add.
-  /// [documentName] is an optional name for the document.
+  /// Pass the original [fileName] and optionally set [mimeType] for its file
+  /// part. To update document metadata, call [updatePartial] after uploading.
+  Future<LibraryDocument> upload({
+    required String libraryId,
+    required List<int> bytes,
+    required String fileName,
+    String? mimeType,
+  }) async {
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents',
+    );
+    final mediaType = mimeType == null ? null : MediaType.parse(mimeType);
+    http.MultipartRequest buildRequest() => http.MultipartRequest('POST', url)
+      ..headers.addAll(requestBuilder.buildHeaders())
+      ..files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: fileName,
+          contentType: mediaType,
+        ),
+      );
+
+    final response = await interceptorChain.execute(
+      buildRequest(),
+      requestFactory: buildRequest,
+    );
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return LibraryDocument.fromJson(responseBody);
+  }
+
+  /// Copies a previously uploaded file into a library.
+  ///
+  /// Downloads the file and uploads its bytes as a library document. Use
+  /// [upload] directly if you have the bytes. [documentName] overrides
+  /// the uploaded filename.
   Future<LibraryDocument> create({
     required String libraryId,
     required String fileId,
     String? documentName,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId/documents');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+    final files = FilesResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
-
-    final body = <String, dynamic>{
-      'file_id': fileId,
-      'document_name': ?documentName,
-    };
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(body);
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return LibraryDocument.fromJson(responseBody);
+    final file = await files.retrieve(fileId: fileId);
+    final bytes = await files.download(fileId: fileId);
+    return upload(
+      libraryId: libraryId,
+      bytes: bytes,
+      fileName: documentName ?? file.filename,
+      mimeType: file.mimetype,
+    );
   }
 
   /// Lists documents in a library.
@@ -318,14 +380,22 @@ class LibraryDocumentsResource extends ResourceBase {
     required String libraryId,
     int? page,
     int? pageSize,
+    String? search,
+    String? filtersAttributes,
+    String? sortBy,
+    String? sortOrder,
   }) async {
     final queryParams = <String, String>{
       if (page != null) 'page': page.toString(),
       if (pageSize != null) 'page_size': pageSize.toString(),
+      'search': ?search,
+      'filters_attributes': ?filtersAttributes,
+      'sort_by': ?sortBy,
+      'sort_order': ?sortOrder,
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
     final headers = requestBuilder.buildHeaders();
@@ -346,7 +416,7 @@ class LibraryDocumentsResource extends ResourceBase {
     required String documentId,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -368,13 +438,13 @@ class LibraryDocumentsResource extends ResourceBase {
     String? documentName,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
 
-    final body = <String, dynamic>{'document_name': ?documentName};
+    final body = UpdateDocumentRequest(name: documentName).toJson();
 
     final httpRequest = http.Request('PUT', url)
       ..headers.addAll(headers)
@@ -400,7 +470,7 @@ class LibraryDocumentsResource extends ResourceBase {
     required UpdateDocumentRequest request,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -424,7 +494,7 @@ class LibraryDocumentsResource extends ResourceBase {
     required String documentId,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -454,7 +524,7 @@ class LibraryDocumentsResource extends ResourceBase {
       if (pageEnd != null) 'page_end': pageEnd.toString(),
     };
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId/text_content',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}/text_content',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
     final headers = requestBuilder.buildHeaders();
@@ -475,7 +545,7 @@ class LibraryDocumentsResource extends ResourceBase {
     required String documentId,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId/status',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}/status',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -495,15 +565,14 @@ class LibraryDocumentsResource extends ResourceBase {
     required String documentId,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId/signed-url',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}/signed-url',
     );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return responseBody['url'] as String;
+    return _decodeSignedUrl(response.body);
   }
 
   /// Gets a signed URL for the extracted text content.
@@ -515,16 +584,21 @@ class LibraryDocumentsResource extends ResourceBase {
     required String documentId,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId/extracted-text-signed-url',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}/extracted-text-signed-url',
     );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return responseBody['url'] as String;
+    return _decodeSignedUrl(response.body);
   }
+
+  String _decodeSignedUrl(String body) => switch (jsonDecode(body)) {
+    final String url => url,
+    {'url': final String url} => url,
+    _ => throw const FormatException('Expected a library document signed URL.'),
+  };
 
   /// Reprocesses a document.
   ///
@@ -537,7 +611,7 @@ class LibraryDocumentsResource extends ResourceBase {
     required String documentId,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/v1/libraries/$libraryId/documents/$documentId/reprocess',
+      '/v1/libraries/${Uri.encodeComponent(libraryId)}/documents/${Uri.encodeComponent(documentId)}/reprocess',
     );
     final headers = requestBuilder.buildHeaders();
 

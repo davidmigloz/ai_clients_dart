@@ -22,7 +22,7 @@ class DeploymentDetailResponse {
   /// Creation timestamp.
   final String createdAt;
 
-  /// Last update timestamp.
+  /// Last update timestamp. Prefer [lastHeartbeat].
   final String updatedAt;
 
   /// Workers in this deployment.
@@ -31,7 +31,7 @@ class DeploymentDetailResponse {
   /// Whether the deployment is hardened.
   final bool isHardened;
 
-  /// The deployment location.
+  /// Legacy deployment location. Prefer [locations].
   final DeploymentLocation? location;
 
   /// Number of workers currently live within the liveness cutoff.
@@ -47,8 +47,16 @@ class DeploymentDetailResponse {
   /// self-hosted deployments or when managed services are unavailable.
   final ManagedDeploymentResponse? managed;
 
+  /// Most recent heartbeat timestamp.
+  final String lastHeartbeat;
+
+  /// Deployment owner identifier.
+  final String? owner;
+
   /// Creates a [DeploymentDetailResponse].
   DeploymentDetailResponse({
+    String? lastHeartbeat,
+    this.owner,
     required this.id,
     required this.name,
     required this.isActive,
@@ -61,7 +69,8 @@ class DeploymentDetailResponse {
     this.workerCount = 0,
     List<LocationType> locations = const [],
     this.managed,
-  }) : workers = List.unmodifiable(workers),
+  }) : lastHeartbeat = lastHeartbeat ?? updatedAt,
+       workers = List.unmodifiable(workers),
        locations = List.unmodifiable(locations);
 
   /// Creates a [DeploymentDetailResponse] from JSON.
@@ -105,6 +114,8 @@ class DeploymentDetailResponse {
       );
     }
     return DeploymentDetailResponse(
+      lastHeartbeat: json['last_heartbeat'] as String?,
+      owner: json['owner'] as String?,
       id: id,
       name: name,
       isActive: isActive,
@@ -138,6 +149,8 @@ class DeploymentDetailResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    'last_heartbeat': lastHeartbeat,
+    if (owner != null) 'owner': owner,
     'id': id,
     'name': name,
     'is_active': isActive,
@@ -154,6 +167,8 @@ class DeploymentDetailResponse {
 
   /// Creates a copy with replaced values.
   DeploymentDetailResponse copyWith({
+    String? lastHeartbeat,
+    Object? owner = unsetCopyWithValue,
     String? id,
     String? name,
     bool? isActive,
@@ -168,6 +183,8 @@ class DeploymentDetailResponse {
     Object? managed = unsetCopyWithValue,
   }) {
     return DeploymentDetailResponse(
+      lastHeartbeat: lastHeartbeat ?? this.lastHeartbeat,
+      owner: owner == unsetCopyWithValue ? this.owner : owner as String?,
       id: id ?? this.id,
       name: name ?? this.name,
       isActive: isActive ?? this.isActive,
@@ -194,7 +211,9 @@ class DeploymentDetailResponse {
     if (runtimeType != other.runtimeType) return false;
     if (!listsEqual(workers, other.workers)) return false;
     if (!listsEqual(locations, other.locations)) return false;
-    return id == other.id &&
+    return lastHeartbeat == other.lastHeartbeat &&
+        owner == other.owner &&
+        id == other.id &&
         name == other.name &&
         isActive == other.isActive &&
         createdAt == other.createdAt &&
@@ -207,7 +226,7 @@ class DeploymentDetailResponse {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     name,
     isActive,
@@ -219,11 +238,13 @@ class DeploymentDetailResponse {
     activeWorkerCount,
     workerCount,
     Object.hash(listHash(locations), managed),
-  );
+    lastHeartbeat,
+    owner,
+  ]);
 
   @override
   String toString() =>
-      'DeploymentDetailResponse('
+      'DeploymentDetailResponse(lastHeartbeat: $lastHeartbeat, owner: $owner, '
       'id: $id, '
       'name: $name, '
       'isActive: $isActive, '

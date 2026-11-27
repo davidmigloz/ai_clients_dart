@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../models/batch/batch_job.dart';
 import '../../models/batch/batch_job_list.dart';
+import '../../models/batch/batch_job_status.dart';
 import '../../models/batch/create_batch_job_request.dart';
 import '../../models/batch/delete_batch_job_response.dart';
 import '../base_resource.dart';
@@ -45,21 +46,48 @@ class BatchJobsResource extends ResourceBase {
   ///
   /// Optional filters:
   /// - [model] - Filter by model name
-  /// - [status] - Filter by job status
+  /// - [agentId] - Filter by agent ID
+  /// - [status] - Filter by a single wire status
+  /// - [statuses] - Filter by any of several job statuses
+  /// - [metadata] - Filter by metadata entries using exploded form serialization
+  /// - [createdByMe] - Include only jobs created by the caller
+  /// - [orderBy] - Order by `created` (ascending) or `-created` (descending)
   /// - [createdAfter] - Filter jobs created after this date (ISO 8601 format)
   Future<BatchJobList> list({
     int? page,
     int? pageSize,
     String? model,
+    String? agentId,
     String? status,
+    List<BatchJobStatus>? statuses,
+    Map<String, dynamic>? metadata,
     String? createdAfter,
+    bool? createdByMe,
+    String? orderBy,
   }) async {
-    final queryParams = <String, String>{};
-    if (page != null) queryParams['page'] = page.toString();
-    if (pageSize != null) queryParams['page_size'] = pageSize.toString();
-    if (model != null) queryParams['model'] = model;
-    if (status != null) queryParams['status'] = status;
-    if (createdAfter != null) queryParams['created_after'] = createdAfter;
+    if (status != null && statuses != null) {
+      throw ArgumentError('Specify either status or statuses.');
+    }
+    final queryParams = <String, dynamic>{
+      for (final entry in (metadata ?? const <String, dynamic>{}).entries)
+        if (entry.value != null)
+          entry.key: entry.value is String
+              ? entry.value
+              : jsonEncode(entry.value),
+      if (page != null) 'page': page.toString(),
+      if (pageSize != null) 'page_size': pageSize.toString(),
+      'model': ?model,
+      'agent_id': ?agentId,
+      if (status != null)
+        'status': status == 'TIMED_OUT'
+            ? BatchJobStatus.timedOut.value
+            : status,
+      if (statuses != null)
+        'status': [for (final value in statuses) value.value],
+      'created_after': ?createdAfter,
+      if (createdByMe != null) 'created_by_me': createdByMe.toString(),
+      'order_by': ?orderBy,
+    };
 
     final url = requestBuilder.buildUrl(
       '/v1/batch/jobs',
@@ -77,10 +105,8 @@ class BatchJobsResource extends ResourceBase {
 
   /// Creates a new batch job.
   ///
-  /// The [request] must specify:
-  /// - Either [inputFiles] (IDs of input files in JSONL format) or [requests] (inline batch requests)
-  /// - [endpoint] - API endpoint to process requests against (e.g., `/v1/chat/completions`)
-  /// - [model] - Model to use for processing
+  /// Provide input file IDs or inline requests and the endpoint to process.
+  /// Select a model or agent as appropriate for that endpoint.
   ///
   /// Returns the created batch job.
   Future<BatchJob> create({required CreateBatchJobRequest request}) async {
@@ -103,8 +129,12 @@ class BatchJobsResource extends ResourceBase {
   /// Retrieves a specific batch job.
   ///
   /// Returns the job with its current status and progress.
-  Future<BatchJob> retrieve({required String jobId}) async {
-    final url = requestBuilder.buildUrl('/v1/batch/jobs/$jobId');
+  /// Set [inline] to include available result objects in [BatchJob.outputs].
+  Future<BatchJob> retrieve({required String jobId, bool? inline}) async {
+    final url = requestBuilder.buildUrl(
+      '/v1/batch/jobs/${Uri.encodeComponent(jobId)}',
+      queryParams: {if (inline != null) 'inline': inline.toString()},
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
@@ -119,7 +149,9 @@ class BatchJobsResource extends ResourceBase {
   ///
   /// Returns the job with updated status (CANCELLATION_REQUESTED or CANCELLED).
   Future<BatchJob> cancel({required String jobId}) async {
-    final url = requestBuilder.buildUrl('/v1/batch/jobs/$jobId/cancel');
+    final url = requestBuilder.buildUrl(
+      '/v1/batch/jobs/${Uri.encodeComponent(jobId)}/cancel',
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('POST', url)..headers.addAll(headers);
@@ -134,7 +166,9 @@ class BatchJobsResource extends ResourceBase {
   ///
   /// Returns a [DeleteBatchJobResponse] confirming the deletion.
   Future<DeleteBatchJobResponse> delete({required String jobId}) async {
-    final url = requestBuilder.buildUrl('/v1/batch/jobs/$jobId');
+    final url = requestBuilder.buildUrl(
+      '/v1/batch/jobs/${Uri.encodeComponent(jobId)}',
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);

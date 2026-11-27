@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import 'workflow_event_run_context.dart';
 import 'workflow_execution_completed_attributes_response.dart';
 
 /// Workflow execution completed event.
@@ -33,8 +34,24 @@ class WorkflowExecutionCompletedResponse {
   /// The event attributes.
   final WorkflowExecutionCompletedAttributesResponse attributes;
 
+  /// Run and schedule identifiers carried by the event.
+  final WorkflowEventRunContext runContext;
+
+  /// Run that started this chain.
+  String? get chainRunId => runContext.chainRunId;
+
+  /// Run from which this execution continued.
+  String? get continuedRunId => runContext.continuedRunId;
+
+  /// First run of the workflow execution.
+  String? get firstExecutionRunId => runContext.firstExecutionRunId;
+
+  /// The schedule that started the workflow.
+  String? get scheduleId => runContext.scheduleId;
+
   /// Creates a [WorkflowExecutionCompletedResponse].
   const WorkflowExecutionCompletedResponse({
+    this.runContext = const WorkflowEventRunContext(),
     required this.eventId,
     required this.eventTimestamp,
     this.eventType = 'WORKFLOW_EXECUTION_COMPLETED',
@@ -50,6 +67,7 @@ class WorkflowExecutionCompletedResponse {
   factory WorkflowExecutionCompletedResponse.fromJson(
     Map<String, dynamic> json,
   ) => WorkflowExecutionCompletedResponse(
+    runContext: WorkflowEventRunContext.fromJson(json),
     eventId: json['event_id'] as String? ?? '',
     eventTimestamp: json['event_timestamp'] as int? ?? 0,
     eventType: json['event_type'] as String? ?? 'WORKFLOW_EXECUTION_COMPLETED',
@@ -65,6 +83,7 @@ class WorkflowExecutionCompletedResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ...runContext.toJson(),
     'event_id': eventId,
     'event_timestamp': eventTimestamp,
     'event_type': eventType,
@@ -78,6 +97,7 @@ class WorkflowExecutionCompletedResponse {
 
   /// Creates a copy with replaced values.
   WorkflowExecutionCompletedResponse copyWith({
+    WorkflowEventRunContext? runContext,
     String? eventId,
     int? eventTimestamp,
     String? eventType,
@@ -89,6 +109,7 @@ class WorkflowExecutionCompletedResponse {
     WorkflowExecutionCompletedAttributesResponse? attributes,
   }) {
     return WorkflowExecutionCompletedResponse(
+      runContext: runContext ?? this.runContext,
       eventId: eventId ?? this.eventId,
       eventTimestamp: eventTimestamp ?? this.eventTimestamp,
       eventType: eventType ?? this.eventType,
@@ -108,7 +129,8 @@ class WorkflowExecutionCompletedResponse {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionCompletedResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return eventId == other.eventId &&
+    return runContext == other.runContext &&
+        eventId == other.eventId &&
         eventTimestamp == other.eventTimestamp &&
         eventType == other.eventType &&
         rootWorkflowExecId == other.rootWorkflowExecId &&
@@ -120,7 +142,7 @@ class WorkflowExecutionCompletedResponse {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     eventId,
     eventTimestamp,
     eventType,
@@ -130,11 +152,12 @@ class WorkflowExecutionCompletedResponse {
     workflowRunId,
     workflowName,
     attributes,
-  );
+    runContext,
+  ]);
 
   @override
   String toString() =>
-      'WorkflowExecutionCompletedResponse('
+      'WorkflowExecutionCompletedResponse(runContext: $runContext, '
       'eventId: $eventId, '
       'eventTimestamp: $eventTimestamp, '
       'eventType: $eventType, '

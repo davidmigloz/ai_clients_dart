@@ -44,6 +44,12 @@ class Prompt {
   /// Last update time.
   final String? updatedAt;
 
+  /// ID of the prompt's creator.
+  final String? createdBy;
+
+  /// Creation time of the returned version.
+  final String? versionCreatedAt;
+
   /// Creates a [Prompt].
   const Prompt({
     required this.id,
@@ -58,6 +64,8 @@ class Prompt {
     this.sharingScope,
     this.createdAt,
     this.updatedAt,
+    this.createdBy,
+    this.versionCreatedAt,
   });
 
   /// Creates a [Prompt] from JSON.
@@ -78,6 +86,8 @@ class Prompt {
     ),
     createdAt: json['createdAt'] as String?,
     updatedAt: json['updatedAt'] as String?,
+    createdBy: json['createdBy'] as String?,
+    versionCreatedAt: json['versionCreatedAt'] as String?,
   );
 
   /// Converts to JSON.
@@ -94,6 +104,8 @@ class Prompt {
     if (sharingScope != null) 'sharingScope': sharingScope!.value,
     if (createdAt != null) 'createdAt': createdAt,
     if (updatedAt != null) 'updatedAt': updatedAt,
+    'createdBy': ?createdBy,
+    'versionCreatedAt': ?versionCreatedAt,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -112,6 +124,8 @@ class Prompt {
     Object? sharingScope = unsetCopyWithValue,
     Object? createdAt = unsetCopyWithValue,
     Object? updatedAt = unsetCopyWithValue,
+    Object? createdBy = unsetCopyWithValue,
+    Object? versionCreatedAt = unsetCopyWithValue,
   }) => Prompt(
     id: id ?? this.id,
     name: name == unsetCopyWithValue ? this.name : name as String?,
@@ -139,6 +153,12 @@ class Prompt {
     updatedAt: updatedAt == unsetCopyWithValue
         ? this.updatedAt
         : updatedAt as String?,
+    createdBy: createdBy == unsetCopyWithValue
+        ? this.createdBy
+        : createdBy as String?,
+    versionCreatedAt: versionCreatedAt == unsetCopyWithValue
+        ? this.versionCreatedAt
+        : versionCreatedAt as String?,
   );
 
   @override
@@ -157,7 +177,9 @@ class Prompt {
           listsEqual(aliases, other.aliases) &&
           sharingScope == other.sharingScope &&
           createdAt == other.createdAt &&
-          updatedAt == other.updatedAt;
+          updatedAt == other.updatedAt &&
+          createdBy == other.createdBy &&
+          versionCreatedAt == other.versionCreatedAt;
 
   @override
   int get hashCode => Object.hash(
@@ -171,7 +193,10 @@ class Prompt {
     notes,
     listHash(aliases),
     sharingScope,
-    Object.hash(createdAt, updatedAt),
+    createdAt,
+    updatedAt,
+    createdBy,
+    versionCreatedAt,
   );
 
   @override
@@ -179,5 +204,6 @@ class Prompt {
       'Prompt(id: $id, name: $name, title: $title, description: $description, '
       'latestVersion: $latestVersion, version: $version, definition: $definition, '
       'notes: $notes, aliases: $aliases, sharingScope: $sharingScope, '
-      'createdAt: $createdAt, updatedAt: $updatedAt)';
+      'createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, '
+      'versionCreatedAt: $versionCreatedAt)';
 }

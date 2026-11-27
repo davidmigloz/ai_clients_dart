@@ -12,7 +12,7 @@ import 'runs_resource.dart';
 import 'schedules_resource.dart';
 import 'workflow_core_resource.dart';
 
-/// Resource for Workflows API operations (beta).
+/// Resource for Workflows API operations.
 ///
 /// Provides access to all workflow sub-resources for managing workflows,
 /// executions, deployments, events, registrations, runs, schedules, and

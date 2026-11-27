@@ -47,11 +47,16 @@ class PromptsResource extends ResourceBase {
   /// [pageToken] is the pagination cursor from a previous response.
   /// [alias] filters to prompts that have this alias registered.
   /// [fields] restricts the response to the given top-level fields.
+  ///
+  /// [sortBy] is `created_at`, `last_modified_at`, `name`, or `title`.
+  /// [sortDirection] is `asc` or `desc`.
   Future<ListPromptsResponse> list({
     int? pageSize,
     String? pageToken,
     String? alias,
     List<String>? fields,
+    String? sortBy,
+    String? sortDirection,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
@@ -59,6 +64,8 @@ class PromptsResource extends ResourceBase {
       'pageToken': ?pageToken,
       'alias': ?alias,
       'fields': ?fields,
+      'sort_by': ?sortBy,
+      'sort_direction': ?sortDirection,
     };
 
     final url = requestBuilder.buildUrl(
