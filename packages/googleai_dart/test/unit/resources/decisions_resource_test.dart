@@ -88,7 +88,11 @@ void main() {
                   'confidence': 0.8,
                 },
               },
-              'usage': {'total_input_tokens': 12, 'total_output_tokens': 0},
+              'usage': {
+                'total_input_tokens': 12,
+                'initial_input_tokens': 10,
+                'total_output_tokens': 0,
+              },
               'prompt_feedback': {
                 'block_reason_message': 'Message in español.',
               },
@@ -110,6 +114,12 @@ void main() {
       ),
     );
     expect(response.usage?.totalInputTokens, 12);
+    expect(response.usage?.initialInputTokens, 10);
+    expect(response.usage?.toJson()['initial_input_tokens'], 10);
+    expect(
+      response.usage?.copyWith(initialInputTokens: null).initialInputTokens,
+      isNull,
+    );
     expect(response.promptFeedback?.blockReasonMessage, 'Message in español.');
   });
 
@@ -131,6 +141,29 @@ void main() {
             .having((error) => error.message, 'message', 'Prompt blocked'),
       ),
     );
+  });
+
+  test('decodes a successful response with blocked prompt feedback', () async {
+    final client = _client(
+      MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'answers': <String, dynamic>{},
+            'prompt_feedback': {
+              'block_reason': 'safety',
+              'block_reason_message': 'Prompt blocked',
+            },
+          }),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        ),
+      ),
+    );
+
+    final response = await _create(client);
+    expect(response.answers, isEmpty);
+    expect(response.promptFeedback?.blockReason, DecisionBlockReason.safety);
+    expect(response.promptFeedback?.blockReasonMessage, 'Prompt blocked');
   });
 
   test('rejects stable Developer API and Vertex before sending', () async {
