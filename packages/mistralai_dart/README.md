@@ -69,7 +69,7 @@ Requires Dart 3.12 or later. See the [Migration Guide](MIGRATION.md) for upgrade
 
 ```yaml
 dependencies:
-  mistralai_dart: ^8.3.0
+  mistralai_dart: ^9.0.0
 ```
 
 ```dart

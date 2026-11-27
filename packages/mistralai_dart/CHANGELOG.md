@@ -1,3 +1,34 @@
+## 9.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+The client now supports stateless generation and input token counts through the [Responses API](https://docs.mistral.ai/inference/conversations/responses).
+Use [Managed Search](https://docs.mistral.ai/resources/release-note/2026-10-30-managed-search-index-a-managed-vector-index-for-agents-and-workflows) to index and query documents and [Voxtral 3](https://docs.mistral.ai/resources/release-note/2026-10-20-voxtral-3-audio-family-release) to transcribe audio with speaker labels and segment timestamps.
+When upgrading, update callers that read `DeltaContent.content` as a string or expect every library share deletion to return a record.
+
+- **BREAKING** **FEAT**: Add HTTP connectors and scoped credentials. Use PATCH for credential upserts ([#629](https://github.com/davidmigloz/ai_clients_dart/issues/629)). ([248dd9a9](https://github.com/davidmigloz/ai_clients_dart/commit/248dd9a9c074d4b670cea7a4ab4a46767660f649))
+- **BREAKING** **FEAT**: Add Observability evaluations, scorers, and OpenTelemetry trace queries ([#623](https://github.com/davidmigloz/ai_clients_dart/issues/623)). ([49c3e60f](https://github.com/davidmigloz/ai_clients_dart/commit/49c3e60f2769c9831ed74ddab6a6ec40dd36056a))
+- **BREAKING** **FEAT**: Use the current Agents and Conversations routes and stream typed conversation events ([#621](https://github.com/davidmigloz/ai_clients_dart/issues/621)). ([5ca1f78f](https://github.com/davidmigloz/ai_clients_dart/commit/5ca1f78f1672c750569fa8a5c7da9f65070289ff))
+- **BREAKING** **FEAT**: Support OCR 4.1 block confidence, multimodal embeddings, and classifier target scores ([#619](https://github.com/davidmigloz/ai_clients_dart/issues/619)). ([efeef83f](https://github.com/davidmigloz/ai_clients_dart/commit/efeef83ff42c27bd979a85f4fdc7a8372fa9eae1))
+- **BREAKING** **FEAT**: Add workflow deployment archives, worker listing, and tags. Update deployment build settings ([#617](https://github.com/davidmigloz/ai_clients_dart/issues/617)). ([ac90e2f9](https://github.com/davidmigloz/ai_clients_dart/commit/ac90e2f93e08d5e431c121ad7e1d9491108e6ac9))
+- **BREAKING** **FEAT**: Update file uploads and signed URLs, agent-based batches, libraries, and model registries ([#614](https://github.com/davidmigloz/ai_clients_dart/issues/614)). ([2d4676de](https://github.com/davidmigloz/ai_clients_dart/commit/2d4676de00043640b11d77b0901b65aeebda4f59))
+- **BREAKING** **FEAT**: Add Voxtral 3 transcription and speech controls, voice search, and WAV sample downloads ([#615](https://github.com/davidmigloz/ai_clients_dart/issues/615)). ([6ce6a260](https://github.com/davidmigloz/ai_clients_dart/commit/6ce6a2607d35d8a0245065322b2d238c5a571484))
+- **BREAKING** **FEAT**: Add completion controls and log probabilities, and decode structured FIM output ([#613](https://github.com/davidmigloz/ai_clients_dart/issues/613)). ([278b7f59](https://github.com/davidmigloz/ai_clients_dart/commit/278b7f593bbe04012604968cd6ab46999f89d1de))
+- **BREAKING** **FIX**: Return `null` when a library share deletion succeeds with HTTP 204 ([#631](https://github.com/davidmigloz/ai_clients_dart/issues/631)). ([84640a4a](https://github.com/davidmigloz/ai_clients_dart/commit/84640a4a88c8f7cad29cbf8193d269150f2c8011))
+- **BREAKING** **FIX**: Decode content lists in streamed deltas and expose answer text through `chunk.text` ([#594](https://github.com/davidmigloz/ai_clients_dart/issues/594)). ([78c1c7b1](https://github.com/davidmigloz/ai_clients_dart/commit/78c1c7b1ad8448f752d02a98850a46ae9e5f933d))
+- **FEAT**: Add Admin billing, workspace API keys, audit events, and Vibe usage analytics ([#626](https://github.com/davidmigloz/ai_clients_dart/issues/626)). ([dabdc23c](https://github.com/davidmigloz/ai_clients_dart/commit/dabdc23cc5d6b9800d609474da786f2d03f0d692))
+- **FEAT**: Manage Voice Agents and hosted audio sessions with room credentials and signed lifecycle webhooks ([#624](https://github.com/davidmigloz/ai_clients_dart/issues/624)). ([8d34cff6](https://github.com/davidmigloz/ai_clients_dart/commit/8d34cff6e22f0eb068d20c6faee8b5c0d5cb12a3))
+- **FEAT**: Add caller identity, workspace service accounts, and workflow event sources ([#625](https://github.com/davidmigloz/ai_clients_dart/issues/625)). ([340d1fe1](https://github.com/davidmigloz/ai_clients_dart/commit/340d1fe125d2b6ed57f7a869dec558a1fd65d131))
+- **FEAT**: Add an Enterprise Admin client for users, workspaces, groups, roles, and SCIM ([#622](https://github.com/davidmigloz/ai_clients_dart/issues/622)). ([df2da04c](https://github.com/davidmigloz/ai_clients_dart/commit/df2da04c865d308a7cc59f205410d8157f132647))
+- **FEAT**: Add realtime Voxtral transcription and speech over WebSockets ([#620](https://github.com/davidmigloz/ai_clients_dart/issues/620)). ([f6a85276](https://github.com/davidmigloz/ai_clients_dart/commit/f6a85276c0080e9be0c499537b53334dcdf8be33))
+- **FEAT**: Add stateless Responses, typed stream events, and input token counts ([#618](https://github.com/davidmigloz/ai_clients_dart/issues/618)). ([3c82395c](https://github.com/davidmigloz/ai_clients_dart/commit/3c82395c63d34cbee1cdab2427273cf1fe2836c2))
+- **FEAT**: Create and query Managed Search indexes, ingest documents, and stream summaries ([#616](https://github.com/davidmigloz/ai_clients_dart/issues/616)). ([95a183ba](https://github.com/davidmigloz/ai_clients_dart/commit/95a183baa8d42f26e0ab7143800dc2a9450002a3))
+- **FIX**: Decode Admin member statuses and workspace page object types as enums ([#634](https://github.com/davidmigloz/ai_clients_dart/issues/634)). ([e8d7244b](https://github.com/davidmigloz/ai_clients_dart/commit/e8d7244b0614b2673f67a1f323c8be875daa7aca))
+- **FIX**: Send classifier requests to `/v1/classifications` and `/v1/chat/classifications` ([#633](https://github.com/davidmigloz/ai_clients_dart/issues/633)). ([4ef0ce39](https://github.com/davidmigloz/ai_clients_dart/commit/4ef0ce39a7a3324bbb5dc211ad79dadbe669afd9))
+- **FIX**: Redact webhook verification tokens from workflow trigger errors ([#632](https://github.com/davidmigloz/ai_clients_dart/issues/632)). ([5cceadce](https://github.com/davidmigloz/ai_clients_dart/commit/5cceadce343498ef09c371f9fda323b1be35b4dc))
+- **FIX**: Return typed validation errors for Managed Search queries ([#630](https://github.com/davidmigloz/ai_clients_dart/issues/630)). ([1293dedd](https://github.com/davidmigloz/ai_clients_dart/commit/1293dedd5497bb4aaa10135cad8833b4f3a9f8b8))
+
 ## 8.3.0
 
 Adds optional `abortTrigger` parameters across chat, FIM, agents, speech, transcription, RAG summaries and workflow streams. Abort signals and listener cancellation now interrupt pending authentication, response headers and stalled SSE/NDJSON bodies, while preserving shared HTTP clients and successful connection reuse.

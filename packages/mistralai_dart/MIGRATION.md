@@ -8,7 +8,9 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Migrating from v8.x to v9.0.0
 
-v9.0.0 changes `DeltaContent.content` from `String?` to `MessageContent?`. Mistral can stream content as a list of chunks, for example while a reasoning model is thinking, which previously threw a type error. This affects streamed deltas and `ChatChoice.messages`.
+`DeltaContent.content` changes from `String?` to `MessageContent?` in
+streamed deltas and `ChatChoice.messages`. The v8 client could throw a type
+error when Mistral streamed a list of chunks during reasoning.
 
 Before:
 
@@ -29,7 +31,8 @@ if (content is MessagePartsContent) {
 }
 ```
 
-When building a `DeltaContent` yourself, wrap strings: `DeltaContent(content: MessageContent.text('Hi'))`.
+Wrap strings when you construct a `DeltaContent`. For a text delta, use
+`DeltaContent(content: MessageContent.text('Hi'))`.
 
 `delta.copyWith(content: 'Hi')` still accepts a plain string. You can also pass a `MessageContent` value to replace the content or `null` to clear it.
 
@@ -112,8 +115,8 @@ seconds and rounds up to whole hours. Both use a GET request.
 
 ### Use the current storage wire values
 
-Check timed-out batches using the enum rather than comparing the serialized
-status. The decoder still accepts the previous `TIMED_OUT` spelling.
+Use the enum to check for timed-out batches. The decoder still accepts the
+previous `TIMED_OUT` spelling.
 
 Before:
 
@@ -136,8 +139,8 @@ timestamps. Add branches for `BatchJobStatus.unknown`,
 if your code switches exhaustively on those enums.
 
 `BatchJob`, `CreateBatchJobRequest`, `Library`, `LibraryDocument`, and
-`FileList` equality now compares their data. Compare identifiers explicitly
-when matching resource identity.
+`FileList` now compare field values. Compare IDs to check whether two
+objects refer to the same resource.
 
 Before:
 
@@ -235,6 +238,10 @@ final count = switch (input) {
 
 ### Read classifier targets
 
+If your proxy or HTTP mocks match request paths, replace `/v1/classifiers`
+and `/v1/chat/classifiers` with `/v1/classifications` and
+`/v1/chat/classifications`.
+
 `ChatClassificationRequest(input: messages)` now sends
 `{"input":{"messages":[...]}}`. `ChatClassificationRequest.batch` sends
 one such envelope per conversation. Dart also reads previously stored flat
@@ -249,8 +256,11 @@ final targets = response.results.first.targets;
 final billingScore = targets['topic']?.scores['billing'];
 ```
 
-Use the target and label names configured on your classifier.
-`client.moderations` provides safety flags and model-defined category scores.
+Use the target and label names configured on your classifier. The
+`categories`, `categoryScores`, and `flagged` fields describe legacy
+moderation-shaped responses. For current classifier responses, those fields
+contain no scores or flags. Use `client.moderations` for safety flags and
+model-defined category scores.
 
 ### Voxtral transcription timing
 
@@ -317,10 +327,9 @@ Switch from `list(limit: 10, offset: 0)` to `search(pageSize: 10)` and pass
 
 ### Managed Workflow Deployments
 
-Create and update requests use `repositoryUrl` or `archiveId` for the build
-source and a backend spec for build settings. Deployments configure the
-entrypoint and working directory in their Dockerfile. Managed resource
-settings on the API now accept `replicas`.
+Set `repositoryUrl` or `archiveId` to choose a build source. Set build
+options in the backend spec. Set the entrypoint and working directory in
+the Dockerfile. Managed resource settings now accept `replicas`.
 
 Before
 
@@ -428,10 +437,10 @@ final payload = FunctionResultEntry(callId: callId, result: 'OK').toJson();
 
 ### Use the current Observability resources
 
-Mistral’s November public snapshot exposes OpenTelemetry traces, scorers,
-and live evaluation pipelines. Earlier campaign, judge, and chat completion
-event routes are historical. Check availability on your deployment before
-calling those compatibility methods.
+Mistral’s November API snapshot includes OpenTelemetry traces, scorers,
+and live evaluation pipelines. Check whether your deployment supports the
+earlier campaign, judge, and chat completion event routes before you call
+the compatibility methods.
 
 ```dart
 // Before
@@ -445,7 +454,9 @@ for (final scorer in scorers.scorers.results) {
 ```
 
 Add `DatasetRecordSource.telemetrySpan` to exhaustive switches over dataset
-record sources. When replacing a historical event importer, use
+record sources. Update exhaustive switches over `ObservabilityErrorCode`
+to handle the new codes, such as `pipelineNotFound` and `scorerNotFound`.
+When replacing a historical event importer, use
 `datasets.importFromSpans` with trace/span IDs and a mapping of attributes
 to dataset record keys. Current datasets report slugs and principal types.
 [Observability guide](https://docs.mistral.ai/studio/observability)
