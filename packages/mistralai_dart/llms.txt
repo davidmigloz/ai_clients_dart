@@ -49,6 +49,7 @@
 - [workflow_trigger_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflow_trigger_example.dart) — Inbound provider webhooks and workflow trigger events.
 
 - [admin_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/admin_example.dart): Organization roles and workspaces using an Enterprise Preview Admin API key.
+- [admin_usage_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/admin_usage_example.dart): Read-only organization usage, key inventory, audit activity, and Vibe analytics.
 
 ## Optional
 

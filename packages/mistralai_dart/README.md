@@ -53,7 +53,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - RAG ingestion pipeline configuration (beta)
 - Caller identity, user memberships, service accounts, and billing (beta)
 - Triggers and webhook event sources for deployed workflows (beta)
-- Organization users, groups, workspaces, roles, and SCIM (Admin API Enterprise Preview)
+- Organization directory, SCIM, usage, limits, audit logs, API keys, and Vibe analytics (Admin API Enterprise Preview)
 
 ## Why choose this client?
 
@@ -1585,6 +1585,35 @@ synchronization endpoints.
 
 </details>
 
+### How do I read Admin usage and audit activity?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `admin.usage` to read monthly usage and pricing, query grouped usage, and
+manage spend limits. Use Admin audit logs to filter activity by actor, event,
+target, and time. Admin API keys can list, create, and delete workspace keys.
+Treat the key returned on creation as a secret.
+
+```dart
+final usage = await admin.usage.getMonthly(apiZone: AdminApiZone.eu);
+final events = await admin.auditLogs.list(
+  actorType: [AdminAuditActorType.human],
+  limit: 10,
+);
+print('Usage period: ${usage.startDate} to ${usage.endDate}');
+print('Recent user events: ${events.length}');
+```
+
+Admin Vibe analytics return Vibe Code metrics by organization or workspace,
+and Vibe Work metrics by agent, time, or user. Pass Unix timestamps in
+seconds for the query window. Enterprise Preview access and product
+permissions apply.
+
+[Read-only Admin usage example](example/admin_usage_example.dart) · [Admin API authentication](https://docs.mistral.ai/admin/admin-api/authentication)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -1662,6 +1691,7 @@ See the [example/](example/) directory for complete examples:
 | [`platform_identity_example.dart`](example/platform_identity_example.dart) | Caller identity, memberships, billing, and workspace roles |
 | [`workflow_trigger_example.dart`](example/workflow_trigger_example.dart) | Provider webhook setup and workflow trigger events |
 | [`admin_example.dart`](example/admin_example.dart) | Organization roles and workspaces (Enterprise Preview) |
+| [`admin_usage_example.dart`](example/admin_usage_example.dart) | Usage, audit logs, workspace key inventory, and Vibe analytics (Enterprise Preview) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`config_example.dart`](example/config_example.dart) | Client configuration options |
@@ -1704,6 +1734,7 @@ See the [example/](example/) directory for complete examples:
 | Billing (Beta) | Dashboard budget and subscription |
 | Triggers and webhooks (Beta) | Inbound event sources, trigger rules, and recent events |
 | Admin Directory | Enterprise Preview |
+| Admin Usage, Audit Logs, API Keys, and Vibe analytics | Enterprise Preview |
 
 ## Official Documentation
 
