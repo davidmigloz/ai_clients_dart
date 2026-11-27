@@ -1,7 +1,6 @@
 import '../client/mistral_client.dart';
 import '../errors/exceptions.dart';
 import '../models/batch/batch_job.dart';
-import '../models/batch/batch_job_status.dart';
 
 /// Poller for long-running batch jobs.
 ///
@@ -16,7 +15,7 @@ import '../models/batch/batch_job_status.dart';
 ///   jobId: job.id,
 /// );
 /// final completed = await poller.poll();
-/// print('Output file: ${completed.outputFile}');
+/// print('Output file: ${completed.outputFileId}');
 /// ```
 
 /// Poller for batch jobs.
@@ -52,49 +51,44 @@ class BatchJobPoller {
   /// Throws an [ApiException] if the job fails.
   /// Throws a [TimeoutException] if polling times out.
   Future<BatchJob> poll() async {
-    final startTime = DateTime.now();
+    final clock = Stopwatch()..start();
+    final limit = timeout;
+
+    TimeoutException deadlineExceeded() => TimeoutException(
+      message: 'Batch job polling timed out after ${limit!.inMilliseconds}ms',
+      timeout: limit,
+      elapsed: clock.elapsed,
+    );
 
     while (true) {
-      final job = await client.batch.jobs.retrieve(jobId: jobId);
+      final remaining = limit == null ? null : limit - clock.elapsed;
+      if (remaining != null && remaining <= Duration.zero) {
+        throw deadlineExceeded();
+      }
 
-      // Notify progress
+      final request = client.batch.jobs.retrieve(jobId: jobId);
+      final job = remaining == null
+          ? await request
+          : await request.timeout(
+              remaining,
+              onTimeout: () => throw deadlineExceeded(),
+            );
       onProgress?.call(job);
 
-      if (_isTerminalState(job.status)) {
-        if (job.status == BatchJobStatus.success) {
-          return job;
-        }
-
-        // Job failed
+      if (job.isSuccess) return job;
+      if (job.isComplete) {
         throw ApiException(
           statusCode: 400,
-          message: 'Batch job failed with status: ${job.status}',
+          message: 'Batch job failed with status: ${job.status.value}',
           details: [for (final error in job.errors) ?error.message],
         );
       }
 
-      // Check timeout
-      if (timeout != null) {
-        final elapsed = DateTime.now().difference(startTime);
-        if (elapsed > timeout!) {
-          throw TimeoutException(
-            message: 'Batch job polling timed out after ${timeout!.inSeconds}s',
-            timeout: timeout!,
-            elapsed: elapsed,
-          );
-        }
-      }
-
-      // Wait before next poll
-      await Future<void>.delayed(pollInterval);
+      final afterProgress = limit == null ? null : limit - clock.elapsed;
+      final wait = afterProgress != null && afterProgress < pollInterval
+          ? afterProgress
+          : pollInterval;
+      if (wait > Duration.zero) await Future<void>.delayed(wait);
     }
-  }
-
-  bool _isTerminalState(BatchJobStatus status) {
-    return status == BatchJobStatus.success ||
-        status == BatchJobStatus.failed ||
-        status == BatchJobStatus.cancelled ||
-        status == BatchJobStatus.timedOut ||
-        status == BatchJobStatus.cancellationRequested;
   }
 }

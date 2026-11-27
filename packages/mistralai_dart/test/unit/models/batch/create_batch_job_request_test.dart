@@ -284,7 +284,7 @@ void main() {
     });
 
     group('equality', () {
-      test('requests with same key fields are equal', () {
+      test('requests with different timeout settings are distinct', () {
         const request1 = CreateBatchJobRequest(
           inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
@@ -294,11 +294,10 @@ void main() {
           inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
-          timeoutHours: 24, // Different but not part of equality
+          timeoutHours: 24,
         );
 
-        expect(request1, equals(request2));
-        expect(request1.hashCode, equals(request2.hashCode));
+        expect(request1, isNot(equals(request2)));
       });
 
       test('requests with different fields are not equal', () {

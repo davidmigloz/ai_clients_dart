@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../registry/registry_share_relation.dart';
 import '../registry/registry_sharing_scope.dart';
 import 'prompt_definition.dart';
 
@@ -26,6 +27,11 @@ class CreatePromptRequest {
   /// Registry sharing scope.
   final RegistrySharingScope? sharingScope;
 
+  /// Workspace members' access when [sharingScope] is workspace.
+  ///
+  /// The API defaults to writer access when omitted.
+  final RegistryShareRelation? workspaceRelation;
+
   /// Aliases pointing to this version.
   final List<String>? aliases;
 
@@ -37,6 +43,7 @@ class CreatePromptRequest {
     this.description,
     this.notes,
     this.sharingScope,
+    this.workspaceRelation,
     this.aliases,
   });
 
@@ -61,6 +68,9 @@ class CreatePromptRequest {
       sharingScope: RegistrySharingScope.fromString(
         json['sharingScope'] as String?,
       ),
+      workspaceRelation: RegistryShareRelation.fromString(
+        json['workspaceRelation'] as String?,
+      ),
       aliases: (json['aliases'] as List?)?.map((e) => e as String).toList(),
     );
   }
@@ -73,6 +83,7 @@ class CreatePromptRequest {
     if (description != null) 'description': description,
     if (notes != null) 'notes': notes,
     if (sharingScope != null) 'sharingScope': sharingScope!.value,
+    'workspaceRelation': ?workspaceRelation?.value,
     if (aliases != null) 'aliases': aliases,
   };
 
@@ -86,6 +97,7 @@ class CreatePromptRequest {
     Object? description = unsetCopyWithValue,
     Object? notes = unsetCopyWithValue,
     Object? sharingScope = unsetCopyWithValue,
+    Object? workspaceRelation = unsetCopyWithValue,
     Object? aliases = unsetCopyWithValue,
   }) => CreatePromptRequest(
     name: name ?? this.name,
@@ -98,6 +110,9 @@ class CreatePromptRequest {
     sharingScope: sharingScope == unsetCopyWithValue
         ? this.sharingScope
         : sharingScope as RegistrySharingScope?,
+    workspaceRelation: workspaceRelation == unsetCopyWithValue
+        ? this.workspaceRelation
+        : workspaceRelation as RegistryShareRelation?,
     aliases: aliases == unsetCopyWithValue
         ? this.aliases
         : aliases as List<String>?,
@@ -114,6 +129,7 @@ class CreatePromptRequest {
           description == other.description &&
           notes == other.notes &&
           sharingScope == other.sharingScope &&
+          workspaceRelation == other.workspaceRelation &&
           listsEqual(aliases, other.aliases);
 
   @override
@@ -124,6 +140,7 @@ class CreatePromptRequest {
     description,
     notes,
     sharingScope,
+    workspaceRelation,
     listHash(aliases),
   );
 
@@ -131,5 +148,5 @@ class CreatePromptRequest {
   String toString() =>
       'CreatePromptRequest(name: $name, definition: $definition, title: $title, '
       'description: $description, notes: $notes, sharingScope: $sharingScope, '
-      'aliases: $aliases)';
+      'workspaceRelation: $workspaceRelation, aliases: $aliases)';
 }

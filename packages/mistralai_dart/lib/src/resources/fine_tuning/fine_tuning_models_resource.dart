@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../models/fine_tuning/archive_ft_model_response.dart';
 import '../../models/fine_tuning/ft_model_out.dart';
+import '../../models/fine_tuning/update_ft_model_request.dart';
 import '../base_resource.dart';
 
 /// Resource for managing fine-tuned models.
@@ -45,21 +46,32 @@ class FineTuningModelsResource extends ResourceBase {
   /// [modelId] is the ID of the fine-tuned model to update.
   /// [name] is the new name for the model.
   /// [description] is the new description for the model.
+  /// Set [clearName] or [clearDescription] to send an explicit JSON null for
+  /// that field. Omit both the value and its flag to leave it unchanged.
   Future<FTModelOut> update({
     required String modelId,
     String? name,
     String? description,
+    bool clearName = false,
+    bool clearDescription = false,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/fine_tuning/models/$modelId');
+    final url = requestBuilder.buildUrl(
+      '/v1/fine_tuning/models/${Uri.encodeComponent(modelId)}',
+    );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
 
-    final body = <String, dynamic>{'name': ?name, 'description': ?description};
+    final body = UpdateFTModelRequest(
+      name: name,
+      description: description,
+      clearName: clearName,
+      clearDescription: clearDescription,
+    );
 
     final httpRequest = http.Request('PATCH', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(body);
+      ..body = jsonEncode(body.toJson());
 
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -74,7 +86,7 @@ class FineTuningModelsResource extends ResourceBase {
   /// [modelId] is the ID of the fine-tuned model to archive.
   Future<ArchiveFTModelResponse> archive({required String modelId}) async {
     final url = requestBuilder.buildUrl(
-      '/v1/fine_tuning/models/$modelId/archive',
+      '/v1/fine_tuning/models/${Uri.encodeComponent(modelId)}/archive',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -92,7 +104,7 @@ class FineTuningModelsResource extends ResourceBase {
   /// [modelId] is the ID of the fine-tuned model to unarchive.
   Future<ArchiveFTModelResponse> unarchive({required String modelId}) async {
     final url = requestBuilder.buildUrl(
-      '/v1/fine_tuning/models/$modelId/archive',
+      '/v1/fine_tuning/models/${Uri.encodeComponent(modelId)}/archive',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -100,6 +112,9 @@ class FineTuningModelsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return ArchiveFTModelResponse.fromJson(responseBody);
+    return ArchiveFTModelResponse.fromJson(
+      responseBody,
+      defaultArchived: false,
+    );
   }
 }

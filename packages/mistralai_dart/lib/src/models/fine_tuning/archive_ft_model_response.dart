@@ -19,13 +19,15 @@ class ArchiveFTModelResponse {
     required this.archived,
   });
 
-  /// Creates from JSON.
-  factory ArchiveFTModelResponse.fromJson(Map<String, dynamic> json) =>
-      ArchiveFTModelResponse(
-        id: json['id'] as String,
-        object: json['object'] as String? ?? 'model',
-        archived: json['archived'] as bool,
-      );
+  /// Creates from JSON. Use [defaultArchived] matching the operation.
+  factory ArchiveFTModelResponse.fromJson(
+    Map<String, dynamic> json, {
+    bool defaultArchived = true,
+  }) => ArchiveFTModelResponse(
+    id: json['id'] as String,
+    object: json['object'] as String? ?? 'model',
+    archived: json['archived'] as bool? ?? defaultArchived,
+  );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

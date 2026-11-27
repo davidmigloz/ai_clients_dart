@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../registry/registry_share_relation.dart';
 import '../registry/registry_sharing_scope.dart';
 import 'skill_definition.dart';
 
@@ -20,6 +21,11 @@ class CreateSkillRequest {
   /// Registry sharing scope.
   final RegistrySharingScope? sharingScope;
 
+  /// Workspace members' access when [sharingScope] is workspace.
+  ///
+  /// The API defaults to writer access when omitted.
+  final RegistryShareRelation? workspaceRelation;
+
   /// Aliases pointing to this version.
   final List<String>? aliases;
 
@@ -29,6 +35,7 @@ class CreateSkillRequest {
     required this.definition,
     this.notes,
     this.sharingScope,
+    this.workspaceRelation,
     this.aliases,
   });
 
@@ -51,6 +58,9 @@ class CreateSkillRequest {
       sharingScope: RegistrySharingScope.fromString(
         json['sharingScope'] as String?,
       ),
+      workspaceRelation: RegistryShareRelation.fromString(
+        json['workspaceRelation'] as String?,
+      ),
       aliases: (json['aliases'] as List?)?.map((e) => e as String).toList(),
     );
   }
@@ -61,6 +71,7 @@ class CreateSkillRequest {
     'definition': definition.toJson(),
     if (notes != null) 'notes': notes,
     if (sharingScope != null) 'sharingScope': sharingScope!.value,
+    'workspaceRelation': ?workspaceRelation?.value,
     if (aliases != null) 'aliases': aliases,
   };
 
@@ -72,6 +83,7 @@ class CreateSkillRequest {
     SkillDefinition? definition,
     Object? notes = unsetCopyWithValue,
     Object? sharingScope = unsetCopyWithValue,
+    Object? workspaceRelation = unsetCopyWithValue,
     Object? aliases = unsetCopyWithValue,
   }) => CreateSkillRequest(
     name: name ?? this.name,
@@ -80,6 +92,9 @@ class CreateSkillRequest {
     sharingScope: sharingScope == unsetCopyWithValue
         ? this.sharingScope
         : sharingScope as RegistrySharingScope?,
+    workspaceRelation: workspaceRelation == unsetCopyWithValue
+        ? this.workspaceRelation
+        : workspaceRelation as RegistryShareRelation?,
     aliases: aliases == unsetCopyWithValue
         ? this.aliases
         : aliases as List<String>?,
@@ -94,14 +109,21 @@ class CreateSkillRequest {
           definition == other.definition &&
           notes == other.notes &&
           sharingScope == other.sharingScope &&
+          workspaceRelation == other.workspaceRelation &&
           listsEqual(aliases, other.aliases);
 
   @override
-  int get hashCode =>
-      Object.hash(name, definition, notes, sharingScope, listHash(aliases));
+  int get hashCode => Object.hash(
+    name,
+    definition,
+    notes,
+    sharingScope,
+    workspaceRelation,
+    listHash(aliases),
+  );
 
   @override
   String toString() =>
       'CreateSkillRequest(name: $name, definition: $definition, notes: $notes, '
-      'sharingScope: $sharingScope, aliases: $aliases)';
+      'sharingScope: $sharingScope, workspaceRelation: $workspaceRelation, aliases: $aliases)';
 }

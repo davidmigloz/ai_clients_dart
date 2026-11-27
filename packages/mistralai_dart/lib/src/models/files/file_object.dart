@@ -12,8 +12,8 @@ class FileObject {
   /// The object type (always "file").
   final String object;
 
-  /// Size of the file in bytes.
-  final int bytes;
+  /// Size of the file in bytes, when returned by the API.
+  final int? bytes;
 
   /// Unix timestamp of when the file was created.
   final int createdAt;
@@ -70,7 +70,7 @@ class FileObject {
   factory FileObject.fromJson(Map<String, dynamic> json) => FileObject(
     id: json['id'] as String? ?? '',
     object: json['object'] as String? ?? 'file',
-    bytes: json['bytes'] as int? ?? 0,
+    bytes: json['bytes'] as int?,
     createdAt: json['created_at'] as int? ?? 0,
     filename: json['filename'] as String? ?? '',
     purpose: filePurposeFromString(json['purpose'] as String?),
