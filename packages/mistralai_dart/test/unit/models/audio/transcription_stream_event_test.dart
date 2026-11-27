@@ -165,7 +165,7 @@ void main() {
         const event = TranscriptionStreamEvent(type: 'text', text: 'Hello');
         expect(
           event.toString(),
-          'TranscriptionStreamEvent(type: text, text: Hello)',
+          contains('TranscriptionStreamEvent(type: text, text: Hello,'),
         );
       });
 
@@ -173,7 +173,7 @@ void main() {
         const event = TranscriptionStreamEvent(type: 'done');
         expect(
           event.toString(),
-          'TranscriptionStreamEvent(type: done, text: null)',
+          contains('TranscriptionStreamEvent(type: done, text: null,'),
         );
       });
     });

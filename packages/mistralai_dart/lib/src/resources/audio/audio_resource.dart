@@ -18,7 +18,7 @@ import 'voices_resource.dart';
 /// final response = await client.audio.transcriptions.create(
 ///   request: TranscriptionRequest(
 ///     file: audioFile.id,
-///     model: 'mistral-audio-latest',
+///     model: 'voxtral-mini-transcribe-3-0',
 ///   ),
 /// );
 /// print(response.text);
@@ -32,7 +32,7 @@ import 'voices_resource.dart';
 /// );
 ///
 /// // List voices
-/// final voices = await client.audio.voices.list();
+/// final voices = await client.audio.voices.search();
 /// ```
 class AudioResource {
   /// Configuration.

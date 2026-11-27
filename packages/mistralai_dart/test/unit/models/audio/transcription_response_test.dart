@@ -210,7 +210,9 @@ void main() {
         );
         expect(
           response.toString(),
-          'TranscriptionResponse(text: 11 chars, language: en)',
+          contains(
+            'TranscriptionResponse(text: 11 chars, language: en, model: null,',
+          ),
         );
       });
 
@@ -218,7 +220,9 @@ void main() {
         const response = TranscriptionResponse(text: 'No language');
         expect(
           response.toString(),
-          'TranscriptionResponse(text: 11 chars, language: null)',
+          contains(
+            'TranscriptionResponse(text: 11 chars, language: null, model: null,',
+          ),
         );
       });
     });

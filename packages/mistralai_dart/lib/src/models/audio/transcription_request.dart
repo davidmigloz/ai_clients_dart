@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'transcription_timestamp_granularity.dart';
 
 /// Request for audio transcription.
 ///
@@ -34,7 +35,8 @@ class TranscriptionRequest {
 
   /// The model to use for transcription.
   ///
-  /// Use 'mistral-audio-latest' for the best results.
+  /// Use a transcription model supported by your workspace, such as
+  /// `voxtral-mini-transcribe-3-0` (Public Preview).
   final String model;
 
   /// The language of the audio in ISO-639-1 format.
@@ -44,12 +46,12 @@ class TranscriptionRequest {
 
   /// The format of the output.
   ///
-  /// Options: 'json', 'text', 'srt', 'vtt', 'verbose_json'
+  /// Legacy field. The current Voxtral API returns structured JSON.
   final String? responseFormat;
 
   /// A prompt to guide the transcription.
   ///
-  /// This can help with proper nouns, technical terms, etc.
+  /// Legacy field. Use [contextBias] with current Voxtral models.
   final String? prompt;
 
   /// Temperature for sampling.
@@ -61,7 +63,14 @@ class TranscriptionRequest {
   /// Whether to include word-level timestamps.
   ///
   /// When `true`, both `segment` and `word` granularities are requested.
+  /// Use [timestampGranularityOptions] to select segment timing for Voxtral 3.
   final bool? timestampGranularities;
+
+  /// Explicit timestamp granularities to request.
+  ///
+  /// This takes precedence over [timestampGranularities]. Voxtral 3 supports
+  /// only [TranscriptionTimestampGranularity.segment].
+  final List<TranscriptionTimestampGranularity>? timestampGranularityOptions;
 
   /// Bias towards specific words or phrases during transcription.
   ///
@@ -70,6 +79,11 @@ class TranscriptionRequest {
 
   /// Whether to enable speaker diarization.
   final bool? diarize;
+
+  /// Base64-encoded reference clips mapped by speaker name.
+  ///
+  /// Requires [diarize] to be `true`.
+  final Map<String, String>? speakerReferences;
 
   /// Creates a [TranscriptionRequest].
   const TranscriptionRequest({
@@ -83,27 +97,39 @@ class TranscriptionRequest {
     this.prompt,
     this.temperature,
     this.timestampGranularities,
+    this.timestampGranularityOptions,
     this.contextBias,
     this.diarize,
+    this.speakerReferences,
   });
 
   /// Creates a [TranscriptionRequest] from JSON.
   ///
   /// Only the reference-based sources ([file], [fileUrl]) round-trip through
   /// JSON; [fileBytes] is a transport-level payload and is never serialized.
-  factory TranscriptionRequest.fromJson(Map<String, dynamic> json) =>
-      TranscriptionRequest(
-        file: json['file'] as String?,
-        fileUrl: json['file_url'] as String?,
-        model: json['model'] as String? ?? 'mistral-audio-latest',
-        language: json['language'] as String?,
-        responseFormat: json['response_format'] as String?,
-        prompt: json['prompt'] as String?,
-        temperature: (json['temperature'] as num?)?.toDouble(),
-        timestampGranularities: json['timestamp_granularities'] as bool?,
-        contextBias: (json['context_bias'] as List?)?.cast<String>(),
-        diarize: json['diarize'] as bool?,
-      );
+  factory TranscriptionRequest.fromJson(Map<String, dynamic> json) {
+    final granularities = json['timestamp_granularities'];
+    return TranscriptionRequest(
+      file: (json['file_id'] ?? json['file']) as String?,
+      fileUrl: json['file_url'] as String?,
+      model: json['model'] as String? ?? 'mistral-audio-latest',
+      language: json['language'] as String?,
+      responseFormat: json['response_format'] as String?,
+      prompt: json['prompt'] as String?,
+      temperature: (json['temperature'] as num?)?.toDouble(),
+      timestampGranularities: granularities is bool ? granularities : null,
+      timestampGranularityOptions: (granularities is List)
+          ? granularities
+                .cast<String>()
+                .map(TranscriptionTimestampGranularity.fromJson)
+                .toList()
+          : null,
+      contextBias: (json['context_bias'] as List?)?.cast<String>(),
+      diarize: json['diarize'] as bool?,
+      speakerReferences: (json['speaker_references'] as Map?)
+          ?.cast<String, String>(),
+    );
+  }
 
   /// Whether exactly one audio source ([file], [fileUrl] or [fileBytes]) is
   /// set, as required by the API.
@@ -122,10 +148,15 @@ class TranscriptionRequest {
     if (responseFormat != null) 'response_format': responseFormat,
     if (prompt != null) 'prompt': prompt,
     if (temperature != null) 'temperature': temperature,
-    if (timestampGranularities != null)
+    if (timestampGranularityOptions case final granularities?)
+      'timestamp_granularities': granularities
+          .map((value) => value.value)
+          .toList()
+    else if (timestampGranularities != null)
       'timestamp_granularities': timestampGranularities,
     if (contextBias != null) 'context_bias': contextBias,
     if (diarize != null) 'diarize': diarize,
+    if (speakerReferences != null) 'speaker_references': speakerReferences,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -143,6 +174,8 @@ class TranscriptionRequest {
     Object? prompt = unsetCopyWithValue,
     Object? temperature = unsetCopyWithValue,
     Object? timestampGranularities = unsetCopyWithValue,
+    Object? timestampGranularityOptions = unsetCopyWithValue,
+    Object? speakerReferences = unsetCopyWithValue,
     Object? contextBias = unsetCopyWithValue,
     Object? diarize = unsetCopyWithValue,
   }) => TranscriptionRequest(
@@ -168,6 +201,14 @@ class TranscriptionRequest {
     timestampGranularities: timestampGranularities == unsetCopyWithValue
         ? this.timestampGranularities
         : timestampGranularities as bool?,
+    timestampGranularityOptions:
+        timestampGranularityOptions == unsetCopyWithValue
+        ? this.timestampGranularityOptions
+        : (timestampGranularityOptions as List?)
+              ?.cast<TranscriptionTimestampGranularity>(),
+    speakerReferences: speakerReferences == unsetCopyWithValue
+        ? this.speakerReferences
+        : (speakerReferences as Map?)?.cast<String, String>(),
     contextBias: contextBias == unsetCopyWithValue
         ? this.contextBias
         : (contextBias as List?)?.cast<String>(),
@@ -189,6 +230,11 @@ class TranscriptionRequest {
           prompt == other.prompt &&
           temperature == other.temperature &&
           timestampGranularities == other.timestampGranularities &&
+          listsEqual(
+            timestampGranularityOptions,
+            other.timestampGranularityOptions,
+          ) &&
+          mapsEqual(speakerReferences, other.speakerReferences) &&
           listsEqual(contextBias, other.contextBias) &&
           diarize == other.diarize;
 
@@ -204,6 +250,8 @@ class TranscriptionRequest {
     prompt,
     temperature,
     timestampGranularities,
+    listHash(timestampGranularityOptions),
+    mapHash(speakerReferences),
     listHash(contextBias),
     diarize,
   );
@@ -221,6 +269,8 @@ class TranscriptionRequest {
       'prompt: $prompt, '
       'temperature: $temperature, '
       'timestampGranularities: $timestampGranularities, '
+      'timestampGranularityOptions: $timestampGranularityOptions, '
+      'speakerReferences: ${speakerReferences == null ? 'null' : '${speakerReferences!.length} clips'}, '
       'contextBias: ${contextBias == null ? 'null' : '${contextBias!.length} items'}, '
       'diarize: $diarize)';
 }

@@ -31,6 +31,7 @@ void main() {
       final client = clientReturning({'items': <dynamic>[]});
       addTearDown(client.close);
 
+      // ignore: deprecated_member_use_from_same_package
       await client.audio.voices.list(limit: 10, type: 'custom');
 
       expect(captured.method, 'GET');

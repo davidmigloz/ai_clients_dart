@@ -156,6 +156,69 @@ in JSON. Read precise timestamps with `createdAtDateTime` and
 `updatedAtDateTime`. The deprecated PUT methods are still available. Prefer
 `updatePartial` for library and document PATCH requests.
 
+### Voxtral transcription timing
+
+Voxtral 3 provides segment timestamps. Use an explicit segment granularity
+when switching models. Older requests using `timestampGranularities: true`
+still request both segment and word timestamps.
+
+```dart
+// Before
+final request = TranscriptionRequest(
+  file: uploadedFileId,
+  model: 'voxtral-mini-2602',
+  timestampGranularities: true,
+);
+
+// After
+final request = TranscriptionRequest(
+  file: uploadedFileId,
+  model: 'voxtral-mini-transcribe-3-0',
+  timestampGranularityOptions: [TranscriptionTimestampGranularity.segment],
+);
+```
+
+`TranscriptionSegment.start`, `end` and `duration` can be absent. `id` is
+also nullable because the current API sends speaker labels and segment text
+without a numeric segment ID.
+
+```dart
+// Before
+final double duration = segment.duration;
+final int id = segment.id;
+
+// After
+final double? duration = segment.duration;
+final String? speaker = segment.speakerId;
+```
+
+`TranscriptionResponse.model` identifies the returned model. When combining
+streamed text, read only `transcription.text.delta` events because
+`transcription.done` can repeat the full transcript.
+
+### Voice creation and pagination
+
+The voice create request no longer accepts `slug`. Use `name` for display
+and the returned `id` when referring to a voice. `VoiceCreateRequest.sampleAudio`
+is nullable.
+
+```dart
+// Before
+final voice = await client.audio.voices.create(
+  request: VoiceCreateRequest(name: 'Narration', slug: 'voice', sampleAudio: clip),
+);
+
+// After
+final voice = await client.audio.voices.create(
+  request: VoiceCreateRequest(name: 'Narration', sampleAudio: clip),
+);
+print(voice.id);
+```
+
+Mistral plans to retire offset-based voice listing on March 31, 2027.
+Switch from `list(limit: 10, offset: 0)` to `search(pageSize: 10)` and pass
+`nextPageToken` as `pageToken` for the next page.
+
 ---
 
 ## Migrating from v7.x to v8.0.0
