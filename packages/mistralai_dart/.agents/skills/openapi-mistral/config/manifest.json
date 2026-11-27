@@ -128,14 +128,16 @@
       "agents"
     ],
     "notes": {
-      "admin": "Admin Enterprise Preview operations are implemented. Legacy group provisioning is superseded by POST /v1/admin/user-groups/{group_uuid}/workspaces."
+      "admin": "Every current Admin operation is exercised by public wire fixtures. The toolkit groups paths under admin, while the client splits them across multiple resources. The deprecated group provisioning endpoint is superseded by the current group assignment route."
     },
     "expected_properties": {},
     "excluded_properties": {
       "global": []
     },
     "resource_aliases": {
-      "context": "managed_search_indexes"
+      "context": "managed_search_indexes",
+      "client": "realtime",
+      "whoami": "users"
     },
     "excluded_resources": []
   },
@@ -2956,7 +2958,11 @@
       "dart_class": "VoiceResponse",
       "file": "lib/src/models/audio/voice_response.dart",
       "schema": "VoiceResponse",
-      "tags": []
+      "tags": [],
+      "excluded_properties": [
+        "type"
+      ],
+      "note": "Decode the current preset/custom type when present. Allow it to be absent in older saved voice lists and responses."
     },
     "VoiceUpdateRequest": {
       "spec": "main",
@@ -4091,123 +4097,163 @@
     },
     "RegisterSearchIndexRequest": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "RegisterSearchIndexRequest",
       "file": "lib/src/models/rag/register_search_index_request.dart",
       "schema": "RegisterSearchIndexRequestIndex",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "RegisterVespaIndexRequest": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "RegisterVespaIndexRequest",
       "file": "lib/src/models/rag/register_vespa_index_request.dart",
       "schema": "RegisterSearchIndexRequestVespaIndex",
       "excluded_properties": [
         "type"
       ],
-      "note": "`type` is a const `vespa` discriminator modeled as a constant getter (validated in fromJson); excluded from field verification.",
-      "tags": []
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "RegisterVespaSchemaRequest": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "RegisterVespaSchemaRequest",
       "file": "lib/src/models/rag/register_vespa_schema_request.dart",
       "schema": "RegisterSearchIndexRequestVespaSchemaModel",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "RegisterVespaSchemaFieldRequest": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "RegisterVespaSchemaFieldRequest",
       "file": "lib/src/models/rag/register_vespa_schema_field_request.dart",
       "schema": "RegisterSearchIndexRequestVespaSchemaField",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "RegisterSearchIndexResponse": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "RegisterSearchIndexResponse",
       "file": "lib/src/models/rag/register_search_index_response.dart",
       "schema": "RegisterSearchIndexResponseIndex",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SearchIndexDetail": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SearchIndexDetail",
       "file": "lib/src/models/rag/search_index_detail.dart",
       "schema": "GetSearchIndexDetailResponseIndex",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SearchIndexDetailSchema": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SearchIndexDetailSchema",
       "file": "lib/src/models/rag/search_index_detail_schema.dart",
       "schema": "GetSearchIndexDetailResponseSchemaModel",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SearchIndexSchemaDetail": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SearchIndexSchemaDetail",
       "file": "lib/src/models/rag/search_index_schema_detail.dart",
       "schema": "GetSearchIndexSchemaDetailResponseSchemaModel",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SearchIndexSchemaField": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SearchIndexSchemaField",
       "file": "lib/src/models/rag/search_index_schema_field.dart",
       "schema": "GetSearchIndexSchemaDetailResponseField",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SearchIndexSchemaSdFile": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SearchIndexSchemaSdFile",
       "file": "lib/src/models/rag/search_index_schema_sd_file.dart",
       "schema": "GetSearchIndexSchemaSDFileResponseSDFile",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SearchIndexSummary": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SearchIndexSummary",
       "file": "lib/src/models/rag/search_index_summary.dart",
       "schema": "GetSearchIndexSummaryResponseIndex",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "VespaIndexSummary": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "VespaIndexSummary",
       "file": "lib/src/models/rag/vespa_index_summary.dart",
       "schema": "GetSearchIndexSummaryResponseVespaIndex",
       "excluded_properties": [
         "type"
       ],
-      "note": "`type` is a const `vespa` discriminator modeled as a constant getter (validated in fromJson); excluded from field verification.",
-      "tags": []
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "VespaSchemaSummary": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "VespaSchemaSummary",
       "file": "lib/src/models/rag/vespa_schema_summary.dart",
       "schema": "GetSearchIndexSummaryResponseVespaSchemaModel",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SearchIndexRetrievable": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SearchIndexRetrievable",
       "file": "lib/src/models/rag/search_index_retrievable.dart",
       "schema": "VespaGetRetrievableResponseRetrievable",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SummaryFieldResponse": {
       "spec": "main",
@@ -4228,11 +4274,14 @@
     },
     "SchemaMetrics": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SchemaMetrics",
       "file": "lib/src/models/rag/schema_metrics.dart",
       "schema": "UpdateIndexMetricsRequestSchemaMetrics",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "UpdateIndexMetricsRequest": {
       "spec": "main",
@@ -4250,53 +4299,71 @@
     },
     "UpdateIndexMetricsOnlineRequest": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "skip",
       "dart_class": "UpdateIndexMetricsOnlineRequest",
       "file": "lib/src/models/rag/update_index_metrics_request.dart",
       "schema": "UpdateIndexMetricsRequestIndexMetricsOnline",
-      "parent": "UpdateIndexMetricsRequest"
+      "parent": "UpdateIndexMetricsRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "UpdateIndexMetricsOfflineRequest": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "skip",
       "dart_class": "UpdateIndexMetricsOfflineRequest",
       "file": "lib/src/models/rag/update_index_metrics_request.dart",
       "schema": "UpdateIndexMetricsRequestIndexMetricsOffline",
-      "parent": "UpdateIndexMetricsRequest"
+      "parent": "UpdateIndexMetricsRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SchemaFieldDataType": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "SchemaFieldDataType",
       "file": "lib/src/models/rag/schema_field_data_type.dart",
       "schema": "SchemaFieldDataType",
-      "tags": [],
-      "note": "Wire values int/bool/string renamed to intType/boolType/stringType to avoid colliding with Dart's built-in type names."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SchemaFieldIndex": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "SchemaFieldIndex",
       "file": "lib/src/models/rag/schema_field_index.dart",
       "schema": "SchemaFieldIndex",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SchemaFieldRankingType": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "SchemaFieldRankingType",
       "file": "lib/src/models/rag/schema_field_ranking_type.dart",
       "schema": "SchemaFieldRankingType",
-      "tags": [],
-      "note": "Wire values string/bool/int renamed to stringType/boolType/intType to avoid colliding with Dart's built-in type names."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SchemaFieldStorage": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "SchemaFieldStorage",
       "file": "lib/src/models/rag/schema_field_storage.dart",
       "schema": "SchemaFieldStorage",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The November snapshot omits this legacy Vespa index schema. Keep the Dart API for compatibility pending confirmed retirement. Managed Search is a separate wire surface."
     },
     "SummaryStatus": {
       "spec": "main",
@@ -4599,7 +4666,11 @@
       "dart_class": "KeywordRetriever",
       "file": "lib/src/models/search/search_query.dart",
       "schema": "KeywordRetriever",
-      "tags": []
+      "tags": [],
+      "excluded_properties": [
+        "operator"
+      ],
+      "note": "Dart matchOperator maps to the operator wire key."
     },
     "NearestNeighbourRetriever": {
       "spec": "main",
@@ -4808,7 +4879,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "BoolArrayFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "BoolFieldDefinition": {
       "spec": "main",
@@ -4817,7 +4892,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "BoolFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "DenseVectorFieldDefinition": {
       "spec": "main",
@@ -4826,7 +4905,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "DenseVectorFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "FloatArrayFieldDefinition": {
       "spec": "main",
@@ -4835,7 +4918,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "FloatArrayFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "FloatFieldDefinition": {
       "spec": "main",
@@ -4844,7 +4931,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "FloatFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "IntArrayFieldDefinition": {
       "spec": "main",
@@ -4853,7 +4944,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "IntArrayFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "IntFieldDefinition": {
       "spec": "main",
@@ -4862,7 +4957,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "IntFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "JsonFieldDefinition": {
       "spec": "main",
@@ -4871,7 +4970,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "JsonFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "KeywordArrayFieldDefinition": {
       "spec": "main",
@@ -4880,7 +4983,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "KeywordArrayFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "KeywordFieldDefinition": {
       "spec": "main",
@@ -4889,7 +4996,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "KeywordFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "LongArrayFieldDefinition": {
       "spec": "main",
@@ -4898,7 +5009,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "LongArrayFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "LongFieldDefinition": {
       "spec": "main",
@@ -4907,7 +5022,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "LongFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "TextArrayFieldDefinition": {
       "spec": "main",
@@ -4916,7 +5035,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "TextArrayFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "TextFieldDefinition": {
       "spec": "main",
@@ -4925,7 +5048,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "TextFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "TimestampArrayFieldDefinition": {
       "spec": "main",
@@ -4934,7 +5061,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "TimestampArrayFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "TimestampFieldDefinition": {
       "spec": "main",
@@ -4943,7 +5074,11 @@
       "file": "lib/src/models/search/managed_index.dart",
       "schema": "TimestampFieldDefinition",
       "tags": [],
-      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator. Dart defaultValue and isRequired map to default and required on the wire.",
+      "excluded_properties": [
+        "default",
+        "required"
+      ]
     },
     "SummaryStatus1": {
       "spec": "main",
@@ -5179,7 +5314,11 @@
       "dart_class": "ResponseFunctionCall",
       "file": "lib/src/models/responses/response_item.dart",
       "schema": "ResponsesFunctionToolCall",
-      "tags": []
+      "tags": [],
+      "excluded_properties": [
+        "async"
+      ],
+      "note": "Dart isAsync maps to the async wire key."
     },
     "ResponsesFunctionCallOutput": {
       "spec": "main",
@@ -5243,7 +5382,11 @@
       "dart_class": "ResponseFunctionTool",
       "file": "lib/src/models/responses/response_tool.dart",
       "schema": "ResponsesFunctionTool",
-      "tags": []
+      "tags": [],
+      "excluded_properties": [
+        "async"
+      ],
+      "note": "Dart isAsync maps to the async wire key."
     },
     "ResponsesNamespaceTool": {
       "spec": "main",
@@ -5259,7 +5402,11 @@
       "dart_class": "ResponseCustomTool",
       "file": "lib/src/models/responses/response_tool.dart",
       "schema": "ResponsesCustomTool",
-      "tags": []
+      "tags": [],
+      "excluded_properties": [
+        "async"
+      ],
+      "note": "Dart isAsync maps to the async wire key."
     },
     "ResponsesText": {
       "spec": "main",
@@ -5331,7 +5478,11 @@
       "dart_class": "ResponseNestedFunctionTool",
       "file": "lib/src/models/responses/response_tool.dart",
       "schema": "ResponsesToolFunction",
-      "tags": []
+      "tags": [],
+      "excluded_properties": [
+        "async"
+      ],
+      "note": "Dart isAsync maps to the async wire key."
     },
     "CreateResponseRequest": {
       "spec": "main",
@@ -5682,7 +5833,11 @@
       "dart_class": "AdminScimGroupUpdateAction",
       "file": "lib/src/models/admin/admin_scim.dart",
       "schema": "ScimSyncGroupUpdateActionOut",
-      "tags": []
+      "tags": [],
+      "excluded_properties": [
+        "previous_groupName"
+      ],
+      "note": "Dart previousGroupName maps to the mixed-case previous_groupName wire key."
     },
     "ScimSyncGroupRefOut": {
       "spec": "main",
@@ -9030,6 +9185,310 @@
         "acknowledged"
       ],
       "note": "MCP metadata is preserved as JSON in _meta."
+    },
+    "Agent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Agent",
+      "file": "lib/src/models/agents/agent.dart",
+      "schema": "Agent",
+      "tags": [],
+      "excluded_properties": [
+        "deployment_chat",
+        "source",
+        "versions"
+      ],
+      "note": "Permit nullable deploymentChat, source, and versions to read older Agent payloads. Current wire values decode without conversion."
+    },
+    "ToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolCall",
+      "file": "lib/src/models/tools/tool_call.dart",
+      "schema": "ToolCall",
+      "tags": []
+    },
+    "RawAudio": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechTurnAudio",
+      "file": "lib/src/models/audio/speech_turn.dart",
+      "schema": "RawAudio",
+      "tags": []
+    },
+    "SpeechAssistantTurn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechAssistantTurn",
+      "file": "lib/src/models/audio/speech_turn.dart",
+      "schema": "SpeechAssistantTurn",
+      "tags": []
+    },
+    "SpeechUserTurn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechUserTurn",
+      "file": "lib/src/models/audio/speech_turn.dart",
+      "schema": "SpeechUserTurn",
+      "tags": []
+    },
+    "IPAPhoneme": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "IpaPhoneme",
+      "file": "lib/src/models/audio/ipa_phoneme.dart",
+      "schema": "IPAPhoneme",
+      "tags": []
+    },
+    "VoiceGender": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "VoiceGender",
+      "file": "lib/src/models/audio/voice_enums.dart",
+      "schema": "VoiceGender",
+      "tags": []
+    },
+    "VoiceKind": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "VoiceKind",
+      "file": "lib/src/models/audio/voice_enums.dart",
+      "schema": "VoiceKind",
+      "tags": []
+    },
+    "VoiceListPage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceListPage",
+      "file": "lib/src/models/audio/voice_list_page.dart",
+      "schema": "VoiceListPage",
+      "tags": []
+    },
+    "TranscriptionSegmentChunk": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionSegment",
+      "file": "lib/src/models/audio/transcription_segment.dart",
+      "schema": "TranscriptionSegmentChunk",
+      "tags": []
+    },
+    "EntityType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "EntityType",
+      "file": "lib/src/models/libraries/entity_type.dart",
+      "schema": "EntityType",
+      "tags": []
+    },
+    "FilePurpose": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "FilePurpose",
+      "file": "lib/src/models/files/file_purpose.dart",
+      "schema": "FilePurpose",
+      "tags": []
+    },
+    "ShareRelation": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "RegistryShareRelation",
+      "file": "lib/src/models/registry/registry_share_relation.dart",
+      "schema": "ShareRelation",
+      "tags": []
+    },
+    "ListLibrariesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LibraryList",
+      "file": "lib/src/models/libraries/library.dart",
+      "schema": "ListLibrariesResponse",
+      "tags": []
+    },
+    "SharingDelete": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SharingDeleteRequest",
+      "file": "lib/src/models/libraries/sharing_delete_request.dart",
+      "schema": "SharingDelete",
+      "tags": []
+    },
+    "SharingRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SharingRequest",
+      "file": "lib/src/models/libraries/sharing_request.dart",
+      "schema": "SharingRequest",
+      "tags": []
+    },
+    "ContentChunk": {
+      "spec": "main",
+      "schema": "ContentChunk",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "The ContentPart sealed parser dispatches this union to the mapped typed chunk variants."
+    },
+    "NamedToolChoice": {
+      "spec": "main",
+      "schema": "NamedToolChoice",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "ToolChoiceFunction encodes the compact nested function-name object."
+    },
+    "ResponseFormat": {
+      "spec": "main",
+      "schema": "ResponseFormat",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "The ResponseFormat sealed parser dispatches to text, JSON object, and JSON schema variants."
+    },
+    "AudioTranscriptionRequest": {
+      "spec": "main",
+      "schema": "AudioTranscriptionRequest",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "TranscriptionRequest and the resource multipart builder encode its upload, file ID, or URL fields."
+    },
+    "AudioTranscriptionRequestStream": {
+      "spec": "main",
+      "schema": "AudioTranscriptionRequestStream",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "The same input and multipart builder are used with stream enabled and SSE parsing."
+    },
+    "SpeechStreamEventTypes": {
+      "spec": "main",
+      "schema": "SpeechStreamEventTypes",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "SpeechStreamEvent uses event-name discriminators and preserves unrecognized events."
+    },
+    "TranscriptionStreamEventTypes": {
+      "spec": "main",
+      "schema": "TranscriptionStreamEventTypes",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "TranscriptionStreamEvent uses the documented SSE types and leaves future tags readable."
+    },
+    "TranscriptionStreamEvents": {
+      "spec": "main",
+      "schema": "TranscriptionStreamEvents",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "The stream parser unwraps the SSE frame into TranscriptionStreamEvent."
+    },
+    "TranscriptionStreamSegmentDelta": {
+      "spec": "main",
+      "schema": "TranscriptionStreamSegmentDelta",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "TranscriptionStreamEvent decodes the segment fields and timestamps from SSE."
+    },
+    "TurnDetectionEagerEndEvent": {
+      "spec": "main",
+      "schema": "TurnDetectionEagerEndEvent",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "TranscriptionStreamEvent exposes the turn tag and time_s as timeSeconds."
+    },
+    "TurnDetectionEndEvent": {
+      "spec": "main",
+      "schema": "TurnDetectionEndEvent",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "TranscriptionStreamEvent exposes the turn tag, time_s, and end_reason."
+    },
+    "TurnDetectionResumeEvent": {
+      "spec": "main",
+      "schema": "TurnDetectionResumeEvent",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "TranscriptionStreamEvent exposes the turn tag and time_s as timeSeconds."
+    },
+    "TurnDetectionStartEvent": {
+      "spec": "main",
+      "schema": "TurnDetectionStartEvent",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "TranscriptionStreamEvent exposes the turn tag and time_s as timeSeconds."
+    },
+    "TurnDetectionEndReason": {
+      "spec": "main",
+      "schema": "TurnDetectionEndReason",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "The event keeps end_reason as a string, including threshold, timeout, and unknown future values."
+    },
+    "ListSortDirection": {
+      "spec": "main",
+      "schema": "ListSortDirection",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "Prompts and skills send the published REST alias sort_direction with asc or desc. Omitting it selects the default ordering."
+    },
+    "ListSortField": {
+      "spec": "main",
+      "schema": "ListSortField",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "Prompts and skills send the published REST alias sort_by. Omitting it selects created_at."
+    },
+    "AdminProvisionGroupToWorkspaceIn": {
+      "spec": "main",
+      "schema": "AdminProvisionGroupToWorkspaceIn",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "kind": "skip",
+      "note": "This schema belongs to the deprecated duplicate group-provision path. Use the supported group workspace assignment route."
     }
   }
 }
