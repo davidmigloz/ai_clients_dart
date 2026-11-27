@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../content/content_part.dart';
 import '../tools/tool_call.dart';
 import 'message_content.dart';
@@ -235,20 +236,10 @@ class AssistantMessage extends ChatMessage {
           runtimeType == other.runtimeType &&
           content == other.content &&
           prefix == other.prefix &&
-          _toolCallsEqual(toolCalls, other.toolCalls);
-
-  bool _toolCallsEqual(List<ToolCall>? a, List<ToolCall>? b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+          listsEqual(toolCalls, other.toolCalls);
 
   @override
-  int get hashCode => Object.hash(role, content, toolCalls, prefix);
+  int get hashCode => Object.hash(role, content, listHash(toolCalls), prefix);
 
   @override
   String toString() =>

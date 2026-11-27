@@ -35,6 +35,37 @@ When building a `DeltaContent` yourself, wrap strings: `DeltaContent(content: Me
 
 `response.text`, `response.allText` and `ChatChoice.text` now also return the text of list content. Previously they returned `null` for it.
 
+### Handle new content part variants
+
+Exhaustive `switch` expressions over `ContentPart` must also handle
+`ResourceContentPart` and `ResourceLinkContentPart`. When your application
+only needs selected variants, add a default branch.
+
+Before:
+
+```dart
+// Part of an exhaustive content switch.
+case ToolReferenceContentPart(:final title):
+  print(title);
+```
+
+After:
+
+```dart
+case ToolReferenceContentPart(:final title):
+  print(title);
+case ResourceContentPart(:final uri, :final content):
+  print('$uri: ${content.toJson()}');
+case ResourceLinkContentPart(:final uri):
+  print(uri);
+```
+
+### Read structured FIM responses
+
+`FimChoice.message` and `FimChoiceDelta.delta` still return generated
+text. Use `assistantMessage` or `messageDelta` to read the full
+structured content from the current API.
+
 ---
 
 ## Migrating from v7.x to v8.0.0

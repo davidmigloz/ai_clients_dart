@@ -438,7 +438,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API"
+      "note": "Public tool names use a string union; Dart preserves all values including mistral_mcp"
     },
     "CampaignPreview": {
       "spec": "main",
@@ -705,7 +705,9 @@
           "AudioChunk": "input_audio",
           "ThinkChunk": "thinking",
           "ToolFileChunk": "tool_file",
-          "ToolReferenceChunk": "tool_reference"
+          "ToolReferenceChunk": "tool_reference",
+          "ResourceChunk": "resource",
+          "ResourceLinkChunk": "resource_link"
         }
       },
       "note": null
@@ -2118,6 +2120,22 @@
       "file": "lib/src/models/workflows/reset_invocation_body.dart",
       "schema": "ResetInvocationBody",
       "tags": []
+    },
+    "ResourceChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResourceContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ResourceChunk",
+      "parent": "ContentPart"
+    },
+    "ResourceLinkChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResourceLinkContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ResourceLinkChunk",
+      "parent": "ContentPart"
     },
     "ResourceLink": {
       "spec": "main",
