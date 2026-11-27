@@ -24,6 +24,7 @@ import '../resources/observability/observability_resource.dart';
 import '../resources/ocr_resource.dart';
 import '../resources/prompts/prompts_resource.dart';
 import '../resources/rag/rag_resource.dart';
+import '../resources/realtime/realtime_resource.dart';
 import '../resources/responses_resource.dart';
 import '../resources/skills/skills_resource.dart';
 import '../resources/users/users_resource.dart';
@@ -50,7 +51,8 @@ import 'retry_wrapper.dart';
 /// - [fineTuning] - Fine-tuning job management
 /// - [batch] - Batch job processing
 /// - [ocr] - OCR text extraction
-/// - [audio] - Audio transcription
+/// - [audio] - Audio transcription, speech synthesis, voices, and WebSockets
+/// - [realtime] - Realtime client session tokens
 /// - [agents] - AI agents (Beta)
 /// - [conversations] - Conversations (Beta)
 /// - [connectors] - MCP connectors (Beta)
@@ -170,6 +172,9 @@ class MistralClient {
 
   /// Resource for audio processing.
   late final AudioResource audio;
+
+  /// Server-side credential minting for realtime client sessions.
+  late final RealtimeResource realtime;
 
   /// Resource for AI agents (Beta).
   late final AgentsResource agents;
@@ -339,6 +344,14 @@ class MistralClient {
     );
 
     audio = AudioResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    realtime = RealtimeResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

@@ -777,6 +777,25 @@
       ],
       "note": "Internal platform observability"
     },
+    "ClientSecret": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RealtimeClientSecret",
+      "file": "lib/src/models/realtime/realtime_client_session.dart",
+      "schema": "ClientSecret",
+      "tags": []
+    },
+    "ClientSessionPurpose": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ClientSessionPurpose",
+      "file": "",
+      "schema": "ClientSessionPurpose",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Realtime is the only HTTP client session purpose. The Dart request and response types use a fixed purpose discriminator."
+    },
     "CompletionArgs": {
       "spec": "main",
       "kind": "object",
@@ -894,6 +913,22 @@
         }
       },
       "note": null
+    },
+    "CreateRealtimeSessionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateRealtimeClientSessionRequest",
+      "file": "lib/src/models/realtime/realtime_client_session.dart",
+      "schema": "CreateRealtimeSessionRequest",
+      "tags": []
+    },
+    "CreateRealtimeSessionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RealtimeClientSession",
+      "file": "lib/src/models/realtime/realtime_client_session.dart",
+      "schema": "CreateRealtimeSessionResponse",
+      "tags": []
     },
     "CustomConnector": {
       "spec": "main",
