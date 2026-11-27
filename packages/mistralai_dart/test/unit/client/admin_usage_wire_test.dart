@@ -584,6 +584,30 @@ void main() {
   );
 
   test(
+    'sanitizes typed errors thrown by an injected Admin transport',
+    () async {
+      final client = _client(
+        MockClient((request) {
+          throw ApiException(
+            statusCode: 401,
+            message: 'Invalid key ${request.headers['x-api-key']}',
+          );
+        }),
+      );
+      await expectLater(
+        client.apiKeys.list(),
+        throwsA(
+          isA<http.ClientException>().having(
+            (error) => error.toString(),
+            'message',
+            isNot(contains(_adminKey)),
+          ),
+        ),
+      );
+    },
+  );
+
+  test(
     'Admin timeout aborts the transport without retrying the request',
     () async {
       const timeout = Duration(milliseconds: 5);

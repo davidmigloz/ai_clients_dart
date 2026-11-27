@@ -192,8 +192,6 @@ class _AdminErrorSanitizer implements Interceptor {
     final http.Response response;
     try {
       response = await next(context);
-    } on MistralException {
-      rethrow;
     } catch (error) {
       // A supplied transport can include the request headers in an exception.
       // Keep those credentials out of both the public exception and the log.
