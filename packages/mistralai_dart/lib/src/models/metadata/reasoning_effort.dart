@@ -19,8 +19,11 @@ enum ReasoningEffort {
   /// Enable comprehensive reasoning traces.
   high('high'),
 
-  /// Maximum reasoning effort.
+  /// Extra-high reasoning effort on supported models.
   xhigh('xhigh'),
+
+  /// Maximum reasoning effort on supported models.
+  max('max'),
 
   /// Unknown reasoning effort (forward compatibility).
   unknown('unknown');
@@ -41,6 +44,7 @@ enum ReasoningEffort {
     'medium' => medium,
     'high' => high,
     'xhigh' => xhigh,
+    'max' => max,
     null => null,
     _ => unknown,
   };

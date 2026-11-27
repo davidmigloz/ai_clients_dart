@@ -6,6 +6,7 @@ import '../common/equality_helpers.dart';
 import '../metadata/prediction.dart';
 import '../metadata/prompt_mode.dart';
 import '../metadata/reasoning_effort.dart';
+import '../metadata/requested_service_tier.dart';
 import '../metadata/response_format.dart';
 import '../metadata/stop_sequence.dart';
 import '../moderations/guardrail_config.dart';
@@ -39,7 +40,10 @@ class AgentCompletionRequest {
   /// Top-p sampling.
   final double? topP;
 
-  /// Additional tools to use for this request.
+  /// Tools available to the model.
+  ///
+  /// This endpoint accepts function, image generation, document library, and
+  /// custom connector tools.
   final List<Tool>? tools;
 
   /// Tool choice configuration.
@@ -61,6 +65,30 @@ class AgentCompletionRequest {
   /// Positive values penalize tokens based on whether they appear in the text.
   final double? presencePenalty;
 
+  /// The minimum number of tokens to generate.
+  final int? minTokens;
+
+  /// Penalty applied to repeating tokens. Must be greater than 0 and at most 2.
+  final double? repetitionPenalty;
+
+  /// Limits sampling to the top K tokens.
+  final int? topK;
+
+  /// Whether to return log probabilities for the generated tokens.
+  final bool? logprobs;
+
+  /// The number of alternative log probabilities to return per generated token.
+  final int? topLogprobs;
+
+  /// Whether to return log probabilities for prompt tokens.
+  final bool? promptLogprobs;
+
+  /// The number of alternative log probabilities to return per prompt token.
+  final int? topPromptLogprobs;
+
+  /// Requested service tier. Omitting it uses standard capacity.
+  final RequestedServiceTier? serviceTier;
+
   /// Number of completions to generate.
   final int? n;
 
@@ -70,7 +98,9 @@ class AgentCompletionRequest {
   /// Custom request metadata.
   final Map<String, dynamic>? metadata;
 
-  /// Prediction configuration for speculative decoding.
+  /// Legacy prediction configuration. Mistral accepts and ignores this field.
+  ///
+  /// Leave this unset in new requests.
   final Prediction? prediction;
 
   /// Prompt mode for reasoning models.
@@ -106,6 +136,14 @@ class AgentCompletionRequest {
     this.randomSeed,
     this.frequencyPenalty,
     this.presencePenalty,
+    this.minTokens,
+    this.repetitionPenalty,
+    this.topK,
+    this.logprobs,
+    this.topLogprobs,
+    this.promptLogprobs,
+    this.topPromptLogprobs,
+    this.serviceTier,
     this.n,
     this.parallelToolCalls,
     this.metadata,
@@ -146,6 +184,16 @@ class AgentCompletionRequest {
         randomSeed: json['random_seed'] as int?,
         frequencyPenalty: (json['frequency_penalty'] as num?)?.toDouble(),
         presencePenalty: (json['presence_penalty'] as num?)?.toDouble(),
+        minTokens: json['min_tokens'] as int?,
+        repetitionPenalty: (json['repetition_penalty'] as num?)?.toDouble(),
+        topK: json['top_k'] as int?,
+        logprobs: json['logprobs'] as bool?,
+        topLogprobs: json['top_logprobs'] as int?,
+        promptLogprobs: json['prompt_logprobs'] as bool?,
+        topPromptLogprobs: json['top_prompt_logprobs'] as int?,
+        serviceTier: RequestedServiceTier.fromString(
+          json['service_tier'] as String?,
+        ),
         n: json['n'] as int?,
         parallelToolCalls: json['parallel_tool_calls'] as bool?,
         metadata: json['metadata'] as Map<String, dynamic>?,
@@ -179,6 +227,14 @@ class AgentCompletionRequest {
     if (randomSeed != null) 'random_seed': randomSeed,
     if (frequencyPenalty != null) 'frequency_penalty': frequencyPenalty,
     if (presencePenalty != null) 'presence_penalty': presencePenalty,
+    if (minTokens != null) 'min_tokens': minTokens,
+    if (repetitionPenalty != null) 'repetition_penalty': repetitionPenalty,
+    if (topK != null) 'top_k': topK,
+    if (logprobs != null) 'logprobs': logprobs,
+    if (topLogprobs != null) 'top_logprobs': topLogprobs,
+    if (promptLogprobs != null) 'prompt_logprobs': promptLogprobs,
+    if (topPromptLogprobs != null) 'top_prompt_logprobs': topPromptLogprobs,
+    if (serviceTier != null) 'service_tier': serviceTier!.value,
     if (n != null) 'n': n,
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (metadata != null) 'metadata': metadata,
@@ -205,6 +261,14 @@ class AgentCompletionRequest {
     Object? randomSeed = unsetCopyWithValue,
     Object? frequencyPenalty = unsetCopyWithValue,
     Object? presencePenalty = unsetCopyWithValue,
+    Object? minTokens = unsetCopyWithValue,
+    Object? repetitionPenalty = unsetCopyWithValue,
+    Object? topK = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+    Object? topLogprobs = unsetCopyWithValue,
+    Object? promptLogprobs = unsetCopyWithValue,
+    Object? topPromptLogprobs = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
     Object? n = unsetCopyWithValue,
     Object? parallelToolCalls = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
@@ -242,6 +306,28 @@ class AgentCompletionRequest {
       presencePenalty: presencePenalty == unsetCopyWithValue
           ? this.presencePenalty
           : presencePenalty as double?,
+      minTokens: minTokens == unsetCopyWithValue
+          ? this.minTokens
+          : minTokens as int?,
+      repetitionPenalty: repetitionPenalty == unsetCopyWithValue
+          ? this.repetitionPenalty
+          : repetitionPenalty as double?,
+      topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
+      logprobs: logprobs == unsetCopyWithValue
+          ? this.logprobs
+          : logprobs as bool?,
+      topLogprobs: topLogprobs == unsetCopyWithValue
+          ? this.topLogprobs
+          : topLogprobs as int?,
+      promptLogprobs: promptLogprobs == unsetCopyWithValue
+          ? this.promptLogprobs
+          : promptLogprobs as bool?,
+      topPromptLogprobs: topPromptLogprobs == unsetCopyWithValue
+          ? this.topPromptLogprobs
+          : topPromptLogprobs as int?,
+      serviceTier: serviceTier == unsetCopyWithValue
+          ? this.serviceTier
+          : serviceTier as RequestedServiceTier?,
       n: n == unsetCopyWithValue ? this.n : n as int?,
       parallelToolCalls: parallelToolCalls == unsetCopyWithValue
           ? this.parallelToolCalls
@@ -289,9 +375,17 @@ class AgentCompletionRequest {
         randomSeed == other.randomSeed &&
         frequencyPenalty == other.frequencyPenalty &&
         presencePenalty == other.presencePenalty &&
+        minTokens == other.minTokens &&
+        repetitionPenalty == other.repetitionPenalty &&
+        topK == other.topK &&
+        logprobs == other.logprobs &&
+        topLogprobs == other.topLogprobs &&
+        promptLogprobs == other.promptLogprobs &&
+        topPromptLogprobs == other.topPromptLogprobs &&
+        serviceTier == other.serviceTier &&
         n == other.n &&
         parallelToolCalls == other.parallelToolCalls &&
-        mapsEqual(metadata, other.metadata) &&
+        mapsDeepEqual(metadata, other.metadata) &&
         prediction == other.prediction &&
         promptMode == other.promptMode &&
         reasoningEffort == other.reasoningEffort &&
@@ -300,9 +394,9 @@ class AgentCompletionRequest {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     agentId,
-    Object.hashAll(messages),
+    listHash(messages),
     maxTokens,
     stream,
     stop,
@@ -314,13 +408,23 @@ class AgentCompletionRequest {
     randomSeed,
     frequencyPenalty,
     presencePenalty,
+    minTokens,
+    repetitionPenalty,
+    topK,
+    logprobs,
+    topLogprobs,
+    promptLogprobs,
+    topPromptLogprobs,
+    serviceTier,
     n,
     parallelToolCalls,
-    mapHash(metadata),
-    Object.hash(prediction, promptMode, reasoningEffort),
+    mapDeepHashCode(metadata),
+    prediction,
+    promptMode,
+    reasoningEffort,
     promptCacheKey,
     listHash(guardrails),
-  );
+  ]);
 
   @override
   String toString() =>
@@ -337,6 +441,14 @@ class AgentCompletionRequest {
       'randomSeed: $randomSeed, '
       'frequencyPenalty: $frequencyPenalty, '
       'presencePenalty: $presencePenalty, '
+      'minTokens: $minTokens, '
+      'repetitionPenalty: $repetitionPenalty, '
+      'topK: $topK, '
+      'logprobs: $logprobs, '
+      'topLogprobs: $topLogprobs, '
+      'promptLogprobs: $promptLogprobs, '
+      'topPromptLogprobs: $topPromptLogprobs, '
+      'serviceTier: $serviceTier, '
       'n: $n, '
       'parallelToolCalls: $parallelToolCalls, '
       'metadata: $metadata, '

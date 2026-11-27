@@ -179,6 +179,26 @@ final response = await client.chat.create(
 print(response.text);
 ```
 
+On models that support log probabilities, set `logprobs: true` and optionally
+`topLogprobs`. Read the generated-token scores from `choice.logprobs?.content`.
+Use `promptLogprobs: true` and optionally `topPromptLogprobs` for input-token
+scores. These choices appear in both JSON responses and streaming chunks when
+the model returns them. Sampling controls such as `minTokens`, `topK`, and
+`repetitionPenalty`, and the supported reasoning levels, depend on the model.
+
+Set `serviceTier: RequestedServiceTier.auto` to request Priority Tier when
+available. Check `response.usage?.serviceTier` or the final stream chunk's usage
+for the actual tier. Priority Tier depends on account entitlement, model, and
+region. Omitting the field uses standard capacity.
+[Mistral Priority Tier](https://docs.mistral.ai/inference/priority-tier)
+
+Chat and Agent completions accept function, image generation, document library,
+and custom connector tools. Mistral accepts legacy `prediction` but ignores it.
+Use `guardrails` in new code in place of the deprecated `safePrompt` flag.
+
+Run the example with `--logprobs` to print token scores or `--priority` to
+request Priority Tier. Set `MISTRAL_CHAT_MODEL` to a supported model if needed.
+
 → [Full example](example/chat_example.dart)
 
 </details>
@@ -1246,7 +1266,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
-| [`chat_example.dart`](example/chat_example.dart) | Basic chat completions |
+| [`chat_example.dart`](example/chat_example.dart) | Chat completions, token scores, and Priority Tier |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
 | [`json_mode_example.dart`](example/json_mode_example.dart) | Structured output |

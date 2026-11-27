@@ -95,7 +95,10 @@ class ChatResource extends ResourceBase with StreamingResource {
       final url = requestBuilder.buildUrl('/v1/chat/completions');
 
       final headers = requestBuilder.buildHeaders(
-        additionalHeaders: {'Content-Type': 'application/json'},
+        additionalHeaders: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+        },
       );
 
       // Ensure stream is true for streaming

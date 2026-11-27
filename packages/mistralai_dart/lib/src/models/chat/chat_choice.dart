@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/finish_reason.dart';
 import 'chat_choice_delta.dart';
+import 'chat_choice_logprobs.dart';
 import 'chat_message.dart';
 
 /// A choice in a chat completion response.
@@ -26,12 +27,20 @@ class ChatChoice {
   /// The reason the model stopped generating.
   final FinishReason finishReason;
 
+  /// Log probabilities for generated tokens, when requested.
+  final ChatChoiceLogprobs? logprobs;
+
+  /// Log probabilities for input tokens, when requested.
+  final ChatChoiceLogprobs? promptLogprobs;
+
   /// Creates a [ChatChoice].
   const ChatChoice({
     required this.index,
     this.message,
     this.messages,
     this.finishReason = FinishReason.unknown,
+    this.logprobs,
+    this.promptLogprobs,
   });
 
   /// Creates a [ChatChoice] from JSON.
@@ -46,6 +55,14 @@ class ChatChoice {
     finishReason:
         finishReasonFromString(json['finish_reason'] as String?) ??
         FinishReason.unknown,
+    logprobs: json['logprobs'] == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(json['logprobs'] as Map<String, dynamic>),
+    promptLogprobs: json['prompt_logprobs'] == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(
+            json['prompt_logprobs'] as Map<String, dynamic>,
+          ),
   );
 
   /// Converts to JSON.
@@ -54,6 +71,8 @@ class ChatChoice {
     if (message != null) 'message': message!.toJson(),
     if (messages != null) 'messages': messages!.map((e) => e.toJson()).toList(),
     'finish_reason': finishReasonToString(finishReason),
+    if (logprobs != null) 'logprobs': logprobs!.toJson(),
+    if (promptLogprobs != null) 'prompt_logprobs': promptLogprobs!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -62,6 +81,8 @@ class ChatChoice {
     Object? message = unsetCopyWithValue,
     Object? messages = unsetCopyWithValue,
     FinishReason? finishReason,
+    Object? logprobs = unsetCopyWithValue,
+    Object? promptLogprobs = unsetCopyWithValue,
   }) => ChatChoice(
     index: index ?? this.index,
     message: message == unsetCopyWithValue
@@ -71,6 +92,12 @@ class ChatChoice {
         ? this.messages
         : messages as List<DeltaContent>?,
     finishReason: finishReason ?? this.finishReason,
+    logprobs: logprobs == unsetCopyWithValue
+        ? this.logprobs
+        : logprobs as ChatChoiceLogprobs?,
+    promptLogprobs: promptLogprobs == unsetCopyWithValue
+        ? this.promptLogprobs
+        : promptLogprobs as ChatChoiceLogprobs?,
   );
 
   @override
@@ -81,14 +108,23 @@ class ChatChoice {
           index == other.index &&
           message == other.message &&
           listsEqual(messages, other.messages) &&
-          finishReason == other.finishReason;
+          finishReason == other.finishReason &&
+          logprobs == other.logprobs &&
+          promptLogprobs == other.promptLogprobs;
 
   @override
-  int get hashCode =>
-      Object.hash(index, message, listHash(messages), finishReason);
+  int get hashCode => Object.hash(
+    index,
+    message,
+    listHash(messages),
+    finishReason,
+    logprobs,
+    promptLogprobs,
+  );
 
   @override
   String toString() =>
       'ChatChoice(index: $index, message: $message, '
-      'messages: ${messages?.length ?? 'null'}, finishReason: $finishReason)';
+      'messages: ${messages?.length ?? 'null'}, finishReason: $finishReason, '
+      'logprobs: $logprobs, promptLogprobs: $promptLogprobs)';
 }

@@ -33,6 +33,9 @@ class UsageInfo {
   /// reasoning tokens.
   final CompletionTokensDetails? completionTokensDetails;
 
+  /// Capacity tier that served the request, such as `standard` or `priority`.
+  final String? serviceTier;
+
   /// Creates a [UsageInfo].
   const UsageInfo({
     required this.promptTokens,
@@ -43,6 +46,7 @@ class UsageInfo {
     this.promptTokensDetails,
     this.promptTokenDetails,
     this.completionTokensDetails,
+    this.serviceTier,
   });
 
   /// Creates a [UsageInfo] from JSON.
@@ -52,6 +56,7 @@ class UsageInfo {
     totalTokens: json['total_tokens'] as int? ?? 0,
     promptAudioSeconds: json['prompt_audio_seconds'] as int?,
     numCachedTokens: json['num_cached_tokens'] as int?,
+    serviceTier: json['service_tier'] as String?,
     promptTokensDetails: json['prompt_tokens_details'] != null
         ? PromptTokensDetails.fromJson(
             json['prompt_tokens_details'] as Map<String, dynamic>,
@@ -80,6 +85,7 @@ class UsageInfo {
       'prompt_tokens_details': promptTokensDetails!.toJson(),
     if (promptTokenDetails != null)
       'prompt_token_details': promptTokenDetails!.toJson(),
+    if (serviceTier != null) 'service_tier': serviceTier,
     if (completionTokensDetails != null)
       'completion_tokens_details': completionTokensDetails!.toJson(),
   };
@@ -94,6 +100,7 @@ class UsageInfo {
     Object? promptTokensDetails = unsetCopyWithValue,
     Object? promptTokenDetails = unsetCopyWithValue,
     Object? completionTokensDetails = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
   }) => UsageInfo(
     promptTokens: promptTokens ?? this.promptTokens,
     completionTokens: completionTokens ?? this.completionTokens,
@@ -110,6 +117,9 @@ class UsageInfo {
     promptTokenDetails: promptTokenDetails == unsetCopyWithValue
         ? this.promptTokenDetails
         : promptTokenDetails as PromptTokensDetails?,
+    serviceTier: serviceTier == unsetCopyWithValue
+        ? this.serviceTier
+        : serviceTier as String?,
     completionTokensDetails: completionTokensDetails == unsetCopyWithValue
         ? this.completionTokensDetails
         : completionTokensDetails as CompletionTokensDetails?,
@@ -127,7 +137,8 @@ class UsageInfo {
           numCachedTokens == other.numCachedTokens &&
           promptTokensDetails == other.promptTokensDetails &&
           promptTokenDetails == other.promptTokenDetails &&
-          completionTokensDetails == other.completionTokensDetails;
+          completionTokensDetails == other.completionTokensDetails &&
+          serviceTier == other.serviceTier;
 
   @override
   int get hashCode => Object.hash(
@@ -139,6 +150,7 @@ class UsageInfo {
     promptTokensDetails,
     promptTokenDetails,
     completionTokensDetails,
+    serviceTier,
   );
 
   @override
@@ -150,5 +162,6 @@ class UsageInfo {
       'numCachedTokens: $numCachedTokens, '
       'promptTokensDetails: $promptTokensDetails, '
       'promptTokenDetails: $promptTokenDetails, '
-      'completionTokensDetails: $completionTokensDetails)';
+      'completionTokensDetails: $completionTokensDetails, '
+      'serviceTier: $serviceTier)';
 }

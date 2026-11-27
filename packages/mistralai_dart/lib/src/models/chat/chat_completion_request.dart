@@ -5,6 +5,7 @@ import '../common/equality_helpers.dart';
 import '../metadata/prediction.dart';
 import '../metadata/prompt_mode.dart';
 import '../metadata/reasoning_effort.dart';
+import '../metadata/requested_service_tier.dart';
 import '../metadata/response_format.dart';
 import '../metadata/stop_sequence.dart';
 import '../moderations/guardrail_config.dart';
@@ -50,6 +51,9 @@ class ChatCompletionRequest {
   final ResponseFormat? responseFormat;
 
   /// Tools available to the model.
+  ///
+  /// This endpoint accepts function, image generation, document library, and
+  /// custom connector tools.
   final List<Tool>? tools;
 
   /// Controls how the model uses tools.
@@ -65,6 +69,30 @@ class ChatCompletionRequest {
   /// Positive values penalize tokens based on their frequency in the text.
   final double? frequencyPenalty;
 
+  /// The minimum number of tokens to generate.
+  final int? minTokens;
+
+  /// Penalty applied to repeating tokens. Must be greater than 0 and at most 2.
+  final double? repetitionPenalty;
+
+  /// Limits sampling to the top K tokens.
+  final int? topK;
+
+  /// Whether to return log probabilities for the generated tokens.
+  final bool? logprobs;
+
+  /// The number of alternative log probabilities to return per generated token.
+  final int? topLogprobs;
+
+  /// Whether to return log probabilities for prompt tokens.
+  final bool? promptLogprobs;
+
+  /// The number of alternative log probabilities to return per prompt token.
+  final int? topPromptLogprobs;
+
+  /// Requested service tier. Omitting it uses standard capacity.
+  final RequestedServiceTier? serviceTier;
+
   /// Number of completions to generate.
   final int? n;
 
@@ -73,7 +101,7 @@ class ChatCompletionRequest {
 
   /// Whether to inject a safety prompt.
   ///
-  /// When true, Mistral injects a system prompt about responsible AI usage.
+  /// Mistral has deprecated this field in favor of [guardrails].
   final bool? safePrompt;
 
   /// Custom request metadata.
@@ -81,14 +109,9 @@ class ChatCompletionRequest {
   /// Allows attaching arbitrary key-value pairs to the request.
   final Map<String, dynamic>? metadata;
 
-  /// Prediction configuration for speculative decoding.
+  /// Legacy prediction configuration. Mistral accepts and ignores this field.
   ///
-  /// Enables users to define anticipated output content, optimizing response
-  /// times by leveraging known or predictable content.
-  ///
-  /// Supported models: `mistral-large-latest`, `codestral-latest`
-  ///
-  /// Note: The `n` parameter is not supported when using predictions.
+  /// Leave this unset in new requests.
   final Prediction? prediction;
 
   /// Prompt mode for reasoning models.
@@ -99,8 +122,7 @@ class ChatCompletionRequest {
 
   /// Controls the reasoning effort level for reasoning models.
   ///
-  /// [ReasoningEffort.high] enables comprehensive reasoning traces,
-  /// [ReasoningEffort.none] disables reasoning effort.
+  /// The model determines which values are supported.
   final ReasoningEffort? reasoningEffort;
 
   /// Guardrail configurations for content moderation.
@@ -128,6 +150,14 @@ class ChatCompletionRequest {
     this.toolChoice,
     this.presencePenalty,
     this.frequencyPenalty,
+    this.minTokens,
+    this.repetitionPenalty,
+    this.topK,
+    this.logprobs,
+    this.topLogprobs,
+    this.promptLogprobs,
+    this.topPromptLogprobs,
+    this.serviceTier,
     this.n,
     this.parallelToolCalls,
     this.safePrompt,
@@ -169,6 +199,16 @@ class ChatCompletionRequest {
             : null,
         presencePenalty: (json['presence_penalty'] as num?)?.toDouble(),
         frequencyPenalty: (json['frequency_penalty'] as num?)?.toDouble(),
+        minTokens: json['min_tokens'] as int?,
+        repetitionPenalty: (json['repetition_penalty'] as num?)?.toDouble(),
+        topK: json['top_k'] as int?,
+        logprobs: json['logprobs'] as bool?,
+        topLogprobs: json['top_logprobs'] as int?,
+        promptLogprobs: json['prompt_logprobs'] as bool?,
+        topPromptLogprobs: json['top_prompt_logprobs'] as int?,
+        serviceTier: RequestedServiceTier.fromString(
+          json['service_tier'] as String?,
+        ),
         n: json['n'] as int?,
         parallelToolCalls: json['parallel_tool_calls'] as bool?,
         safePrompt: json['safe_prompt'] as bool?,
@@ -203,6 +243,14 @@ class ChatCompletionRequest {
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
     if (presencePenalty != null) 'presence_penalty': presencePenalty,
     if (frequencyPenalty != null) 'frequency_penalty': frequencyPenalty,
+    if (minTokens != null) 'min_tokens': minTokens,
+    if (repetitionPenalty != null) 'repetition_penalty': repetitionPenalty,
+    if (topK != null) 'top_k': topK,
+    if (logprobs != null) 'logprobs': logprobs,
+    if (topLogprobs != null) 'top_logprobs': topLogprobs,
+    if (promptLogprobs != null) 'prompt_logprobs': promptLogprobs,
+    if (topPromptLogprobs != null) 'top_prompt_logprobs': topPromptLogprobs,
+    if (serviceTier != null) 'service_tier': serviceTier!.value,
     if (n != null) 'n': n,
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (safePrompt != null) 'safe_prompt': safePrompt,
@@ -230,6 +278,14 @@ class ChatCompletionRequest {
     Object? toolChoice = unsetCopyWithValue,
     Object? presencePenalty = unsetCopyWithValue,
     Object? frequencyPenalty = unsetCopyWithValue,
+    Object? minTokens = unsetCopyWithValue,
+    Object? repetitionPenalty = unsetCopyWithValue,
+    Object? topK = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+    Object? topLogprobs = unsetCopyWithValue,
+    Object? promptLogprobs = unsetCopyWithValue,
+    Object? topPromptLogprobs = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
     Object? n = unsetCopyWithValue,
     Object? parallelToolCalls = unsetCopyWithValue,
     Object? safePrompt = unsetCopyWithValue,
@@ -268,6 +324,28 @@ class ChatCompletionRequest {
       frequencyPenalty: frequencyPenalty == unsetCopyWithValue
           ? this.frequencyPenalty
           : frequencyPenalty as double?,
+      minTokens: minTokens == unsetCopyWithValue
+          ? this.minTokens
+          : minTokens as int?,
+      repetitionPenalty: repetitionPenalty == unsetCopyWithValue
+          ? this.repetitionPenalty
+          : repetitionPenalty as double?,
+      topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
+      logprobs: logprobs == unsetCopyWithValue
+          ? this.logprobs
+          : logprobs as bool?,
+      topLogprobs: topLogprobs == unsetCopyWithValue
+          ? this.topLogprobs
+          : topLogprobs as int?,
+      promptLogprobs: promptLogprobs == unsetCopyWithValue
+          ? this.promptLogprobs
+          : promptLogprobs as bool?,
+      topPromptLogprobs: topPromptLogprobs == unsetCopyWithValue
+          ? this.topPromptLogprobs
+          : topPromptLogprobs as int?,
+      serviceTier: serviceTier == unsetCopyWithValue
+          ? this.serviceTier
+          : serviceTier as RequestedServiceTier?,
       n: n == unsetCopyWithValue ? this.n : n as int?,
       parallelToolCalls: parallelToolCalls == unsetCopyWithValue
           ? this.parallelToolCalls
@@ -318,10 +396,18 @@ class ChatCompletionRequest {
         toolChoice == other.toolChoice &&
         presencePenalty == other.presencePenalty &&
         frequencyPenalty == other.frequencyPenalty &&
+        minTokens == other.minTokens &&
+        repetitionPenalty == other.repetitionPenalty &&
+        topK == other.topK &&
+        logprobs == other.logprobs &&
+        topLogprobs == other.topLogprobs &&
+        promptLogprobs == other.promptLogprobs &&
+        topPromptLogprobs == other.topPromptLogprobs &&
+        serviceTier == other.serviceTier &&
         n == other.n &&
         parallelToolCalls == other.parallelToolCalls &&
         safePrompt == other.safePrompt &&
-        mapsEqual(metadata, other.metadata) &&
+        mapsDeepEqual(metadata, other.metadata) &&
         prediction == other.prediction &&
         promptMode == other.promptMode &&
         reasoningEffort == other.reasoningEffort &&
@@ -330,9 +416,9 @@ class ChatCompletionRequest {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     model,
-    Object.hashAll(messages),
+    listHash(messages),
     temperature,
     topP,
     maxTokens,
@@ -344,14 +430,24 @@ class ChatCompletionRequest {
     toolChoice,
     presencePenalty,
     frequencyPenalty,
+    minTokens,
+    repetitionPenalty,
+    topK,
+    logprobs,
+    topLogprobs,
+    promptLogprobs,
+    topPromptLogprobs,
+    serviceTier,
     n,
     parallelToolCalls,
     safePrompt,
-    mapHash(metadata),
-    Object.hash(prediction, promptMode, reasoningEffort),
+    mapDeepHashCode(metadata),
+    prediction,
+    promptMode,
+    reasoningEffort,
     listHash(guardrails),
     promptCacheKey,
-  );
+  ]);
 
   @override
   String toString() =>
@@ -368,6 +464,14 @@ class ChatCompletionRequest {
       'toolChoice: $toolChoice, '
       'presencePenalty: $presencePenalty, '
       'frequencyPenalty: $frequencyPenalty, '
+      'minTokens: $minTokens, '
+      'repetitionPenalty: $repetitionPenalty, '
+      'topK: $topK, '
+      'logprobs: $logprobs, '
+      'topLogprobs: $topLogprobs, '
+      'promptLogprobs: $promptLogprobs, '
+      'topPromptLogprobs: $topPromptLogprobs, '
+      'serviceTier: $serviceTier, '
       'n: $n, '
       'parallelToolCalls: $parallelToolCalls, '
       'safePrompt: $safePrompt, '

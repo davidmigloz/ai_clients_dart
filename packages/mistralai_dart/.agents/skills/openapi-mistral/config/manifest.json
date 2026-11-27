@@ -568,6 +568,30 @@
       "schema": "ChatCompletionResponse",
       "tags": []
     },
+    "ChatCompletionResponseChoiceLogprobs": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatChoiceLogprobs",
+      "file": "lib/src/models/chat/chat_choice_logprobs.dart",
+      "schema": "ChatCompletionResponseChoiceLogprobs",
+      "tags": []
+    },
+    "ChatCompletionResponseTokenLogprobs": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatTokenLogprob",
+      "file": "lib/src/models/chat/chat_choice_logprobs.dart",
+      "schema": "ChatCompletionResponseTokenLogprobs",
+      "tags": []
+    },
+    "ChatCompletionResponseTokenLogprobsTopK": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatTokenLogprobTopK",
+      "file": "lib/src/models/chat/chat_choice_logprobs.dart",
+      "schema": "ChatCompletionResponseTokenLogprobsTopK",
+      "tags": []
+    },
     "ChatMessage": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -683,6 +707,14 @@
       "dart_class": "ConnectorsQueryFilters",
       "file": "lib/src/models/connectors/connectors_query_filters.dart",
       "schema": "ConnectorsQueryFilters",
+      "tags": []
+    },
+    "CompletionResponseStreamChoice": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatChoiceDelta",
+      "file": "lib/src/models/chat/chat_choice_delta.dart",
+      "schema": "CompletionResponseStreamChoice",
       "tags": []
     },
     "ContentPart": {
@@ -2030,14 +2062,11 @@
     },
     "PromptTokensDetails": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "PromptTokensDetails",
       "file": "lib/src/models/metadata/prompt_tokens_details.dart",
       "schema": "PromptTokensDetails",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Spec schema is now empty/unreferenced; Dart model retained (matches official client) but no longer used by UsageInfo"
+      "tags": []
     },
     "PutDatasetRecordPropertiesInSchema": {
       "spec": "main",
@@ -2093,17 +2122,20 @@
       "schema": "QueryWorkflowResponse",
       "tags": []
     },
+    "RequestedServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "RequestedServiceTier",
+      "file": "lib/src/models/metadata/requested_service_tier.dart",
+      "schema": "RequestedServiceTier",
+      "tags": []
+    },
     "ReasoningEffort": {
       "spec": "main",
       "kind": "enum",
       "dart_class": "ReasoningEffort",
       "file": "lib/src/models/metadata/reasoning_effort.dart",
-      "schema": null,
-      "enum_values": [
-        "high",
-        "none"
-      ],
-      "note": "Inline enum used by ChatCompletionRequest and AgentsCompletionRequest"
+      "schema": "ReasoningEffort"
     },
     "ReferenceChunk": {
       "spec": "main",
