@@ -368,7 +368,7 @@ void main() {
     };
     test('passes text metadata and decodes model-defined targets', () async {
       final client = _client(
-        '/v1/classifiers',
+        '/v1/classifications',
         result,
         requestBody: {
           'model': model,
@@ -393,7 +393,7 @@ void main() {
 
     test('sends each chat as a messages envelope', () async {
       final batchClient = _client(
-        '/v1/chat/classifiers',
+        '/v1/chat/classifications',
         result,
         requestBody: {
           'model': model,
@@ -412,7 +412,7 @@ void main() {
       expect(batch.copyWith(conversations: []).conversations, isEmpty);
 
       final singleClient = _client(
-        '/v1/chat/classifiers',
+        '/v1/chat/classifications',
         result,
         requestBody: {
           'model': model,
