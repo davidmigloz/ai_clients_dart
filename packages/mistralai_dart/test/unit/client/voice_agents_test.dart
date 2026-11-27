@@ -480,6 +480,76 @@ void main() {
     },
   );
 
+  test('join packets reach the first listener in arrival order', () async {
+    final transport = _Transport(
+      onJoin: (room) {
+        room
+          ..emit(const {
+            'type': 'agent.state.changed',
+            'old_state': 'initializing',
+            'state': 'speaking',
+            'ts': 1,
+          })
+          ..emit(_transcript);
+      },
+    );
+    final connection = await VoiceAgentConnection.connect(
+      credentials: _credentials,
+      transport: transport,
+      closeSession: (_) async {},
+    );
+    addTearDown(connection.close);
+    final events = await connection.events.take(2).toList();
+    expect(events.map((event) => event.type), [
+      'agent.state.changed',
+      'transcription.segment',
+    ]);
+    expect(events.last, isA<VoiceAgentTranscriptEvent>());
+  });
+
+  test('finishes teardown without an event listener', () async {
+    final transport = _Transport(onJoin: (room) => room.emit(_transcript));
+    final stopped = <String>[];
+    final connection = await VoiceAgentConnection.connect(
+      credentials: _credentials,
+      transport: transport,
+      closeSession: (id) async => stopped.add(id),
+    );
+    await connection.close().timeout(const Duration(seconds: 1));
+    await connection.done;
+    expect(stopped, [_sessionId]);
+    expect(transport.disconnections, 1);
+  });
+
+  test('reports a fatal event before the media join returns', () async {
+    final transport = _Transport(
+      onJoin: (room) => room.emit(const {
+        'type': 'error',
+        'source': 'llm',
+        'code': 'not_ready',
+        'message': 'The selected model could not start.',
+        'fatal': true,
+      }),
+    );
+    final stopped = <String>[];
+    await expectLater(
+      VoiceAgentConnection.connect(
+        credentials: _credentials,
+        transport: transport,
+        closeSession: (id) async => stopped.add(id),
+      ),
+      throwsA(
+        isA<VoiceAgentConnectionException>().having(
+          (error) => error.errorEvent?.code,
+          'fatal error code',
+          'not_ready',
+        ),
+      ),
+    );
+    expect(stopped, [_sessionId]);
+    expect(transport.disconnections, 1);
+  });
+
   test(
     'peer disconnect stops the backend even if room teardown fails',
     () async {
@@ -559,11 +629,12 @@ TypeMatcher<VoiceAgentRpcError> _rpcCode(int code) =>
     isA<VoiceAgentRpcError>().having((error) => error.code, 'code', code);
 
 final class _Transport implements VoiceAgentRoomTransport {
-  _Transport({this.failJoin = false, this.failDisconnect = false});
+  _Transport({this.failJoin = false, this.failDisconnect = false, this.onJoin});
 
   final _packets = StreamController<VoiceAgentRoomPacket>();
   final bool failJoin;
   final bool failDisconnect;
+  final void Function(_Transport)? onJoin;
   late VoiceAgentRpcHandler _handler;
   int disconnections = 0;
   bool unregistered = false;
@@ -575,6 +646,8 @@ final class _Transport implements VoiceAgentRoomTransport {
   Future<void> connect(VoiceAgentRoomCredentials credentials) async {
     expect(credentials.toJson(), _credentials.toJson());
     if (failJoin) throw StateError('Rejected ${credentials.participantToken}');
+    onJoin?.call(this);
+    await Future<void>.delayed(Duration.zero);
   }
 
   void emit(

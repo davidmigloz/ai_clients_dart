@@ -105,7 +105,10 @@ final class VoiceAgentRpcError implements Exception {
 /// A room connection or protocol failure.
 final class VoiceAgentConnectionException implements Exception {
   /// Creates the exception with a message that omits credentials.
-  const VoiceAgentConnectionException(this.message);
+  const VoiceAgentConnectionException(this.message, {this.errorEvent});
+
+  /// The fatal agent event that ended startup, when supplied by the peer.
+  final VoiceAgentErrorEvent? errorEvent;
 
   /// Description of the failed operation.
   final String message;
@@ -202,7 +205,13 @@ final class VoiceAgentConnection {
   final VoiceAgentRoomTransport _transport;
   final Future<void> Function(String sessionId) _closeSession;
   final Map<String, VoiceAgentFunctionHandler> _functions;
-  final _events = StreamController<VoiceAgentEvent>.broadcast();
+  static const _maxPendingEvents = 1024;
+  var _hasEventListener = false;
+  var _pendingEventCount = 0;
+  late final _events = StreamController<VoiceAgentEvent>(
+    onListen: () => _hasEventListener = true,
+  );
+  VoiceAgentConnectionException? _startupFailure;
   // Released in _teardown(), shared by all shutdown paths.
   // ignore: cancel_subscriptions
   StreamSubscription<VoiceAgentRoomPacket>? _packets;
@@ -210,8 +219,12 @@ final class VoiceAgentConnection {
   Future<void>? _shutdown;
   final _done = Completer<void>();
 
-  /// Agent events. Subscribe after connecting and call [close] to end the session.
-  Stream<VoiceAgentEvent> get events => _events.stream;
+  /// Agent events, including those received during startup.
+  ///
+  /// The connection buffers the first 1024 events until the first subscriber.
+  /// If the buffer fills, the connection closes.
+  late final Stream<VoiceAgentEvent> events = _events.stream
+      .asBroadcastStream();
 
   /// Completes after the media connection and backend session are released.
   Future<void> get done => _done.future;
@@ -241,10 +254,9 @@ final class VoiceAgentConnection {
         connection._receive,
         onError: (Object _, StackTrace _) {
           if (connection.isClosed) return;
-          connection._events.addError(
+          connection._fail(
             const VoiceAgentConnectionException('Voice room transport failed.'),
           );
-          connection.close().ignore();
         },
         onDone: () => connection.close().ignore(),
       );
@@ -261,14 +273,19 @@ final class VoiceAgentConnection {
       return connection;
     } catch (_) {
       await connection.close().catchError((Object _) {});
-      throw const VoiceAgentConnectionException(
-        'Joining the voice room failed.',
-      );
+      throw connection._startupFailure ??
+          const VoiceAgentConnectionException('Joining the voice room failed.');
     }
   }
 
   void _receive(VoiceAgentRoomPacket packet) {
     if (isClosed || packet.topic != eventsTopic || !packet.senderIsAgent) {
+      return;
+    }
+    if (!_hasEventListener && _pendingEventCount++ == _maxPendingEvents) {
+      _fail(
+        const VoiceAgentConnectionException('Voice room event buffer is full.'),
+      );
       return;
     }
     final VoiceAgentEvent event;
@@ -283,7 +300,19 @@ final class VoiceAgentConnection {
       return;
     }
     _events.add(event);
-    if (event case VoiceAgentErrorEvent(fatal: true)) close().ignore();
+    if (event case final VoiceAgentErrorEvent error when error.fatal) {
+      _startupFailure = VoiceAgentConnectionException(
+        'The voice agent closed the room.',
+        errorEvent: error,
+      );
+      close().ignore();
+    }
+  }
+
+  void _fail(VoiceAgentConnectionException error) {
+    _startupFailure = error;
+    _events.addError(error);
+    close().ignore();
   }
 
   Future<String> _invokeFunction(VoiceAgentRpcInvocation invocation) async {
