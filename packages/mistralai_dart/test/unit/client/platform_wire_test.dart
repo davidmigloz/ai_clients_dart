@@ -470,6 +470,8 @@ void main() {
 
     expect(matching.single, created);
     expect(found.toJson(), _trigger);
+    expect(found.eventSource.urlVerificationToken, 'fixture-provider-token');
+    expect(found.toString(), isNot(contains('fixture-provider-token')));
     expect(recent.data.single.status, TriggerStatus.submissionFailed);
     expect(recent.data.single.triggeredAt, isNull);
     expect(requests.map((request) => request.method), [
@@ -587,5 +589,72 @@ void main() {
       ),
     );
     expect(requests.single.followRedirects, isFalse);
+  });
+
+  test('trigger responses redact nested webhook tokens from errors', () async {
+    const token = 'fixture-provider-token';
+    final calls = <Future<Object?> Function()>[
+      () => client.triggers.list(),
+      () => client.triggers.create(
+        request: const CreateTriggerRequest(
+          eventSourceId: 'source-1',
+          handler: TriggerHandler.workflows,
+          action: TriggerAction(
+            primitiveId: 'workflow-1',
+            type: TriggerActionType.startWorkflow,
+          ),
+          ownerType: TriggerOwnerType.workspace,
+          title: 'Start workflow',
+        ),
+      ),
+      () => client.triggers.get(triggerId: 'trigger-1'),
+    ];
+    for (final call in calls) {
+      reply = (request) => http.Response(
+        '{"event_source":{"url_verification_token":"$token"},malformed}',
+        request.method == 'POST' ? 201 : 200,
+      );
+      await expectLater(
+        call(),
+        throwsA(
+          isA<FormatException>()
+              .having((error) => error.source, 'source', isNull)
+              .having(
+                (error) => error.toString(),
+                'description',
+                isNot(contains(token)),
+              ),
+        ),
+      );
+
+      reply = (_) => http.Response(
+        jsonEncode({'message': 'Rejected token $token'}),
+        422,
+        headers: {'x-verification-token': token},
+      );
+      await expectLater(
+        call(),
+        throwsA(
+          isA<ApiException>()
+              .having((error) => error.statusCode, 'statusCode', 422)
+              .having((error) => error.details, 'details', isEmpty)
+              .having(
+                (error) => error.responseMetadata?.bodyExcerpt,
+                'body excerpt',
+                '[REDACTED]',
+              )
+              .having(
+                (error) => error.responseMetadata?.headers,
+                'response headers',
+                isEmpty,
+              )
+              .having(
+                (error) => error.toString(),
+                'description',
+                isNot(contains(token)),
+              ),
+        ),
+      );
+    }
   });
 }

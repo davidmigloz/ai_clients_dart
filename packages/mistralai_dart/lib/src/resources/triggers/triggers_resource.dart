@@ -35,6 +35,7 @@ class TriggersResource extends ResourceBase with PlatformResource {
       'primitive_id': ?primitiveId,
       'event_source_id': ?eventSourceId,
     },
+    redactErrorBody: true,
   );
 
   /// Creates a trigger attached to a registered webhook.
@@ -44,6 +45,7 @@ class TriggersResource extends ResourceBase with PlatformResource {
         _path,
         (json) => Trigger.fromJson(json! as Map<String, dynamic>),
         body: request.toJson(),
+        redactErrorBody: true,
       );
 
   /// Retrieves a trigger.
@@ -51,6 +53,7 @@ class TriggersResource extends ResourceBase with PlatformResource {
     'GET',
     _trigger(triggerId),
     (json) => Trigger.fromJson(json! as Map<String, dynamic>),
+    redactErrorBody: true,
   );
 
   /// Deletes a trigger.
