@@ -64,6 +64,13 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// to false for a stateless request. [background] enables asynchronous
   /// execution on supported models and requires server-side storage.
   ///
+  /// To continue a foreground long decode, set [continuationToken] to the
+  /// latest token. For a stored interaction, set [previousInteractionId] to
+  /// the ID that issued that token and omit [input]. For a stateless
+  /// interaction, keep `store: false` and resend the original [input].
+  /// Keep the [model], [generationConfig], [tools], and [systemInstruction]
+  /// consistent across hops. Each call submits one request.
+  ///
   /// The stable Gemini Developer API uses [responseFormat] for output options.
   /// [responseModalities] and [responseMimeType] are legacy beta parameters.
   Future<Interaction> create({
@@ -76,6 +83,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? responseMimeType,
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
+    String? continuationToken,
     bool? background,
     EnvironmentConfigOrId? environment,
     WebhookConfig? webhookConfig,
@@ -94,6 +102,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       responseMimeType: responseMimeType,
       responseFormat: responseFormat,
       previousInteractionId: previousInteractionId,
+      continuationToken: continuationToken,
       background: background,
       environment: environment,
       webhookConfig: webhookConfig,
@@ -115,6 +124,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     AgentConfig? agentConfig,
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
+    String? continuationToken,
     bool? background,
     EnvironmentConfigOrId? environment,
     WebhookConfig? webhookConfig,
@@ -131,6 +141,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       agentConfig: agentConfig,
       responseFormat: responseFormat,
       previousInteractionId: previousInteractionId,
+      continuationToken: continuationToken,
       background: background,
       environment: environment,
       webhookConfig: webhookConfig,
@@ -179,6 +190,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   ///
   /// Use [abortTrigger] to cancel the local request and response stream. For a
   /// background interaction, use [cancel] to stop server-side execution.
+  /// Use [continuationToken] to start the next decoding hop, following the
+  /// stored and stateless request rules on [create].
   /// The stable Gemini Developer API uses [responseFormat] for output options.
   /// [responseModalities] and [responseMimeType] are legacy beta parameters.
   Stream<InteractionEvent> createStream({
@@ -191,6 +204,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? responseMimeType,
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
+    String? continuationToken,
     EnvironmentConfigOrId? environment,
     bool? background,
     WebhookConfig? webhookConfig,
@@ -210,6 +224,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       responseMimeType: responseMimeType,
       responseFormat: responseFormat,
       previousInteractionId: previousInteractionId,
+      continuationToken: continuationToken,
       environment: environment,
       background: background,
       webhookConfig: webhookConfig,
@@ -235,6 +250,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     AgentConfig? agentConfig,
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
+    String? continuationToken,
     bool? background,
     EnvironmentConfigOrId? environment,
     WebhookConfig? webhookConfig,
@@ -252,6 +268,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       agentConfig: agentConfig,
       responseFormat: responseFormat,
       previousInteractionId: previousInteractionId,
+      continuationToken: continuationToken,
       background: background,
       environment: environment,
       webhookConfig: webhookConfig,
@@ -268,7 +285,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// Resumes a streaming interaction from a specific event.
   ///
   /// [lastEventId] identifies the last event already received. The server
-  /// starts with the next event. [abortTrigger] cancels the local stream.
+  /// starts with the next event. Use [createStream] with a continuation token
+  /// to start the next decoding hop. [abortTrigger] cancels the local stream.
   Stream<InteractionEvent> resumeStream(
     String id, {
     String? lastEventId,
@@ -303,6 +321,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? responseMimeType,
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
+    String? continuationToken,
     bool? background,
     EnvironmentConfigOrId? environment,
     WebhookConfig? webhookConfig,
@@ -326,6 +345,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     'response_mime_type': ?responseMimeType,
     if (responseFormat != null) 'response_format': responseFormat.toJson(),
     'previous_interaction_id': ?previousInteractionId,
+    'continuation_token': ?continuationToken,
     'background': ?background,
     if (environment != null) 'environment': environment.toJson(),
     if (webhookConfig != null) 'webhook_config': webhookConfig.toJson(),

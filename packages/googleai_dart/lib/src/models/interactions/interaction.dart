@@ -55,6 +55,12 @@ class Interaction {
   /// The ID of the previous interaction, if any.
   final String? previousInteractionId;
 
+  /// Opaque token for starting the next hop when decoding can continue.
+  ///
+  /// A stored continuation must identify this interaction as the previous
+  /// interaction. A stateless continuation must resend its original input.
+  final String? continuationToken;
+
   /// System instruction for the interaction.
   final String? systemInstruction;
 
@@ -114,6 +120,7 @@ class Interaction {
     this.usage,
     this.object = 'interaction',
     this.previousInteractionId,
+    this.continuationToken,
     this.systemInstruction,
     this.tools,
     this.generationConfig,
@@ -152,6 +159,7 @@ class Interaction {
         : null,
     object: json['object'] as String? ?? 'interaction',
     previousInteractionId: json['previous_interaction_id'] as String?,
+    continuationToken: json['continuation_token'] as String?,
     systemInstruction: json['system_instruction'] as String?,
     tools: (json['tools'] as List<dynamic>?)
         ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
@@ -205,6 +213,7 @@ class Interaction {
     'object': object,
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
+    if (continuationToken != null) 'continuation_token': continuationToken,
     if (systemInstruction != null) 'system_instruction': systemInstruction,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (generationConfig != null)
@@ -239,6 +248,7 @@ class Interaction {
     Object? usage = unsetCopyWithValue,
     Object? object = unsetCopyWithValue,
     Object? previousInteractionId = unsetCopyWithValue,
+    Object? continuationToken = unsetCopyWithValue,
     Object? systemInstruction = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
     Object? generationConfig = unsetCopyWithValue,
@@ -279,6 +289,9 @@ class Interaction {
       previousInteractionId: previousInteractionId == unsetCopyWithValue
           ? this.previousInteractionId
           : previousInteractionId as String?,
+      continuationToken: continuationToken == unsetCopyWithValue
+          ? this.continuationToken
+          : continuationToken as String?,
       systemInstruction: systemInstruction == unsetCopyWithValue
           ? this.systemInstruction
           : systemInstruction as String?,
@@ -370,6 +383,12 @@ class CreateModelInteractionParams extends CreateInteractionParams {
   /// The ID of a previous interaction to continue from.
   final String? previousInteractionId;
 
+  /// Opaque continuation token returned by a previous interaction or checkpoint.
+  final String? continuationToken;
+
+  /// Whether to store the request and response for later retrieval.
+  final bool? store;
+
   /// Whether to run the model interaction in the background.
   final bool? background;
 
@@ -404,6 +423,8 @@ class CreateModelInteractionParams extends CreateInteractionParams {
     this.responseMimeType,
     this.responseFormat,
     this.previousInteractionId,
+    this.continuationToken,
+    this.store,
     this.background,
     this.serviceTier,
     this.environment,
@@ -439,6 +460,8 @@ class CreateModelInteractionParams extends CreateInteractionParams {
           )
         : null,
     previousInteractionId: json['previous_interaction_id'] as String?,
+    continuationToken: json['continuation_token'] as String?,
+    store: json['store'] as bool?,
     background: json['background'] as bool?,
     serviceTier: json['service_tier'] != null
         ? serviceTierFromString(json['service_tier'] as String?)
@@ -474,6 +497,8 @@ class CreateModelInteractionParams extends CreateInteractionParams {
     if (responseFormat != null) 'response_format': responseFormat!.toJson(),
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
+    if (continuationToken != null) 'continuation_token': continuationToken,
+    if (store != null) 'store': store,
     if (background != null) 'background': background,
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
@@ -502,6 +527,12 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
 
   /// The ID of a previous interaction to continue from.
   final String? previousInteractionId;
+
+  /// Opaque continuation token returned by a previous interaction or checkpoint.
+  final String? continuationToken;
+
+  /// Whether to store the request and response for later retrieval.
+  final bool? store;
 
   /// Whether to run the agent interaction in the background.
   final bool? background;
@@ -533,6 +564,8 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
     this.agentConfig,
     this.responseFormat,
     this.previousInteractionId,
+    this.continuationToken,
+    this.store,
     this.background,
     this.serviceTier,
     this.environment,
@@ -558,6 +591,8 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
           )
         : null,
     previousInteractionId: json['previous_interaction_id'] as String?,
+    continuationToken: json['continuation_token'] as String?,
+    store: json['store'] as bool?,
     background: json['background'] as bool?,
     serviceTier: json['service_tier'] != null
         ? serviceTierFromString(json['service_tier'] as String?)
@@ -585,6 +620,8 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
     if (responseFormat != null) 'response_format': responseFormat!.toJson(),
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
+    if (continuationToken != null) 'continuation_token': continuationToken,
+    if (store != null) 'store': store,
     if (background != null) 'background': background,
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
