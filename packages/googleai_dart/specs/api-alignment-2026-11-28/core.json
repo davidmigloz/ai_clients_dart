@@ -1,0 +1,3323 @@
+{
+  "audit_cutoff": "2026-11-28 Europe/Madrid",
+  "cross_source_gaps": [
+    {
+      "acceptance": "Public Dart client sends documented snake_case tagged input, question and instruction unions, preserves keyed calibrated answers, usage and blocked feedback, checks Google AI auth/version and cancellation with MockClient.",
+      "evidence": [
+        "https://aistudio.google.com/api-reference/decisions",
+        "https://aistudio.google.com/api-reference/interactions.openapi.json",
+        "https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/gaos/funcs/decisions-create.ts",
+        "https://github.com/googleapis/python-genai/blob/aa813f8bf805b6f4f3e57abb8f04b91d769e23e6/google/genai/_gaos/google_genai.py#L1280"
+      ],
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/640",
+      "scope": "Gemini Decisions",
+      "status": "Public Gemini Developer v1beta POST /decisions, absent from Dart and core discovery; present in canonical GAOS OpenAPI and both SDKs"
+    },
+    {
+      "acceptance": "Server-side tool declarations honor defer_loading on functions and MCP; client execution round-trips discovery function calls/results; typed tool_search_call and tool_search_result including deltas preserve signatures and order in stateless history.",
+      "evidence": [
+        "https://aistudio.google.com/docs/tool-retrieval",
+        "https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/gaos/models/interactions/tool-search.ts"
+      ],
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "scope": "Tool retrieval",
+      "status": "Developer Interactions v1beta preview; Gemini 3.6+ where supported. No Dart typed tool, defer-loading, call or result coverage."
+    },
+    {
+      "acceptance": "Test generated prompts and function results with direct URIs and inline bytes, page ranges/layers, sheet ranges/layers, audio clips and video frame layers, plus response decoding and unknown field retention.",
+      "evidence": [
+        "https://aistudio.google.com/docs/document-processing#customize-document-processing",
+        "https://aistudio.google.com/docs/function-calling#file-inspection-options",
+        "https://aistudio.google.com/api-reference/api-versions"
+      ],
+      "followup": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "scope": "Multimodal file slicing",
+      "status": "Developer API media processing options are documented for v1 and v1beta. GenerateContent uses camelCase metadata and Interactions uses snake_case inspection options; existing Dart supports basic videos and inline function responses only for this feature group."
+    },
+    {
+      "acceptance": "Typed CRUD and persisted voice IDs in speech settings with request shape, paginated list, URI and closed-client fixtures.",
+      "evidence": [
+        "https://aistudio.google.com/api-reference/voices",
+        "https://aistudio.google.com/docs/voice-remixing"
+      ],
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "scope": "Voices",
+      "status": "Developer v1beta create/list/get/delete, SDK-supported, absent from Dart. Existing speech config needs text normalization and named voice fields."
+    },
+    {
+      "acceptance": "All documented verbs, masks, pagination, auth, managed environment references and masked output covered by mocked requests.",
+      "evidence": [
+        "https://aistudio.google.com/api-reference/credentials",
+        "https://aistudio.google.com/api-reference/all-methods#credentials"
+      ],
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "scope": "Credentials",
+      "status": "Developer v1beta create/list/get/update/delete, SDK-supported, absent from Dart. Keep write-only credentials distinct from response and exclude secret values from diagnostics."
+    },
+    {
+      "acceptance": "Verify POST files:register with gs:// URI list, Bearer auth and optional quota project, and expose parity across conditional file resources.",
+      "evidence": [
+        "https://aistudio.google.com/api-reference/all-methods#files",
+        "https://github.com/googleapis/python-genai/blob/aa813f8bf805b6f4f3e57abb8f04b91d769e23e6/google/genai/files.py#L767",
+        "https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/files.ts#L345"
+      ],
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "scope": "Cloud Storage file registration",
+      "status": "Developer v1 and v1beta discovery; Gemini Developer endpoint authenticates Cloud Storage rights with OAuth. No Dart files.register. JS defaults to Node credential discovery; package can accept explicit auth on supported platforms."
+    },
+    {
+      "acceptance": "Verify ADC/Bearer auth, global and dedicated regional routes, permitted versions and backend feature availability. Avoid sending Developer-only paths to Cloud; keep vertex_ai out of scope.",
+      "evidence": [
+        "https://docs.cloud.google.com/gemini-enterprise-agent-platform/apis",
+        "https://docs.cloud.google.com/gemini-enterprise-agent-platform/release-notes"
+      ],
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/642",
+      "scope": "Gemini Enterprise Agent Platform",
+      "status": "Separate public reference and SDK backend support. Existing config includes dedicated us/eu endpoints but global version selection and route injection require resource-specific checks."
+    },
+    {
+      "acceptance": "Confirm each model ID used by affected examples and distinguish announced future shutdown, automatic model redirect, and existing retirement.",
+      "evidence": [
+        "https://aistudio.google.com/docs/deprecations",
+        "https://aistudio.google.com/docs/changelog"
+      ],
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "scope": "Deprecated models and legacy developer routes",
+      "status": "Public model deprecations and routings are distinct from source compatibility. Replace retired example models, record reroutes and preserve existing callers unless a migration is required."
+    }
+  ],
+  "hashes_sha256": {
+    "latest-main-v1.json": "4743c8548012c47227f6d73c9dfd91cf9e5fe2b18582af2df020ecfaa9d8dcba",
+    "latest-main.json": "0fd965903a2e57b27bc8da78dec2c47c748d3901ac6f6e2f7d7383926a03e1df",
+    "openapi.json": "2df072464dc16334f5e30c5e226bc5d7b9891270e1f6f554d76a873d9ddb9da2"
+  },
+  "operations": [
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "method": "DELETE",
+      "operation": "DeleteEnvironmentHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/environments/{id}",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "method": "DELETE",
+      "operation": "DeleteEnvironment",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/environments/{id}:delete",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Present in v1beta discovery and both pinned SDKs for Live Interactions. This scope is separate from authTokens.create for BidiGenerateContent; the public GAOS OpenAPI file omits these operations.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "method": "DELETE",
+      "operation": "DeleteInteractionAuthTokenHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/644",
+      "path": "/v1beta/interactions/{interactionsId}/auth_tokens/{auth_tokensId}",
+      "plan": "Interactions/Genie scoped auth tokens; preserve separate general Live authTokens.create behavior"
+    },
+    {
+      "availability_or_dart_coverage": "Public v1beta managed environment route; client supports list CRUD but lacks the new mode filter and the files subresource.",
+      "changed_contract": [
+        {
+          "kind": "replace",
+          "new": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "schema": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageToken",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "mode",
+              "schema": {
+                "enum": [
+                  "ENVIRONMENT_MODE_UNSPECIFIED",
+                  "ON_DEMAND",
+                  "SELF_HOSTED"
+                ],
+                "type": "string"
+              }
+            }
+          ],
+          "old": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "schema": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageToken",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "path": [
+            "parameters"
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "method": "GET",
+      "operation": "ListEnvironmentsHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery lists root listing separately. Public reference describes an empty path as root and the nested path endpoint for subdirectories; confirm the SDK conversion and test both.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "method": "GET",
+      "operation": "GetEnvironmentFilesHttpByEnvironment",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments/{environment}/files",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified"
+    },
+    {
+      "availability_or_dart_coverage": "Public v1beta managed environment route; client supports list CRUD but lacks the new mode filter and the files subresource.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "method": "GET",
+      "operation": "GetEnvironmentFilesHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments/{environment}/files/{path=**}",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "method": "GET",
+      "operation": "GetEnvironmentHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/environments/{id}",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "method": "GET",
+      "operation": "GetEnvironment",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/environments/{id}:get",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery exposes an RPC-style environments:list alias. The published and SDK route is GET /v1beta/environments; account for the alias without exposing a duplicate Dart method.",
+      "changed_contract": [
+        {
+          "kind": "replace",
+          "new": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "schema": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageToken",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "in": "query",
+              "name": "mode",
+              "schema": {
+                "enum": [
+                  "ENVIRONMENT_MODE_UNSPECIFIED",
+                  "ON_DEMAND",
+                  "SELF_HOSTED"
+                ],
+                "type": "string"
+              }
+            }
+          ],
+          "old": [
+            {
+              "in": "query",
+              "name": "pageSize",
+              "schema": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "pageToken",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "path": [
+            "parameters"
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "method": "GET",
+      "operation": "ListEnvironments",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments:list",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "GET",
+      "operation": "ListModels",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "GET",
+      "operation": "GetModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models/{model}",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "GenerateContentByDynamicId",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/dynamic/{dynamicId}:generateContent",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "StreamGenerateContentByDynamicId",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/dynamic/{dynamicId}:streamGenerateContent",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "CreateEnvironmentHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/environments",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Present in v1beta discovery and both pinned SDKs for Live Interactions. This scope is separate from authTokens.create for BidiGenerateContent; the public GAOS OpenAPI file omits these operations.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "method": "POST",
+      "operation": "CreateInteractionAuthTokenHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/644",
+      "path": "/v1beta/interactions/{interactionsId}/auth_tokens",
+      "plan": "Interactions/Genie scoped auth tokens; preserve separate general Live authTokens.create behavior"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "method": "POST",
+      "operation": "CountMessageTokens",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:countMessageTokens",
+      "plan": "retired PaLM surface; no Dart implementation to remove"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "CountTokens",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models/{model}:countTokens",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "EmbedContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models/{model}:embedContent",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "GenerateContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models/{model}:generateContent",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "method": "POST",
+      "operation": "GenerateMessage",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:generateMessage",
+      "plan": "retired PaLM surface; no Dart implementation to remove"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "Predict",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models/{model}:predict",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "PredictLongRunning",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models/{model}:predictLongRunning",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "StreamGenerateContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/models/{model}:streamGenerateContent",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "GenerateContentByTunedModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/tunedModels/{tunedModel}:generateContent",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "method": "POST",
+      "operation": "StreamGenerateContentByTunedModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "path": "/v1beta/tunedModels/{tunedModel}:streamGenerateContent",
+      "plan": "documentation metadata changed"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery lists this unprefixed route. The public SDKs and reference use PUT /upload/v1beta/environments/{environment}/files/{path} for media upload; use the public resumable flow.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "method": "PUT",
+      "operation": "UploadEnvironmentFileHttp",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments/{environment}/files/{path=**}",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified"
+    }
+  ],
+  "public_reference_operations": [
+    {
+      "dart_coverage": "exists; reconcile version and complete current request, response and streaming contract",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/637",
+      "path": "/v1beta/interactions"
+    },
+    {
+      "dart_coverage": "exists; reconcile version and complete current request, response and streaming contract",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/637",
+      "path": "/v1beta/interactions/{id}/cancel"
+    },
+    {
+      "dart_coverage": "exists; reconcile version and complete current request, response and streaming contract",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/637",
+      "path": "/v1beta/interactions/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile version and complete current request, response and streaming contract",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/637",
+      "path": "/v1beta/interactions/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/agents"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/agents"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/agents/{agentsId}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/agents/{agentsId}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/webhooks"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/webhooks/{id}:ping"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/webhooks/{id}:rotateSigningSecret"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/webhooks"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/webhooks/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "PATCH",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/webhooks/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/webhooks/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/triggers"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/triggers/{triggerId}/executions"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/triggers"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/triggers/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/triggers/{triggerId}/executions"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "PATCH",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/triggers/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile against current GAOS spec",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/triggers/{id}"
+    },
+    {
+      "dart_coverage": "exists; reconcile schema",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments"
+    },
+    {
+      "dart_coverage": "exists; list needs mode filter",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments/{environment}/files/{path}"
+    },
+    {
+      "dart_coverage": "exists; reconcile schema",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments/{id}"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "PUT",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/upload/v1beta/environments/{environment}/files/{path}"
+    },
+    {
+      "dart_coverage": "exists; reconcile schema",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/environments/{id}"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/voices"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/voices"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/voices/{voicesId}"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/voices/{voicesId}"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/credentials"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/credentials"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/credentials/{id}"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "PATCH",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/credentials/{id}"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "path": "/v1beta/credentials/{id}"
+    },
+    {
+      "dart_coverage": "missing",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/640",
+      "path": "/v1beta/decisions"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:generateContent"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:streamGenerateContent"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/auth_tokens"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:batchGenerateContent"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:asyncBatchEmbedContent"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/batches/{generateContentBatch}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/batches"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/batches/{generateContentBatch}:cancel"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/batches/{generateContentBatch}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "PATCH",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/batches/{generateContentBatch}:updateGenerateContentBatch"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "PATCH",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/batches/{generateContentBatch}:updateEmbedContentBatch"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/files/{file}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/files"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/files/{file}"
+    },
+    {
+      "dart_coverage": "missing; Gemini Developer endpoint requiring Cloud OAuth credentials for Cloud Storage assets",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/files:register"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/files"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:countTokens"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/cachedContents"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/cachedContents"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/cachedContents/{id}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "PATCH",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/cachedContents/{id}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/cachedContents/{id}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:embedContent"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:batchEmbedContents"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/models/{model}:asyncBatchEmbedContent"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}:importFile"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}/operations/{operation}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStoresId}/upload/operations/{operationsId}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "POST",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}:uploadToFileSearchStore"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "DELETE",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}/documents/{document}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}/documents/{document}"
+    },
+    {
+      "dart_coverage": "existing resource; verify coverage, version, and route-specific behavior in implementation",
+      "method": "GET",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1beta/fileSearchStores/{fileSearchStore}/documents"
+    }
+  ],
+  "schemas": [
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "source",
+              "properties": [
+                "groundingPassage",
+                "semanticRetrieverChunk"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "AttributionSourceId"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "interactions_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "AudioMetadata"
+    },
+    {
+      "availability_or_dart_coverage": "Main REST transcription uses its typed request and response shapes. Reconcile separately with Live transcript events and preserve the distinct existing Dart configs.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "live_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "AudioTranscription"
+    },
+    {
+      "availability_or_dart_coverage": "Main REST transcription uses its typed request and response shapes. Reconcile separately with Live transcript events and preserve the distinct existing Dart configs.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "mode"
+          ],
+          "value": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "VERBATIM",
+              "SMART"
+            ],
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "sourceText"
+          ],
+          "value": {
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "language_config",
+              "properties": [
+                "languageAuto",
+                "languageHints"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "live_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "AudioTranscriptionConfig"
+    },
+    {
+      "availability_or_dart_coverage": "General Live-token discovery schema drops interactionId; scoped Live Interactions tokens use dedicated endpoints and types. Preserve existing callers explicitly or provide migration.",
+      "changed_contract": [
+        {
+          "kind": "remove",
+          "path": [
+            "properties",
+            "interactionId"
+          ],
+          "value": {
+            "type": "string",
+            "writeOnly": true,
+            "x-google-immutable": true
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "config",
+              "properties": [
+                "bidiGenerateContentSetup"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/644",
+      "plan": "Interactions/Genie scoped auth tokens; preserve separate general Live authTokens.create behavior",
+      "schema": "AuthToken"
+    },
+    {
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "labels"
+          ],
+          "value": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "proactivity"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProactivityConfig"
+              }
+            ]
+          }
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "BidiGenerateContentSetup"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "displayName"
+          ],
+          "value": {
+            "type": "string"
+          }
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "Blob"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "expiration",
+              "properties": [
+                "expireTime",
+                "ttl"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "CachedContent"
+    },
+    {
+      "availability_or_dart_coverage": "Core generation contract. Verify input and output fields in public Dart unary/stream APIs and pinned Developer vs Enterprise SDK converters. Addition to discovery does not establish availability on either backend or every model.",
+      "backend_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/642",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "continuationToken"
+          ],
+          "value": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        {
+          "kind": "replace",
+          "new": [
+            "FINISH_REASON_UNSPECIFIED",
+            "STOP",
+            "MAX_TOKENS",
+            "SAFETY",
+            "RECITATION",
+            "LANGUAGE",
+            "OTHER",
+            "BLOCKLIST",
+            "PROHIBITED_CONTENT",
+            "SPII",
+            "MALFORMED_FUNCTION_CALL",
+            "IMAGE_SAFETY",
+            "IMAGE_PROHIBITED_CONTENT",
+            "IMAGE_OTHER",
+            "NO_IMAGE",
+            "IMAGE_RECITATION",
+            "UNEXPECTED_TOOL_CALL",
+            "TOO_MANY_TOOL_CALLS",
+            "MISSING_THOUGHT_SIGNATURE",
+            "MALFORMED_RESPONSE",
+            "ESCALATION",
+            "PUP_LIMITED_DISABLED",
+            "CONTINUATION"
+          ],
+          "old": [
+            "FINISH_REASON_UNSPECIFIED",
+            "STOP",
+            "MAX_TOKENS",
+            "SAFETY",
+            "RECITATION",
+            "LANGUAGE",
+            "OTHER",
+            "BLOCKLIST",
+            "PROHIBITED_CONTENT",
+            "SPII",
+            "MALFORMED_FUNCTION_CALL",
+            "IMAGE_SAFETY",
+            "IMAGE_PROHIBITED_CONTENT",
+            "IMAGE_OTHER",
+            "NO_IMAGE",
+            "IMAGE_RECITATION",
+            "UNEXPECTED_TOOL_CALL",
+            "TOO_MANY_TOOL_CALLS",
+            "MISSING_THOUGHT_SIGNATURE",
+            "MALFORMED_RESPONSE",
+            "ESCALATION"
+          ],
+          "path": [
+            "properties",
+            "finishReason",
+            "enum"
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core generation, continuation and labels; verify Developer vs Enterprise route and actual SDK converter behavior",
+      "schema": "Candidate"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "config",
+              "properties": [
+                "whiteSpaceConfig"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "ChunkingConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "value",
+              "properties": [
+                "stringValue",
+                "numericValue"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "Condition"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "compression_mechanism",
+              "properties": [
+                "slidingWindow"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "ContextWindowCompressionConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "retired PaLM surface; no Dart implementation to remove",
+      "schema": "CountMessageTokensRequest"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "retired PaLM surface; no Dart implementation to remove",
+      "schema": "CountMessageTokensResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "CountTokensRequest"
+    },
+    {
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "customConfig"
+          ],
+          "value": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "env"
+          ],
+          "value": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/EnvVar"
+            },
+            "type": "object"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "fromEnvironment"
+          ],
+          "value": {
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "mode"
+          ],
+          "value": {
+            "enum": [
+              "ENVIRONMENT_MODE_UNSPECIFIED",
+              "ON_DEMAND",
+              "SELF_HOSTED"
+            ],
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "systemInstruction"
+          ],
+          "value": {
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "network",
+              "properties": [
+                "networkAllowlist",
+                "networkMode"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "CreateEnvironmentRequest"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "result",
+              "properties": [
+                "error",
+                "response"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "CustomLongRunningOperation"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "value",
+              "properties": [
+                "stringValue",
+                "stringListValue",
+                "numericValue"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "CustomMetadata"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "dataset",
+              "properties": [
+                "examples"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "Dataset"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "interactions_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "DocumentMetadata"
+    },
+    {
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "credential"
+          ],
+          "value": {
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "mode"
+          ],
+          "value": {
+            "enum": [
+              "NETWORK_MODE_UNSPECIFIED",
+              "DISABLED"
+            ],
+            "type": "string"
+          }
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "EgressRule"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "output",
+              "properties": [
+                "responsesFile",
+                "inlinedResponses"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "EmbedContentBatchOutput"
+    },
+    {
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "EnvVar"
+    },
+    {
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "customConfig"
+          ],
+          "value": {
+            "additionalProperties": {},
+            "readOnly": true,
+            "type": "object"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "environmentKey"
+          ],
+          "value": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "mode"
+          ],
+          "value": {
+            "enum": [
+              "ENVIRONMENT_MODE_UNSPECIFIED",
+              "ON_DEMAND",
+              "SELF_HOSTED"
+            ],
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "networkAllowlist"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentNetworkEgressAllowlist"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "networkMode"
+          ],
+          "value": {
+            "enum": [
+              "NETWORK_MODE_UNSPECIFIED",
+              "DISABLED"
+            ],
+            "type": "string"
+          }
+        },
+        {
+          "kind": "remove",
+          "path": [
+            "properties",
+            "network_allowlist"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentNetworkEgressAllowlist"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "remove",
+          "path": [
+            "properties",
+            "network_mode"
+          ],
+          "value": {
+            "enum": [
+              "NETWORK_MODE_UNSPECIFIED",
+              "DISABLED"
+            ],
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "network",
+              "properties": [
+                "networkAllowlist",
+                "networkMode"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "Environment"
+    },
+    {
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "EnvironmentFile"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "EnvironmentNetworkEgressAllowlist"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "retired PaLM surface; no Dart implementation to remove",
+      "schema": "Example"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "metadata",
+              "properties": [
+                "videoMetadata"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "File"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "displayName"
+          ],
+          "value": {
+            "type": "string"
+          }
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "FileData"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "FunctionResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "displayName"
+          ],
+          "value": {
+            "type": "string"
+          }
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "FunctionResponseBlob"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "FunctionResponseFileData"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "audioMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "documentMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "fileData"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FunctionResponseFileData"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "mediaProcessing"
+          ],
+          "value": {
+            "enum": [
+              "MEDIA_PROCESSING_UNSPECIFIED",
+              "STATIC",
+              "AGENTIC"
+            ],
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "mediaResolution"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/V1mainMediaResolution"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "spreadsheetMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpreadsheetMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "videoMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VideoMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "data",
+              "properties": [
+                "inlineData",
+                "fileData"
+              ]
+            },
+            {
+              "name": "metadata",
+              "properties": [
+                "videoMetadata",
+                "documentMetadata",
+                "spreadsheetMetadata",
+                "audioMetadata"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "interactions_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "FunctionResponsePart"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "grounding_source",
+              "properties": [
+                "inlinePassages",
+                "semanticRetriever"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "GenerateAnswerRequest"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "output",
+              "properties": [
+                "responsesFile",
+                "inlinedResponses"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "GenerateContentBatchOutput"
+    },
+    {
+      "availability_or_dart_coverage": "Core generation contract. Verify input and output fields in public Dart unary/stream APIs and pinned Developer vs Enterprise SDK converters. Addition to discovery does not establish availability on either backend or every model.",
+      "backend_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/642",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "continuationToken"
+          ],
+          "value": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "labels"
+          ],
+          "value": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core generation, continuation and labels; verify Developer vs Enterprise route and actual SDK converter behavior",
+      "schema": "GenerateContentRequest"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "retired PaLM surface; no Dart implementation to remove",
+      "schema": "GenerateMessageRequest"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "retired PaLM surface; no Dart implementation to remove",
+      "schema": "GenerateMessageResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "GenerationConfig"
+    },
+    {
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "GetEnvironmentFilesResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "chunk_type",
+              "properties": [
+                "web",
+                "image",
+                "retrievedContext",
+                "maps"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "GroundingChunk"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "value",
+              "properties": [
+                "stringValue",
+                "stringListValue",
+                "numericValue"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "GroundingChunkCustomMetadata"
+    },
+    {
+      "changed_contract": [
+        {
+          "kind": "replace",
+          "new": [
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false
+          ],
+          "old": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false
+          ],
+          "path": [
+            "x-google-enum-deprecated"
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "HarmCategory"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "learning_rate_option",
+              "properties": [
+                "learningRate",
+                "learningRateMultiplier"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "Hyperparameters"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "output",
+              "properties": [
+                "error",
+                "response"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "InlinedEmbedContentResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "output",
+              "properties": [
+                "error",
+                "response"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "InlinedResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "source",
+              "properties": [
+                "fileName",
+                "requests"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "InputConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "source",
+              "properties": [
+                "fileName",
+                "requests"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "InputEmbedContentConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "ListEnvironmentsResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "transport",
+              "properties": [
+                "streamableHttpTransport"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "McpServer"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "type",
+              "properties": [
+                "video"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "Media"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "retired PaLM surface; no Dart implementation to remove",
+      "schema": "Message"
+    },
+    {
+      "availability_or_dart_coverage": "Retired PaLM discovery schema or route. No Dart generateMessage or countMessageTokens surface to remove.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "remove",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "retired PaLM surface; no Dart implementation to remove",
+      "schema": "MessagePrompt"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "Model"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "audioMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "audioTranscription"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioTranscription"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "documentMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "mediaProcessing"
+          ],
+          "value": {
+            "enum": [
+              "MEDIA_PROCESSING_UNSPECIFIED",
+              "STATIC",
+              "AGENTIC"
+            ],
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "speechMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpeechMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "spreadsheetMetadata"
+          ],
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpreadsheetMetadata"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "data",
+              "properties": [
+                "text",
+                "inlineData",
+                "functionCall",
+                "functionResponse",
+                "fileData",
+                "executableCode",
+                "codeExecutionResult",
+                "toolCall",
+                "toolResponse"
+              ]
+            },
+            {
+              "name": "metadata",
+              "properties": [
+                "videoMetadata",
+                "documentMetadata",
+                "spreadsheetMetadata",
+                "audioMetadata"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "interactions_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "Part"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "PrebuiltVoiceConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Core generation contract. Verify input and output fields in public Dart unary/stream APIs and pinned Developer vs Enterprise SDK converters. Addition to discovery does not establish availability on either backend or every model.",
+      "backend_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/642",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "labels"
+          ],
+          "value": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core generation, continuation and labels; verify Developer vs Enterprise route and actual SDK converter behavior",
+      "schema": "PredictLongRunningRequest"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "response",
+              "properties": [
+                "generateVideoResponse"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "PredictLongRunningResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Core generation contract. Verify input and output fields in public Dart unary/stream APIs and pinned Developer vs Enterprise SDK converters. Addition to discovery does not establish availability on either backend or every model.",
+      "backend_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/642",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "labels"
+          ],
+          "value": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core generation, continuation and labels; verify Developer vs Enterprise route and actual SDK converter behavior",
+      "schema": "PredictRequest"
+    },
+    {
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "ProactivityConfig"
+    },
+    {
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "interimTranscriptTimestampEnabled"
+          ],
+          "value": {
+            "type": "boolean"
+          }
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "RealtimeInputConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "Source"
+    },
+    {
+      "availability_or_dart_coverage": "Public v1beta-only speech/Voices features in the current developer version matrix. Verify change independently of Live routing and preserve old prebuilt voice config.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "textNormalization"
+          ],
+          "value": {
+            "enum": [
+              "TEXT_NORMALIZATION_UNSPECIFIED",
+              "AUTO",
+              "ENABLED",
+              "DISABLED"
+            ],
+            "type": "string"
+          }
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "live_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "SpeechConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Main REST transcription uses its typed request and response shapes. Reconcile separately with Live transcript events and preserve the distinct existing Dart configs.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "live_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "SpeechMetadata"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "interactions_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "SpreadsheetMetadata"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "StreamableHttpTransport"
+    },
+    {
+      "availability_or_dart_coverage": "Core generation contract. Verify input and output fields in public Dart unary/stream APIs and pinned Developer vs Enterprise SDK converters. Addition to discovery does not establish availability on either backend or every model.",
+      "backend_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/642",
+      "changed_contract": [
+        {
+          "kind": "replace",
+          "new": [
+            "THINKING_LEVEL_UNSPECIFIED",
+            "MINIMAL",
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "XHIGH"
+          ],
+          "old": [
+            "THINKING_LEVEL_UNSPECIFIED",
+            "MINIMAL",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ],
+          "path": [
+            "properties",
+            "thinkingLevel",
+            "enum"
+          ]
+        }
+      ],
+      "in_stable_discovery": true,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "ThinkingConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "Tool"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "source_model",
+              "properties": [
+                "tunedModelSource",
+                "baseModel"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "TunedModel"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "model_input",
+              "properties": [
+                "textInput"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "TuningExample"
+    },
+    {
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "UploadEnvironmentFileRequest"
+    },
+    {
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/638",
+      "plan": "managed environments and media transfer; use public v1beta GAOS routes where publication is verified",
+      "schema": "UploadEnvironmentFileResponse"
+    },
+    {
+      "availability_or_dart_coverage": "Description, summary, or example metadata only. Review user-facing docs during closeout.",
+      "changed_contract": [],
+      "in_stable_discovery": true,
+      "kind": "prose",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/645",
+      "plan": "documentation metadata changed",
+      "schema": "UsageMetadata"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "value",
+              "properties": [
+                "level"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "V1mainMediaResolution"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [
+        {
+          "kind": "replace",
+          "new": [
+            "TOOL_TYPE_UNSPECIFIED",
+            "GOOGLE_SEARCH_WEB",
+            "GOOGLE_SEARCH_IMAGE",
+            "URL_CONTEXT",
+            "GOOGLE_MAPS",
+            "FILE_SEARCH",
+            "MEDIA_PROCESSING"
+          ],
+          "old": [
+            "TOOL_TYPE_UNSPECIFIED",
+            "GOOGLE_SEARCH_WEB",
+            "GOOGLE_SEARCH_IMAGE",
+            "URL_CONTEXT",
+            "GOOGLE_MAPS",
+            "FILE_SEARCH"
+          ],
+          "path": [
+            "enum"
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "V1mainToolType"
+    },
+    {
+      "availability_or_dart_coverage": "Discovery now explicitly declares the existing oneof. Review the corresponding Dart shape against the pinned SDKs; metadata addition alone is insufficient evidence of a new API feature.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "content",
+              "properties": [
+                "video",
+                "uri"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "validate operation/schema metadata and SDK wire behavior before closing",
+      "schema": "Video"
+    },
+    {
+      "availability_or_dart_coverage": "Core media contract. Existing Part preserves many unknown keys, but new fields need typed access, typed metadata-only decoding, and round-trip without disrupting existing known parts. FunctionResponseInlinePart currently handles inline bytes only. Keep separate naming and wire casing from Interactions.",
+      "changed_contract": [
+        {
+          "kind": "remove",
+          "path": [
+            "deprecated"
+          ],
+          "value": true
+        },
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "contentLayers"
+          ],
+          "value": {
+            "items": {
+              "enum": [
+                "CONTENT_LAYER_UNSPECIFIED",
+                "FRAMES",
+                "AUDIO",
+                "TRANSCRIPT"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      ],
+      "in_stable_discovery": true,
+      "interactions_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/639",
+      "kind": "modify",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "core multimodal part and function response slicing, and typed generated media preservation",
+      "schema": "VideoMetadata"
+    },
+    {
+      "availability_or_dart_coverage": "Public v1beta-only speech/Voices features in the current developer version matrix. Verify change independently of Live routing and preserve old prebuilt voice config.",
+      "changed_contract": [
+        {
+          "kind": "add",
+          "path": [
+            "properties",
+            "voice"
+          ],
+          "value": {
+            "type": "string"
+          }
+        },
+        {
+          "kind": "add",
+          "path": [
+            "x-google-oneofs"
+          ],
+          "value": [
+            {
+              "name": "voice_config",
+              "properties": [
+                "prebuiltVoiceConfig",
+                "voice"
+              ]
+            }
+          ]
+        }
+      ],
+      "in_stable_discovery": false,
+      "kind": "modify",
+      "live_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "VoiceConfig"
+    },
+    {
+      "availability_or_dart_coverage": "Main REST transcription uses its typed request and response shapes. Reconcile separately with Live transcript events and preserve the distinct existing Dart configs.",
+      "changed_contract": [],
+      "in_stable_discovery": false,
+      "kind": "add",
+      "live_followup": "https://github.com/davidmigloz/ai_clients_dart/issues/643",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "plan": "Live and batch transcription, speech configuration and voices; verify shared main vs Live schema types explicitly",
+      "schema": "WordInfo"
+    }
+  ],
+  "source": "https://generativelanguage.googleapis.com/$discovery/OPENAPI3_0?version=v1beta",
+  "stable_comparison_source": "https://generativelanguage.googleapis.com/$discovery/OPENAPI3_0?version=v1",
+  "stable_discovery_operations": [
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "DELETE",
+      "operation": "DeleteOperation",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/batches/{generateContentBatch}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "DELETE",
+      "operation": "DeleteFileSearchStore",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "DELETE",
+      "operation": "DeleteDocument",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}/documents/{document}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "DELETE",
+      "operation": "DeleteFile",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/files/{file}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "DELETE",
+      "operation": "DeleteOperationByOperationsId",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/operations/{operationsId}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListOperationsBy",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/batches"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetOperationByGenerateContentBatch",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/batches/{generateContentBatch}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetOperationByCorpusAndOperation",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/corpora/{corpus}/operations/{operation}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListFileSearchStores",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "DownloadMedia",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStoresId}/media/{mediaId}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetOperationByFileSearchStoresIdAndOperationsId",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStoresId}/upload/operations/{operationsId}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetFileSearchStore",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListDocuments",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}/documents"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetDocument",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}/documents/{document}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetOperationByFileSearchStoreAndOperation",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}/operations/{operation}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListFiles",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/files"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetFile",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/files/{file}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "DownloadFile",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/files/{file}:download"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetOperationByGeneratedFileAndOperation",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/generatedFiles/{generatedFile}/operations/{operation}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListModels",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListOperationsByModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}/operations"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetOperationByModelAndOperation",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}/operations/{operation}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListOperations",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/operations"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "ListOperationsByTunedModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/tunedModels/{tunedModel}/operations"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "GET",
+      "operation": "GetOperation",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/tunedModels/{tunedModel}/operations/{operation}"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "PATCH",
+      "operation": "UpdateEmbedContentBatch",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/batches/{generateContentBatch}:updateEmbedContentBatch"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "PATCH",
+      "operation": "UpdateGenerateContentBatch",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/batches/{generateContentBatch}:updateGenerateContentBatch"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "CancelOperationByGenerateContentBatch",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/batches/{generateContentBatch}:cancel"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "GenerateContentByDynamicId",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/dynamic/{dynamicId}:generateContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "StreamGenerateContentByDynamicId",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/dynamic/{dynamicId}:streamGenerateContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "CreateFileSearchStore",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "ImportFile",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}:importFile"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "UploadToFileSearchStore",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/fileSearchStores/{fileSearchStore}:uploadToFileSearchStore"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "CreateFile",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/files"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "RegisterFiles",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/files:register"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "AsyncBatchEmbedContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}:asyncBatchEmbedContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "BatchEmbedContents",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}:batchEmbedContents"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "BatchGenerateContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}:batchGenerateContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "CountTokens",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}:countTokens"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "EmbedContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}:embedContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "GenerateContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}:generateContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "StreamGenerateContent",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/models/{model}:streamGenerateContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "CancelOperation",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/tunedModels/{tunedModel}/operations/{operation}:cancel"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "AsyncBatchEmbedContentByTunedModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/tunedModels/{tunedModel}:asyncBatchEmbedContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "BatchGenerateContentByTunedModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/tunedModels/{tunedModel}:batchGenerateContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "GenerateContentByTunedModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/tunedModels/{tunedModel}:generateContent"
+    },
+    {
+      "availability_or_dart_coverage": "Present in authenticated v1 core discovery. Public docs and relevant SDK support still control model/backend availability.",
+      "method": "POST",
+      "operation": "StreamGenerateContentByTunedModel",
+      "owner": "https://github.com/davidmigloz/ai_clients_dart/issues/641",
+      "path": "/v1/tunedModels/{tunedModel}:streamGenerateContent"
+    }
+  ],
+  "toolkit": {
+    "missing_manifest_entries": [
+      "AudioMetadata",
+      "AudioTranscription",
+      "BidiGenerateContentSetup",
+      "CountMessageTokensRequest",
+      "CountMessageTokensResponse",
+      "DocumentMetadata",
+      "EnvVar",
+      "EnvironmentFile",
+      "Example",
+      "FunctionResponseBlob",
+      "FunctionResponseFileData",
+      "FunctionResponsePart",
+      "GenerateMessageRequest",
+      "GenerateMessageResponse",
+      "GetEnvironmentFilesResponse",
+      "Message",
+      "MessagePrompt",
+      "PredictLongRunningRequest",
+      "PredictRequest",
+      "ProactivityConfig",
+      "RealtimeInputConfig",
+      "SpeechConfig",
+      "SpeechMetadata",
+      "SpreadsheetMetadata",
+      "UploadEnvironmentFileRequest",
+      "UploadEnvironmentFileResponse",
+      "VideoMetadata",
+      "VoiceConfig",
+      "WordInfo"
+    ],
+    "summary": {
+      "changed_type_count": 40,
+      "error_count": 81,
+      "missing_manifest_count": 29,
+      "warning_count": 1
+    }
+  }
+}

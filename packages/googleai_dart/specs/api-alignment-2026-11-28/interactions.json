@@ -1,0 +1,2058 @@
+{
+  "cutoff_date": "2026-11-28",
+  "cutoff_timezone": "Europe/Madrid",
+  "baseline_commit": "36a0c21803b969a9942bc42f84ac0658a6cb2f19",
+  "snapshot": {
+    "canonical_url": "https://aistudio.google.com/api-reference/interactions.openapi.json",
+    "version": "v1beta",
+    "repository_path": "specs/openapi-interactions.json",
+    "baseline_sha256": "89573b4fcdae9203bf18cd019953955c1fb83cd134111e9ee591d2594ef7cf81",
+    "candidate_raw_sha256": "76210b6440354784c0dec1c92d0013b3e7bfe24e6b1a324b62eed91bf58e5fa2",
+    "candidate_toolkit_normalized_sha256": "565aa2c65f09fda6a470e207a82f4d5596cd0f64769de24e208babb143352128",
+    "baseline_counts": {
+      "paths": 14,
+      "operations": 26,
+      "schemas": 179
+    },
+    "candidate_counts": {
+      "paths": 21,
+      "operations": 38,
+      "schemas": 213
+    },
+    "wire_route_renames": 4,
+    "operation_delta_counts": {
+      "added": 16,
+      "modified": 15,
+      "removed": 4
+    },
+    "schema_delta_counts": {
+      "added": 67,
+      "modified": 32,
+      "removed": 33
+    },
+    "note": "The v1 and v1beta reference pages distinguish the public route and schema. The download URL returns the same v1beta document when queried for v1."
+  },
+  "sdk_revisions": {
+    "https://github.com/googleapis/python-genai": {
+      "tag": "v3.6.1",
+      "commit": "aa813f8bf805b6f4f3e57abb8f04b91d769e23e6"
+    },
+    "https://github.com/googleapis/js-genai": {
+      "tag": "v3.6.1",
+      "commit": "719dffc91dbf38f8a5f2d90bf93efa5dc8207999"
+    }
+  },
+  "operations": [
+    {
+      "change": "added",
+      "method": "DELETE",
+      "path": "/{api_version}/agents/{agentsId}",
+      "operation_id": "DeleteAgent",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    },
+    {
+      "change": "added",
+      "method": "DELETE",
+      "path": "/{api_version}/credentials/{id}",
+      "operation_id": "DeleteCredential",
+      "issue": 638,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "DELETE",
+      "path": "/{api_version}/voices/{voicesId}",
+      "operation_id": "DeleteVoice",
+      "issue": 641,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/agents/{agentsId}",
+      "operation_id": "GetAgent",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/credentials",
+      "operation_id": "ListCredentials",
+      "issue": 638,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/credentials/{id}",
+      "operation_id": "GetCredential",
+      "issue": 638,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/environments/{environment}/files/{path}",
+      "operation_id": "GetEnvironmentFiles",
+      "issue": 638,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/triggers/{triggerId}/executions",
+      "operation_id": "ListTriggerExecutions",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/voices",
+      "operation_id": "ListVoices",
+      "issue": 641,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "GET",
+      "path": "/{api_version}/voices/{voicesId}",
+      "operation_id": "GetVoice",
+      "issue": 641,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "PATCH",
+      "path": "/{api_version}/credentials/{id}",
+      "operation_id": "UpdateCredential",
+      "issue": 638,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "POST",
+      "path": "/{api_version}/credentials",
+      "operation_id": "CreateCredential",
+      "issue": 638,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "POST",
+      "path": "/{api_version}/decisions",
+      "operation_id": "CreateDecision",
+      "issue": 640,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "POST",
+      "path": "/{api_version}/triggers/{triggerId}/executions",
+      "operation_id": "RunTrigger",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    },
+    {
+      "change": "added",
+      "method": "POST",
+      "path": "/{api_version}/voices",
+      "operation_id": "CreateVoice",
+      "issue": 641,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "added",
+      "method": "PUT",
+      "path": "/upload/{api_version}/environments/{environment}/files/{path}",
+      "operation_id": "StartEnvironmentFileUpload",
+      "issue": 638,
+      "disposition": "Missing in Dart."
+    },
+    {
+      "change": "modified",
+      "method": "DELETE",
+      "path": "/{api_version}/environments/{id}",
+      "operation_id": "DeleteEnvironment",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "id",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "DELETE",
+      "path": "/{api_version}/interactions/{id}",
+      "operation_id": "deleteInteraction",
+      "issue": 637,
+      "disposition": "Dart already sends the wire path. Added OpenAPI path placeholder is a generator alias.",
+      "details": [
+        {
+          "name": "interactionsId",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "DELETE",
+      "path": "/{api_version}/triggers/{id}",
+      "operation_id": "DeleteTrigger",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "id",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/environments",
+      "operation_id": "ListEnvironments",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "mode",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/environments/{id}",
+      "operation_id": "GetEnvironment",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "id",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/interactions/{id}",
+      "operation_id": "getInteractionById",
+      "issue": 637,
+      "disposition": "Dart already has this method. Retain explicit include_input supported by pinned SDKs despite its absence from current OpenAPI.",
+      "details": [
+        {
+          "breaking": true,
+          "name": "include_input",
+          "type": "parameter_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "GET",
+      "path": "/{api_version}/triggers/{id}",
+      "operation_id": "GetTrigger",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "id",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "PATCH",
+      "path": "/{api_version}/triggers/{id}",
+      "operation_id": "UpdateTrigger",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": "UpdateTriggerRequest",
+          "old": "TriggerUpdate",
+          "type": "request_schema_changed"
+        },
+        {
+          "name": "id",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "PATCH",
+      "path": "/{api_version}/webhooks/{id}",
+      "operation_id": "UpdateWebhook",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": "UpdateWebhookRequest",
+          "old": "WebhookUpdate",
+          "type": "request_schema_changed"
+        },
+        {
+          "breaking": true,
+          "name": "update_mask",
+          "type": "parameter_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/agents",
+      "operation_id": "CreateAgent",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "name": "parent",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/interactions",
+      "operation_id": "CreateInteraction",
+      "issue": 637,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "name": "",
+          "type": "parameter_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/triggers",
+      "operation_id": "CreateTrigger",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": "Trigger",
+          "old": "TriggerCreateParams",
+          "type": "request_schema_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/webhooks",
+      "operation_id": "CreateWebhook",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": "CreateWebhookRequest",
+          "old": "Webhook",
+          "type": "request_schema_changed"
+        },
+        {
+          "name": "webhook_id",
+          "type": "parameter_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/webhooks/{id}:ping",
+      "operation_id": "PingWebhook",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": null,
+          "old": "PingWebhookRequest",
+          "type": "request_schema_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "method": "POST",
+      "path": "/{api_version}/webhooks/{id}:rotateSigningSecret",
+      "operation_id": "RotateSigningSecret",
+      "issue": 638,
+      "disposition": "Dart method exists. Check changed parameters and body against reference and pinned SDKs.",
+      "details": [
+        {
+          "new": null,
+          "old": "RotateSigningSecretRequest",
+          "type": "request_schema_changed"
+        }
+      ]
+    },
+    {
+      "change": "removed",
+      "method": "DELETE",
+      "path": "/{api_version}/agents/{id}",
+      "operation_id": "DeleteAgent",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    },
+    {
+      "change": "removed",
+      "method": "GET",
+      "path": "/{api_version}/agents/{id}",
+      "operation_id": "GetAgent",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    },
+    {
+      "change": "removed",
+      "method": "GET",
+      "path": "/{api_version}/triggers/{trigger_id}/executions",
+      "operation_id": "ListTriggerExecutions",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    },
+    {
+      "change": "removed",
+      "method": "POST",
+      "path": "/{api_version}/triggers/{trigger_id}/executions",
+      "operation_id": "RunTrigger",
+      "issue": 638,
+      "disposition": "Wire path unchanged. OpenAPI placeholder rename."
+    }
+  ],
+  "schemas": [
+    {
+      "change": "added",
+      "schema": "Answer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "AudioData",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "AudioMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "AudioStaticMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ChoiceAnswer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ChoiceQuestion",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "CreateDecisionRequest",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "CreateDecisionResponse",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "CreateVoiceRequest",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "CreateWebhookRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "Credential",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "CredentialCreateParams",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "CredentialUpdateParams",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "Criteria",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "DecisionInputContent",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "DecisionInstructionContent",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "DeleteVoiceResponse",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "DocumentMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "DocumentStaticMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "EgressRule",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "EnvVar",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "EnvironmentFile",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "EnvironmentVariableConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "EnvironmentVariableUpdateConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "GetEnvironmentFilesResponse",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "HttpBearerConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "HttpBearerUpdateConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "HttpBody",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "InjectionLocation",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ListCredentialsResponse",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ListVoicesResponse",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "MediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "NoulAnswer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "NoulQuestion",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "OAuth2Config",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "OAuth2UpdateConfig",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "PageProcessingOptions",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "Pitch",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingCallDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingCallStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingResultDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ProcessingResultStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "PromptFeedback",
+      "issue": 637,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "PromptedVoice",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "Question",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ReplicatedVoice",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ScoreAnswer",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ScoreQuestion",
+      "issue": 640,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "SmartTranscriptionMode",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "SpeakerConfig",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "SpeechAnnotation",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "SpreadsheetProcessingOptions",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "StaticMediaProcessing",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearch",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchCallDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchCallStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchCallStepArguments",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchResultDelta",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "ToolSearchResultStep",
+      "issue": 639,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "TranscriptionMode",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "UpdateTriggerRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "UpdateWebhookRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "UploadEnvironmentFileRequest",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "UploadEnvironmentFileResponse",
+      "issue": 638,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "VerbatimTranscriptionMode",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "Voice",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "added",
+      "schema": "VoiceType",
+      "issue": 641,
+      "disposition": "No mapped Dart type. Add, map an existing representation, or document an exclusion against the pinned wire contract."
+    },
+    {
+      "change": "modified",
+      "schema": "AgentOption",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "AgentOption"
+      ],
+      "disposition": "String-based Dart model IDs accept new values. Refresh examples for current supported preview agents.",
+      "details": [
+        {
+          "new": [
+            "antigravity-preview-05-2026",
+            "antigravity-preview-09-2026",
+            "deep-research-max-preview-04-2026",
+            "deep-research-preview-04-2026"
+          ],
+          "old": [
+            "antigravity-preview-05-2026",
+            "deep-research-max-preview-04-2026",
+            "deep-research-preview-04-2026",
+            "deep-research-pro-preview-12-2025"
+          ],
+          "type": "enum_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "Annotation",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "Annotation"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "new": [
+            "FileCitation",
+            "PlaceCitation",
+            "SpeechAnnotation",
+            "UrlCitation",
+            "WordInfo"
+          ],
+          "old": [
+            "FileCitation",
+            "PlaceCitation",
+            "UrlCitation",
+            "WordInfo"
+          ],
+          "type": "union_members_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "AudioContent",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "AudioContent"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "processing",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "CreateAgentInteractionParams",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "CreateAgentInteractionParams"
+      ],
+      "disposition": "The continuation token changes the spec. The Dart unary and SSE agent surfaces also need request parity.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "continuation_token",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "CreateEnvironmentRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "interactions:CreateEnvironmentRequest"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "custom_config",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "env",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "from_environment",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "mode",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "system_instruction",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "CreateModelInteractionParams",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "CreateModelInteractionParams"
+      ],
+      "disposition": "The continuation token changes the spec. Add already documented missing request parameters through model unary and SSE as supported.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "continuation_token",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "DeepResearchAgentConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "DeepResearchAgentConfig"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "property": "enable_bigquery_tool",
+          "type": "property_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "DocumentContent",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "DocumentContent"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "processing",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "resolution",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "Environment",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "interactions:Environment"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "custom_config",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "environment_key",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "mode",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "EnvironmentConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "EnvironmentConfig"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "custom_config",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "env",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "mode",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "EnvironmentNetworkEgressAllowlist",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "interactions:EnvironmentNetworkEgressAllowlist"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "allowlist",
+          "type": "property_added"
+        },
+        {
+          "new": [],
+          "old": [
+            "oneOf:object",
+            "oneOf:string"
+          ],
+          "type": "union_members_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "Function",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "Function"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "defer_loading",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "short_description",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "FunctionResultDelta",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "FunctionResultDelta"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "property": "call_id",
+          "type": "property_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "GenerationConfig",
+      "issue": 641,
+      "dart_manifest_entries": [
+        "interactions:GenerationConfig"
+      ],
+      "disposition": "Coordinate Interactions speech config migration with voice and transcription. Retain existing beta caller serialization where the wire supports it.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "structured_speech_config",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "temperature",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "top_p",
+          "type": "property_added"
+        },
+        {
+          "breaking": true,
+          "property": "speech_config",
+          "type": "property_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "HarmCategory",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "interactions:HarmCategory"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "new": [
+            "dangerous_content",
+            "harassment",
+            "hate_speech",
+            "jailbreak",
+            "sexually_explicit"
+          ],
+          "old": [
+            "civic_integrity",
+            "dangerous_content",
+            "harassment",
+            "hate_speech",
+            "image_dangerous_content",
+            "image_harassment",
+            "image_hate",
+            "image_sexually_explicit",
+            "jailbreak",
+            "sexually_explicit"
+          ],
+          "type": "enum_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "Interaction",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "Interaction"
+      ],
+      "disposition": "The output accessors remain SDK conveniences produced from steps. Preserve Dart convenience access while expanding typed response coverage.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "background",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "continuation_token",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "errors",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "max_total_tokens",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "store",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "stream",
+          "type": "property_added"
+        },
+        {
+          "breaking": true,
+          "property": "output_audio",
+          "type": "property_removed"
+        },
+        {
+          "breaking": true,
+          "property": "output_image",
+          "type": "property_removed"
+        },
+        {
+          "breaking": true,
+          "property": "output_text",
+          "type": "property_removed"
+        },
+        {
+          "breaking": true,
+          "property": "output_video",
+          "type": "property_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "InteractionSseEventInteraction",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "InteractionSseEventInteraction"
+      ],
+      "disposition": "Include continuation token in typed create/completed snapshots and preserve requiredness for partial stream envelopes.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "continuation_token",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "InteractionStatusUpdate",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "InteractionStatusUpdate"
+      ],
+      "disposition": "Decode both checkpoint token and usage, including streams interrupted after a checkpoint.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "continuation_token",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "usage",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "McpServer",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "interactions:McpServer"
+      ],
+      "disposition": "Cover deferred schema loading and audit credential-linked behavior with managed agents.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "defer_loading",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "ModelOption",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "ModelOption"
+      ],
+      "disposition": "Dart accepts model strings. Update example IDs and version and model capability constraints.",
+      "details": [
+        {
+          "new": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-image",
+            "gemini-2.5-flash-lite",
+            "gemini-2.5-pro",
+            "gemini-3-flash-preview",
+            "gemini-3-pro-image",
+            "gemini-3.1-flash-image",
+            "gemini-3.1-flash-lite",
+            "gemini-3.1-flash-lite-image",
+            "gemini-3.1-flash-tts-preview",
+            "gemini-3.1-pro-preview",
+            "gemini-3.1-pro-preview-customtools",
+            "gemini-3.5-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-transcribe",
+            "gemini-3.6-flash",
+            "gemini-3.7-flash",
+            "gemini-3.8-flash",
+            "gemini-3.8-flash-lite-tts",
+            "gemini-3.8-flash-tts",
+            "gemini-4-argon",
+            "gemini-4-carbon",
+            "gemini-4-hydrogen",
+            "gemini-4-neon",
+            "gemini-flash-latest",
+            "gemini-flash-lite-latest",
+            "gemini-nano-banana-2.1",
+            "gemini-omni-1.1-flash",
+            "gemini-omni-1.2-flash",
+            "gemini-omni-flash-preview",
+            "gemini-pro-latest",
+            "gemini-robotics-er-1.6-preview",
+            "gemini-robotics-er-2-preview",
+            "gemma-4-26b-a4b-it",
+            "gemma-4-31b-it",
+            "lyria-3-clip-preview",
+            "lyria-3-pro-preview",
+            "lyria-3.5",
+            "nano-banana-pro-preview"
+          ],
+          "old": [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-image",
+            "gemini-2.5-flash-lite",
+            "gemini-2.5-pro",
+            "gemini-3-flash-preview",
+            "gemini-3-pro-image",
+            "gemini-3.1-flash-image",
+            "gemini-3.1-flash-lite",
+            "gemini-3.1-pro-preview",
+            "gemini-3.1-pro-preview-customtools",
+            "gemini-3.5-flash",
+            "gemini-3.6-flash",
+            "gemini-flash-latest",
+            "gemini-flash-lite-latest",
+            "gemini-pro-latest",
+            "gemini-robotics-er-1.6-preview",
+            "gemini-robotics-er-2-preview",
+            "gemma-4-26b-a4b-it",
+            "gemma-4-31b-it",
+            "lyria-3-clip-preview",
+            "lyria-3-pro-preview",
+            "nano-banana-pro-preview"
+          ],
+          "type": "enum_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "ModelOutputStep",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "ModelOutputStep"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "property": "error",
+          "type": "property_removed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "PingWebhookRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "PingWebhookRequest"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "property": "id",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "RotateSigningSecretRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "RotateSigningSecretRequest"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "property": "id",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "RunTriggerRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "RunTriggerRequest"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": true,
+          "property": "id",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "Step",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "Step"
+      ],
+      "disposition": "New media-processing and tool-search variants owned by #639. Check existing Vertex retrieval separately in #642.",
+      "details": [
+        {
+          "new": [
+            "CodeExecutionCallStep",
+            "CodeExecutionResultStep",
+            "FileSearchCallStep",
+            "FileSearchResultStep",
+            "FunctionCallStep",
+            "FunctionResultStep",
+            "GoogleMapsCallStep",
+            "GoogleMapsResultStep",
+            "GoogleSearchCallStep",
+            "GoogleSearchResultStep",
+            "McpServerToolCallStep",
+            "McpServerToolResultStep",
+            "ModelOutputStep",
+            "ProcessingCallStep",
+            "ProcessingResultStep",
+            "ThoughtStep",
+            "ToolSearchCallStep",
+            "ToolSearchResultStep",
+            "UrlContextCallStep",
+            "UrlContextResultStep",
+            "UserInputStep"
+          ],
+          "old": [
+            "CodeExecutionCallStep",
+            "CodeExecutionResultStep",
+            "FileSearchCallStep",
+            "FileSearchResultStep",
+            "FunctionCallStep",
+            "FunctionResultStep",
+            "GoogleMapsCallStep",
+            "GoogleMapsResultStep",
+            "GoogleSearchCallStep",
+            "GoogleSearchResultStep",
+            "McpServerToolCallStep",
+            "McpServerToolResultStep",
+            "ModelOutputStep",
+            "ThoughtStep",
+            "UrlContextCallStep",
+            "UrlContextResultStep",
+            "UserInputStep"
+          ],
+          "type": "union_members_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "StepDeltaData",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "StepDeltaData"
+      ],
+      "disposition": "New media-processing and tool-search deltas owned by #639. Check existing Vertex retrieval separately in #642.",
+      "details": [
+        {
+          "new": [
+            "ArgumentsDelta",
+            "AudioDelta",
+            "CodeExecutionCallDelta",
+            "CodeExecutionResultDelta",
+            "DocumentDelta",
+            "FileSearchCallDelta",
+            "FileSearchResultDelta",
+            "FunctionResultDelta",
+            "GoogleMapsCallDelta",
+            "GoogleMapsResultDelta",
+            "GoogleSearchCallDelta",
+            "GoogleSearchResultDelta",
+            "ImageDelta",
+            "McpServerToolCallDelta",
+            "McpServerToolResultDelta",
+            "ProcessingCallDelta",
+            "ProcessingResultDelta",
+            "TextAnnotationDelta",
+            "TextDelta",
+            "ThoughtSignatureDelta",
+            "ThoughtSummaryDelta",
+            "ToolSearchCallDelta",
+            "ToolSearchResultDelta",
+            "UrlContextCallDelta",
+            "UrlContextResultDelta",
+            "VideoDelta"
+          ],
+          "old": [
+            "ArgumentsDelta",
+            "AudioDelta",
+            "CodeExecutionCallDelta",
+            "CodeExecutionResultDelta",
+            "DocumentDelta",
+            "FileSearchCallDelta",
+            "FileSearchResultDelta",
+            "FunctionResultDelta",
+            "GoogleMapsCallDelta",
+            "GoogleMapsResultDelta",
+            "GoogleSearchCallDelta",
+            "GoogleSearchResultDelta",
+            "ImageDelta",
+            "McpServerToolCallDelta",
+            "McpServerToolResultDelta",
+            "RetrievalCallDelta",
+            "RetrievalResultDelta",
+            "TextAnnotationDelta",
+            "TextDelta",
+            "ThoughtSignatureDelta",
+            "ThoughtSummaryDelta",
+            "UrlContextCallDelta",
+            "UrlContextResultDelta",
+            "VideoDelta"
+          ],
+          "type": "union_members_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "ThinkingLevel",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "ThinkingLevel"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "new": [
+            "high",
+            "low",
+            "medium",
+            "minimal",
+            "xhigh"
+          ],
+          "old": [
+            "high",
+            "low",
+            "medium",
+            "minimal"
+          ],
+          "type": "enum_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "Tool",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "interactions:Tool"
+      ],
+      "disposition": "New tool-search variant owned by #639. Assess old retrieval support against Vertex separately in #642 before changing public types.",
+      "details": [
+        {
+          "new": [
+            "CodeExecution",
+            "ComputerUse",
+            "FileSearch",
+            "Function",
+            "GoogleMaps",
+            "GoogleSearch",
+            "McpServer",
+            "ToolSearch",
+            "UrlContext"
+          ],
+          "old": [
+            "CodeExecution",
+            "ComputerUse",
+            "FileSearch",
+            "Function",
+            "GoogleMaps",
+            "GoogleSearch",
+            "McpServer",
+            "Retrieval",
+            "UrlContext"
+          ],
+          "type": "union_members_changed"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "TranscriptionConfig",
+      "issue": 641,
+      "dart_manifest_entries": [
+        "TranscriptionConfig"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "mode",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "Usage",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "Usage"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "initial_input_tokens",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "VideoContent",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "VideoContent"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "name",
+          "type": "property_added"
+        },
+        {
+          "breaking": false,
+          "property": "processing",
+          "type": "property_added"
+        }
+      ]
+    },
+    {
+      "change": "modified",
+      "schema": "VideoResponseFormat",
+      "issue": 639,
+      "dart_manifest_entries": [
+        "interactions:VideoResponseFormat"
+      ],
+      "disposition": "Review Dart field, union and serialization coverage against the candidate and SDKs.",
+      "details": [
+        {
+          "breaking": false,
+          "property": "resolution",
+          "type": "property_added"
+        },
+        {
+          "breaking": true,
+          "property": "gcs_uri",
+          "type": "property_removed"
+        }
+      ]
+    },
+    {
+      "change": "removed",
+      "schema": "AllowlistEntry",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "AllowlistEntry"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "CodeMenderAgentConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "CodeMenderAgentConfig"
+      ],
+      "disposition": "Absent from candidate. Check public support before changing the existing Dart type."
+    },
+    {
+      "change": "removed",
+      "schema": "ContentDelta",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "ContentDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "ContentDeltaData",
+      "issue": 637,
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "ContentStart",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "ContentStart"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "ContentStop",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "ContentStop"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "DeleteInteractionResponse",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "DeleteInteractionResponse"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "ExaAISearchConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:ExaAISearchConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "FileContent",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "FileContent"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "Filter",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:Filter"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "FindRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "FindRequest"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "FixRequest",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "FixRequest"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "FunctionCallDelta",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "FunctionCallDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "HybridSearch",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:HybridSearch"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "LocalEnvironmentConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "LocalEnvironmentConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "ParallelAISearchConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:ParallelAISearchConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RagResource",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RagResource"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RagRetrievalConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RagRetrievalConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RagStoreConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RagStoreConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RankService",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:RankService"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "Ranking",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:Ranking"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "Retrieval",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:Retrieval"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalCallDelta",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalCallDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalCallStep",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalCallStep"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalResultDelta",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalResultDelta"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalResultStep",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalResultStep"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "RetrievalStepArguments",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "RetrievalStepArguments"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "SessionConfig",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "SessionConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "Status",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "interactions:Status"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "ThoughtContent",
+      "issue": 637,
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "TriggerCreateParams",
+      "issue": 638,
+      "dart_manifest_entries": [
+        "TriggerCreateParams"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "Turn",
+      "issue": 637,
+      "dart_manifest_entries": [
+        "Turn"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    },
+    {
+      "change": "removed",
+      "schema": "VertexAISearchConfig",
+      "issue": 642,
+      "dart_manifest_entries": [
+        "interactions:VertexAISearchConfig"
+      ],
+      "disposition": "Absent from candidate. Check source and backend compatibility before removing any public Dart model."
+    }
+  ],
+  "additional_public_contracts": [
+    {
+      "issue": 637,
+      "surface": "Gemini Developer API",
+      "contract": "Stable v1 POST create, GET get/resume, DELETE, POST cancel. Preserve explicit beta calls. Unary and SSE model and agent requests, storage and manual/automatic continuation.",
+      "source": "https://aistudio.google.com/api-reference/interactions-api?api-version=v1"
+    },
+    {
+      "issue": 637,
+      "surface": "Gemini Developer API",
+      "contract": "Previous interaction ID retains conversation history. Long-decode continuation is independent and uses a server-issued continuation token, optional stream checkpoints, and surfaced incomplete progress.",
+      "source": "https://aistudio.google.com/docs/long-decode"
+    },
+    {
+      "issue": 638,
+      "surface": "Gemini Developer API",
+      "contract": "Environment files support root/list/stat, recursive directory archives, binary alt=media, direct and resumable uploads, and optional archive extraction.",
+      "source": "https://aistudio.google.com/docs/agent-environment#download-files-from-the-environment"
+    },
+    {
+      "issue": 638,
+      "surface": "Gemini Developer API",
+      "contract": "Agent credentials are write-only secrets. Verify secret redaction and egress attachment independently of endpoint availability.",
+      "source": "https://aistudio.google.com/docs/agent-credentials"
+    },
+    {
+      "issue": 639,
+      "surface": "Gemini Developer API",
+      "contract": "v1beta tool_search supports server-side and client-side retrieval, deferred function and MCP declarations, result and SSE variants.",
+      "source": "https://aistudio.google.com/docs/tool-retrieval"
+    },
+    {
+      "issue": 641,
+      "surface": "Gemini Developer API",
+      "contract": "v1beta Voices is separate from Live and GenerateContent. Verify prompted voice creation and the current model, storage, project and replication restrictions.",
+      "source": "https://aistudio.google.com/docs/voice-design"
+    },
+    {
+      "issue": 642,
+      "surface": "Gemini Enterprise Agent Platform",
+      "contract": "OAuth bearer Interactions routes omit publishers/google. Include Vertex-only list pagination. Preserve dedicated us/eu hosts for data residency. Verify model and managed-agent support separately.",
+      "source": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/interactions/developer-guide"
+    },
+    {
+      "issue": 642,
+      "surface": "Gemini Enterprise Agent Platform",
+      "contract": "Managed Antigravity interactions use global v1beta1. Google Cloud preview tool and regional restrictions differ from the Gemini Developer API.",
+      "source": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/managed-agents/interact-with-agents"
+    },
+    {
+      "issue": 644,
+      "surface": "Gemini Developer API Genie 4",
+      "contract": "Paid v1beta POST create has model genie-4 with no ordinary input. Short-lived per-interaction auth token create/delete at /v1beta/interactions/{id}/auth_tokens[/{token}]. Dedicated WebSocket /v1beta/interactions/live or WebRTC POST /v1beta/interactions/{id}:webrtc. Explicitly complete to stop generation and billing.",
+      "source": "https://aistudio.google.com/docs/genie"
+    }
+  ]
+}
