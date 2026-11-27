@@ -113,31 +113,40 @@ void main() {
   });
 
   group('CreateConnectorRequest model', () {
-    test('serializes optional auth data and headers, without protocol', () {
-      const request = CreateConnectorRequest(
-        name: 'n',
-        description: 'd',
-        server: 's',
-        title: 't',
-        authData: AuthData(clientId: 'id', clientSecret: 'secret'),
-        headers: {'X-Org': 'value'},
-        oauth2ServerMetadataUrl: 'https://meta',
-        visibility: PublicResourceVisibility.sharedWorkspace,
-      );
-      final json = request.toJson();
-      expect(json, {
-        'name': 'n',
-        'description': 'd',
-        'server': 's',
-        'title': 't',
-        'auth_data': {'client_id': 'id', 'client_secret': 'secret'},
-        'headers': {'X-Org': 'value'},
-        'oauth2_server_metadata_url': 'https://meta',
-        'visibility': 'shared_workspace',
-      });
-      expect(json.containsKey('protocol'), isFalse);
-      expect(CreateConnectorRequest.fromJson(json), request);
-    });
+    test(
+      'serializes legacy authorization-code data as a current auth method',
+      () {
+        const request = CreateConnectorRequest(
+          name: 'n',
+          description: 'd',
+          server: 's',
+          title: 't',
+          authData: AuthData(clientId: 'id', clientSecret: 'secret'),
+          headers: {'X-Org': 'value'},
+          oauth2ServerMetadataUrl: 'https://meta',
+          visibility: PublicResourceVisibility.sharedWorkspace,
+        );
+        final json = request.toJson();
+        expect(json, {
+          'name': 'n',
+          'description': 'd',
+          'server': 's',
+          'title': 't',
+          'auth_methods': [
+            {
+              'method_type': 'oauth2',
+              'grant_type': 'authorization_code',
+              'auth_data': {'client_id': 'id', 'client_secret': 'secret'},
+            },
+          ],
+          'headers': {'X-Org': 'value'},
+          'oauth2_server_metadata_url': 'https://meta',
+          'visibility': 'shared_workspace',
+        });
+        expect(json.containsKey('protocol'), isFalse);
+        expect(CreateConnectorRequest.fromJson(json), request);
+      },
+    );
 
     test('visibility is nullable and omitted when unset', () {
       const request = CreateConnectorRequest(

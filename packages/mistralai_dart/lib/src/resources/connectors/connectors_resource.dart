@@ -5,19 +5,22 @@ import 'package:http/http.dart' as http;
 import '../../models/connectors/auth_url_response.dart';
 import '../../models/connectors/connector.dart';
 import '../../models/connectors/connector_call_tool_request.dart';
+import '../../models/connectors/connector_consumer_scope.dart';
 import '../../models/connectors/connector_tool_call_response.dart';
 import '../../models/connectors/connectors_query_filters.dart';
 import '../../models/connectors/create_connector_request.dart';
 import '../../models/connectors/credentials_create_or_update.dart';
 import '../../models/connectors/credentials_response.dart';
+import '../../models/connectors/mcp_connector_tool.dart';
 import '../../models/connectors/message_response.dart';
 import '../../models/connectors/outbound_authentication_type.dart';
 import '../../models/connectors/public_authentication_method.dart';
 import '../../models/connectors/tool_execution_configuration.dart';
 import '../../models/connectors/update_connector_request.dart';
 import '../base_resource.dart';
+import '../platform_resource.dart';
 
-/// Resource for managing MCP connectors (Beta).
+/// Resource for managing MCP and HTTP connectors (Public Preview).
 ///
 /// Connectors expose external Model Context Protocol (MCP) servers to agents
 /// and conversations. This resource lets you create, list, update, and delete
@@ -43,14 +46,8 @@ import '../base_resource.dart';
 ///   connectorIdOrName: connector.id,
 /// );
 ///
-/// // Call a tool
-/// final result = await client.connectors.callTool(
-///   connectorIdOrName: connector.id,
-///   toolName: 'search',
-///   request: const ConnectorCallToolRequest(arguments: {'q': 'mistral'}),
-/// );
 /// ```
-class ConnectorsResource extends ResourceBase {
+class ConnectorsResource extends ResourceBase with PlatformResource {
   /// Creates a [ConnectorsResource].
   ConnectorsResource({
     required super.config,
@@ -70,21 +67,10 @@ class ConnectorsResource extends ResourceBase {
   /// (`POST /v1/connectors`).
   ///
   /// [request] contains the connector configuration.
-  Future<Connector> create({required CreateConnectorRequest request}) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/connectors');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return Connector.fromJson(responseBody);
-  }
+  Future<Connector> create({required CreateConnectorRequest request}) =>
+      Future.sync(
+        () => _writeConnector('POST', '/v1/connectors', request.toJson()),
+      );
 
   /// Lists all connectors with keyset pagination and filters.
   ///
@@ -100,8 +86,9 @@ class ConnectorsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, String>{
-      if (queryFilters?.active != null)
-        'active': queryFilters!.active.toString(),
+      for (final entry
+          in (queryFilters?.toJson() ?? const <String, Object?>{}).entries)
+        entry.key: entry.value.toString(),
       'cursor': ?cursor,
       if (pageSize != null) 'page_size': pageSize.toString(),
     };
@@ -128,7 +115,7 @@ class ConnectorsResource extends ResourceBase {
   ///
   /// [connectorIdOrName] is the unique identifier or name of the connector.
   /// [fetchUserData] requests the caller's user credentials be returned.
-  /// [fetchCustomerData] requests the customer configuration be returned.
+  /// [fetchCustomerData] is available for historical deployments.
   Future<Connector> get({
     required String connectorIdOrName,
     bool? fetchUserData,
@@ -143,7 +130,7 @@ class ConnectorsResource extends ResourceBase {
       queryParams['fetch_customer_data'] = fetchCustomerData.toString();
     }
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders();
@@ -165,20 +152,33 @@ class ConnectorsResource extends ResourceBase {
   Future<Connector> update({
     required String connectorId,
     required UpdateConnectorRequest request,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/connectors/$connectorId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+  }) => Future.sync(
+    () => _writeConnector(
+      'PATCH',
+      '/v1/connectors/${Uri.encodeComponent(connectorId)}',
+      request.toJson(),
+    ),
+  );
+
+  Future<Connector> _writeConnector(
+    String method,
+    String path,
+    Map<String, dynamic> body,
+  ) {
+    const credentialFields = {
+      'auth_methods',
+      'global_headers',
+      'headers',
+      'oauth2_server_metadata',
+      'oauth2_server_metadata_url',
+    };
+    return requestPlatform(
+      method,
+      path,
+      (json) => Connector.fromJson(json! as Map<String, dynamic>),
+      body: body,
+      redactErrorBody: credentialFields.any((key) => body[key] != null),
     );
-
-    final httpRequest = http.Request('PATCH', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return Connector.fromJson(responseBody);
   }
 
   /// Deletes a connector by its ID.
@@ -189,7 +189,9 @@ class ConnectorsResource extends ResourceBase {
   /// [connectorId] is the unique identifier of the connector to delete.
   Future<MessageResponse> delete({required String connectorId}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/connectors/$connectorId');
+    final url = requestBuilder.buildUrl(
+      '/v1/connectors/${Uri.encodeComponent(connectorId)}',
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
@@ -212,12 +214,14 @@ class ConnectorsResource extends ResourceBase {
   /// [appReturnUrl] is an optional URL to return to after authorization.
   /// [methodType] selects the auth method to use.
   /// [credentialsName] selects a specific credential.
+  /// [credentialsTitle] sets the credential’s display title.
   /// [githubInstallationLink] requests a GitHub App installation URL.
   Future<AuthUrlResponse> getAuthUrl({
     required String connectorIdOrName,
     String? appReturnUrl,
     OutboundAuthenticationType? methodType,
     String? credentialsName,
+    String? credentialsTitle,
     bool? githubInstallationLink,
   }) async {
     ensureNotClosed?.call();
@@ -225,12 +229,13 @@ class ConnectorsResource extends ResourceBase {
       'app_return_url': ?appReturnUrl,
       if (methodType != null) 'method_type': methodType.value,
       'credentials_name': ?credentialsName,
+      'credentials_title': ?credentialsTitle,
       if (githubInstallationLink != null)
         'github_installation_link': githubInstallationLink.toString(),
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/auth_url',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/auth_url',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
     final headers = requestBuilder.buildHeaders();
@@ -253,7 +258,7 @@ class ConnectorsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/authentication_methods',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/authentication_methods',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -305,7 +310,7 @@ class ConnectorsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/tools',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/tools',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
     final headers = requestBuilder.buildHeaders();
@@ -317,8 +322,25 @@ class ConnectorsResource extends ResourceBase {
     return responseBody.map((e) => e as Map<String, dynamic>).toList();
   }
 
+  /// Lists tools with the full MCP schema and annotations.
+  ///
+  /// Use [listTools] with `pretty: true` to retrieve the compact raw variant.
+  Future<List<McpConnectorTool>> listMcpTools({
+    required String connectorIdOrName,
+    int? pageSize,
+    bool? refresh,
+    String? credentialsName,
+  }) async => (await listTools(
+    connectorIdOrName: connectorIdOrName,
+    pageSize: pageSize,
+    refresh: refresh,
+    credentialsName: credentialsName,
+  )).map(McpConnectorTool.fromJson).toList();
+
   /// Calls a tool on a connector.
   ///
+  /// Mistral soft-deprecated direct tool calls. Use a connector in the tools
+  /// parameter for new integrations.
   /// Maps to the official `connectors.call_tool`
   /// (`POST /v1/connectors/{connector_id_or_name}/tools/{tool_name}/call`).
   ///
@@ -326,6 +348,9 @@ class ConnectorsResource extends ResourceBase {
   /// [toolName] is the name of the tool to call.
   /// [request] contains the tool arguments.
   /// [credentialsName] selects a specific credential.
+  @Deprecated(
+    'Use a CustomConnector in the tools parameter for new integrations.',
+  )
   Future<ConnectorToolCallResponse> callTool({
     required String connectorIdOrName,
     required String toolName,
@@ -336,7 +361,7 @@ class ConnectorsResource extends ResourceBase {
     final queryParams = <String, String>{'credentials_name': ?credentialsName};
 
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/tools/$toolName/call',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/tools/${Uri.encodeComponent(toolName)}/call',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
     final headers = requestBuilder.buildHeaders(
@@ -401,6 +426,19 @@ class ConnectorsResource extends ResourceBase {
     fetchDefault: fetchDefault,
   );
 
+  /// Lists configured credentials at one consumer scope.
+  Future<CredentialsResponse> listCredentials({
+    required String connectorIdOrName,
+    required ConnectorConsumerScope scope,
+    OutboundAuthenticationType? authType,
+    bool? fetchDefault,
+  }) => _listCredentials(
+    connectorIdOrName: connectorIdOrName,
+    level: scope.value,
+    authType: authType,
+    fetchDefault: fetchDefault,
+  );
+
   Future<CredentialsResponse> _listCredentials({
     required String connectorIdOrName,
     required String level,
@@ -414,7 +452,7 @@ class ConnectorsResource extends ResourceBase {
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/$level/credentials',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/$level/credentials',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
     final headers = requestBuilder.buildHeaders();
@@ -426,66 +464,87 @@ class ConnectorsResource extends ResourceBase {
     return CredentialsResponse.fromJson(responseBody);
   }
 
+  /// Creates credentials at user or workspace scope.
+  Future<MessageResponse> createCredentials({
+    required String connectorIdOrName,
+    required ConnectorConsumerScope scope,
+    required CredentialsCreateOrUpdate request,
+  }) {
+    if (scope == ConnectorConsumerScope.organization) {
+      throw ArgumentError.value(
+        scope,
+        'scope',
+        'Use updateCredentials for organization credentials',
+      );
+    }
+    return _credentialsWrite('POST', connectorIdOrName, scope, request);
+  }
+
+  /// Creates or updates credentials at any supported scope.
+  Future<MessageResponse> updateCredentials({
+    required String connectorIdOrName,
+    required ConnectorConsumerScope scope,
+    required CredentialsCreateOrUpdate request,
+  }) => _credentialsWrite('PATCH', connectorIdOrName, scope, request);
+
   /// Creates or updates organization-level credentials for a connector.
   ///
-  /// Maps to the official `connectors.create_or_update_organization_credentials`
-  /// (`POST /v1/connectors/{connector_id_or_name}/organization/credentials`).
+  /// Compatibility alias for [updateCredentials].
   Future<MessageResponse> createOrUpdateOrganizationCredentials({
     required String connectorIdOrName,
     required CredentialsCreateOrUpdate request,
-  }) => _createOrUpdateCredentials(
+  }) => updateCredentials(
     connectorIdOrName: connectorIdOrName,
-    level: 'organization',
+    scope: ConnectorConsumerScope.organization,
     request: request,
   );
 
   /// Creates or updates workspace-level credentials for a connector.
   ///
-  /// Maps to the official `connectors.create_or_update_workspace_credentials`
-  /// (`POST /v1/connectors/{connector_id_or_name}/workspace/credentials`).
+  /// Compatibility alias for [updateCredentials].
   Future<MessageResponse> createOrUpdateWorkspaceCredentials({
     required String connectorIdOrName,
     required CredentialsCreateOrUpdate request,
-  }) => _createOrUpdateCredentials(
+  }) => updateCredentials(
     connectorIdOrName: connectorIdOrName,
-    level: 'workspace',
+    scope: ConnectorConsumerScope.workspace,
     request: request,
   );
 
   /// Creates or updates user-level credentials for a connector.
   ///
-  /// Maps to the official `connectors.create_or_update_user_credentials`
-  /// (`POST /v1/connectors/{connector_id_or_name}/user/credentials`).
+  /// Compatibility alias for [updateCredentials].
   Future<MessageResponse> createOrUpdateUserCredentials({
     required String connectorIdOrName,
     required CredentialsCreateOrUpdate request,
-  }) => _createOrUpdateCredentials(
+  }) => updateCredentials(
     connectorIdOrName: connectorIdOrName,
-    level: 'user',
+    scope: ConnectorConsumerScope.user,
     request: request,
   );
 
-  Future<MessageResponse> _createOrUpdateCredentials({
+  Future<MessageResponse> _credentialsWrite(
+    String method,
+    String connectorIdOrName,
+    ConnectorConsumerScope scope,
+    CredentialsCreateOrUpdate request,
+  ) => _message(
+    method,
+    '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/${scope.value}/credentials',
+    body: request.toJson(),
+    redactErrorBody: true,
+  );
+
+  /// Deletes a named credential at the selected scope.
+  Future<MessageResponse> deleteCredentials({
     required String connectorIdOrName,
-    required String level,
-    required CredentialsCreateOrUpdate request,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/$level/credentials',
-    );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return MessageResponse.fromJson(responseBody);
-  }
+    required ConnectorConsumerScope scope,
+    required String credentialsName,
+  }) => _deleteCredentials(
+    connectorIdOrName: connectorIdOrName,
+    level: scope.value,
+    credentialsName: credentialsName,
+  );
 
   /// Deletes organization-level credentials for a connector.
   ///
@@ -536,7 +595,7 @@ class ConnectorsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/$level/credentials/$credentialsName',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/$level/credentials/${Uri.encodeComponent(credentialsName)}',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -558,7 +617,7 @@ class ConnectorsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorIdOrName/user/credentials',
+      '/v1/connectors/${Uri.encodeComponent(connectorIdOrName)}/user/credentials',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -573,44 +632,65 @@ class ConnectorsResource extends ResourceBase {
   // Sharing
   // ---------------------------------------------------------------------------
 
-  /// Shares a private, user-owned connector with the current workspace.
+  /// Shares a private connector with the current workspace.
   ///
-  /// Maps to the official `connectors.share`
-  /// (`PUT /v1/connectors/{connector_id}/share`).
-  ///
-  /// This transfers ownership of the connector to the current workspace,
-  /// making it available to all workspace members. This action is
-  /// irreversible: once shared, the connector belongs to the workspace and
-  /// can no longer be used privately across other workspaces. Any
-  /// authentication flows that rely on the original owner's identity (e.g.
-  /// OAuth on-behalf-of) will be affected and must be reconfigured after
-  /// sharing. Only the connector's creator can call this; it requires the
-  /// `ShareConnectorToWorkspace` workspace permission.
-  ///
-  /// [connectorId] is the unique identifier of the connector to share.
-  Future<MessageResponse> share({required String connectorId}) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/connectors/$connectorId/share');
-    final headers = requestBuilder.buildHeaders();
+  /// The creator can revert sharing with [unshare]. Authentication may need
+  /// reconfiguration because the action transfers ownership.
+  Future<MessageResponse> share({required String connectorId}) => _message(
+    'PUT',
+    '/v1/connectors/${Uri.encodeComponent(connectorId)}/share',
+  );
 
-    final httpRequest = http.Request('PUT', url)..headers.addAll(headers);
+  /// Restores a workspace-shared connector to private ownership.
+  ///
+  /// Removes workspace connections and other members' connections.
+  Future<MessageResponse> unshare({required String connectorId}) => _message(
+    'DELETE',
+    '/v1/connectors/${Uri.encodeComponent(connectorId)}/share',
+  );
 
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return MessageResponse.fromJson(responseBody);
-  }
+  /// Shares a private connector with the current organization.
+  Future<MessageResponse> shareToOrganization({required String connectorId}) =>
+      _message(
+        'PUT',
+        '/v1/connectors/${Uri.encodeComponent(connectorId)}/organization/share',
+      );
+
+  /// Restores an organization-shared connector to private ownership.
+  ///
+  /// Removes organization connections and other members' connections.
+  Future<MessageResponse> unshareFromOrganization({
+    required String connectorId,
+  }) => _message(
+    'DELETE',
+    '/v1/connectors/${Uri.encodeComponent(connectorId)}/organization/share',
+  );
 
   // ---------------------------------------------------------------------------
   // Activation
   // ---------------------------------------------------------------------------
 
+  /// Enables the connector for one consumer scope.
+  Future<MessageResponse> activate({
+    required String connectorId,
+    required ConnectorConsumerScope scope,
+  }) => _message(
+    'POST',
+    '/v1/connectors/${Uri.encodeComponent(connectorId)}/${scope.value}/activate',
+  );
+
+  /// Disables the connector for one consumer scope.
+  Future<MessageResponse> deactivate({
+    required String connectorId,
+    required ConnectorConsumerScope scope,
+  }) => _deactivate(connectorId: connectorId, level: scope.value);
+
   /// Activates a connector for the organization.
   ///
-  /// Maps to the official `connectors.activate_for_organization`
-  /// (`POST /v1/connectors/{connector_id}/organization/activate`).
+  /// Compatibility method for [activate] at organization scope.
   ///
   /// [connectorId] is the connector ID.
-  /// [toolConfiguration] optionally configures tool execution.
+  /// [toolConfiguration] is a historical request body for older deployments.
   Future<MessageResponse> activateForOrganization({
     required String connectorId,
     ToolExecutionConfiguration? toolConfiguration,
@@ -622,16 +702,14 @@ class ConnectorsResource extends ResourceBase {
 
   /// Deactivates a connector for the organization.
   ///
-  /// Maps to the official `connectors.deactivate_for_organization`
-  /// (`POST /v1/connectors/{connector_id}/organization/deactivate`).
+  /// Compatibility method for [deactivate] at organization scope.
   Future<MessageResponse> deactivateForOrganization({
     required String connectorId,
   }) => _deactivate(connectorId: connectorId, level: 'organization');
 
   /// Activates a connector for the workspace.
   ///
-  /// Maps to the official `connectors.activate_for_workspace`
-  /// (`POST /v1/connectors/{connector_id}/workspace/activate`).
+  /// Compatibility method for [activate] at workspace scope.
   Future<MessageResponse> activateForWorkspace({
     required String connectorId,
     ToolExecutionConfiguration? toolConfiguration,
@@ -643,16 +721,14 @@ class ConnectorsResource extends ResourceBase {
 
   /// Deactivates a connector for the workspace.
   ///
-  /// Maps to the official `connectors.deactivate_for_workspace`
-  /// (`POST /v1/connectors/{connector_id}/workspace/deactivate`).
+  /// Compatibility method for [deactivate] at workspace scope.
   Future<MessageResponse> deactivateForWorkspace({
     required String connectorId,
   }) => _deactivate(connectorId: connectorId, level: 'workspace');
 
   /// Activates a connector for the current user.
   ///
-  /// Maps to the official `connectors.activate_for_user`
-  /// (`POST /v1/connectors/{connector_id}/user/activate`).
+  /// Compatibility method for [activate] at user scope.
   Future<MessageResponse> activateForUser({
     required String connectorId,
     ToolExecutionConfiguration? toolConfiguration,
@@ -664,8 +740,7 @@ class ConnectorsResource extends ResourceBase {
 
   /// Deactivates a connector for the current user.
   ///
-  /// Maps to the official `connectors.deactivate_for_user`
-  /// (`POST /v1/connectors/{connector_id}/user/deactivate`).
+  /// Compatibility method for [deactivate] at user scope.
   Future<MessageResponse> deactivateForUser({required String connectorId}) =>
       _deactivate(connectorId: connectorId, level: 'user');
 
@@ -676,7 +751,7 @@ class ConnectorsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorId/$level/activate',
+      '/v1/connectors/${Uri.encodeComponent(connectorId)}/$level/activate',
     );
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -697,7 +772,7 @@ class ConnectorsResource extends ResourceBase {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/connectors/$connectorId/$level/deactivate',
+      '/v1/connectors/${Uri.encodeComponent(connectorId)}/$level/deactivate',
     );
     final headers = requestBuilder.buildHeaders();
 
@@ -707,4 +782,17 @@ class ConnectorsResource extends ResourceBase {
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return MessageResponse.fromJson(responseBody);
   }
+
+  Future<MessageResponse> _message(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+    bool redactErrorBody = false,
+  }) => requestPlatform(
+    method,
+    path,
+    (json) => MessageResponse.fromJson(json! as Map<String, dynamic>),
+    body: body,
+    redactErrorBody: redactErrorBody,
+  );
 }

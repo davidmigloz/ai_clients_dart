@@ -1,6 +1,6 @@
-/// Type of the owner of a connector resource.
+/// Historical integer-valued owner type of a connector resource.
 ///
-/// Represented in the API as an integer code.
+/// Current responses report the owner scope as a string.
 enum ResourceType {
   /// User-owned resource.
   user(1),

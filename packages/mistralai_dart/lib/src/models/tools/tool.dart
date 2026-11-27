@@ -396,7 +396,8 @@ class CustomConnectorTool extends Tool {
   /// The unique identifier of the connector.
   final String connectorId;
 
-  /// Authentication credentials for the connector.
+  /// Historical per-request authentication. Configure stored credentials
+  /// through the Connectors API for current integrations.
   final ConnectorAuth? authorization;
 
   /// Configuration for the tool's behavior.

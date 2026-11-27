@@ -32,6 +32,7 @@
 - [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart) (~2.2k tokens): Multipart library documents and access (beta).
 - [prompts_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/prompts_example.dart): Versioned prompt templates (beta).
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/skills_example.dart): Versioned skills and workspace sharing (beta).
+- [connectors_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/connectors_example.dart) — MCP and HTTP connector lifecycle and tool discovery.
 - [managed_search_indexes_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/managed_search_indexes_example.dart): Mistral-hosted index search (Public Preview).
 - [observability_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/observability_example.dart) — Enterprise Public Preview projects, datasets, scorers, and telemetry.
 - [workflows_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflows_example.dart) (~1.3k tokens): Workflow execution, scheduling, and management.

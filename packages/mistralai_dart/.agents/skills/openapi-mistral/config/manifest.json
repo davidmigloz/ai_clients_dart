@@ -807,8 +807,13 @@
       "kind": "object",
       "dart_class": "Connector",
       "file": "lib/src/models/connectors/connector.dart",
-      "schema": "Connector",
-      "tags": []
+      "schema": "MCPConnector",
+      "excluded_properties": [
+        "owner_type",
+        "protocol",
+        "supports_mcp"
+      ],
+      "note": "MCP and HTTP responses use one Dart connector type. ownerScope decodes current string values and ownerType preserves the legacy integer view. Historical data can omit protocol and supports_mcp."
     },
     "ConnectorAuth": {
       "spec": "main",
@@ -1727,14 +1732,10 @@
     },
     "MCPServerIcon": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "MCPServerIcon",
-      "file": "",
-      "schema": "MCPServerIcon",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal MCP protocol type"
+      "kind": "object",
+      "dart_class": "McpToolIcon",
+      "file": "lib/src/models/connectors/mcp_connector_tool.dart",
+      "schema": "MCPServerIcon"
     },
     "MCPToolCallMetadata": {
       "spec": "main",
@@ -3451,8 +3452,7 @@
       "kind": "object",
       "dart_class": "UpdateConnectorRequest",
       "file": "lib/src/models/connectors/update_connector_request.dart",
-      "schema": "UpdateConnectorRequest",
-      "tags": []
+      "schema": "ConnectorMCPPublicUpdate"
     },
     "AuthUrlResponse": {
       "spec": "main",
@@ -3464,19 +3464,25 @@
     },
     "OAuth2Token": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "OAuth2Token",
       "file": "lib/src/models/connectors/oauth2_token.dart",
       "schema": "OAuth2Token",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical stored OAuth token input. The current credential contract uses OAuth2ClientCredentialsInput."
     },
     "ConnectionCredentials": {
       "spec": "main",
       "kind": "object",
       "dart_class": "ConnectionCredentials",
       "file": "lib/src/models/connectors/connection_credentials.dart",
-      "schema": "ConnectionCredentials",
-      "tags": []
+      "schema": "ConnectionCredentialsInput",
+      "excluded_properties": [
+        "oauth"
+      ],
+      "note": "clientCredentials serializes as the current OAuth2ClientCredentialsInput under oauth. The legacy token form remains readable."
     },
     "ConnectorAuthenticationHeader": {
       "spec": "main",
@@ -3496,11 +3502,14 @@
     },
     "PublicConnectionConfig": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "PublicConnectionConfig",
       "file": "lib/src/models/connectors/public_connection_config.dart",
       "schema": "PublicConnectionConfig",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical connector model preserved for older deployments. Its schema is absent from the November public OpenAPI snapshot."
     },
     "CredentialsStatus": {
       "spec": "main",
@@ -3604,11 +3613,14 @@
     },
     "ResourceType": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "ResourceType",
       "file": "lib/src/models/connectors/resource_type.dart",
       "schema": "ResourceType",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The current owner_type is ConsumerType. The legacy integer ResourceType is preserved by the compatibility accessor."
     },
     "ConsumerType": {
       "spec": "main",
@@ -3620,27 +3632,32 @@
     },
     "ConnectorProtocol": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "ConnectorProtocol",
       "file": "lib/src/models/connectors/connector_protocol.dart",
       "schema": "ConnectorProtocol",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Protocol constants are defined on the MCP and HTTP connector variants. Retains the older Turbine value."
     },
     "ConnectionConfigType": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "ConnectionConfigType",
       "file": "lib/src/models/connectors/connection_config_type.dart",
       "schema": "ConnectionConfigType",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical connector model preserved for older deployments. Its schema is absent from the November public OpenAPI snapshot."
     },
     "OutboundAuthenticationType": {
       "spec": "main",
       "kind": "enum",
       "dart_class": "OutboundAuthenticationType",
       "file": "lib/src/models/connectors/outbound_authentication_type.dart",
-      "schema": "OutboundAuthenticationType",
-      "tags": []
+      "schema": "AuthenticationType"
     },
     "AuthStatus": {
       "spec": "main",
@@ -4307,43 +4324,58 @@
     },
     "ExecutionTool": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "ExecutionTool",
       "file": "lib/src/models/connectors/execution_tool.dart",
       "schema": "ExecutionTool",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical connector model preserved for older deployments. Its schema is absent from the November public OpenAPI snapshot."
     },
     "PublicConnectorExecutionData": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "PublicConnectorExecutionData",
       "file": "lib/src/models/connectors/public_connector_execution_data.dart",
       "schema": "PublicConnectorExecutionData",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical connector model preserved for older deployments. Its schema is absent from the November public OpenAPI snapshot."
     },
     "PublicExecutionConnectionConfig": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "PublicExecutionConnectionConfig",
       "file": "lib/src/models/connectors/public_execution_connection_config.dart",
       "schema": "PublicExecutionConnectionConfig",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical connector model preserved for older deployments. Its schema is absent from the November public OpenAPI snapshot."
     },
     "PublicExecutionConnector": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "PublicExecutionConnector",
       "file": "lib/src/models/connectors/public_execution_connector.dart",
       "schema": "PublicExecutionConnector",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical connector model preserved for older deployments. Its schema is absent from the November public OpenAPI snapshot."
     },
     "PublicExecutionEnv": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "PublicExecutionEnv",
       "file": "lib/src/models/connectors/public_execution_env.dart",
       "schema": "PublicExecutionEnv",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Historical connector model preserved for older deployments. Its schema is absent from the November public OpenAPI snapshot."
     },
     "PublicResourceVisibility": {
       "spec": "main",
@@ -8779,6 +8811,225 @@
       "file": "lib/src/models/search/managed_search_query_error.dart",
       "schema": "TopKTooLargeResponse",
       "parent": "ManagedSearchQueryError"
+    },
+    "GlobalHeaderValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorGlobalHeader",
+      "file": "lib/src/models/connectors/connector_oauth.dart",
+      "schema": "GlobalHeaderValue"
+    },
+    "OAuth2GrantType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ConnectorOAuthGrantType",
+      "file": "lib/src/models/connectors/connector_oauth.dart",
+      "schema": "OAuth2GrantType"
+    },
+    "OAuth2TokenEndpointAuthMethod": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ConnectorOAuthTokenAuthMethod",
+      "file": "lib/src/models/connectors/connector_oauth.dart",
+      "schema": "OAuth2TokenEndpointAuthMethod"
+    },
+    "OAuthMetadataSource": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ConnectorOAuthMetadataSource",
+      "file": "lib/src/models/connectors/connector_oauth.dart",
+      "schema": "OAuthMetadataSource"
+    },
+    "ExtendedOAuthServerMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorOAuthServerMetadata",
+      "file": "lib/src/models/connectors/connector_oauth.dart",
+      "schema": "ExtendedOAuthServerMetadata"
+    },
+    "Oauth2MetadataSecrets": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorOAuthMetadataSecrets",
+      "file": "lib/src/models/connectors/connector_oauth.dart",
+      "schema": "Oauth2MetadataSecrets"
+    },
+    "OAuth2ClientCredentialsInput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorOAuthClientCredentials",
+      "file": "lib/src/models/connectors/connector_oauth.dart",
+      "schema": "OAuth2ClientCredentialsInput"
+    },
+    "BearerAuthMethod": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BearerConnectorAuthMethod",
+      "file": "lib/src/models/connectors/connector_auth_method.dart",
+      "schema": "BearerAuthMethod"
+    },
+    "NoneAuthMethod": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "NoneConnectorAuthMethod",
+      "file": "lib/src/models/connectors/connector_auth_method.dart",
+      "schema": "NoneAuthMethod"
+    },
+    "OAuth2AuthorizationCodeAuthMethod": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OAuthAuthorizationCodeConnectorAuthMethod",
+      "file": "lib/src/models/connectors/connector_auth_method.dart",
+      "schema": "OAuth2AuthorizationCodeAuthMethod"
+    },
+    "OAuth2ClientCredentialsAuthMethod": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OAuthClientCredentialsConnectorAuthMethod",
+      "file": "lib/src/models/connectors/connector_auth_method.dart",
+      "schema": "OAuth2ClientCredentialsAuthMethod"
+    },
+    "AuthenticationMethodCreateOrUpdateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorAuthMethodPatch",
+      "file": "lib/src/models/connectors/connector_auth_method.dart",
+      "schema": "AuthenticationMethodCreateOrUpdateRequest"
+    },
+    "ConnectorOpenApiSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorOpenApiSpec",
+      "file": "lib/src/models/connectors/connector_metadata.dart",
+      "schema": "ConnectorOpenApiSpec"
+    },
+    "OpenApiSpecSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorOpenApiSource",
+      "file": "lib/src/models/connectors/connector_metadata.dart",
+      "schema": "OpenApiSpecSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The Dart sealed union handles both OpenAPI source discriminators and retains unknown source payloads."
+    },
+    "OpenApiFileSource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorOpenApiFileSource",
+      "file": "lib/src/models/connectors/connector_metadata.dart",
+      "schema": "OpenApiFileSource"
+    },
+    "OpenApiUrlSource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorOpenApiUrlSource",
+      "file": "lib/src/models/connectors/connector_metadata.dart",
+      "schema": "OpenApiUrlSource"
+    },
+    "ConnectorErrorCode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ConnectorErrorCode",
+      "file": "lib/src/models/connectors/connector_metadata.dart",
+      "schema": "ConnectorErrorCode"
+    },
+    "ConnectorErrorResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorErrorResponse",
+      "file": "lib/src/models/connectors/connector_metadata.dart",
+      "schema": "ConnectorErrorResponse"
+    },
+    "MCPTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpConnectorTool",
+      "file": "lib/src/models/connectors/mcp_connector_tool.dart",
+      "schema": "MCPTool",
+      "excluded_properties": [
+        "_meta"
+      ],
+      "note": "The JSON _meta key is preserved by the Dart meta field and round-trip fixtures."
+    },
+    "ToolAnnotations": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpToolAnnotations",
+      "file": "lib/src/models/connectors/mcp_connector_tool.dart",
+      "schema": "ToolAnnotations"
+    },
+    "ToolExecution": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpToolExecution",
+      "file": "lib/src/models/connectors/mcp_connector_tool.dart",
+      "schema": "ToolExecution"
+    },
+    "HTTPConnector": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "HTTPConnector",
+      "excluded_properties": [
+        "owner_type",
+        "protocol",
+        "supports_mcp"
+      ],
+      "note": "Same documented representation as MCPConnector, with typed OpenAPI document source and protocol."
+    },
+    "CreateHTTPConnectorRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateConnectorRequest",
+      "file": "lib/src/models/connectors/create_connector_request.dart",
+      "schema": "CreateHTTPConnectorRequest",
+      "excluded_properties": [
+        "protocol"
+      ],
+      "note": "HTTP creation uses protocol http on the shared request. MCP callers can omit protocol."
+    },
+    "UpdateHTTPConnectorRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateConnectorRequest",
+      "file": "lib/src/models/connectors/update_connector_request.dart",
+      "schema": "UpdateHTTPConnectorRequest"
+    },
+    "OAuth2AuthMethod": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorAuthMethod",
+      "file": "lib/src/models/connectors/connector_auth_method.dart",
+      "schema": "OAuth2AuthMethod",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The shared Dart sealed hierarchy dispatches OAuth declarations by grant_type."
+    },
+    "MCPServerCard": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPServerCard",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "serverCard preserves the evolving MCP server card and extension keys as JSON."
+    },
+    "MCPToolMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "McpConnectorTool",
+      "file": "lib/src/models/connectors/mcp_connector_tool.dart",
+      "schema": "MCPToolMeta",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "MCP metadata is preserved as JSON in _meta."
     }
   }
 }

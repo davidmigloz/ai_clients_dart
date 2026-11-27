@@ -31,6 +31,9 @@ enum CredentialsStatusErrorReason {
   /// An unknown error occurred (as reported by the server).
   unknownError('unknown error'),
 
+  /// The configured bearer token is blank.
+  blankBearerToken('blank bearer token'),
+
   /// Unknown error reason (forward-compatibility fallback).
   unknown('unknown');
 

@@ -3,6 +3,8 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'auth_data.dart';
+import 'connector_auth_method.dart';
+import 'connector_oauth.dart';
 import 'public_resource_visibility.dart';
 
 /// Request body for creating a connector.
@@ -15,7 +17,7 @@ class CreateConnectorRequest {
   /// The description of the connector.
   final String description;
 
-  /// The URL of the MCP server.
+  /// The URL of the connector server.
   final String server;
 
   /// An optional human-readable title for the connector.
@@ -31,7 +33,7 @@ class CreateConnectorRequest {
   /// Optional organization-level headers to send to the MCP server.
   final Map<String, dynamic>? headers;
 
-  /// Optional additional authentication data for the connector.
+  /// Legacy OAuth authorization-code credentials. Serialized as an auth method.
   final AuthData? authData;
 
   /// Optional OAuth2 authorization server metadata (freeform).
@@ -44,8 +46,20 @@ class CreateConnectorRequest {
   /// Optional system prompt for the connector.
   final String? systemPrompt;
 
+  /// Connector transport, mcp or http. Omit to use the MCP default.
+  final String? protocol;
+
+  /// Authentication methods supported by the connector.
+  final List<ConnectorAuthMethod>? authMethods;
+
+  /// Connector-wide headers applied before caller-specific headers.
+  final Map<String, ConnectorGlobalHeader>? globalHeaders;
+
   /// Creates a [CreateConnectorRequest].
   const CreateConnectorRequest({
+    this.protocol,
+    this.authMethods,
+    this.globalHeaders,
     required this.name,
     required this.description,
     required this.server,
@@ -62,6 +76,19 @@ class CreateConnectorRequest {
   /// Creates a [CreateConnectorRequest] from JSON.
   factory CreateConnectorRequest.fromJson(Map<String, dynamic> json) =>
       CreateConnectorRequest(
+        protocol: json['protocol'] as String?,
+        authMethods: (json['auth_methods'] as List<Object?>?)
+            ?.map(
+              (value) =>
+                  ConnectorAuthMethod.fromJson(value! as Map<String, dynamic>),
+            )
+            .toList(),
+        globalHeaders: (json['global_headers'] as Map<String, dynamic>?)?.map(
+          (name, value) => MapEntry(
+            name,
+            ConnectorGlobalHeader.fromJson(value as Map<String, dynamic>),
+          ),
+        ),
         name: json['name'] as String? ?? '',
         description: json['description'] as String? ?? '',
         server: json['server'] as String? ?? '',
@@ -80,27 +107,51 @@ class CreateConnectorRequest {
         systemPrompt: json['system_prompt'] as String?,
       );
 
+  List<ConnectorAuthMethod>? get _resolvedAuthMethods =>
+      authMethods ??
+      (authData == null
+          ? null
+          : [OAuthAuthorizationCodeConnectorAuthMethod(authData: authData!)]);
+
   /// Converts this request to JSON.
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'description': description,
-    'server': server,
-    if (title != null) 'title': title,
-    if (iconUrl != null) 'icon_url': iconUrl,
-    if (visibility != null) 'visibility': visibility!.toJson(),
-    if (headers != null) 'headers': headers,
-    if (authData != null) 'auth_data': authData!.toJson(),
-    if (oauth2ServerMetadata != null)
-      'oauth2_server_metadata': oauth2ServerMetadata,
-    if (oauth2ServerMetadataUrl != null)
-      'oauth2_server_metadata_url': oauth2ServerMetadataUrl,
-    if (systemPrompt != null) 'system_prompt': systemPrompt,
-  };
+  Map<String, dynamic> toJson() {
+    if (protocol != null && protocol != 'mcp' && protocol != 'http') {
+      throw ArgumentError.value(protocol, 'protocol', 'Expected mcp or http');
+    }
+    final methods = _resolvedAuthMethods;
+    if (methods?.any((method) => method is ConnectorAuthMethodPatch) == true) {
+      throw ArgumentError('ConnectorAuthMethodPatch is only valid for updates');
+    }
+    return {
+      if (protocol != null) 'protocol': protocol,
+      if (methods != null)
+        'auth_methods': methods.map((value) => value.toJson()).toList(),
+      if (globalHeaders != null)
+        'global_headers': globalHeaders!.map(
+          (name, value) => MapEntry(name, value.toJson()),
+        ),
+      'name': name,
+      'description': description,
+      'server': server,
+      if (title != null) 'title': title,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (visibility != null) 'visibility': visibility!.toJson(),
+      if (headers != null) 'headers': headers,
+      if (oauth2ServerMetadata != null)
+        'oauth2_server_metadata': oauth2ServerMetadata,
+      if (oauth2ServerMetadataUrl != null)
+        'oauth2_server_metadata_url': oauth2ServerMetadataUrl,
+      if (systemPrompt != null) 'system_prompt': systemPrompt,
+    };
+  }
 
   /// Creates a copy with the given fields replaced.
   ///
   /// Pass `null` for nullable fields to clear them explicitly; omit to keep.
   CreateConnectorRequest copyWith({
+    Object? protocol = unsetCopyWithValue,
+    Object? authMethods = unsetCopyWithValue,
+    Object? globalHeaders = unsetCopyWithValue,
     String? name,
     String? description,
     String? server,
@@ -113,6 +164,16 @@ class CreateConnectorRequest {
     Object? oauth2ServerMetadataUrl = unsetCopyWithValue,
     Object? systemPrompt = unsetCopyWithValue,
   }) => CreateConnectorRequest(
+    protocol: protocol == unsetCopyWithValue
+        ? this.protocol
+        : protocol as String?,
+    authMethods: authMethods == unsetCopyWithValue
+        ? this.authMethods
+        : (authMethods as List<Object?>?)?.cast<ConnectorAuthMethod>(),
+    globalHeaders: globalHeaders == unsetCopyWithValue
+        ? this.globalHeaders
+        : (globalHeaders as Map<Object?, Object?>?)
+              ?.cast<String, ConnectorGlobalHeader>(),
     name: name ?? this.name,
     description: description ?? this.description,
     server: server ?? this.server,
@@ -123,13 +184,14 @@ class CreateConnectorRequest {
         : visibility as PublicResourceVisibility?,
     headers: headers == unsetCopyWithValue
         ? this.headers
-        : headers as Map<String, dynamic>?,
+        : (headers as Map<Object?, Object?>?)?.cast<String, dynamic>(),
     authData: authData == unsetCopyWithValue
         ? this.authData
         : authData as AuthData?,
     oauth2ServerMetadata: oauth2ServerMetadata == unsetCopyWithValue
         ? this.oauth2ServerMetadata
-        : oauth2ServerMetadata as Map<String, dynamic>?,
+        : (oauth2ServerMetadata as Map<Object?, Object?>?)
+              ?.cast<String, dynamic>(),
     oauth2ServerMetadataUrl: oauth2ServerMetadataUrl == unsetCopyWithValue
         ? this.oauth2ServerMetadataUrl
         : oauth2ServerMetadataUrl as String?,
@@ -142,6 +204,9 @@ class CreateConnectorRequest {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CreateConnectorRequest &&
+          protocol == other.protocol &&
+          listsEqual(_resolvedAuthMethods, other._resolvedAuthMethods) &&
+          mapsEqual(globalHeaders, other.globalHeaders) &&
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
@@ -150,13 +215,12 @@ class CreateConnectorRequest {
           iconUrl == other.iconUrl &&
           visibility == other.visibility &&
           mapsDeepEqual(headers, other.headers) &&
-          authData == other.authData &&
           mapsDeepEqual(oauth2ServerMetadata, other.oauth2ServerMetadata) &&
           oauth2ServerMetadataUrl == other.oauth2ServerMetadataUrl &&
           systemPrompt == other.systemPrompt;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     name,
     description,
     server,
@@ -164,15 +228,17 @@ class CreateConnectorRequest {
     iconUrl,
     visibility,
     mapDeepHashCode(headers),
-    authData,
     mapDeepHashCode(oauth2ServerMetadata),
     oauth2ServerMetadataUrl,
     systemPrompt,
-  );
+    protocol,
+    listHash(_resolvedAuthMethods),
+    mapHash(globalHeaders),
+  ]);
 
   @override
   String toString() =>
-      'CreateConnectorRequest('
+      'CreateConnectorRequest(protocol: $protocol, authMethods: ${authMethods?.length}, globalHeaders: ${globalHeaders?.length}, '
       'name: $name, '
       'description: $description, '
       'server: $server, '
