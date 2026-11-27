@@ -20,7 +20,7 @@ class AdminWorkspacesPage {
   final List<AdminWorkspace> items;
 
   /// Type of paginated API object.
-  final Object? object;
+  final AdminApiObjectType? object;
 
   /// Page number returned.
   final int page;
@@ -49,7 +49,9 @@ class AdminWorkspacesPage {
       items: (json['items'] as List)
           .map((item) => AdminWorkspace.fromJson(item as Map<String, dynamic>))
           .toList(),
-      object: json['object'],
+      object: json['object'] == null
+          ? null
+          : AdminApiObjectType.fromJson(json['object'] as String),
       page: json['page'] as int,
       pageSize: json['page_size'] as int,
       total: json['total'] as int,
@@ -59,7 +61,7 @@ class AdminWorkspacesPage {
   /// Serializes this model.
   Map<String, dynamic> toJson() => {
     'items': items.map((item) => item.toJson()).toList(),
-    'object': ?object,
+    'object': ?object?.toJson(),
     'page': page,
     'page_size': pageSize,
     'total': total,
@@ -74,7 +76,9 @@ class AdminWorkspacesPage {
     int? total,
   }) => AdminWorkspacesPage(
     items: items ?? this.items,
-    object: object == unsetCopyWithValue ? this.object : object,
+    object: object == unsetCopyWithValue
+        ? this.object
+        : object as AdminApiObjectType?,
     page: page ?? this.page,
     pageSize: pageSize ?? this.pageSize,
     total: total ?? this.total,
@@ -86,19 +90,14 @@ class AdminWorkspacesPage {
       other is AdminWorkspacesPage &&
           runtimeType == other.runtimeType &&
           valuesDeepEqual(items, other.items) &&
-          valuesDeepEqual(object, other.object) &&
+          object == other.object &&
           page == other.page &&
           pageSize == other.pageSize &&
           total == other.total;
 
   @override
-  int get hashCode => Object.hashAll([
-    valueDeepHashCode(items),
-    valueDeepHashCode(object),
-    page,
-    pageSize,
-    total,
-  ]);
+  int get hashCode =>
+      Object.hashAll([valueDeepHashCode(items), object, page, pageSize, total]);
 
   @override
   String toString() =>

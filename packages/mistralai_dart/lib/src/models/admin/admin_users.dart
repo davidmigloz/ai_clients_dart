@@ -806,7 +806,7 @@ class AdminUser {
   final List<String> rawRoles;
 
   /// Account status of the member. Deactivated and blocked members cannot access the Organization.
-  final Object? status;
+  final AdminMemberStatus? status;
 
   /// Product seats assigned to the member.
   final List<String>? subscriptionTypes;
@@ -871,7 +871,9 @@ class AdminUser {
       rawRoles: (json['raw_roles'] as List)
           .map((item) => item as String)
           .toList(),
-      status: json['status'],
+      status: json['status'] == null
+          ? null
+          : AdminMemberStatus.fromJson(json['status'] as String),
       subscriptionTypes: json['subscription_types'] == null
           ? null
           : (json['subscription_types'] as List)
@@ -914,7 +916,7 @@ class AdminUser {
     'oid_id': oidId,
     'raw_role': rawRole,
     'raw_roles': rawRoles,
-    'status': ?status,
+    'status': ?status?.toJson(),
     'subscription_types': ?subscriptionTypes,
     if (subscriptions != null)
       'subscriptions': subscriptions!.map((item) => item.toJson()).toList(),
@@ -961,7 +963,9 @@ class AdminUser {
     oidId: oidId == unsetCopyWithValue ? this.oidId : oidId as String?,
     rawRole: rawRole ?? this.rawRole,
     rawRoles: rawRoles ?? this.rawRoles,
-    status: status == unsetCopyWithValue ? this.status : status,
+    status: status == unsetCopyWithValue
+        ? this.status
+        : status as AdminMemberStatus?,
     subscriptionTypes: subscriptionTypes == unsetCopyWithValue
         ? this.subscriptionTypes
         : (subscriptionTypes as List?)?.cast<String>(),
@@ -992,7 +996,7 @@ class AdminUser {
           oidId == other.oidId &&
           rawRole == other.rawRole &&
           valuesDeepEqual(rawRoles, other.rawRoles) &&
-          valuesDeepEqual(status, other.status) &&
+          status == other.status &&
           valuesDeepEqual(subscriptionTypes, other.subscriptionTypes) &&
           valuesDeepEqual(subscriptions, other.subscriptions) &&
           uuid == other.uuid &&
@@ -1011,7 +1015,7 @@ class AdminUser {
     oidId,
     rawRole,
     valueDeepHashCode(rawRoles),
-    valueDeepHashCode(status),
+    status,
     valueDeepHashCode(subscriptionTypes),
     valueDeepHashCode(subscriptions),
     uuid,
@@ -1190,7 +1194,7 @@ class AdminOrganizationMember {
   final List<String> rawRoles;
 
   /// Account status of the member. Deactivated and blocked members cannot access the Organization.
-  final Object? status;
+  final AdminMemberStatus? status;
 
   /// Product seats assigned to the member.
   final List<String>? subscriptionTypes;
@@ -1247,7 +1251,9 @@ class AdminOrganizationMember {
       rawRoles: (json['raw_roles'] as List)
           .map((item) => item as String)
           .toList(),
-      status: json['status'],
+      status: json['status'] == null
+          ? null
+          : AdminMemberStatus.fromJson(json['status'] as String),
       subscriptionTypes: json['subscription_types'] == null
           ? null
           : (json['subscription_types'] as List)
@@ -1288,7 +1294,7 @@ class AdminOrganizationMember {
     'oid_id': oidId,
     'raw_role': rawRole,
     'raw_roles': rawRoles,
-    'status': ?status,
+    'status': ?status?.toJson(),
     'subscription_types': ?subscriptionTypes,
     if (subscriptions != null)
       'subscriptions': subscriptions!.map((item) => item.toJson()).toList(),
@@ -1327,7 +1333,9 @@ class AdminOrganizationMember {
     oidId: oidId == unsetCopyWithValue ? this.oidId : oidId as String?,
     rawRole: rawRole ?? this.rawRole,
     rawRoles: rawRoles ?? this.rawRoles,
-    status: status == unsetCopyWithValue ? this.status : status,
+    status: status == unsetCopyWithValue
+        ? this.status
+        : status as AdminMemberStatus?,
     subscriptionTypes: subscriptionTypes == unsetCopyWithValue
         ? this.subscriptionTypes
         : (subscriptionTypes as List?)?.cast<String>(),
@@ -1356,7 +1364,7 @@ class AdminOrganizationMember {
           oidId == other.oidId &&
           rawRole == other.rawRole &&
           valuesDeepEqual(rawRoles, other.rawRoles) &&
-          valuesDeepEqual(status, other.status) &&
+          status == other.status &&
           valuesDeepEqual(subscriptionTypes, other.subscriptionTypes) &&
           valuesDeepEqual(subscriptions, other.subscriptions) &&
           uuid == other.uuid &&
@@ -1373,7 +1381,7 @@ class AdminOrganizationMember {
     oidId,
     rawRole,
     valueDeepHashCode(rawRoles),
-    valueDeepHashCode(status),
+    status,
     valueDeepHashCode(subscriptionTypes),
     valueDeepHashCode(subscriptions),
     uuid,
