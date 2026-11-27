@@ -8,8 +8,11 @@ enum EntityType {
   /// Workspace.
   workspace('Workspace'),
 
-  /// Organization.
-  org('Org');
+  /// Organization value retained for historical payloads.
+  org('Org'),
+
+  /// A value introduced by a newer version of the API.
+  unknown('unknown');
 
   const EntityType(this.value);
 
@@ -20,7 +23,7 @@ enum EntityType {
   static EntityType fromString(String? value) {
     return EntityType.values.firstWhere(
       (e) => e.value == value,
-      orElse: () => EntityType.user,
+      orElse: () => EntityType.unknown,
     );
   }
 }

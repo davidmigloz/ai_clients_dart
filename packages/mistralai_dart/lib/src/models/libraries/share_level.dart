@@ -6,7 +6,10 @@ enum ShareLevel {
   viewer('Viewer'),
 
   /// Full editing access.
-  editor('Editor');
+  editor('Editor'),
+
+  /// A value introduced by a newer version of the API.
+  unknown('unknown');
 
   const ShareLevel(this.value);
 
@@ -17,7 +20,7 @@ enum ShareLevel {
   static ShareLevel fromString(String? value) {
     return ShareLevel.values.firstWhere(
       (e) => e.value == value,
-      orElse: () => ShareLevel.viewer,
+      orElse: () => ShareLevel.unknown,
     );
   }
 }

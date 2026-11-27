@@ -65,8 +65,14 @@ void main() {
         expect(json['id'], 'lib-456');
         expect(json['name'], 'Full Library');
         expect(json['description'], 'Complete example');
-        expect(json['created_at'], 1703980800);
-        expect(json['updated_at'], 1703984400);
+        expect(
+          DateTime.parse(json['created_at'] as String).millisecondsSinceEpoch,
+          1703980800000,
+        );
+        expect(
+          DateTime.parse(json['updated_at'] as String).millisecondsSinceEpoch,
+          1703984400000,
+        );
         expect(json['owner_id'], 'org-123');
         expect(json['owner_type'], 'org');
         expect(json['total_size'], 2097152);
@@ -175,11 +181,12 @@ void main() {
     });
 
     group('equality', () {
-      test('equals with same id', () {
+      test('equal fields compare equal and changed fields remain distinct', () {
         const lib1 = Library(id: 'lib-123', name: 'A');
-        const lib2 = Library(id: 'lib-123', name: 'Different Name');
+        final lib2 = Library.fromJson(lib1.toJson());
         expect(lib1, equals(lib2));
         expect(lib1.hashCode, lib2.hashCode);
+        expect(lib1.copyWith(name: 'Different Name'), isNot(lib1));
       });
 
       test('not equals with different id', () {
@@ -198,7 +205,7 @@ void main() {
         );
         expect(
           library.toString(),
-          'Library(id: lib-xyz, name: My Library, documents: 10)',
+          'Library(id: lib-xyz, name: My Library, documents: 10, chunkSize: null)',
         );
       });
 
@@ -206,7 +213,7 @@ void main() {
         const library = Library(id: 'lib-abc', name: 'Empty');
         expect(
           library.toString(),
-          'Library(id: lib-abc, name: Empty, documents: 0)',
+          'Library(id: lib-abc, name: Empty, documents: 0, chunkSize: null)',
         );
       });
     });
@@ -325,7 +332,7 @@ void main() {
           data: [Library(id: '1', name: 'A')],
         );
         const list2 = LibraryList(
-          data: [Library(id: '1', name: 'B')], // Same id = equal library
+          data: [Library(id: '1', name: 'A')],
         );
         expect(list1, equals(list2));
       });
