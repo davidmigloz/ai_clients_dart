@@ -1,45 +1,27 @@
 // ignore_for_file: avoid_print
 
-/// A simple example demonstrating basic usage of the googleai_dart package.
+/// Creates a stable Gemini Developer API interaction.
 ///
-/// This example shows how to:
-/// - Initialize the Google AI client from environment variable
-/// - Generate content using the Gemini API with convenience methods
-/// - Handle the response using extension methods
-///
-/// To run this example:
-/// 1. Get an API key from https://ai.google.dev/gemini-api/docs/api-key
-/// 2. Set the environment variable: export GOOGLE_GENAI_API_KEY=your_key
-/// 3. Run: dart run example/example.dart
+/// Set GOOGLE_GENAI_API_KEY, then run `dart run example/example.dart`.
 library;
 
 import 'package:googleai_dart/googleai_dart.dart';
 
-void main() async {
-  // Initialize the Google AI client from environment variable
-  // Uses GOOGLE_GENAI_API_KEY by default
-  final client = GoogleAIClient.fromEnvironment();
+Future<void> main() async {
+  final client = GoogleAIClient.fromEnvironment(
+    interactionsApiVersion: ApiVersion.v1,
+  );
 
   try {
-    // Generate content using Gemini with convenience Content.text()
-    final response = await client.models.generateContent(
-      model: 'gemini-3.1-flash-preview',
-      request: GenerateContentRequest(
-        contents: [Content.text('Explain quantum computing in simple terms')],
+    final interaction = await client.interactions.create(
+      model: 'gemini-4-hydrogen',
+      input: const InteractionInput.text(
+        'Explain why Dart works well for APIs.',
       ),
     );
 
-    // Print the generated text using the .text extension
-    print('Response: ${response.text}');
-
-    // Print token usage
-    if (response.usageMetadata != null) {
-      print('\nTokens used: ${response.usageMetadata!.totalTokenCount}');
-    }
-  } catch (e) {
-    print('Error: $e');
+    print(interaction.outputText);
   } finally {
-    // Clean up resources
     client.close();
   }
 }

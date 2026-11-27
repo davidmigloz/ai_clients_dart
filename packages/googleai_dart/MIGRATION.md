@@ -6,6 +6,35 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Adopting the stable Interactions API
+
+Gemini Developer API model interactions are generally available on `v1`.
+Google's recent Python and JavaScript SDKs select `v1` by default. In Dart,
+choose the stable version for Interactions with `interactionsApiVersion`.
+Existing clients inherit `apiVersion`, which defaults to `v1beta` on the
+Gemini Developer API. [Gemini API version matrix](https://aistudio.google.com/api-reference/api-versions)
+
+An existing beta client can keep the same call.
+
+```dart
+final client = GoogleAIClient.fromEnvironment();
+```
+
+To move its model interactions to the stable endpoint, set the override.
+
+```dart
+final client = GoogleAIClient.fromEnvironment(
+  interactionsApiVersion: ApiVersion.v1,
+);
+```
+
+For structured output on `v1`, supply an `InteractionResponseFormatConfig`.
+`responseMimeType` and `responseModalities` are legacy beta fields. Use
+`ApiVersion.v1beta` for managed agents and other beta-only capabilities.
+[Interactions reference](https://aistudio.google.com/api-reference/interactions-api?api-version=v1)
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

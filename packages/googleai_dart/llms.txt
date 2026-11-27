@@ -1,6 +1,6 @@
 # Google AI & Vertex AI Gemini API Dart Client
 
-> Dart client for the Google AI Gemini Developer API and Vertex AI Gemini API with text generation, image generation, tool calling, grounding tools, Live API WebSocket sessions, service tier routing, and embeddings.
+> Dart client for the Google AI Gemini Developer API and Vertex AI Gemini API with stable Developer API Interactions, text generation, image generation, tool calling, grounding tools, Live API WebSocket sessions, service tier routing, and embeddings.
 
 Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platform, Generative AI on Vertex AI) under the Gemini Enterprise Agent Platform brand; the API and SDKs still use the Vertex AI name, which this client keeps. See the [Vertex AI name changes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes) page.
 
@@ -12,6 +12,8 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 
 ## Examples
 
+- [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart) (~326 tokens): Stable Developer API Interactions quickstart.
+- [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart) (~1.2k tokens): Stable Interactions, streaming, state and function calls.
 - [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart) (~194 tokens): Basic text generation.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart) (~224 tokens): Streaming responses.
 - [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart) (~1.2k tokens): Image generation.
@@ -32,13 +34,11 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [complete_api_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/complete_api_example.dart) (~1k tokens): Complete API coverage demo.
 - [corpora_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/corpora_example.dart) (~908 tokens): Corpus management for semantic retrieval.
 - [documents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/documents_example.dart) (~889 tokens): Document management within corpora.
-- [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart) (~326 tokens): Quick-start usage.
 - [file_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_example.dart) (~1.6k tokens): File search with semantic retrieval.
 - [file_search_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_stores_example.dart) (~1k tokens): File search store management.
 - [generate_answer_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_answer_example.dart) (~1.3k tokens): Grounded question answering (RAG).
 - [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart) (~714 tokens): Generated files for video outputs.
 - [google_maps_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_maps_example.dart) (~1.1k tokens): Google Maps grounding.
-- [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart) (~1.2k tokens): Server-side conversation state management.
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/models_example.dart) (~397 tokens): List and inspect models.
 - [oauth_refresh_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/oauth_refresh_example.dart) (~1.7k tokens): OAuth token refresh during retries.
 - [operations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/operations_example.dart) (~1k tokens): Long-running operations management.

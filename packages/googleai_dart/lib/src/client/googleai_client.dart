@@ -125,13 +125,14 @@ class GoogleAIClient {
   /// Resource for file search stores API (file-based retrieval).
   late final FileSearchStoresResource fileSearchStores;
 
-  /// Resource for interactions API (experimental).
+  /// Resource for the Interactions API.
   ///
   /// The Interactions API provides server-side state management for conversations
   /// with Gemini models. It enables multi-turn conversations with managed state,
   /// function calling with automatic result handling, and streaming responses.
   ///
-  /// This is an experimental API and is subject to change.
+  /// [GoogleAIConfig.interactionsApiVersion] selects the version for this
+  /// resource independently of other API calls.
   late final InteractionsResource interactions;
 
   /// Resource for agents API (experimental).
@@ -336,6 +337,7 @@ class GoogleAIClient {
   factory GoogleAIClient.fromEnvironment({
     String envVarName = 'GOOGLE_GENAI_API_KEY',
     ApiVersion apiVersion = ApiVersion.v1beta,
+    ApiVersion? interactionsApiVersion,
     Duration timeout = const Duration(minutes: 2),
     RetryPolicy retryPolicy = RetryPolicy.defaultPolicy,
     http.Client? httpClient,
@@ -344,6 +346,7 @@ class GoogleAIClient {
       config: GoogleAIConfig.fromEnvironment(
         envVarName: envVarName,
         apiVersion: apiVersion,
+        interactionsApiVersion: interactionsApiVersion,
         timeout: timeout,
         retryPolicy: retryPolicy,
       ),
@@ -357,6 +360,7 @@ class GoogleAIClient {
   factory GoogleAIClient.withApiKey(
     String apiKey, {
     String? baseUrl,
+    ApiVersion? interactionsApiVersion,
     Map<String, String>? defaultHeaders,
     http.Client? httpClient,
   }) {
@@ -364,6 +368,7 @@ class GoogleAIClient {
       config: GoogleAIConfig(
         authProvider: ApiKeyProvider(apiKey),
         baseUrl: baseUrl ?? 'https://generativelanguage.googleapis.com',
+        interactionsApiVersion: interactionsApiVersion,
         defaultHeaders: defaultHeaders ?? const {},
       ),
       httpClient: httpClient,

@@ -43,13 +43,22 @@ void main() {
     });
 
     test('uses default env var name GOOGLE_GENAI_API_KEY', () {
-      // This test verifies the error message uses the default env var
-      // when none is specified
-      try {
-        GoogleAIClient.fromEnvironment();
-        fail('Expected StateError');
-      } on StateError catch (e) {
-        expect(e.message, contains('GOOGLE_GENAI_API_KEY'));
+      final apiKey = Platform.environment['GOOGLE_GENAI_API_KEY'];
+      if (apiKey == null || apiKey.isEmpty) {
+        expect(
+          GoogleAIClient.fromEnvironment,
+          throwsA(
+            isA<StateError>().having(
+              (error) => error.message,
+              'message',
+              contains('GOOGLE_GENAI_API_KEY'),
+            ),
+          ),
+        );
+      } else {
+        final client = GoogleAIClient.fromEnvironment();
+        addTearDown(client.close);
+        expect(client.config.authProvider, isA<ApiKeyProvider>());
       }
     });
 
@@ -76,6 +85,21 @@ void main() {
       final client = GoogleAIClient.fromEnvironment(apiVersion: ApiVersion.v1);
       expect(client.config.apiVersion, ApiVersion.v1);
       client.close();
+    });
+
+    test('passes through an independent Interactions version', () {
+      final apiKey = Platform.environment['GOOGLE_GENAI_API_KEY'];
+      if (apiKey == null || apiKey.isEmpty) {
+        markTestSkipped('GOOGLE_GENAI_API_KEY not set');
+        return;
+      }
+
+      final client = GoogleAIClient.fromEnvironment(
+        interactionsApiVersion: ApiVersion.v1,
+      );
+      addTearDown(client.close);
+      expect(client.config.apiVersion, ApiVersion.v1beta);
+      expect(client.config.interactionsApiVersion, ApiVersion.v1);
     });
 
     test('respects custom timeout parameter', () {
