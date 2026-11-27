@@ -156,6 +156,34 @@ in JSON. Read precise timestamps with `createdAtDateTime` and
 `updatedAtDateTime`. The deprecated PUT methods are still available. Prefer
 `updatePartial` for library and document PATCH requests.
 
+### Handle library access deletion without a sharing record
+
+`client.libraries.deleteSharing` now returns `SharingResponse?`. An HTTP 200
+response includes the deleted sharing record. HTTP 204 confirms removal and
+returns `null`.
+
+Before:
+
+```dart
+final removed = await client.libraries.deleteSharing(
+  libraryId: libraryId,
+  shareWithUuid: workspaceId,
+  shareWithType: EntityType.workspace,
+);
+print(removed.role);
+```
+
+After:
+
+```dart
+final removed = await client.libraries.deleteSharing(
+  libraryId: libraryId,
+  shareWithUuid: workspaceId,
+  shareWithType: EntityType.workspace,
+);
+if (removed != null) print(removed.role);
+```
+
 ### OCR 4.1 documents and confidence
 
 Replace the retired `mistral-ocr-4-0` model with `mistral-ocr-4-1` or
