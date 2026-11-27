@@ -117,17 +117,15 @@
   },
   "coverage": {
     "excluded_paths": [
-      "^/v1/admin(/|$)"
+      "^/v1/admin/(analytics|api-keys|audit-logs|rate-limit|spend-limit|usage)(/|$)",
+      "^/v1/admin/user-groups/provision-workspace$"
     ],
     "excluded_tags": [
       "beta.admin.api-keys",
       "beta.admin.audit-logs",
       "beta.admin.billing",
-      "beta.admin.user-groups",
-      "beta.admin.users",
       "beta.admin.vibe-code-analytics",
-      "beta.admin.vibe-work-analytics",
-      "beta.admin.workspaces"
+      "beta.admin.vibe-work-analytics"
     ],
     "priority_resources": [
       "chat",
@@ -137,7 +135,7 @@
       "agents"
     ],
     "notes": {
-      "admin": "beta.admin.* org-console surface (41 endpoints, ~100 schemas) deliberately excluded from coverage in the 2026-08 spec sync; candidate for a follow-up PR."
+      "admin": "Directory operations are implemented. Legacy group provisioning is superseded by POST /v1/admin/user-groups/{group_uuid}/workspaces. Remaining Admin operations are tracked in #610."
     },
     "expected_properties": {},
     "excluded_properties": {
@@ -5580,6 +5578,614 @@
         "acknowledged"
       ],
       "note": "SDK frame wrapper around SSE event name and data. Dart decodes the event wire shape directly."
+    },
+    "RolesOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminRoles",
+      "file": "lib/src/models/admin/admin_roles.dart",
+      "schema": "RolesOut",
+      "tags": []
+    },
+    "RoleOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminRole",
+      "file": "lib/src/models/admin/admin_roles.dart",
+      "schema": "RoleOut",
+      "tags": []
+    },
+    "AdminScimSyncTriggerIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "StartAdminScimSyncRequest",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "AdminScimSyncTriggerIN",
+      "tags": []
+    },
+    "AdminScimSyncTriggerOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimSyncStarted",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "AdminScimSyncTriggerOUT",
+      "tags": []
+    },
+    "AdminScimSyncRunOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimSyncRun",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "AdminScimSyncRunOUT",
+      "tags": []
+    },
+    "AdminScimSyncActiveRunOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimSyncActiveRun",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "AdminScimSyncActiveRunOUT",
+      "tags": []
+    },
+    "AdminScimSyncConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimSyncConfig",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "AdminScimSyncConfig",
+      "tags": []
+    },
+    "ScimSyncRunStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminScimRunStatus",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncRunStatus",
+      "tags": []
+    },
+    "ScimSyncSummaryOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimSyncSummary",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncSummaryOut",
+      "tags": []
+    },
+    "ScimSyncGroupsSummaryOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimGroupSummary",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncGroupsSummaryOut",
+      "tags": []
+    },
+    "ScimSyncMembershipActionOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimMembershipAction",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncMembershipActionOut",
+      "tags": []
+    },
+    "ScimSyncUsersSummaryOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimUserSummary",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncUsersSummaryOut",
+      "tags": []
+    },
+    "ScimSyncGroupActionOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimGroupAction",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncGroupActionOut",
+      "tags": []
+    },
+    "ScimSyncGroupUpdateActionOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimGroupUpdateAction",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncGroupUpdateActionOut",
+      "tags": []
+    },
+    "ScimSyncGroupRefOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimGroupReference",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncGroupRefOut",
+      "tags": []
+    },
+    "ScimSyncUserRefOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimUserReference",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncUserRefOut",
+      "tags": []
+    },
+    "ScimSyncUserActionOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminScimUserAction",
+      "file": "lib/src/models/admin/admin_scim.dart",
+      "schema": "ScimSyncUserActionOut",
+      "tags": []
+    },
+    "AdminUserGroupsOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUserGroupPage",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUserGroupsOut",
+      "tags": []
+    },
+    "AdminUserGroupIn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAdminUserGroupRequest",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUserGroupIn",
+      "tags": []
+    },
+    "AdminUserGroupOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUserGroup",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUserGroupOut",
+      "tags": []
+    },
+    "AdminUpdateUserGroupIn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAdminUserGroupRequest",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUpdateUserGroupIn",
+      "tags": []
+    },
+    "AdminAssignUsersToGroupIn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminGroupUsersRequest",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminAssignUsersToGroupIn",
+      "tags": []
+    },
+    "AdminUserGroupMembersOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUserGroupMembersPage",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUserGroupMembersOut",
+      "tags": []
+    },
+    "AdminUpdateUserGroupOrganizationRoleIn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SetAdminGroupOrganizationRoleRequest",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUpdateUserGroupOrganizationRoleIn",
+      "tags": []
+    },
+    "GroupWorkspaceAssignmentsOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminGroupWorkspaceAssignmentPage",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "GroupWorkspaceAssignmentsOut",
+      "tags": []
+    },
+    "AdminAssignGroupToWorkspaceIn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AssignAdminGroupWorkspaceRequest",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminAssignGroupToWorkspaceIn",
+      "tags": []
+    },
+    "AdminUpdateGroupWorkspaceAssignmentIn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAdminGroupWorkspaceRequest",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUpdateGroupWorkspaceAssignmentIn",
+      "tags": []
+    },
+    "AdminUserGroupMemberOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUserGroupMember",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "AdminUserGroupMemberOut",
+      "tags": []
+    },
+    "GroupWorkspaceAssignmentOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminGroupWorkspaceAssignment",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "GroupWorkspaceAssignmentOut",
+      "tags": []
+    },
+    "WorkspaceRoleRef": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceRoleReference",
+      "file": "lib/src/models/admin/admin_groups.dart",
+      "schema": "WorkspaceRoleRef",
+      "tags": []
+    },
+    "OrganizationAdminUsersOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminOrganizationUsersPage",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "OrganizationAdminUsersOUT",
+      "tags": []
+    },
+    "OrganizationMemberCreate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAdminUserRequest",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "OrganizationMemberCreate",
+      "tags": []
+    },
+    "OrganizationUsersCreateOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAdminUserResponse",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "OrganizationUsersCreateOUT",
+      "tags": []
+    },
+    "OrganizationUserInviteOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUserInvite",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "OrganizationUserInviteOUT",
+      "tags": []
+    },
+    "OrganizationInviteIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "InviteAdminUserRequest",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "OrganizationInviteIN",
+      "tags": []
+    },
+    "OrganizationInvitesCreateOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "InviteAdminUserResponse",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "OrganizationInvitesCreateOUT",
+      "tags": []
+    },
+    "DeleteOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminDeleteResult",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "DeleteOUT",
+      "tags": []
+    },
+    "AdminUserOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUser",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "AdminUserOUT",
+      "tags": []
+    },
+    "AdminOrganizationMemberUpdate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAdminUserRequest",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "AdminOrganizationMemberUpdate",
+      "tags": []
+    },
+    "AdminOrganizationMemberOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminOrganizationMember",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "AdminOrganizationMemberOUT",
+      "tags": []
+    },
+    "DeactivateUserOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminDeactivateUserResult",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "DeactivateUserOUT",
+      "tags": []
+    },
+    "ReactivateUserOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminReactivateUserResult",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "ReactivateUserOUT",
+      "tags": []
+    },
+    "AdminUserWorkspacesOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUserWorkspacesPage",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "AdminUserWorkspacesOUT",
+      "tags": []
+    },
+    "OrganizationInviteOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminOrganizationInvite",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "OrganizationInviteOUT",
+      "tags": []
+    },
+    "PlanType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminPlanType",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "PlanType",
+      "tags": []
+    },
+    "MemberStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminMemberStatus",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "MemberStatus",
+      "tags": []
+    },
+    "MemberSubscriptionOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminMemberSubscription",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "MemberSubscriptionOUT",
+      "tags": []
+    },
+    "MemberWorkspaceInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminMemberWorkspace",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "MemberWorkspaceInfo",
+      "tags": []
+    },
+    "APIPlan": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminApiPlan",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "APIPlan",
+      "tags": []
+    },
+    "ChatPlan": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminChatPlan",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "ChatPlan",
+      "tags": []
+    },
+    "CodePlan": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminCodePlan",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "CodePlan",
+      "tags": []
+    },
+    "SubscriptionStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminSubscriptionStatus",
+      "file": "lib/src/models/admin/admin_users.dart",
+      "schema": "SubscriptionStatus",
+      "tags": []
+    },
+    "WorkspacesOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspacesPage",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "WorkspacesOut",
+      "tags": []
+    },
+    "AdminWorkspaceIn": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAdminWorkspaceRequest",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceIn",
+      "tags": []
+    },
+    "WorkspaceEnrichedOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminCreatedWorkspace",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "WorkspaceEnrichedOUT",
+      "tags": []
+    },
+    "UpdateWorkspaceIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAdminWorkspaceRequest",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "UpdateWorkspaceIN",
+      "tags": []
+    },
+    "WorkspaceOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspace",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "WorkspaceOUT",
+      "tags": []
+    },
+    "AdminWorkspaceMemberIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AddAdminWorkspaceUsersRequest",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceMemberIN",
+      "tags": []
+    },
+    "AddUsersToWorkspaceOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AddAdminWorkspaceUsersResult",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AddUsersToWorkspaceOUT",
+      "tags": []
+    },
+    "RemoveWorkspaceMembersIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RemoveAdminWorkspaceUsersRequest",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "RemoveWorkspaceMembersIN",
+      "tags": []
+    },
+    "RemoveWorkspaceMembersOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RemoveAdminWorkspaceUsersResult",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "RemoveWorkspaceMembersOUT",
+      "tags": []
+    },
+    "AdminWorkspaceUsersOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceUsersPage",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceUsersOUT",
+      "tags": []
+    },
+    "AdminWorkspaceMemberUpsertIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpsertAdminWorkspaceUsersRequest",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceMemberUpsertIN",
+      "tags": []
+    },
+    "AddOrUpdateUsersToWorkspaceOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpsertAdminWorkspaceUsersResult",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AddOrUpdateUsersToWorkspaceOUT",
+      "tags": []
+    },
+    "ApiObjectType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminApiObjectType",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "ApiObjectType",
+      "tags": []
+    },
+    "WorkspaceSpendLimitOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceSpendLimit",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "WorkspaceSpendLimitOUT",
+      "tags": []
+    },
+    "AdminWorkspaceMemberSingleIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceUserAddition",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceMemberSingleIN",
+      "tags": []
+    },
+    "BaseWorkspaceMemberIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceUserReference",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "BaseWorkspaceMemberIN",
+      "tags": []
+    },
+    "AdminWorkspaceMemberOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceMember",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceMemberOUT",
+      "tags": []
+    },
+    "AdminWorkspaceMemberUpsertSingleIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceUserUpsert",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceMemberUpsertSingleIN",
+      "tags": []
+    },
+    "AdminWorkspaceGroupGrantOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminWorkspaceGroupGrant",
+      "file": "lib/src/models/admin/admin_workspaces.dart",
+      "schema": "AdminWorkspaceGroupGrantOUT",
+      "tags": []
+    },
+    "WorkspaceRole": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "WorkspaceRole",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Directory role references accept both built-in names and custom role UUIDs; the Dart role fields retain the JSON string."
+    },
+    "UserRole": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "UserRole",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Directory role references accept both built-in names and custom role UUIDs; the Dart role fields retain the JSON string."
+    },
+    "StaticWorkspaceRoles": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "StaticWorkspaceRoles",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Directory role references accept both built-in names and custom role UUIDs; the Dart role fields retain the JSON string."
+    },
+    "StaticOrganizationRoles": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "StaticOrganizationRoles",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Directory role references accept both built-in names and custom role UUIDs; the Dart role fields retain the JSON string."
     }
   }
 }

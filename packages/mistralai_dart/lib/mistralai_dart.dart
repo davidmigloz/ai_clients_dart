@@ -62,12 +62,19 @@ library;
 export 'src/auth/auth_provider.dart';
 // --- Client ---
 export 'src/client/config.dart' show MistralConfig, RetryPolicy;
+export 'src/client/mistral_admin_client.dart';
 export 'src/client/mistral_client.dart';
 // --- Errors ---
 export 'src/errors/exceptions.dart';
 // --- Extensions ---
 export 'src/extensions/chat_completion_extensions.dart';
 export 'src/extensions/chat_stream_extensions.dart';
+// --- Models: Admin (Enterprise Preview) ---
+export 'src/models/admin/admin_groups.dart';
+export 'src/models/admin/admin_roles.dart';
+export 'src/models/admin/admin_scim.dart';
+export 'src/models/admin/admin_users.dart';
+export 'src/models/admin/admin_workspaces.dart';
 // --- Models: Agents (Beta) ---
 export 'src/models/agents/agent.dart';
 export 'src/models/agents/agent_alias_response.dart';
@@ -576,6 +583,11 @@ export 'src/models/workflows/workflow_update_response.dart';
 export 'src/models/workflows/workflow_with_worker_status.dart';
 export 'src/models/workflows/workflows_worker_spec_update.dart';
 // --- Resources ---
+export 'src/resources/admin/admin_groups_resource.dart';
+export 'src/resources/admin/admin_roles_resource.dart';
+export 'src/resources/admin/admin_scim_resource.dart';
+export 'src/resources/admin/admin_users_resource.dart';
+export 'src/resources/admin/admin_workspaces_resource.dart';
 export 'src/resources/managed_search_indexes_resource.dart';
 export 'src/resources/realtime/realtime_audio.dart';
 export 'src/resources/realtime/realtime_resource.dart';
