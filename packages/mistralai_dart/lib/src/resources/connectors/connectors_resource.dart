@@ -67,8 +67,10 @@ class ConnectorsResource extends ResourceBase with PlatformResource {
   /// (`POST /v1/connectors`).
   ///
   /// [request] contains the connector configuration.
-  Future<Connector> create({required CreateConnectorRequest request}) async =>
-      _writeConnector('POST', '/v1/connectors', request.toJson());
+  Future<Connector> create({required CreateConnectorRequest request}) =>
+      Future.sync(
+        () => _writeConnector('POST', '/v1/connectors', request.toJson()),
+      );
 
   /// Lists all connectors with keyset pagination and filters.
   ///
@@ -150,10 +152,12 @@ class ConnectorsResource extends ResourceBase with PlatformResource {
   Future<Connector> update({
     required String connectorId,
     required UpdateConnectorRequest request,
-  }) async => _writeConnector(
-    'PATCH',
-    '/v1/connectors/${Uri.encodeComponent(connectorId)}',
-    request.toJson(),
+  }) => Future.sync(
+    () => _writeConnector(
+      'PATCH',
+      '/v1/connectors/${Uri.encodeComponent(connectorId)}',
+      request.toJson(),
+    ),
   );
 
   Future<Connector> _writeConnector(
@@ -171,7 +175,7 @@ class ConnectorsResource extends ResourceBase with PlatformResource {
     return requestPlatform(
       method,
       path,
-      (json) => Connector.fromJson(json as Map<String, dynamic>),
+      (json) => Connector.fromJson(json! as Map<String, dynamic>),
       body: body,
       redactErrorBody: credentialFields.any((key) => body[key] != null),
     );
@@ -787,7 +791,7 @@ class ConnectorsResource extends ResourceBase with PlatformResource {
   }) => requestPlatform(
     method,
     path,
-    (json) => MessageResponse.fromJson(json as Map<String, dynamic>),
+    (json) => MessageResponse.fromJson(json! as Map<String, dynamic>),
     body: body,
     redactErrorBody: redactErrorBody,
   );
