@@ -1,5 +1,6 @@
 import '../models/chat/chat_choice_delta.dart';
 import '../models/chat/chat_completion_stream_response.dart';
+import '../models/chat/message_content.dart';
 import '../models/metadata/finish_reason.dart';
 import '../models/tools/tool_call.dart';
 
@@ -22,7 +23,7 @@ extension ChatCompletionStreamResponseExtensions
   ///   }
   /// }
   /// ```
-  String? get text => firstChoice?.delta.content;
+  String? get text => firstChoice?.delta.content?.text;
 
   /// Tool calls from the first choice's delta.
   ///
@@ -48,7 +49,7 @@ extension ChatCompletionStreamResponseExtensions
 /// Convenience extensions for [ChatChoiceDelta].
 extension ChatChoiceDeltaExtensions on ChatChoiceDelta {
   /// The text content from this delta.
-  String? get text => delta.content;
+  String? get text => delta.content?.text;
 
   /// Tool calls from this delta.
   List<ToolCall> get toolCalls => delta.toolCalls ?? [];

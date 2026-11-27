@@ -111,3 +111,18 @@ class MessagePartsContent extends MessageContent {
   @override
   String toString() => 'MessagePartsContent(${parts.length} parts)';
 }
+
+/// Text extraction shared by the response and stream extensions.
+extension MessageContentText on MessageContent {
+  /// The text of this content, or null if it has none.
+  ///
+  /// For [MessagePartsContent] this joins every [TextContentPart] and skips
+  /// all other parts, including thinking.
+  String? get text => switch (this) {
+    MessageTextContent(:final text) => text,
+    MessagePartsContent(:final parts) =>
+      parts.any((p) => p is TextContentPart)
+          ? parts.whereType<TextContentPart>().map((p) => p.text).join()
+          : null,
+  };
+}

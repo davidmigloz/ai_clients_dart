@@ -6,6 +6,35 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v8.x to v9.0.0
+
+v9.0.0 changes `DeltaContent.content` from `String?` to `MessageContent?`. Mistral can stream content as a list of chunks, for example while a reasoning model is thinking, which previously threw a type error. This affects streamed deltas and `ChatChoice.messages`.
+
+Before:
+
+```dart
+final String? text = chunk.choices.first.delta.content;
+```
+
+After:
+
+```dart
+// Answer text only. Thinking and other non-text parts are skipped.
+final String? text = chunk.text;
+
+// Everything, including thinking.
+final MessageContent? content = chunk.choices.firstOrNull?.delta.content;
+if (content is MessagePartsContent) {
+  final thinking = content.parts.whereType<ThinkContentPart>();
+}
+```
+
+When building a `DeltaContent` yourself, wrap strings: `DeltaContent(content: MessageContent.text('Hi'))`.
+
+`response.text`, `response.allText` and `ChatChoice.text` now also return the text of list content. Previously they returned `null` for it.
+
+---
+
 ## Migrating from v7.x to v8.0.0
 
 v8.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

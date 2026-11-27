@@ -90,7 +90,7 @@ import 'retry_wrapper.dart';
 ///     ],
 ///   ),
 /// )) {
-///   final content = chunk.choices.first.delta.content;
+///   final content = chunk.text;
 ///   if (content != null) {
 ///     stdout.write(content);
 ///   }

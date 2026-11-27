@@ -20,6 +20,34 @@ void main() {
       expect(response.text, 'Hello!');
     });
 
+    test('text joins text parts and skips thinking', () {
+      const response = ChatCompletionResponse(
+        id: 'chat-1',
+        object: 'chat.completion',
+        model: 'mistral-large-latest',
+        created: 1703980800,
+        choices: [
+          ChatChoice(
+            index: 0,
+            message: AssistantMessage(
+              content: MessageContent.parts([
+                ThinkContentPart(
+                  thinking: [TextContentPart('hmm')],
+                  closed: true,
+                ),
+                TextContentPart('Hello'),
+                TextContentPart(' there'),
+              ]),
+            ),
+            finishReason: FinishReason.stop,
+          ),
+        ],
+      );
+      expect(response.text, 'Hello there');
+      expect(response.allText, 'Hello there');
+      expect(response.choices.first.text, 'Hello there');
+    });
+
     test('text returns null when no content', () {
       const response = ChatCompletionResponse(
         id: 'chat-1',
