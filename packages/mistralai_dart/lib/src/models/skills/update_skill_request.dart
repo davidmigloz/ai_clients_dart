@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../registry/registry_share_relation.dart';
 import '../registry/registry_sharing_scope.dart';
 
 /// Request body to update a skill's metadata.
@@ -18,15 +19,29 @@ class UpdateSkillRequest {
   /// Must not be `true` while [sharingScope] is non-null.
   final bool clearSharingScope;
 
+  /// Workspace members' access when [sharingScope] is workspace.
+  final RegistryShareRelation? workspaceRelation;
+
+  /// Sends an explicit null for the workspace relation when true.
+  final bool clearWorkspaceRelation;
+
   /// Creates an [UpdateSkillRequest].
   ///
   /// Asserts that [clearSharingScope] is not `true` while [sharingScope] is
   /// also non-null.
-  const UpdateSkillRequest({this.sharingScope, this.clearSharingScope = false})
-    : assert(
-        !(clearSharingScope && sharingScope != null),
-        'Cannot set both sharingScope and clearSharingScope: true.',
-      );
+  const UpdateSkillRequest({
+    this.sharingScope,
+    this.clearSharingScope = false,
+    this.workspaceRelation,
+    this.clearWorkspaceRelation = false,
+  }) : assert(
+         !(clearSharingScope && sharingScope != null),
+         'Cannot set both sharingScope and clearSharingScope: true.',
+       ),
+       assert(
+         !(clearWorkspaceRelation && workspaceRelation != null),
+         'Cannot set both workspaceRelation and clearWorkspaceRelation: true.',
+       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -34,6 +49,10 @@ class UpdateSkillRequest {
       'sharingScope': sharingScope!.value
     else if (clearSharingScope)
       'sharingScope': null,
+    if (workspaceRelation != null)
+      'workspaceRelation': workspaceRelation!.value
+    else if (clearWorkspaceRelation)
+      'workspaceRelation': null,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -45,8 +64,11 @@ class UpdateSkillRequest {
   UpdateSkillRequest copyWith({
     Object? sharingScope = unsetCopyWithValue,
     bool? clearSharingScope,
+    Object? workspaceRelation = unsetCopyWithValue,
+    bool? clearWorkspaceRelation,
   }) {
     final sharingScopeSet = sharingScope != unsetCopyWithValue;
+    final workspaceRelationSet = workspaceRelation != unsetCopyWithValue;
     return UpdateSkillRequest(
       sharingScope: sharingScopeSet
           ? sharingScope as RegistrySharingScope?
@@ -54,6 +76,14 @@ class UpdateSkillRequest {
       clearSharingScope:
           clearSharingScope ??
           (sharingScopeSet ? sharingScope == null : this.clearSharingScope),
+      workspaceRelation: workspaceRelationSet
+          ? workspaceRelation as RegistryShareRelation?
+          : ((clearWorkspaceRelation ?? false) ? null : this.workspaceRelation),
+      clearWorkspaceRelation:
+          clearWorkspaceRelation ??
+          (workspaceRelationSet
+              ? workspaceRelation == null
+              : this.clearWorkspaceRelation),
     );
   }
 
@@ -63,13 +93,22 @@ class UpdateSkillRequest {
       other is UpdateSkillRequest &&
           runtimeType == other.runtimeType &&
           sharingScope == other.sharingScope &&
-          clearSharingScope == other.clearSharingScope;
+          clearSharingScope == other.clearSharingScope &&
+          workspaceRelation == other.workspaceRelation &&
+          clearWorkspaceRelation == other.clearWorkspaceRelation;
 
   @override
-  int get hashCode => Object.hash(sharingScope, clearSharingScope);
+  int get hashCode => Object.hash(
+    sharingScope,
+    clearSharingScope,
+    workspaceRelation,
+    clearWorkspaceRelation,
+  );
 
   @override
   String toString() =>
       'UpdateSkillRequest(sharingScope: $sharingScope, '
-      'clearSharingScope: $clearSharingScope)';
+      'clearSharingScope: $clearSharingScope, '
+      'workspaceRelation: $workspaceRelation, '
+      'clearWorkspaceRelation: $clearWorkspaceRelation)';
 }

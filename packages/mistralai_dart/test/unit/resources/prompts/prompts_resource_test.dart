@@ -27,6 +27,77 @@ void main() {
       );
     }
 
+    test('can sort the prompts list and select fields', () async {
+      final client = clientReturning({
+        'data': <Map<String, dynamic>>[],
+        'nextPageToken': 'next-page',
+      });
+      addTearDown(client.close);
+
+      final page = await client.prompts.list(
+        fields: ['name', 'createdBy'],
+        sortBy: 'last_modified_at',
+        sortDirection: 'desc',
+        pageToken: 'previous-page',
+      );
+      expect(captured.url.path, '/v2/prompts');
+      expect(captured.url.queryParametersAll, {
+        'fields': ['name', 'createdBy'],
+        'sort_by': ['last_modified_at'],
+        'sort_direction': ['desc'],
+        'pageToken': ['previous-page'],
+      });
+      expect(page.nextPageToken, 'next-page');
+    });
+
+    test('sends workspace reader and writer relations', () async {
+      final client = clientReturning({
+        'id': 'prompt-1',
+        'createdBy': 'user-1',
+        'versionCreatedAt': '2026-11-27T00:00:00Z',
+      });
+      addTearDown(client.close);
+
+      const create = CreatePromptRequest(
+        name: 'shared',
+        definition: PromptDefinition(content: 'Example'),
+        sharingScope: RegistrySharingScope.workspace,
+        workspaceRelation: RegistryShareRelation.reader,
+      );
+      final created = await client.prompts.create(request: create);
+      expect(created.id, 'prompt-1');
+      expect(created.createdBy, 'user-1');
+      expect(created.versionCreatedAt, '2026-11-27T00:00:00Z');
+      expect(Prompt.fromJson(created.toJson()), created);
+      expect(captured.method, 'POST');
+      expect(jsonDecode(captured.body), {
+        'name': 'shared',
+        'definition': {'content': 'Example'},
+        'sharingScope': 'workspace',
+        'workspaceRelation': 'reader',
+      });
+      expect(CreatePromptRequest.fromJson(create.toJson()), create);
+      expect(
+        create.copyWith(workspaceRelation: null).toJson(),
+        isNot(contains('workspaceRelation')),
+      );
+
+      const update = UpdatePromptRequest(
+        sharingScope: RegistrySharingScope.workspace,
+        workspaceRelation: RegistryShareRelation.writer,
+      );
+      await client.prompts.update(promptId: 'prompt-1', request: update);
+      expect(captured.method, 'PATCH');
+      expect(jsonDecode(captured.body), {
+        'sharingScope': 'workspace',
+        'workspaceRelation': 'writer',
+      });
+      expect(update.copyWith(workspaceRelation: null).toJson(), {
+        'sharingScope': 'workspace',
+        'workspaceRelation': null,
+      });
+    });
+
     test('list issues GET with camelCase query params', () async {
       final client = clientReturning({'data': <dynamic>[]});
       addTearDown(client.close);

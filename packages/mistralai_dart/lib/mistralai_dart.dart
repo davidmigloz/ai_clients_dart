@@ -362,6 +362,7 @@ export 'src/models/rag/vespa_index_summary.dart';
 export 'src/models/rag/vespa_schema_summary.dart';
 // --- Models: Registry (Beta) ---
 export 'src/models/registry/alias_list.dart';
+export 'src/models/registry/registry_share_relation.dart';
 export 'src/models/registry/registry_sharing_scope.dart';
 // --- Models: Skills (Beta) ---
 export 'src/models/skills/create_skill_request.dart';

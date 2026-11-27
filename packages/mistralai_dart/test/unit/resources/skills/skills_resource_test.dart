@@ -27,6 +27,71 @@ void main() {
       );
     }
 
+    test('can sort the skills list and select fields', () async {
+      final client = clientReturning({
+        'data': <Map<String, dynamic>>[],
+        'nextPageToken': 'next-page',
+      });
+      addTearDown(client.close);
+
+      final page = await client.skills.list(
+        fields: ['name', 'definition.description'],
+        sortBy: 'last_modified_at',
+        sortDirection: 'desc',
+        pageToken: 'previous-page',
+      );
+      expect(captured.url.path, '/v2/skills');
+      expect(captured.url.queryParametersAll, {
+        'fields': ['name', 'definition.description'],
+        'sort_by': ['last_modified_at'],
+        'sort_direction': ['desc'],
+        'pageToken': ['previous-page'],
+      });
+      expect(page.nextPageToken, 'next-page');
+    });
+
+    test('sends workspace reader and writer relations', () async {
+      final client = clientReturning({'id': 'skill-1'});
+      addTearDown(client.close);
+
+      const create = CreateSkillRequest(
+        name: 'shared',
+        definition: SkillDefinition(body: 'Example'),
+        sharingScope: RegistrySharingScope.workspace,
+        workspaceRelation: RegistryShareRelation.reader,
+      );
+      final created = await client.skills.create(request: create);
+      expect(created.id, 'skill-1');
+
+      expect(captured.method, 'POST');
+      expect(jsonDecode(captured.body), {
+        'name': 'shared',
+        'definition': {'body': 'Example'},
+        'sharingScope': 'workspace',
+        'workspaceRelation': 'reader',
+      });
+      expect(CreateSkillRequest.fromJson(create.toJson()), create);
+      expect(
+        create.copyWith(workspaceRelation: null).toJson(),
+        isNot(contains('workspaceRelation')),
+      );
+
+      const update = UpdateSkillRequest(
+        sharingScope: RegistrySharingScope.workspace,
+        workspaceRelation: RegistryShareRelation.writer,
+      );
+      await client.skills.update(skillId: 'skill-1', request: update);
+      expect(captured.method, 'PATCH');
+      expect(jsonDecode(captured.body), {
+        'sharingScope': 'workspace',
+        'workspaceRelation': 'writer',
+      });
+      expect(update.copyWith(workspaceRelation: null).toJson(), {
+        'sharingScope': 'workspace',
+        'workspaceRelation': null,
+      });
+    });
+
     test('list issues GET with camelCase query params', () async {
       final client = clientReturning({'data': <dynamic>[]});
       addTearDown(client.close);

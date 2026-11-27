@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../registry/registry_share_relation.dart';
 import '../registry/registry_sharing_scope.dart';
 
 /// Request body to update a prompt's metadata.
@@ -48,6 +49,12 @@ class UpdatePromptRequest {
   /// Must not be `true` while [sharingScope] is non-null.
   final bool clearSharingScope;
 
+  /// Workspace members' access when [sharingScope] is workspace.
+  final RegistryShareRelation? workspaceRelation;
+
+  /// Sends an explicit null for the workspace relation when true.
+  final bool clearWorkspaceRelation;
+
   /// Creates an [UpdatePromptRequest].
   ///
   /// Asserts that a `clearX` flag is not `true` while its corresponding
@@ -59,6 +66,8 @@ class UpdatePromptRequest {
     this.clearTitle = false,
     this.sharingScope,
     this.clearSharingScope = false,
+    this.workspaceRelation,
+    this.clearWorkspaceRelation = false,
   }) : assert(
          !(clearDescription && description != null),
          'Cannot set both description and clearDescription: true.',
@@ -70,6 +79,10 @@ class UpdatePromptRequest {
        assert(
          !(clearSharingScope && sharingScope != null),
          'Cannot set both sharingScope and clearSharingScope: true.',
+       ),
+       assert(
+         !(clearWorkspaceRelation && workspaceRelation != null),
+         'Cannot set both workspaceRelation and clearWorkspaceRelation: true.',
        );
 
   /// Converts to JSON.
@@ -83,6 +96,10 @@ class UpdatePromptRequest {
       'sharingScope': sharingScope!.value
     else if (clearSharingScope)
       'sharingScope': null,
+    if (workspaceRelation != null)
+      'workspaceRelation': workspaceRelation!.value
+    else if (clearWorkspaceRelation)
+      'workspaceRelation': null,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -99,10 +116,13 @@ class UpdatePromptRequest {
     bool? clearTitle,
     Object? sharingScope = unsetCopyWithValue,
     bool? clearSharingScope,
+    Object? workspaceRelation = unsetCopyWithValue,
+    bool? clearWorkspaceRelation,
   }) {
     final descriptionSet = description != unsetCopyWithValue;
     final titleSet = title != unsetCopyWithValue;
     final sharingScopeSet = sharingScope != unsetCopyWithValue;
+    final workspaceRelationSet = workspaceRelation != unsetCopyWithValue;
     return UpdatePromptRequest(
       description: descriptionSet
           ? description as String?
@@ -120,6 +140,14 @@ class UpdatePromptRequest {
       clearSharingScope:
           clearSharingScope ??
           (sharingScopeSet ? sharingScope == null : this.clearSharingScope),
+      workspaceRelation: workspaceRelationSet
+          ? workspaceRelation as RegistryShareRelation?
+          : ((clearWorkspaceRelation ?? false) ? null : this.workspaceRelation),
+      clearWorkspaceRelation:
+          clearWorkspaceRelation ??
+          (workspaceRelationSet
+              ? workspaceRelation == null
+              : this.clearWorkspaceRelation),
     );
   }
 
@@ -133,7 +161,9 @@ class UpdatePromptRequest {
           title == other.title &&
           clearTitle == other.clearTitle &&
           sharingScope == other.sharingScope &&
-          clearSharingScope == other.clearSharingScope;
+          clearSharingScope == other.clearSharingScope &&
+          workspaceRelation == other.workspaceRelation &&
+          clearWorkspaceRelation == other.clearWorkspaceRelation;
 
   @override
   int get hashCode => Object.hash(
@@ -143,6 +173,8 @@ class UpdatePromptRequest {
     clearTitle,
     sharingScope,
     clearSharingScope,
+    workspaceRelation,
+    clearWorkspaceRelation,
   );
 
   @override
@@ -150,5 +182,7 @@ class UpdatePromptRequest {
       'UpdatePromptRequest(description: $description, '
       'clearDescription: $clearDescription, title: $title, '
       'clearTitle: $clearTitle, sharingScope: $sharingScope, '
-      'clearSharingScope: $clearSharingScope)';
+      'clearSharingScope: $clearSharingScope, '
+      'workspaceRelation: $workspaceRelation, '
+      'clearWorkspaceRelation: $clearWorkspaceRelation)';
 }
