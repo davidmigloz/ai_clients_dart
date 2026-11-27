@@ -13,7 +13,8 @@
       "version": "1.0.0",
       "retrieved_at": "2026-11-27T17:34:25Z",
       "raw_sha256": "acf0efcbee4617601df77fc40185516ed6aae4369ce090034099317d5866b2db",
-      "normalized_sha256": "0b0b3a3d5b5e5a026a4e76bf1dae28b334bc5004fd473728c3b41fa904502140"
+      "normalized_sha256": "bfc5e48ee2299075592422b120a2a069e1fb65834a5cfb80ffca72f8b4f89260",
+      "initial_toolkit_sha256": "0b0b3a3d5b5e5a026a4e76bf1dae28b334bc5004fd473728c3b41fa904502140"
     },
     "python": {
       "tag": "v3.9.0",
@@ -921,7 +922,7 @@
       "change": "added",
       "ticket": 609,
       "disposition": "implement_public_contract",
-      "candidate_sha256": "2c69b5a441534dd6f4b93da4f50ef8ef34b3515523791c13bd0b2ee26323cd8d"
+      "candidate_sha256": "31ab9eed38098c73cce55132f4758b1a59dc6ba7fbfc2f24c10b02821b157f9f"
     },
     {
       "operation": "GET /v1/admin/workspaces",
@@ -930,7 +931,7 @@
       "ticket": 609,
       "disposition": "implement_older_gap",
       "baseline_sha256": "985231de44fde95e70a1155b803db3b9dfd23dd9902ec79dba52bba9f5f11dd0",
-      "candidate_sha256": "42f80b6f02827eab6078185cbdebc94c8abd4e7f80ffc7e8e7a81703d1eb63a3",
+      "candidate_sha256": "9318a46447805c7e0ac5914967e0d034bb2ff379ec805cc12d70c974d8458773",
       "changed_keys": [
         "parameters"
       ]
@@ -941,7 +942,7 @@
       "change": "added",
       "ticket": 609,
       "disposition": "implement_public_contract",
-      "candidate_sha256": "1099ce65b6fa2ee7378459689a464072cc4570999c3edec0ab034b4215b1616e"
+      "candidate_sha256": "663fa8f4abb9fdfdff9f8fdcfa61c5a14f1b39149155c93f68c0993472085373"
     },
     {
       "operation": "GET /v1/agents",
@@ -1136,6 +1137,7 @@
       "ticket": 599,
       "disposition": "align_existing_contract",
       "deprecated": true,
+      "gap": "Deprecated offset listing remains published until March 31, 2027. Prefer cursor search.",
       "baseline_route_candidates": [
         "audio/voices_resource.dart"
       ],
@@ -3578,7 +3580,8 @@
       "operation_id": "update_voice_v1_audio_voices__voice_id__patch",
       "change": "changed",
       "ticket": 599,
-      "disposition": "document",
+      "disposition": "align_existing_contract",
+      "gap": "Add retention_notice and test the published nullable update fields.",
       "baseline_route_candidates": [
         "audio/voices_resource.dart"
       ],
@@ -4104,7 +4107,8 @@
       "operation_id": "create_voice_v1_audio_voices_post",
       "change": "unchanged",
       "ticket": 599,
-      "disposition": "verify_existing_route",
+      "disposition": "align_existing_contract",
+      "gap": "The updated request drops slug and makes sample_audio optional.",
       "baseline_route_candidates": [
         "audio/voices_resource.dart"
       ],
@@ -13080,6 +13084,16 @@
       "ticket": 610,
       "disposition": "implementation",
       "finding": "Scope analytics, usage, audit log and key operations to the Admin client; redact returned raw secrets. Do not infer endpoints from the Admin Panel announcements."
+    },
+    {
+      "ticket": 611,
+      "disposition": "source_disagreement",
+      "finding": "The toolkit PyYAML loader interpreted three plain 1e+06 scalar maximums as strings. The pinned YAML 1.2 conversion preserves numeric bounds. Closeout verifies normalization or updates the loader and verifies all managed packages."
+    },
+    {
+      "ticket": 599,
+      "disposition": "retired",
+      "finding": "GET /v1/audio/voices offset listing is deprecated with a published sunset of March 31, 2027. Use cursor-based search for new callers."
     }
   ]
 }

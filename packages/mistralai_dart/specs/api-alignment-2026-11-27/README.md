@@ -12,14 +12,17 @@ The August 2 snapshot was promoted in [#287](https://github.com/davidmigloz/ai_c
 | Source | Pin |
 | --- | --- |
 | [Published OpenAPI YAML](https://docs.mistral.ai/openapi.yaml) | Retrieved November 27, 17:34 UTC. Raw SHA-256 `acf0efcbee4617601df77fc40185516ed6aae4369ce090034099317d5866b2db` |
-| Toolkit-normalized candidate | SHA-256 `0b0b3a3d5b5e5a026a4e76bf1dae28b334bc5004fd473728c3b41fa904502140` |
+| Normalized YAML 1.2 candidate | SHA-256 `bfc5e48ee2299075592422b120a2a069e1fb65834a5cfb80ffca72f8b4f89260` |
 | August 2 baseline | SHA-256 `5569018c9b0cc44507ecc1da7eb499d654b8634e38a947d3e39d2f62793cc5b4` |
 | [Python v3.9.0](https://github.com/mistralai/client-python/releases/tag/v3.9.0) | [`6e9e31ac6f982c1fdfe177787ded223f458c9f69`](https://github.com/mistralai/client-python/tree/6e9e31ac6f982c1fdfe177787ded223f458c9f69) |
 | [TypeScript v3.5.0](https://github.com/mistralai/client-ts/releases/tag/v3.5.0) | [`d1cf81b7e4795692689559f13ac920d1af7a26d1`](https://github.com/mistralai/client-ts/tree/d1cf81b7e4795692689559f13ac920d1af7a26d1) |
 | Supplemental TypeScript main | [`3e87497eea3ae73f482cd683b043469e72f12389`](https://github.com/mistralai/client-ts/tree/3e87497eea3ae73f482cd683b043469e72f12389) |
 
-Both OpenAPI documents advertise version 1.0.0. The downloaded YAML
-parses to the same structure as the toolkit candidate. The November pin
+Both OpenAPI documents advertise version 1.0.0. The YAML 1.2 candidate uses the toolkit's sorted JSON formatting. The
+initial PyYAML conversion represented three Admin page-size bounds as
+strings. The independent YAML 1.2 conversion identified each as the number
+1,000,000. The initial toolkit digest is retained in the inventory. The
+closeout will verify those numeric constraints and promote the corrected pin. The November pin
 includes 345 operation records and 1,117 named schemas. The August pin
 contains 293 operation records and 719 schemas. A fragment such as
 `#stream` on a spec path identifies an alternate shape of the HTTP
