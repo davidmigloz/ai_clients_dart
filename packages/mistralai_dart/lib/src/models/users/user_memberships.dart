@@ -1,6 +1,5 @@
 import 'package:meta/meta.dart';
 
-
 import '../common/equality_helpers.dart';
 
 /// An organization the authenticated user belongs to.

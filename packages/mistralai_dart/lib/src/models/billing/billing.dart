@@ -2,7 +2,6 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 
-
 /// Usage against the expected API and Vibe budgets.
 @immutable
 class BillingBudget {

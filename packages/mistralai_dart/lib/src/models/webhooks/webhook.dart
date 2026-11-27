@@ -2,7 +2,6 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 
-
 /// Registers an inbound webhook event source.
 @immutable
 class CreateWebhookRequest {
