@@ -36,10 +36,10 @@ void main() {
       final delta = DeltaContent.fromJson(const {
         'content': [
           {'type': 'thinking', 'thinking': <Object>[], 'closed': true},
-          {'type': 'text', 'text': 'Bonjour'},
+          {'type': 'text', 'text': 'Hello'},
         ],
       });
-      expect(delta.content?.text, 'Bonjour');
+      expect(delta.content?.text, 'Hello');
     });
 
     test('tolerates an unknown part type', () {

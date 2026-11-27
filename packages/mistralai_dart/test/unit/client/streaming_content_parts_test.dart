@@ -31,9 +31,9 @@ void main() {
       ]),
       event([
         {'type': 'thinking', 'thinking': <Object>[], 'closed': true},
-        {'type': 'text', 'text': 'Bon'},
+        {'type': 'text', 'text': 'Hel'},
       ]),
-      event('jour'),
+      event('lo'),
       'data: [DONE]\n\n',
     ];
 
@@ -50,11 +50,11 @@ void main() {
     final stream = client.chat.createStream(
       request: ChatCompletionRequest(
         model: 'mistral-large-latest',
-        messages: [ChatMessage.user('Hello')],
+        messages: [ChatMessage.user('Hi')],
       ),
     );
 
-    expect(await stream.text, 'Bonjour');
+    expect(await stream.text, 'Hello');
     client.close();
   });
 }
