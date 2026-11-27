@@ -70,10 +70,14 @@ export 'src/errors/exceptions.dart';
 export 'src/extensions/chat_completion_extensions.dart';
 export 'src/extensions/chat_stream_extensions.dart';
 // --- Models: Admin (Enterprise Preview) ---
+export 'src/models/admin/admin_api_keys.dart';
+export 'src/models/admin/admin_audit_logs.dart';
 export 'src/models/admin/admin_groups.dart';
 export 'src/models/admin/admin_roles.dart';
 export 'src/models/admin/admin_scim.dart';
+export 'src/models/admin/admin_usage.dart';
 export 'src/models/admin/admin_users.dart';
+export 'src/models/admin/admin_vibe_analytics.dart';
 export 'src/models/admin/admin_workspaces.dart';
 // --- Models: Agents (Beta) ---
 export 'src/models/agents/agent.dart';
@@ -103,6 +107,15 @@ export 'src/models/audio/voice_list_page.dart';
 export 'src/models/audio/voice_list_response.dart';
 export 'src/models/audio/voice_response.dart';
 export 'src/models/audio/voice_update_request.dart';
+
+// --- Models: Audio Agents ---
+export 'src/models/audio_agents/audio_agent.dart';
+export 'src/models/audio_agents/audio_agent_config.dart';
+export 'src/models/audio_agents/audio_agent_tools.dart';
+export 'src/models/audio_agents/audio_session.dart';
+export 'src/models/audio_agents/audio_session_transcript.dart';
+export 'src/models/audio_agents/voice_agent_event.dart';
+export 'src/models/audio_agents/voice_agent_webhook_event.dart';
 // --- Models: Batch ---
 export 'src/models/batch/batch_error.dart';
 export 'src/models/batch/batch_job.dart';
@@ -610,11 +623,17 @@ export 'src/models/workflows/workflow_update_response.dart';
 export 'src/models/workflows/workflow_with_worker_status.dart';
 export 'src/models/workflows/workflows_worker_spec_update.dart';
 // --- Resources ---
+export 'src/resources/admin/admin_api_keys_resource.dart';
+export 'src/resources/admin/admin_audit_logs_resource.dart';
 export 'src/resources/admin/admin_groups_resource.dart';
 export 'src/resources/admin/admin_roles_resource.dart';
 export 'src/resources/admin/admin_scim_resource.dart';
+export 'src/resources/admin/admin_usage_resource.dart';
 export 'src/resources/admin/admin_users_resource.dart';
+export 'src/resources/admin/admin_vibe_analytics_resource.dart';
 export 'src/resources/admin/admin_workspaces_resource.dart';
+export 'src/resources/audio_agents/audio_agents_resource.dart';
+export 'src/resources/audio_agents/voice_agent_connection.dart';
 export 'src/resources/billing/billing_resource.dart';
 export 'src/resources/managed_search_indexes_resource.dart';
 export 'src/resources/realtime/realtime_audio.dart';
@@ -626,3 +645,4 @@ export 'src/resources/webhooks/webhooks_resource.dart';
 // --- Utils ---
 export 'src/utils/job_poller.dart';
 export 'src/utils/paginator.dart';
+export 'src/utils/voice_agent_webhook_verifier.dart';

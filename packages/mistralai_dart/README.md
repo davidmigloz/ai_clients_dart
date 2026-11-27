@@ -39,7 +39,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 ### Tools and media
 
 - Built-in web search, code interpreter, and document library tools
-- Audio transcription, text-to-speech, voice management, and realtime WebSockets
+- Audio transcription, text-to-speech, voice management, realtime WebSockets, and Voice Agents
 - OCR, moderations, and classifications
 
 ### Operational APIs
@@ -53,7 +53,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - RAG ingestion pipeline configuration (beta)
 - Caller identity, user memberships, service accounts, and billing (beta)
 - Triggers and webhook event sources for deployed workflows (beta)
-- Organization users, groups, workspaces, roles, and SCIM (Admin API Enterprise Preview)
+- Organization directory, SCIM, usage, limits, audit logs, API keys, and Vibe analytics (Admin API Enterprise Preview)
 
 ## Why choose this client?
 
@@ -873,6 +873,96 @@ final connection = await browser.audio.realtime.connect(
 
 </details>
 
+### How do I use Voice Agents?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.audio.agents` to manage versioned voice agents and
+`client.audio.sessions` to create, inspect, update, and stop their sessions
+on Mistral-hosted infrastructure. The session API also starts sessions with
+inline settings. Both are separate from the text agent API at `client.agents`.
+
+```dart
+// Backend. Authenticate the app user before creating a room.
+final session = await backend.audio.sessions.create(
+  request: CreateAudioSessionRequest(agentId: agentId),
+);
+final handoff = VoiceAgentRoomCredentials.fromSession(session).toJson();
+// Return handoff only to the authenticated app user.
+```
+
+The app joins LiveKit using the server URL and short-lived participant token.
+Keep the workspace API key on the backend. Treat the handoff as a credential.
+Use your LiveKit media SDK to capture microphone audio and play the remote
+tracks. An adapter supplied to `VoiceAgentConnection` translates room
+packets and RPC calls into Dart types without adding a media dependency to
+this package.
+
+```dart
+final connection = await VoiceAgentConnection.connect(
+  credentials: VoiceAgentRoomCredentials.fromJson(handoff),
+  transport: liveKitAdapter, // Implements VoiceAgentRoomTransport.
+  closeSession: closeSessionOnBackend,
+  functions: {
+    'lookup_order': (args) => lookupOrderOnBackend(args['order_id'] as String),
+  },
+);
+try {
+  await for (final event in connection.events) {
+    if (event case VoiceAgentTranscriptEvent(isFinal: true, :final content)) {
+      print(content);
+    }
+  }
+} finally {
+  await connection.close();
+}
+```
+
+Your adapter should identify the agent from trusted LiveKit participant
+metadata, subscribe to its `voice_agent.events` packets, and close the packet
+stream when the room disconnects. Register `mistral.function_tool` before
+publishing the microphone. Convert `VoiceAgentRpcError` to the media SDK's RPC
+error with the same code. Function handlers should enforce application
+permissions. Save their declarations on the agent or include them when
+creating the session.
+
+For a runtime update, call `backend.audio.sessions.update()` over REST or
+`connection.update()` to send `mistral.session_update` to the room's agent.
+The room RPC returns the committed configuration as a
+`VoiceAgentSessionUpdatedEvent`. Instructions and tools apply at the next
+turn boundary. The app owns the connection and calls `close()` to release
+the LiveKit room and stop the server session through the backend callback.
+
+SIP calling requires Enterprise access. Session metadata and the transfer
+and hang-up tool declarations are available through this client.
+[Mistral browser guide](https://docs.mistral.ai/studio/audio/voice-agents/browser) ·
+[Telephony guide](https://docs.mistral.ai/studio/audio/voice-agents/telephony)
+
+Voice Agent webhooks deliver `call_started`, `call_ended`, and `call_failed`
+to your backend. Use the endpoint signing secret and verify the original
+request bytes against the `x-mistral-signature` header.
+
+```dart
+final verifier = VoiceAgentWebhookVerifier(signingSecret: endpointSecret);
+final event = verifier.verifyAndParse(
+  rawBody: rawRequestBytes,
+  signature: signatureHeader,
+);
+if (event case VoiceAgentCallEndedEvent(:final sessionId, :final transcript)) {
+  // Acknowledge the request, then process the optional transcript.
+}
+```
+
+Use the session ID and event type to deduplicate retried deliveries.
+Configure phone number provisioning and webhook subscriptions in the
+Mistral console. [Signed Voice Agent deliveries](https://docs.mistral.ai/studio/audio/voice-agents/webhooks)
+
+→ [Session management example](example/voice_agents_example.dart) ·
+[Offline webhook example](example/voice_agent_webhooks_example.dart)
+
+</details>
+
 ### How do I use agents?
 
 <details>
@@ -1481,6 +1571,35 @@ synchronization endpoints.
 
 </details>
 
+### How do I read Admin usage and audit activity?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `admin.usage` to read monthly usage and pricing, query grouped usage, and
+manage spend limits. Use Admin audit logs to filter activity by actor, event,
+target, and time. Admin API keys can list, create, and delete workspace keys.
+Treat the key returned on creation as a secret.
+
+```dart
+final usage = await admin.usage.getMonthly(apiZone: AdminApiZone.eu);
+final events = await admin.auditLogs.list(
+  actorType: [AdminAuditActorType.human],
+  limit: 10,
+);
+print('Usage period: ${usage.startDate} to ${usage.endDate}');
+print('Recent user events: ${events.length}');
+```
+
+Admin Vibe analytics return Vibe Code metrics by organization or workspace,
+and Vibe Work metrics by agent, time, or user. Pass Unix timestamps in
+seconds for the query window. Enterprise Preview access and product
+permissions apply.
+
+[Read-only Admin usage example](example/admin_usage_example.dart) · [Admin API authentication](https://docs.mistral.ai/admin/admin-api/authentication)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -1541,6 +1660,8 @@ See the [example/](example/) directory for complete examples:
 | [`ocr_example.dart`](example/ocr_example.dart) | OCR 4.1 with block confidence |
 | [`audio_example.dart`](example/audio_example.dart) | Voxtral file transcription, SSE, speech, voice search, and WAV samples |
 | [`realtime_audio_example.dart`](example/realtime_audio_example.dart) | Realtime Voxtral transcription and speech over WebSockets |
+| [`voice_agents_example.dart`](example/voice_agents_example.dart) | Mistral-hosted Voice Agents and audio sessions |
+| [`voice_agent_webhooks_example.dart`](example/voice_agent_webhooks_example.dart) | Offline verification of signed Voice Agent lifecycle events |
 | [`agents_example.dart`](example/agents_example.dart) | Legacy Agents (beta), cursor pagination |
 | [`conversations_example.dart`](example/conversations_example.dart) | Legacy Conversations (beta), typed streaming |
 | [`libraries_example.dart`](example/libraries_example.dart) | Library and document uploads (beta) |
@@ -1556,6 +1677,7 @@ See the [example/](example/) directory for complete examples:
 | [`platform_identity_example.dart`](example/platform_identity_example.dart) | Caller identity, memberships, billing, and workspace roles |
 | [`workflow_trigger_example.dart`](example/workflow_trigger_example.dart) | Provider webhook setup and workflow trigger events |
 | [`admin_example.dart`](example/admin_example.dart) | Organization roles and workspaces (Enterprise Preview) |
+| [`admin_usage_example.dart`](example/admin_usage_example.dart) | Usage, audit logs, workspace key inventory, and Vibe analytics (Enterprise Preview) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`config_example.dart`](example/config_example.dart) | Client configuration options |
@@ -1582,6 +1704,7 @@ See the [example/](example/) directory for complete examples:
 | OCR | ✅ Full |
 | Audio (Transcription, Speech, Voices) | ✅ Full |
 | Voxtral realtime transcription and speech | Public Preview. Native STT and TTS, browser STT with a scoped token |
+| Voice Agents (audio agents and sessions) | Mistral-hosted REST, LiveKit handoff, and signed webhook deliveries. Enterprise SIP access |
 | Agents (legacy beta) | Entities, versions, aliases, and completions |
 | Conversations (legacy beta) | JSON, typed SSE, history, and messages |
 | Libraries (Beta) | ✅ Full |
@@ -1597,6 +1720,7 @@ See the [example/](example/) directory for complete examples:
 | Billing (Beta) | Dashboard budget and subscription |
 | Triggers and webhooks (Beta) | Inbound event sources, trigger rules, and recent events |
 | Admin Directory | Enterprise Preview |
+| Admin Usage, Audit Logs, API Keys, and Vibe analytics | Enterprise Preview |
 
 ## Official Documentation
 
