@@ -14,6 +14,7 @@ class AdminApiKeysResource {
         'GET',
         '/v1/admin/api-keys',
         AdminApiKeyList.fromJson,
+        secretResponse: true,
         query: {
           'limit': ?limit?.toString(),
           'offset': ?offset?.toString(),
@@ -28,6 +29,7 @@ class AdminApiKeysResource {
     'POST',
     '/v1/admin/api-keys',
     AdminCreatedApiKey.fromJson,
+    secretResponse: true,
     body: request.toJson(),
   );
 
@@ -36,5 +38,6 @@ class AdminApiKeysResource {
     'DELETE',
     '/v1/admin/api-keys/${Uri.encodeComponent(keyId)}',
     AdminDeletedApiKey.fromJson,
+    secretResponse: true,
   );
 }

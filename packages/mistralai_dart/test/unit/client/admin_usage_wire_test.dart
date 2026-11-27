@@ -1,3 +1,4 @@
+import 'dart:async' show Completer;
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -140,7 +141,7 @@ void main() {
             'actor_user_uuid': ['fixture'],
             'sort': ['ascending'],
             'after': ['2026-11-27T13:00:00.123Z'],
-            'before': ['2026-11-27T13:00:00.123Z'],
+            'before': ['2026-11-28T13:00:00.123Z'],
             'limit': ['2'],
           });
           expect(request.body, isEmpty);
@@ -160,7 +161,7 @@ void main() {
         actorUserUuid: 'fixture',
         sort: AdminAuditLogSort.ascending,
         after: '2026-11-27T13:00:00.123Z',
-        before: '2026-11-27T13:00:00.123Z',
+        before: '2026-11-28T13:00:00.123Z',
         limit: 2,
       );
       expect(
@@ -356,23 +357,23 @@ void main() {
           expect(request.followRedirects, isFalse);
           expect(request.url.queryParametersAll, {
             'start_time': ['2'],
-            'end_time': ['2'],
+            'end_time': ['4'],
           });
           expect(request.body, isEmpty);
           return http.Response(
-            r'''{"end_time":2,"next_edit_active_users":[{"day":"2026-11-27","nb_active_users":2}],"next_edit_modified_loc":[{"day":"2026-11-27","lines_deleted":2,"lines_inserted":2,"lines_total":2,"lines_unchanged":2}],"next_edit_suggestions":[{"day":"2026-11-27","force_generated_false":2,"force_generated_true":2,"outcome_aborted":2,"outcome_accepted":2,"outcome_dismissed":2,"outcome_rejected":2,"outcome_timeout":2,"surface_ghost_text":2,"surface_widget":2,"total_suggestions":2}],"start_time":2}''',
+            r'''{"end_time":4,"next_edit_active_users":[{"day":"2026-11-27","nb_active_users":2}],"next_edit_modified_loc":[{"day":"2026-11-27","lines_deleted":2,"lines_inserted":2,"lines_total":2,"lines_unchanged":2}],"next_edit_suggestions":[{"day":"2026-11-27","force_generated_false":2,"force_generated_true":2,"outcome_aborted":2,"outcome_accepted":2,"outcome_dismissed":2,"outcome_rejected":2,"outcome_timeout":2,"surface_ghost_text":2,"surface_widget":2,"total_suggestions":2}],"start_time":2}''',
             200,
           );
         }),
       );
       final result = await client.vibeAnalytics.getCodeByOrganization(
         startTime: 2,
-        endTime: 2,
+        endTime: 4,
       );
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"end_time":2,"next_edit_active_users":[{"day":"2026-11-27","nb_active_users":2}],"next_edit_modified_loc":[{"day":"2026-11-27","lines_deleted":2,"lines_inserted":2,"lines_total":2,"lines_unchanged":2}],"next_edit_suggestions":[{"day":"2026-11-27","force_generated_false":2,"force_generated_true":2,"outcome_aborted":2,"outcome_accepted":2,"outcome_dismissed":2,"outcome_rejected":2,"outcome_timeout":2,"surface_ghost_text":2,"surface_widget":2,"total_suggestions":2}],"start_time":2}''',
+          r'''{"end_time":4,"next_edit_active_users":[{"day":"2026-11-27","nb_active_users":2}],"next_edit_modified_loc":[{"day":"2026-11-27","lines_deleted":2,"lines_inserted":2,"lines_total":2,"lines_unchanged":2}],"next_edit_suggestions":[{"day":"2026-11-27","force_generated_false":2,"force_generated_true":2,"outcome_aborted":2,"outcome_accepted":2,"outcome_dismissed":2,"outcome_rejected":2,"outcome_timeout":2,"surface_ghost_text":2,"surface_widget":2,"total_suggestions":2}],"start_time":2}''',
         ),
       );
     });
@@ -390,25 +391,25 @@ void main() {
           expect(request.followRedirects, isFalse);
           expect(request.url.queryParametersAll, {
             'start_time': ['2'],
-            'end_time': ['2'],
+            'end_time': ['4'],
             'workspace_id': ['fixture'],
           });
           expect(request.body, isEmpty);
           return http.Response(
-            r'''{"active_users":[{"day":"2026-11-27","nb_active_users_acp":2,"nb_active_users_cli":2,"nb_active_users_programmatic":2,"nb_active_users_total":2}],"consumed_tokens":[{"cached_tokens":2,"day":"2026-11-27","input_tokens":2,"model":"fixture","output_tokens":2}],"end_time":2,"session_durations":[{"day":"2026-11-27","total_duration_hours":2.5}],"sessions":[{"day":"2026-11-27","nb_sessions":2,"nb_sessions_acp":2,"nb_sessions_cli":2,"nb_sessions_programmatic":2}],"start_time":2,"tool_calls":[{"approval_always":2,"approval_ask":2,"approval_never":2,"day":"2026-11-27","status_failure":2,"status_skipped":2,"status_success":2,"total":2}],"tool_calls_by_name":[{"count":2,"day":"2026-11-27","tool_name":"fixture"}],"user_prompts":[{"day":"2026-11-27","nb_prompts_acp":2,"nb_prompts_cli":2,"nb_prompts_programmatic":2,"nb_prompts_total":2}]}''',
+            r'''{"active_users":[{"day":"2026-11-27","nb_active_users_acp":2,"nb_active_users_cli":2,"nb_active_users_programmatic":2,"nb_active_users_total":2}],"consumed_tokens":[{"cached_tokens":2,"day":"2026-11-27","input_tokens":2,"model":"fixture","output_tokens":2}],"end_time":4,"session_durations":[{"day":"2026-11-27","total_duration_hours":2.5}],"sessions":[{"day":"2026-11-27","nb_sessions":2,"nb_sessions_acp":2,"nb_sessions_cli":2,"nb_sessions_programmatic":2}],"start_time":2,"tool_calls":[{"approval_always":2,"approval_ask":2,"approval_never":2,"day":"2026-11-27","status_failure":2,"status_skipped":2,"status_success":2,"total":2}],"tool_calls_by_name":[{"count":2,"day":"2026-11-27","tool_name":"fixture"}],"user_prompts":[{"day":"2026-11-27","nb_prompts_acp":2,"nb_prompts_cli":2,"nb_prompts_programmatic":2,"nb_prompts_total":2}]}''',
             200,
           );
         }),
       );
       final result = await client.vibeAnalytics.getCodeByWorkspace(
         startTime: 2,
-        endTime: 2,
+        endTime: 4,
         workspaceId: 'fixture',
       );
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"active_users":[{"day":"2026-11-27","nb_active_users_acp":2,"nb_active_users_cli":2,"nb_active_users_programmatic":2,"nb_active_users_total":2}],"consumed_tokens":[{"cached_tokens":2,"day":"2026-11-27","input_tokens":2,"model":"fixture","output_tokens":2}],"end_time":2,"session_durations":[{"day":"2026-11-27","total_duration_hours":2.5}],"sessions":[{"day":"2026-11-27","nb_sessions":2,"nb_sessions_acp":2,"nb_sessions_cli":2,"nb_sessions_programmatic":2}],"start_time":2,"tool_calls":[{"approval_always":2,"approval_ask":2,"approval_never":2,"day":"2026-11-27","status_failure":2,"status_skipped":2,"status_success":2,"total":2}],"tool_calls_by_name":[{"count":2,"day":"2026-11-27","tool_name":"fixture"}],"user_prompts":[{"day":"2026-11-27","nb_prompts_acp":2,"nb_prompts_cli":2,"nb_prompts_programmatic":2,"nb_prompts_total":2}]}''',
+          r'''{"active_users":[{"day":"2026-11-27","nb_active_users_acp":2,"nb_active_users_cli":2,"nb_active_users_programmatic":2,"nb_active_users_total":2}],"consumed_tokens":[{"cached_tokens":2,"day":"2026-11-27","input_tokens":2,"model":"fixture","output_tokens":2}],"end_time":4,"session_durations":[{"day":"2026-11-27","total_duration_hours":2.5}],"sessions":[{"day":"2026-11-27","nb_sessions":2,"nb_sessions_acp":2,"nb_sessions_cli":2,"nb_sessions_programmatic":2}],"start_time":2,"tool_calls":[{"approval_always":2,"approval_ask":2,"approval_never":2,"day":"2026-11-27","status_failure":2,"status_skipped":2,"status_success":2,"total":2}],"tool_calls_by_name":[{"count":2,"day":"2026-11-27","tool_name":"fixture"}],"user_prompts":[{"day":"2026-11-27","nb_prompts_acp":2,"nb_prompts_cli":2,"nb_prompts_programmatic":2,"nb_prompts_total":2}]}''',
         ),
       );
     });
@@ -426,23 +427,23 @@ void main() {
           expect(request.followRedirects, isFalse);
           expect(request.url.queryParametersAll, {
             'start_time': ['2'],
-            'end_time': ['2'],
+            'end_time': ['4'],
           });
           expect(request.body, isEmpty);
           return http.Response(
-            r'''{"data":[{"agent_id":"fixture","files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"spreadsheets_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":2,"start_time":2}''',
+            r'''{"data":[{"agent_id":"fixture","files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"spreadsheets_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":4,"start_time":2}''',
             200,
           );
         }),
       );
       final result = await client.vibeAnalytics.getWorkByAgent(
         startTime: 2,
-        endTime: 2,
+        endTime: 4,
       );
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"data":[{"agent_id":"fixture","files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"spreadsheets_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":2,"start_time":2}''',
+          r'''{"data":[{"agent_id":"fixture","files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"spreadsheets_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":4,"start_time":2}''',
         ),
       );
     });
@@ -460,25 +461,25 @@ void main() {
           expect(request.followRedirects, isFalse);
           expect(request.url.queryParametersAll, {
             'start_time': ['2'],
-            'end_time': ['2'],
+            'end_time': ['4'],
             'granularity': ['hour'],
           });
           expect(request.body, isEmpty);
           return http.Response(
-            r'''{"data":[{"files_count":2,"images_count":2,"messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"time_bucket":null,"unique_agents_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":2,"start_time":2}''',
+            r'''{"data":[{"files_count":2,"images_count":2,"messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"time_bucket":null,"unique_agents_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":4,"start_time":2}''',
             200,
           );
         }),
       );
       final result = await client.vibeAnalytics.getWorkByTime(
         startTime: 2,
-        endTime: 2,
+        endTime: 4,
         granularity: VibeUsageGranularity.hour,
       );
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"data":[{"files_count":2,"images_count":2,"messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"time_bucket":null,"unique_agents_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":2,"start_time":2}''',
+          r'''{"data":[{"files_count":2,"images_count":2,"messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"time_bucket":null,"unique_agents_count":2,"unique_conversations_count":2,"unique_users_count":2}],"end_time":4,"start_time":2}''',
         ),
       );
     });
@@ -496,25 +497,129 @@ void main() {
           expect(request.followRedirects, isFalse);
           expect(request.url.queryParametersAll, {
             'start_time': ['2'],
-            'end_time': ['2'],
+            'end_time': ['4'],
           });
           expect(request.body, isEmpty);
           return http.Response(
-            r'''{"data":[{"files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"unique_agents_count":2,"unique_conversations_count":2,"user_id":"fixture"}],"end_time":2,"start_time":2}''',
+            r'''{"data":[{"files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"unique_agents_count":2,"unique_conversations_count":2,"user_id":"fixture"}],"end_time":4,"start_time":2}''',
             200,
           );
         }),
       );
       final result = await client.vibeAnalytics.getWorkByUser(
         startTime: 2,
-        endTime: 2,
+        endTime: 4,
       );
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"data":[{"files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"unique_agents_count":2,"unique_conversations_count":2,"user_id":"fixture"}],"end_time":2,"start_time":2}''',
+          r'''{"data":[{"files_count":2,"images_count":2,"last_message_at":"2026-11-27T13:00:00.123Z","messages_count":2,"messages_to_agents_count":2,"spreadsheets_count":2,"unique_agents_count":2,"unique_conversations_count":2,"user_id":"fixture"}],"end_time":4,"start_time":2}''',
         ),
       );
     });
   });
+
+  test(
+    'API key errors and malformed success responses omit issued secrets',
+    () async {
+      const issued = 'issued-key-with-no-hint';
+      var calls = 0;
+      final client = _client(
+        MockClient((_) async {
+          if (++calls == 1) {
+            return http.Response(
+              jsonEncode({'key': issued, 'message': 'Rejected key $issued'}),
+              422,
+              headers: {'x-diagnostic': issued},
+            );
+          }
+          return http.Response('{"key":"$issued", malformed}', 200);
+        }),
+      );
+      const request = CreateAdminApiKeyRequest(
+        name: 'fixture',
+        userId: '8c3d5182-3612-4fbe-b23b-61e0361d679d',
+        workspaceUuid: '8c3d5182-3612-4fbe-b23b-61e0361d679c',
+      );
+      await expectLater(
+        client.apiKeys.create(request: request),
+        throwsA(
+          isA<ApiException>()
+              .having((error) => error.statusCode, 'HTTP status', 422)
+              .having(
+                (error) => error.message,
+                'message',
+                isNot(contains(issued)),
+              )
+              .having(
+                (error) => error.responseMetadata?.bodyExcerpt,
+                'excerpt',
+                isNot(contains(issued)),
+              )
+              .having(
+                (error) => error.responseMetadata?.headers.values,
+                'headers',
+                isNot(contains(issued)),
+              )
+              .having(
+                (error) => error.details.toString(),
+                'details',
+                isNot(contains(issued)),
+              ),
+        ),
+      );
+      await expectLater(
+        client.apiKeys.create(request: request),
+        throwsA(
+          isA<FormatException>()
+              .having((error) => error.source, 'source', isNull)
+              .having(
+                (error) => error.toString(),
+                'message',
+                isNot(contains(issued)),
+              ),
+        ),
+      );
+    },
+  );
+
+  test(
+    'Admin timeout aborts the transport without retrying the request',
+    () async {
+      const timeout = Duration(milliseconds: 5);
+      final transport = _WaitingClient();
+      final client = MistralAdminClient.withApiKey(
+        _adminKey,
+        httpClient: transport,
+        timeout: timeout,
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.usage.getRateLimits(),
+        throwsA(
+          isA<TimeoutException>().having(
+            (error) => error.timeout,
+            'timeout',
+            timeout,
+          ),
+        ),
+      );
+      await transport.aborted.future;
+      expect(transport.calls, 1);
+    },
+  );
+}
+
+class _WaitingClient extends http.BaseClient {
+  final aborted = Completer<void>();
+  int calls = 0;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    calls++;
+    final abort = (request as http.Abortable).abortTrigger!;
+    await abort;
+    aborted.complete();
+    throw http.RequestAbortedException(request.url);
+  }
 }
