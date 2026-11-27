@@ -183,8 +183,12 @@ class GetSpan {
   /// The `workspace_id` value.
   final String workspaceId;
 
+  /// Service account that generated the telemetry.
+  final String? serviceAccountId;
+
   /// Creates a [GetSpan].
   GetSpan({
+    this.serviceAccountId,
     required this.agentDescription,
     required this.agentId,
     required this.agentName,
@@ -250,6 +254,7 @@ class GetSpan {
 
   /// Creates a [GetSpan] from JSON.
   factory GetSpan.fromJson(Map<String, dynamic> json) => GetSpan(
+    serviceAccountId: json['service_account_id'] as String?,
     agentDescription: json['agent_description'] as String? ?? '',
     agentId: json['agent_id'] as String? ?? '',
     agentName: json['agent_name'] as String? ?? '',
@@ -322,6 +327,7 @@ class GetSpan {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (serviceAccountId != null) 'service_account_id': serviceAccountId,
     'agent_description': agentDescription,
     'agent_id': agentId,
     'agent_name': agentName,
@@ -387,6 +393,7 @@ class GetSpan {
 
   /// Creates a copy with replaced values.
   GetSpan copyWith({
+    Object? serviceAccountId = unsetCopyWithValue,
     String? agentDescription,
     String? agentId,
     String? agentName,
@@ -448,6 +455,9 @@ class GetSpan {
     String? workspaceId,
   }) {
     return GetSpan(
+      serviceAccountId: serviceAccountId == unsetCopyWithValue
+          ? this.serviceAccountId
+          : serviceAccountId as String?,
       agentDescription: agentDescription ?? this.agentDescription,
       agentId: agentId ?? this.agentId,
       agentName: agentName ?? this.agentName,
@@ -529,7 +539,8 @@ class GetSpan {
     if (identical(this, other)) return true;
     if (other is! GetSpan) return false;
     if (runtimeType != other.runtimeType) return false;
-    return agentDescription == other.agentDescription &&
+    return serviceAccountId == other.serviceAccountId &&
+        agentDescription == other.agentDescription &&
         agentId == other.agentId &&
         agentName == other.agentName &&
         agentVersion == other.agentVersion &&
@@ -592,70 +603,73 @@ class GetSpan {
 
   @override
   int get hashCode => Object.hashAll([
-    agentDescription,
-    agentId,
-    agentName,
-    agentVersion,
-    conversationId,
-    customerId,
-    dataSourceId,
-    durationNs,
-    endTime,
-    errorType,
-    inputMessages,
-    operationName,
-    organizationId,
-    outputMessages,
-    outputType,
-    parentSpanId,
-    promptName,
-    providerName,
-    requestChoiceCount,
-    listHash(requestEncodingFormats),
-    requestFrequencyPenalty,
-    requestMaxTokens,
-    requestModel,
-    requestPresencePenalty,
-    requestSeed,
-    listHash(requestStopSequences),
-    requestTemperature,
-    requestTopK,
-    requestTopP,
-    mapDeepHashCode(resourceAttributes),
-    listHash(responseFinishReasons),
-    responseId,
-    responseModel,
-    scopeName,
-    scopeVersion,
-    serviceName,
-    mapDeepHashCode(spanAttributes),
-    spanId,
-    spanKind,
-    spanName,
-    startTime,
-    statusCode,
-    statusMessage,
-    systemInstructions,
-    toolCallArguments,
-    toolCallId,
-    toolCallResult,
-    toolDefinitions,
-    toolName,
-    toolType,
-    traceId,
-    traceState,
-    usageCacheCreationInputTokens,
-    usageCacheReadInputTokens,
-    usageInputTokens,
-    usageOutputTokens,
-    userId,
-    workflowName,
-    workspaceId,
+    Object.hashAll([
+      agentDescription,
+      agentId,
+      agentName,
+      agentVersion,
+      conversationId,
+      customerId,
+      dataSourceId,
+      durationNs,
+      endTime,
+      errorType,
+      inputMessages,
+      operationName,
+      organizationId,
+      outputMessages,
+      outputType,
+      parentSpanId,
+      promptName,
+      providerName,
+      requestChoiceCount,
+      listHash(requestEncodingFormats),
+      requestFrequencyPenalty,
+      requestMaxTokens,
+      requestModel,
+      requestPresencePenalty,
+      requestSeed,
+      listHash(requestStopSequences),
+      requestTemperature,
+      requestTopK,
+      requestTopP,
+      mapDeepHashCode(resourceAttributes),
+      listHash(responseFinishReasons),
+      responseId,
+      responseModel,
+      scopeName,
+      scopeVersion,
+      serviceName,
+      mapDeepHashCode(spanAttributes),
+      spanId,
+      spanKind,
+      spanName,
+      startTime,
+      statusCode,
+      statusMessage,
+      systemInstructions,
+      toolCallArguments,
+      toolCallId,
+      toolCallResult,
+      toolDefinitions,
+      toolName,
+      toolType,
+      traceId,
+      traceState,
+      usageCacheCreationInputTokens,
+      usageCacheReadInputTokens,
+      usageInputTokens,
+      usageOutputTokens,
+      userId,
+      workflowName,
+      workspaceId,
+    ]),
+    serviceAccountId,
   ]);
 
   @override
   String toString() =>
-      'GetSpan(agentDescription: $agentDescription, agentId: $agentId, '
+      'GetSpan(serviceAccountId: $serviceAccountId, agentDescription: $agentDescription, agentId: $agentId, '
       'agentName: $agentName, agentVersion: $agentVersion, '
       'conversationId: $conversationId, customerId: $customerId, '
       'dataSourceId: $dataSourceId, durationNs: $durationNs, '

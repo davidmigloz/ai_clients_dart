@@ -1,149 +1,64 @@
 // ignore_for_file: avoid_print
-// Observability API (Beta)
 import 'dart:io';
 
 import 'package:mistralai_dart/mistralai_dart.dart';
 
-/// Example demonstrating the Observability API (Beta).
-///
-/// This example shows how to:
-/// - Create and list datasets
-/// - List campaigns
-/// - List judges
-/// - Search chat completion events
-///
-/// Before running:
-/// 1. Get your API key from https://console.mistral.ai/
-/// 2. Set environment variable: export MISTRAL_API_KEY=your_api_key
-void main() async {
-  final apiKey = Platform.environment['MISTRAL_API_KEY'];
+/// Queries an Enterprise workspace with Observability enabled.
+Future<void> main() async {
+  final env = Platform.environment;
+  final apiKey = env['MISTRAL_API_KEY'];
   if (apiKey == null) {
-    print('Please set MISTRAL_API_KEY environment variable');
-    exit(1);
+    print('Set MISTRAL_API_KEY for a workspace with Observability access.');
+    return;
   }
 
   final client = MistralClient.withApiKey(apiKey);
-
   try {
-    // --- Datasets ---
-    print('=== Create Dataset ===\n');
+    final observability = client.observability;
+    final datasets = await observability.datasets.list(pageSize: 10);
+    for (final dataset in datasets.datasets.results) {
+      print('${dataset.slug}: ${dataset.name}');
+    }
 
-    final dataset = await client.observability.datasets.create(
-      request: const PostDatasetInSchema(
-        name: 'Example Dataset',
-        description: 'A dataset created from the Dart example',
-      ),
+    final projects = await observability.projects.list(pageSize: 10);
+    for (final project in projects.projects.results) {
+      print('${project.slug}: ${project.name}');
+    }
+
+    final runs = await observability.evaluations.searchAllRuns(pageSize: 10);
+    print('Offline evaluation runs: ${runs.runs.count}');
+
+    final scorers = await observability.scorers.list(pageSize: 10);
+    print('Scorers: ${scorers.scorers.count}');
+    final pipelines = await observability.pipelines.list(enabled: true);
+    print('Live evaluations: ${pipelines.pipelines.count}');
+
+    final optimizations = await observability.optimizations.list(pageSize: 10);
+    print('Optimizations: ${optimizations.optimizations.count}');
+
+    final from = DateTime.now().toUtc().subtract(const Duration(hours: 1));
+    final traces = await observability.traces.search(
+      from: from.toIso8601String(),
+      pageSize: 5,
     );
+    print('Returned traces: ${traces.traces.results.length}');
 
-    print('Created dataset:');
-    print('  ID: ${dataset.id}');
-    print('  Name: ${dataset.name}');
-    print('  Description: ${dataset.description}');
-    print('  Created: ${dataset.createdAt}');
-
-    print('\n=== List Datasets ===\n');
-
-    final datasets = await client.observability.datasets.list();
-    final datasetResults = datasets.datasets.results;
-
-    if (datasetResults.isEmpty) {
-      print('No datasets found.');
-    } else {
-      print('Found ${datasets.datasets.count} dataset(s):');
-      for (final ds in datasetResults) {
-        print('  - ${ds.name} (${ds.id})');
-        print('    Description: ${ds.description}');
-      }
-    }
-
-    // Clean up the created dataset
-    await client.observability.datasets.delete(datasetId: dataset.id);
-    print('\nDeleted example dataset.');
-
-    // --- Campaigns ---
-    print('\n=== List Campaigns ===\n');
-
-    final campaigns = await client.observability.campaigns.list();
-    final campaignResults = campaigns.campaigns.results;
-
-    if (campaignResults.isEmpty) {
-      print('No campaigns found.');
-    } else {
-      print('Found ${campaigns.campaigns.count} campaign(s):');
-      for (final campaign in campaignResults) {
-        print('  - ${campaign.name} (${campaign.id})');
-        print('    Description: ${campaign.description}');
-        print('    Max events: ${campaign.maxNbEvents}');
-      }
-    }
-
-    // --- Judges ---
-    print('\n=== List Judges ===\n');
-
-    final judges = await client.observability.judges.list();
-    final judgeResults = judges.judges.results;
-
-    if (judgeResults.isEmpty) {
-      print('No judges found.');
-    } else {
-      print('Found ${judges.judges.count} judge(s):');
-      for (final judge in judgeResults) {
-        print('  - ${judge.name} (${judge.id})');
-        print('    Model: ${judge.modelName}');
-        print('    Description: ${judge.description}');
-      }
-    }
-
-    // --- Chat Completion Events ---
-    print('\n=== Search Chat Completion Events ===\n');
-
-    // Search with no filters (returns recent events)
-    final events = await client.observability.chatCompletionEvents.search(
-      request: GetChatCompletionEventsInSchema(
-        searchParams: const FilterPayload(),
-      ),
+    final spanFields = await observability.spans.getFields();
+    print('Span filter fields: ${spanFields.fieldDefinitions.length}');
+    final logs = await observability.logs.search(
+      from: from.toIso8601String(),
+      pageSize: 5,
     );
+    print('Returned logs: ${logs.logs.results.length}');
 
-    final eventResults = events.completionEvents.results;
-
-    if (eventResults.isEmpty) {
-      print('No chat completion events found.');
-    } else {
-      print('Found ${eventResults.length} event(s):');
-      for (final event in eventResults.take(5)) {
-        print('  - Event: ${event.eventId}');
-        print('    Created: ${event.createdAt}');
-        print('    Input tokens: ${event.nbInputTokens}');
-        print('    Output tokens: ${event.nbOutputTokens}');
-      }
-    }
-
-    // Search with a filter (e.g., filter by model)
-    print('\n=== Search Events with Filter ===\n');
-
-    final filteredEvents = await client.observability.chatCompletionEvents
-        .search(
-          request: GetChatCompletionEventsInSchema(
-            searchParams: const FilterPayload(
-              filters: FilterCondition(
-                field: 'model',
-                op: 'eq',
-                value: 'mistral-small-latest',
-              ),
-            ),
-          ),
-        );
-
-    final filteredResults = filteredEvents.completionEvents.results;
-
-    if (filteredResults.isEmpty) {
-      print('No events found matching the filter.');
-    } else {
-      print('Found ${filteredResults.length} filtered event(s):');
-      for (final event in filteredResults.take(3)) {
-        print('  - Event: ${event.eventId}');
-        print('    Input tokens: ${event.nbInputTokens}');
-        print('    Output tokens: ${event.nbOutputTokens}');
+    final configSlug = env['MISTRAL_PIPELINE_CONFIG_SLUG'];
+    if (configSlug != null) {
+      final results = await observability.pipelines.searchResults(
+        from: from,
+        request: PipelineResultsRequest(pipelineConfigSlugs: [configSlug]),
+      );
+      for (final item in results.pipelineResults.results) {
+        print('Trace ${item.traceId}, span ${item.spanId}');
       }
     }
   } finally {

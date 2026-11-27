@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
+import '../workflows/principal_type.dart';
 
 /// An observability dataset.
 @immutable
@@ -29,8 +31,20 @@ class Dataset {
   /// Workspace ID.
   final String workspaceId;
 
+  /// Workspace-local slug.
+  final String slug;
+
+  /// Additional JSON metadata supplied by the caller.
+  final Map<String, dynamic>? metadata;
+
+  /// Kind of account that owns the dataset.
+  final PrincipalType? ownerType;
+
   /// Creates a [Dataset].
   const Dataset({
+    this.slug = '',
+    this.metadata,
+    this.ownerType,
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -43,6 +57,9 @@ class Dataset {
 
   /// Creates a [Dataset] from JSON.
   factory Dataset.fromJson(Map<String, dynamic> json) => Dataset(
+    slug: json['slug'] as String? ?? '',
+    metadata: json['metadata'] as Map<String, dynamic>?,
+    ownerType: PrincipalType.fromJson(json['owner_type'] as String?),
     id: json['id'] as String? ?? '',
     createdAt:
         DateTime.tryParse(json['created_at'] as String? ?? '') ??
@@ -61,6 +78,9 @@ class Dataset {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (slug.isNotEmpty) 'slug': slug,
+    if (metadata != null) 'metadata': metadata,
+    if (ownerType != null) 'owner_type': ownerType!.value,
     'id': id,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
@@ -73,6 +93,9 @@ class Dataset {
 
   /// Creates a copy with replaced values.
   Dataset copyWith({
+    String? slug,
+    Object? metadata = unsetCopyWithValue,
+    Object? ownerType = unsetCopyWithValue,
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -83,6 +106,13 @@ class Dataset {
     String? workspaceId,
   }) {
     return Dataset(
+      slug: slug ?? this.slug,
+      metadata: metadata == unsetCopyWithValue
+          ? this.metadata
+          : (metadata as Map<Object?, Object?>?)?.cast<String, dynamic>(),
+      ownerType: ownerType == unsetCopyWithValue
+          ? this.ownerType
+          : ownerType as PrincipalType?,
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -101,7 +131,10 @@ class Dataset {
     if (identical(this, other)) return true;
     if (other is! Dataset) return false;
     if (runtimeType != other.runtimeType) return false;
-    return id == other.id &&
+    return slug == other.slug &&
+        mapsDeepEqual(metadata, other.metadata) &&
+        ownerType == other.ownerType &&
+        id == other.id &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt &&
         deletedAt == other.deletedAt &&
@@ -112,7 +145,7 @@ class Dataset {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     createdAt,
     updatedAt,
@@ -121,8 +154,12 @@ class Dataset {
     description,
     ownerId,
     workspaceId,
-  );
+    slug,
+    mapDeepHashCode(metadata),
+    ownerType,
+  ]);
 
   @override
-  String toString() => 'Dataset(id: $id, name: $name)';
+  String toString() =>
+      'Dataset(slug: $slug, metadata: ${metadata?.length}, ownerType: $ownerType, id: $id, name: $name)';
 }
