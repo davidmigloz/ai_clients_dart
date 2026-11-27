@@ -251,7 +251,8 @@ print(next.outputText);
 Gemini 4 foreground long decode may return
 `InteractionStatus.requiresContinuation`. For a stored interaction, send the
 latest `continuationToken` and set `previousInteractionId` to the ID of the hop
-that issued it. Omit `input` and keep the same model and generation settings.
+that issued it. Omit `input` and keep the same model, generation settings,
+tools, and system instruction.
 For a stateless interaction, keep `store: false` and resend the original `input`
 with the latest token.
 

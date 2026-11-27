@@ -68,7 +68,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// latest token. For a stored interaction, set [previousInteractionId] to
   /// the ID that issued that token and omit [input]. For a stateless
   /// interaction, keep `store: false` and resend the original [input].
-  /// Each call submits one request.
+  /// Keep the [model], [generationConfig], [tools], and [systemInstruction]
+  /// consistent across hops. Each call submits one request.
   ///
   /// The stable Gemini Developer API uses [responseFormat] for output options.
   /// [responseModalities] and [responseMimeType] are legacy beta parameters.
