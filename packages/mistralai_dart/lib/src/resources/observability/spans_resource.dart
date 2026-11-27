@@ -10,7 +10,9 @@ import '../../models/observability/get_span_fields.dart';
 import '../../models/observability/get_spans.dart';
 import '../../models/observability/span_evaluations_request.dart';
 import '../../models/observability/spans_request.dart';
+import '../../models/observability/telemetry_aggregation.dart';
 import '../base_resource.dart';
+import 'observability_http.dart';
 
 /// Resource for observability span operations (beta).
 ///
@@ -153,7 +155,7 @@ class SpansResource extends ResourceBase {
     if (to != null) queryParams['to'] = to;
 
     final url = requestBuilder.buildUrl(
-      '/v1/observability/spans/fields/$fieldName/options',
+      '/v1/observability/spans/fields/${Uri.encodeComponent(fieldName)}/options',
       queryParams: queryParams,
     );
     final headers = requestBuilder.buildHeaders();
@@ -180,7 +182,7 @@ class SpansResource extends ResourceBase {
     if (to != null) queryParams['to'] = to;
 
     final url = requestBuilder.buildUrl(
-      '/v1/observability/spans/evaluations/fields/$fieldName/options',
+      '/v1/observability/spans/evaluations/fields/${Uri.encodeComponent(fieldName)}/options',
       queryParams: queryParams,
     );
     final headers = requestBuilder.buildHeaders();
@@ -260,4 +262,36 @@ class SpansResource extends ResourceBase {
     if (cursor != null) queryParams['cursor'] = cursor;
     return queryParams;
   }
+
+  /// Aggregates matching spans by metric, dimensions, and time.
+  Future<Aggregation> aggregate({
+    DateTime? from,
+    DateTime? to,
+    required AggregationRequest request,
+  }) => readObservability(
+    'POST',
+    'spans/aggregate',
+    Aggregation.fromJson,
+    query: {
+      if (from != null) 'from': from.toUtc().toIso8601String(),
+      if (to != null) 'to': to.toUtc().toIso8601String(),
+    },
+    body: request.toJson(),
+  );
+
+  /// Aggregates matching evaluation results.
+  Future<Aggregation> aggregateEvaluations({
+    DateTime? from,
+    DateTime? to,
+    required AggregationRequest request,
+  }) => readObservability(
+    'POST',
+    'spans/evaluations/aggregate',
+    Aggregation.fromJson,
+    query: {
+      if (from != null) 'from': from.toUtc().toIso8601String(),
+      if (to != null) 'to': to.toUtc().toIso8601String(),
+    },
+    body: request.toJson(),
+  );
 }

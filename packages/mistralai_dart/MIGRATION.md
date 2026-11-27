@@ -398,6 +398,30 @@ final payload = FunctionResultEntry(callId: callId, result: 'OK').toJson();
 
 ---
 
+### Use the current Observability resources
+
+Mistral’s November public snapshot exposes OpenTelemetry traces, scorers,
+and live evaluation pipelines. Earlier campaign, judge, and chat completion
+event routes are historical. Check availability on your deployment before
+calling those compatibility methods.
+
+```dart
+// Before
+final judges = await client.observability.judges.list();
+
+// After
+final scorers = await client.observability.scorers.list(pageSize: 20);
+for (final scorer in scorers.scorers.results) {
+  print(scorer.slug);
+}
+```
+
+Add `DatasetRecordSource.telemetrySpan` to exhaustive switches over dataset
+record sources. When replacing a historical event importer, use
+`datasets.importFromSpans` with trace/span IDs and a mapping of attributes
+to dataset record keys. Current datasets report slugs and principal types.
+[Observability guide](https://docs.mistral.ai/studio/observability)
+
 ## Migrating from v7.x to v8.0.0
 
 v8.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

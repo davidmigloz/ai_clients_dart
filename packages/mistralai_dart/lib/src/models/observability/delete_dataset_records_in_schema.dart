@@ -22,6 +22,12 @@ class DeleteDatasetRecordsInSchema {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'dataset_record_ids': datasetRecordIds};
 
+  /// Creates a copy with replaced values.
+  DeleteDatasetRecordsInSchema copyWith({List<String>? datasetRecordIds}) =>
+      DeleteDatasetRecordsInSchema(
+        datasetRecordIds: datasetRecordIds ?? this.datasetRecordIds,
+      );
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

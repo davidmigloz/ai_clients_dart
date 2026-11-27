@@ -8,8 +8,10 @@ import '../../models/observability/get_trace.dart';
 import '../../models/observability/get_trace_field_options.dart';
 import '../../models/observability/get_trace_fields.dart';
 import '../../models/observability/get_traces.dart';
+import '../../models/observability/telemetry_aggregation.dart';
 import '../../models/observability/traces_request.dart';
 import '../base_resource.dart';
+import 'observability_http.dart';
 
 /// Resource for observability trace operations (beta).
 ///
@@ -103,7 +105,7 @@ class TracesResource extends ResourceBase {
     if (to != null) queryParams['to'] = to;
 
     final url = requestBuilder.buildUrl(
-      '/v1/observability/traces/fields/$fieldName/options',
+      '/v1/observability/traces/fields/${Uri.encodeComponent(fieldName)}/options',
       queryParams: queryParams,
     );
     final headers = requestBuilder.buildHeaders();
@@ -119,7 +121,9 @@ class TracesResource extends ResourceBase {
   /// Gets a trace by ID.
   Future<GetTrace> getById({required String traceId}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/observability/traces/$traceId');
+    final url = requestBuilder.buildUrl(
+      '/v1/observability/traces/${Uri.encodeComponent(traceId)}',
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
@@ -150,7 +154,7 @@ class TracesResource extends ResourceBase {
     if (cursor != null) queryParams['cursor'] = cursor;
 
     final url = requestBuilder.buildUrl(
-      '/v1/observability/traces/$traceId/spans',
+      '/v1/observability/traces/${Uri.encodeComponent(traceId)}/spans',
       queryParams: queryParams,
     );
     final headers = requestBuilder.buildHeaders();
@@ -178,7 +182,7 @@ class TracesResource extends ResourceBase {
     if (to != null) queryParams['to'] = to;
 
     final url = requestBuilder.buildUrl(
-      '/v1/observability/traces/$traceId/spans/$spanId',
+      '/v1/observability/traces/${Uri.encodeComponent(traceId)}/spans/${Uri.encodeComponent(spanId)}',
       queryParams: queryParams,
     );
     final headers = requestBuilder.buildHeaders();
@@ -190,4 +194,20 @@ class TracesResource extends ResourceBase {
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return GetSpan.fromJson(responseBody);
   }
+
+  /// Aggregates matching traces by metric, dimensions, and time.
+  Future<Aggregation> aggregate({
+    DateTime? from,
+    DateTime? to,
+    required AggregationRequest request,
+  }) => readObservability(
+    'POST',
+    'traces/aggregate',
+    Aggregation.fromJson,
+    query: {
+      if (from != null) 'from': from.toUtc().toIso8601String(),
+      if (to != null) 'to': to.toUtc().toIso8601String(),
+    },
+    body: request.toJson(),
+  );
 }

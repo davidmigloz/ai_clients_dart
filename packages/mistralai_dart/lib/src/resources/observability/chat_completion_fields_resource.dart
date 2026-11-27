@@ -8,6 +8,9 @@ import '../../models/observability/field_option_counts.dart';
 import '../../models/observability/field_option_counts_in_schema.dart';
 import '../base_resource.dart';
 
+/// Historical API. The current Observability API exposes traces,
+/// scorers, and live evaluation pipelines.
+///
 /// Resource for chat completion field operations.
 ///
 /// Provides access to field definitions and their options for filtering

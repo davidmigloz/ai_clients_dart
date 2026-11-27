@@ -24,6 +24,13 @@ class PutDatasetRecordPropertiesInSchema {
     'properties': Map<String, dynamic>.from(properties),
   };
 
+  /// Creates a copy with replaced values.
+  PutDatasetRecordPropertiesInSchema copyWith({
+    Map<String, dynamic>? properties,
+  }) => PutDatasetRecordPropertiesInSchema(
+    properties: properties ?? this.properties,
+  );
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

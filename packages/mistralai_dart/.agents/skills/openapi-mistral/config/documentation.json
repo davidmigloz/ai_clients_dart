@@ -38,7 +38,12 @@
     "admin_roles": "admin",
     "admin_scim": "admin",
     "admin_users": "admin",
-    "admin_workspaces": "admin"
+    "admin_workspaces": "admin",
+    "projects": "observability",
+    "evaluations": "observability",
+    "scorers": "observability",
+    "pipelines": "observability",
+    "optimizations": "observability"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

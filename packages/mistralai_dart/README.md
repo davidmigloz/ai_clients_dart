@@ -47,7 +47,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Files, fine-tuned model management, and batch processing
 - Legacy Agents and Conversations (beta), connectors, and libraries
 - Prompts and skills: versioned, shareable templates and instructions (beta)
-- Observability: campaigns, datasets, judges, and chat completion events (beta)
+- Observability traces, datasets, and evaluations (Enterprise Public Preview)
 - Workflows: execution, scheduling, management, and managed deployments (Public Preview)
 - Managed Search indexes, document ingestion, and retrieval (Mistral-hosted Public Preview)
 - RAG ingestion pipeline configuration (beta)
@@ -1174,46 +1174,27 @@ final result = await client.connectors.callTool(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.observability` to manage campaigns, datasets, dataset records, judges, chat completion events, and chat completion fields. You can also explore OpenTelemetry traces, spans, and logs. These APIs help you monitor and evaluate your Mistral AI usage.
+Observability is in Public Preview for Enterprise organizations. Reading telemetry and managing evaluations require the corresponding workspace role. Creating a live evaluation requires a user credential with the appropriate role. Live evaluation selectors use `PipelineSourceKind.span`. [Access requirements](https://docs.mistral.ai/studio/observability) · [Online evaluation API](https://docs.mistral.ai/studio/observability/online-evaluations/api)
 
 ```dart
-// List datasets
-final datasetList = await client.observability.datasets.list();
-for (final dataset in datasetList.datasets.results) {
-  print('${dataset.name}: ${dataset.id}');
-}
+final observability = client.observability;
+final datasets = await observability.datasets.list(pageSize: 20);
+final projects = await observability.projects.list(pageSize: 20);
+final runs = await observability.evaluations.searchAllRuns(pageSize: 20);
+final scorers = await observability.scorers.list(pageSize: 20);
+final pipelines = await observability.pipelines.list(enabled: true);
+final optimizations = await observability.optimizations.list(pageSize: 20);
 
-// Create a dataset
-final dataset = await client.observability.datasets.create(
-  request: PostDatasetInSchema(
-    name: 'My Dataset',
-    description: 'A sample dataset',
-  ),
-);
-
-// Manage dataset records
-final records = await client.observability.datasets.listRecords(
-  datasetId: dataset.id,
-);
-
-// List judges
-final judges = await client.observability.judges.list();
-
-// List campaigns
-final campaigns = await client.observability.campaigns.list();
-
-// Browse chat completion fields
-final fields = await client.observability.chatCompletionFields.list();
-
-// Search traces and inspect their spans
-final traces = await client.observability.traces.search(
+final traces = await observability.traces.search(
   request: const TracesRequest(searchExpression: 'status_code = "Error"'),
 );
-final spans = await client.observability.spans.search();
-
-// Search structured logs
-final logs = await client.observability.logs.search();
+final fields = await observability.spans.getFields();
+final logs = await observability.logs.search();
 ```
+
+Use `datasets.createRecords` for bulk inserts and `datasets.importFromSpans` to map telemetry into dataset records. A client-generated ID lets a retried bulk insert return the existing record. Use `pipelines.searchResults` with pipeline configuration slugs for cursor-paginated results, and `spans.aggregateEvaluations` for grouped scores.
+
+Historical `campaigns`, `judges`, `chatCompletionEvents`, `chatCompletionFields`, and their related import methods remain available for existing deployments. Current integrations use OpenTelemetry traces and live evaluation scorers and pipelines. The separate Mistral Evaluation SDK runs offline jobs and manages their lifecycle. [Offline evaluations](https://docs.mistral.ai/studio/observability/evaluations/api-reference)
 
 → [Full example](example/observability_example.dart)
 
@@ -1487,7 +1468,7 @@ See the [example/](example/) directory for complete examples:
 | [`prompts_example.dart`](example/prompts_example.dart) | Versioned prompt templates (beta) |
 | [`skills_example.dart`](example/skills_example.dart) | Versioned model instructions and assets (beta) |
 | [`connectors_example.dart`](example/connectors_example.dart) | MCP connector management (beta) |
-| [`observability_example.dart`](example/observability_example.dart) | Observability: datasets, judges, campaigns (beta) |
+| [`observability_example.dart`](example/observability_example.dart) | Observability projects, datasets, scorers, and telemetry |
 | [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and management |
 | [`workflow_deployment_archive_example.dart`](example/workflow_deployment_archive_example.dart) | Signed archive upload and managed deployment (Public Preview) |
 | [`managed_search_indexes_example.dart`](example/managed_search_indexes_example.dart) | Mistral-hosted Managed Search |
@@ -1526,7 +1507,7 @@ See the [example/](example/) directory for complete examples:
 | Connectors (Beta) | ✅ Full |
 | Prompts (Beta) | ✅ Full |
 | Skills (Beta) | ✅ Full |
-| Observability (Beta) | ✅ Full |
+| Observability (Enterprise Public Preview) | ✅ Public API |
 | Workflows | ✅ Supported |
 | Managed Search | Mistral-hosted Public Preview |
 | RAG (Beta) | Ingestion pipeline configuration and legacy index wrappers |

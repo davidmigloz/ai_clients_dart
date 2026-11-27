@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'telemetry_aggregation.dart';
 
 /// A field definition for OpenTelemetry-based observability filtering
 /// (traces, spans, span evaluations, and logs).
@@ -26,16 +27,27 @@ class OtelFieldDefinition {
 
   /// Creates an [OtelFieldDefinition].
   OtelFieldDefinition({
+    this.sourceAttributeKey,
+    List<MetricAggregation>? supportedAggregations,
     required this.name,
     required this.label,
     required this.type,
     required List<String> supportedOperators,
     this.group,
-  }) : supportedOperators = List.unmodifiable(supportedOperators);
+  }) : supportedOperators = List.unmodifiable(supportedOperators),
+       _hasSupportedAggregations = supportedAggregations != null,
+       supportedAggregations = List.unmodifiable(
+         supportedAggregations ?? const [],
+       );
 
   /// Creates an [OtelFieldDefinition] from JSON.
   factory OtelFieldDefinition.fromJson(Map<String, dynamic> json) =>
       OtelFieldDefinition(
+        sourceAttributeKey: json['source_attribute_key'] as String?,
+        supportedAggregations:
+            (json['supported_aggregations'] as List<Object?>?)
+                ?.map((value) => MetricAggregation.fromJson(value! as String))
+                .toList(),
         name: json['name'] as String? ?? '',
         label: json['label'] as String? ?? '',
         type: json['type'] as String? ?? '',
@@ -46,6 +58,11 @@ class OtelFieldDefinition {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (sourceAttributeKey != null) 'source_attribute_key': sourceAttributeKey,
+    if (_hasSupportedAggregations)
+      'supported_aggregations': supportedAggregations
+          .map((value) => value.toJson())
+          .toList(),
     'name': name,
     'label': label,
     'type': type,
@@ -53,8 +70,18 @@ class OtelFieldDefinition {
     if (group != null) 'group': group,
   };
 
+  /// Original OpenTelemetry attribute name for this field.
+  final String? sourceAttributeKey;
+
+  /// Aggregations supported by this field.
+  final List<MetricAggregation> supportedAggregations;
+
+  final bool _hasSupportedAggregations;
+
   /// Creates a copy with replaced values.
   OtelFieldDefinition copyWith({
+    Object? sourceAttributeKey = unsetCopyWithValue,
+    List<MetricAggregation>? supportedAggregations,
     String? name,
     String? label,
     String? type,
@@ -62,6 +89,12 @@ class OtelFieldDefinition {
     Object? group = unsetCopyWithValue,
   }) {
     return OtelFieldDefinition(
+      sourceAttributeKey: sourceAttributeKey == unsetCopyWithValue
+          ? this.sourceAttributeKey
+          : sourceAttributeKey as String?,
+      supportedAggregations:
+          supportedAggregations ??
+          (_hasSupportedAggregations ? this.supportedAggregations : null),
       name: name ?? this.name,
       label: label ?? this.label,
       type: type ?? this.type,
@@ -75,7 +108,10 @@ class OtelFieldDefinition {
     if (identical(this, other)) return true;
     if (other is! OtelFieldDefinition) return false;
     if (runtimeType != other.runtimeType) return false;
-    return name == other.name &&
+    return _hasSupportedAggregations == other._hasSupportedAggregations &&
+        sourceAttributeKey == other.sourceAttributeKey &&
+        listsEqual(supportedAggregations, other.supportedAggregations) &&
+        name == other.name &&
         label == other.label &&
         type == other.type &&
         listsEqual(supportedOperators, other.supportedOperators) &&
@@ -83,12 +119,20 @@ class OtelFieldDefinition {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(name, label, type, listHash(supportedOperators), group);
+  int get hashCode => Object.hashAll([
+    name,
+    label,
+    type,
+    listHash(supportedOperators),
+    group,
+    sourceAttributeKey,
+    listHash(supportedAggregations),
+    _hasSupportedAggregations,
+  ]);
 
   @override
   String toString() =>
-      'OtelFieldDefinition(name: $name, label: $label, type: $type, '
+      'OtelFieldDefinition(sourceAttributeKey: $sourceAttributeKey, supportedAggregations: ${supportedAggregations.length}, name: $name, label: $label, type: $type, '
       'supportedOperators: ${supportedOperators.length} operators, '
       'group: $group)';
 }

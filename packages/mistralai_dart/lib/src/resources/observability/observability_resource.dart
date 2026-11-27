@@ -8,45 +8,20 @@ import 'chat_completion_events_resource.dart';
 import 'chat_completion_fields_resource.dart';
 import 'dataset_records_resource.dart';
 import 'datasets_resource.dart';
+import 'evaluations_resource.dart';
 import 'judges_resource.dart';
 import 'logs_resource.dart';
+import 'optimizations_resource.dart';
+import 'pipelines_resource.dart';
+import 'projects_resource.dart';
+import 'scorers_resource.dart';
 import 'spans_resource.dart';
 import 'traces_resource.dart';
 
 /// Resource for Observability API operations (beta).
 ///
-/// The Observability API provides tools for monitoring, evaluating, and
-/// curating chat completion events. Key features include:
-/// - **Campaigns**: Automated evaluation of events using judges
-/// - **Chat completion events**: Search and inspect logged completions
-/// - **Chat completion fields**: Discover filterable fields
-/// - **Datasets**: Curate conversation collections for evaluation
-/// - **Dataset records**: Manage individual records within datasets
-/// - **Judges**: Create LLM-based evaluators (classification or regression)
-/// - **Traces**: Search and inspect end-to-end execution traces
-/// - **Spans**: Search spans and span evaluations within traces
-/// - **Logs**: Search structured log records
-///
-/// Example usage:
-/// ```dart
-/// // List all judges
-/// final judges = await client.observability.judges.list();
-///
-/// // Search events
-/// final events = await client.observability.chatCompletionEvents.search(
-///   request: GetChatCompletionEventsInSchema(
-///     searchParams: FilterPayload(),
-///   ),
-/// );
-///
-/// // Create a dataset and import events
-/// final dataset = await client.observability.datasets.create(
-///   request: PostDatasetInSchema(
-///     name: 'Review Dataset',
-///     description: 'Events to review',
-///   ),
-/// );
-/// ```
+/// Enterprise Public Preview. Query telemetry, read offline evaluations, and
+/// manage datasets, scorers, and live evaluations.
 class ObservabilityResource {
   /// Configuration.
   final MistralConfig config;
@@ -63,13 +38,13 @@ class ObservabilityResource {
   /// Callback to check if the client has been closed.
   final void Function()? ensureNotClosed;
 
-  /// Sub-resource for campaigns.
+  /// Historical sub-resource for campaigns. New applications can use [pipelines].
   late final CampaignsResource campaigns;
 
-  /// Sub-resource for chat completion events.
+  /// Historical sub-resource for chat completion events. New applications can use [traces].
   late final ChatCompletionEventsResource chatCompletionEvents;
 
-  /// Sub-resource for chat completion fields.
+  /// Historical sub-resource for chat completion fields. New applications can use [traces].
   late final ChatCompletionFieldsResource chatCompletionFields;
 
   /// Sub-resource for datasets.
@@ -78,7 +53,7 @@ class ObservabilityResource {
   /// Sub-resource for dataset records.
   late final DatasetRecordsResource datasetRecords;
 
-  /// Sub-resource for judges.
+  /// Historical sub-resource for judges. New applications can use [scorers].
   late final JudgesResource judges;
 
   /// Sub-resource for traces.
@@ -89,6 +64,21 @@ class ObservabilityResource {
 
   /// Sub-resource for logs.
   late final LogsResource logs;
+
+  /// Sub-resource for projects.
+  late final EvaluationProjectsResource projects;
+
+  /// Sub-resource for evaluations.
+  late final EvaluationsResource evaluations;
+
+  /// Sub-resource for optimizations.
+  late final OptimizationsResource optimizations;
+
+  /// Sub-resource for scorers.
+  late final ScorersResource scorers;
+
+  /// Sub-resource for pipelines.
+  late final PipelinesResource pipelines;
 
   /// Creates an [ObservabilityResource].
   ObservabilityResource({
@@ -148,6 +138,41 @@ class ObservabilityResource {
       ensureNotClosed: ensureNotClosed,
     );
     spans = SpansResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    projects = EvaluationProjectsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    evaluations = EvaluationsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    optimizations = OptimizationsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    scorers = ScorersResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    pipelines = PipelinesResource(
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,
