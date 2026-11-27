@@ -529,8 +529,8 @@ void main() {
   test(
     'preserves omission and explicit clearing in service account updates',
     () {
-      final unresolved = UpdateServiceAccountRequest.fromJson({});
-      final cleared = UpdateServiceAccountRequest.fromJson({
+      final unresolved = UpdateServiceAccountRequest.fromJson(const {});
+      final cleared = UpdateServiceAccountRequest.fromJson(const {
         'description': null,
       });
       final set = cleared.copyWith(description: 'New role');
