@@ -25,6 +25,8 @@
 - [ocr_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/ocr_example.dart) — OCR 4.1 document extraction and block confidence.
 - [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/audio_example.dart) (~1.1k tokens): Voxtral file transcription, SSE, speech generation, voice search, and sample downloads.
 - [realtime_audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/realtime_audio_example.dart): Realtime Voxtral transcription and speech over WebSockets.
+- [voice_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/voice_agents_example.dart): Versioned voice agents, hosted audio sessions, and room credentials.
+- [voice_agent_webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/voice_agent_webhooks_example.dart): Verify signed call lifecycle deliveries offline.
 - [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/agents_example.dart) (~1.6k tokens): Legacy Agents API (beta), including cursor pagination.
 - [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/conversations_example.dart) (~1.7k tokens): Legacy Conversations API (beta) with typed SSE and history.
 - [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart) (~2.2k tokens): Multipart library documents and access (beta).

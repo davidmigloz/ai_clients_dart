@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../client/config.dart';
 import '../../client/interceptor_chain.dart';
 import '../../client/request_builder.dart';
+import '../audio_agents/audio_agents_resource.dart';
 import '../realtime/realtime_audio.dart';
 import 'speech_resource.dart';
 import 'transcriptions_resource.dart';
@@ -66,6 +67,12 @@ class AudioResource {
   /// Sub-resource for voice management.
   late final VoicesResource voices;
 
+  /// Versioned voice agent configurations and saved sessions.
+  late final AudioAgentsResource agents;
+
+  /// Realtime voice agent session lifecycle.
+  late final AudioSessionsResource sessions;
+
   /// Creates an [AudioResource].
   AudioResource({
     required this.config,
@@ -74,6 +81,20 @@ class AudioResource {
     required this.requestBuilder,
     this.ensureNotClosed,
   }) {
+    agents = AudioAgentsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    sessions = AudioSessionsResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
     transcriptions = TranscriptionsResource(
       config: config,
       httpClient: httpClient,

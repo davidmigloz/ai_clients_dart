@@ -104,6 +104,14 @@ export 'src/models/audio/voice_list_response.dart';
 export 'src/models/audio/voice_response.dart';
 export 'src/models/audio/voice_update_request.dart';
 
+// --- Models: Audio Agents ---
+export 'src/models/audio_agents/audio_agent.dart';
+export 'src/models/audio_agents/audio_agent_config.dart';
+export 'src/models/audio_agents/audio_agent_tools.dart';
+export 'src/models/audio_agents/audio_session.dart';
+export 'src/models/audio_agents/audio_session_transcript.dart';
+export 'src/models/audio_agents/voice_agent_event.dart';
+export 'src/models/audio_agents/voice_agent_webhook_event.dart';
 // --- Models: Batch ---
 export 'src/models/batch/batch_error.dart';
 export 'src/models/batch/batch_job.dart';
@@ -611,6 +619,8 @@ export 'src/resources/admin/admin_roles_resource.dart';
 export 'src/resources/admin/admin_scim_resource.dart';
 export 'src/resources/admin/admin_users_resource.dart';
 export 'src/resources/admin/admin_workspaces_resource.dart';
+export 'src/resources/audio_agents/audio_agents_resource.dart';
+export 'src/resources/audio_agents/voice_agent_connection.dart';
 export 'src/resources/billing/billing_resource.dart';
 export 'src/resources/managed_search_indexes_resource.dart';
 export 'src/resources/realtime/realtime_audio.dart';
@@ -622,3 +632,4 @@ export 'src/resources/webhooks/webhooks_resource.dart';
 // --- Utils ---
 export 'src/utils/job_poller.dart';
 export 'src/utils/paginator.dart';
+export 'src/utils/voice_agent_webhook_verifier.dart';
