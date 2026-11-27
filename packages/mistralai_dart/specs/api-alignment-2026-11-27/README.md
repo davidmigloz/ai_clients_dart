@@ -33,7 +33,10 @@ and 165 unchanged operation records. It also records 480 added, 190
 changed, and 82 removed schema records. It links each record to a ticket.
 Use operation and model fixtures to verify the route candidates. Shared
 schema ownership follows its earliest listed consumer, with the other
-affected tickets linked for regression checks. Where a source describes an
+affected tickets linked for regression checks. All 1,117 candidate schemas
+are transitively referenced by current operations and extensions. Each
+added schema requires public behavior coverage with a new or reusable
+Dart type, including inline models and event wrappers. Where a source describes an
 API outside OpenAPI, the supplemental records link its disposition to a
 ticket.
 
