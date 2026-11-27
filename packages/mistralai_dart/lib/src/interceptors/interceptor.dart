@@ -14,12 +14,20 @@ class RequestContext {
   /// Optional abort trigger for this request.
   final Future<void>? abortTrigger;
 
+  /// Whether the endpoint authenticates using the x-api-key header.
+  final bool authInApiKeyHeader;
+
+  /// Whether errors omit response contents that may include credentials.
+  final bool redactErrorBody;
+
   /// Creates a [RequestContext].
   const RequestContext({
     required this.request,
     this.response,
     this.metadata = const {},
     this.abortTrigger,
+    this.authInApiKeyHeader = false,
+    this.redactErrorBody = false,
   });
 
   /// Creates a copy with updated values.
@@ -28,12 +36,16 @@ class RequestContext {
     http.Response? response,
     Map<String, dynamic>? metadata,
     Future<void>? abortTrigger,
+    bool? authInApiKeyHeader,
+    bool? redactErrorBody,
   }) {
     return RequestContext(
       request: request ?? this.request,
       response: response ?? this.response,
       metadata: metadata ?? this.metadata,
       abortTrigger: abortTrigger ?? this.abortTrigger,
+      authInApiKeyHeader: authInApiKeyHeader ?? this.authInApiKeyHeader,
+      redactErrorBody: redactErrorBody ?? this.redactErrorBody,
     );
   }
 }

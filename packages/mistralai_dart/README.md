@@ -51,7 +51,8 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Workflows: execution, scheduling, management, and managed deployments (Public Preview)
 - Managed Search indexes, document ingestion, and retrieval (Mistral-hosted Public Preview)
 - RAG ingestion pipeline configuration (beta)
-- Users: current authenticated user identity (beta)
+- Caller identity, user memberships, service accounts, and billing (beta)
+- Triggers and webhook event sources for deployed workflows (beta)
 - Organization users, groups, workspaces, roles, and SCIM (Admin API Enterprise Preview)
 
 ## Why choose this client?
@@ -1370,22 +1371,114 @@ Streamed logs expose `eventId` for resuming from `lastEventId`.
 
 </details>
 
-### How do I get the current user?
+### How do I identify the authenticated caller?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.users` to retrieve the identity of the currently authenticated user (Beta), including their organization, workspace, and the API key used for the request.
+Use `client.users.whoami()` for a human user or service account. Use
+`me()` for the legacy human profile, or `listOrganizations` and
+`listWorkspaces` for user memberships.
 
 ```dart
-final identity = await client.users.me();
-
-print('Signed in as: ${identity.email}');
-print('Organization: ${identity.organization?.name}');
-print('Workspace: ${identity.workspace?.name}');
+final identity = await client.users.whoami();
+switch (identity.principal) {
+  case WhoamiUserPrincipal(:final id):
+    print(id);
+  case WhoamiServiceAccountPrincipal(:final serviceAccountId):
+    print(serviceAccountId);
+  case UnknownWhoamiPrincipal():
+    break;
+}
 ```
 
-→ [Full example](example/users_example.dart)
+These beta identity routes accept the configured credential as a bearer
+token. Pass `authInApiKeyHeader: true` to use the public API key header.
+The membership methods accept `offset` and `limit`. Filter workspace
+listings by organization when needed.
+
+→ [Full example](example/platform_identity_example.dart)
+
+</details>
+
+### How do I manage workspace service accounts?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.serviceAccounts` to list and manage workspace principals and
+their roles. Access depends on the caller's workspace permissions.
+
+```dart
+final page = await client.serviceAccounts.list(
+  workspaceId: workspaceId,
+  limit: 25,
+);
+final assignable = await client.serviceAccounts.listAssignableRoles(
+  workspaceId: workspaceId,
+);
+print('${page.items.length} accounts and ${assignable.items.length} roles');
+```
+
+Use `setRoles` with the complete set of role IDs to replace existing
+assignments. See the [Mistral service accounts guide](https://docs.mistral.ai/admin/identity-access/service-accounts).
+
+→ [Full example](example/platform_identity_example.dart)
+
+</details>
+
+### How do I read billing settings?
+
+<details>
+<summary><b>Show example</b></summary>
+
+The beta billing resource reads the budget and subscription for the
+authenticated dashboard customer. The client sends the configured public
+API key in the `x-api-key` header.
+
+```dart
+final budget = await client.billing.getBudget();
+final plan = await client.billing.getSubscription();
+print('${plan.planName}: ${budget.apiBudget.usagePercentage}% API usage');
+```
+
+→ [Full example](example/platform_identity_example.dart)
+
+</details>
+
+### How do I start a workflow on a webhook event?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Register an inbound event source with `client.webhooks` and link it to a
+deployed workflow with `client.triggers`. The webhook and its triggers
+share the same owner type. Mistral validates provider-specific signatures
+and tracks delivered events.
+
+```dart
+final trigger = await client.triggers.create(
+  request: CreateTriggerRequest(
+    eventSourceId: webhookId,
+    handler: TriggerHandler.workflows,
+    action: TriggerAction(
+      primitiveId: workflowId,
+      type: TriggerActionType.startWorkflow,
+    ),
+    ownerType: TriggerOwnerType.workspace,
+    title: 'Start workflow',
+  ),
+);
+final events = await client.triggers.listEvents(triggerId: trigger.id);
+print(events.data.length);
+```
+
+Workflow triggers receive events from your provider. Voice Agents send
+call lifecycle events to your app with an `x-mistral-signature` header.
+Use the configured provider signing secret for workflow webhooks. See the
+[Mistral triggers and webhooks guide](https://docs.mistral.ai/studio/workflows/building-workflows/triggers-and-webhooks).
+
+→ [Full example](example/workflow_trigger_example.dart)
 
 </details>
 
@@ -1492,7 +1585,9 @@ See the [example/](example/) directory for complete examples:
 | [`workflow_deployment_archive_example.dart`](example/workflow_deployment_archive_example.dart) | Signed archive upload and managed deployment (Public Preview) |
 | [`managed_search_indexes_example.dart`](example/managed_search_indexes_example.dart) | Mistral-hosted Managed Search |
 | [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipeline configuration (beta) |
-| [`users_example.dart`](example/users_example.dart) | Current authenticated user identity (beta) |
+| [`users_example.dart`](example/users_example.dart) | Legacy current user profile |
+| [`platform_identity_example.dart`](example/platform_identity_example.dart) | Caller identity, memberships, billing, and workspace roles |
+| [`workflow_trigger_example.dart`](example/workflow_trigger_example.dart) | Provider webhook setup and workflow trigger events |
 | [`admin_example.dart`](example/admin_example.dart) | Organization roles and workspaces (Enterprise Preview) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
@@ -1530,7 +1625,10 @@ See the [example/](example/) directory for complete examples:
 | Workflows | ✅ Supported |
 | Managed Search | Mistral-hosted Public Preview |
 | RAG (Beta) | Ingestion pipeline configuration and legacy index wrappers |
-| Users (Beta) | ✅ Full |
+| Identity and memberships (Beta) | Caller identity, organizations, and workspaces |
+| Service accounts (Beta) | Workspace principals and role assignments |
+| Billing (Beta) | Dashboard budget and subscription |
+| Triggers and webhooks (Beta) | Inbound event sources, trigger rules, and recent events |
 | Admin Directory | Enterprise Preview |
 
 ## Official Documentation

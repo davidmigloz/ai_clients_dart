@@ -46,13 +46,17 @@ class ErrorInterceptor implements Interceptor {
 
     final responseMetadata = ResponseMetadata(
       statusCode: response.statusCode,
-      headers: response.headers,
-      bodyExcerpt: _truncateBody(response.body),
+      headers: context.redactErrorBody ? const {} : response.headers,
+      bodyExcerpt: context.redactErrorBody
+          ? '[REDACTED]'
+          : _truncateBody(response.body),
       latency: latency,
     );
 
     // Parse error message from response body
-    final (message, details) = _parseErrorBody(response.body);
+    final (message, details) = context.redactErrorBody
+        ? ('HTTP ${response.statusCode} error', const <Object>[])
+        : _parseErrorBody(response.body);
 
     // Handle authentication errors
     if (response.statusCode == 401) {

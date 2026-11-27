@@ -21,7 +21,8 @@
   },
   "excluded_resources": [
     "base_resource",
-    "streaming_resource"
+    "streaming_resource",
+    "platform_resource"
   ],
   "resource_to_example": {
     "chat": "chat",
@@ -38,7 +39,12 @@
     "admin_roles": "admin",
     "admin_scim": "admin",
     "admin_users": "admin",
-    "admin_workspaces": "admin"
+    "admin_workspaces": "admin",
+    "billing": "platform_identity",
+    "users": "platform_identity",
+    "serviceAccounts": "platform_identity",
+    "triggers": "workflow_trigger",
+    "webhooks": "workflow_trigger"
   },
   "excluded_from_examples": [],
   "drift_patterns": []
