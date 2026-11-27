@@ -772,6 +772,39 @@ Future<void> main() async {
 
 </details>
 
+### How do I process selected parts of a file?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Set `processing` on Interactions document, audio, or video content.
+Select one-based pages or worksheet indexes, A1 cell ranges, or time
+intervals. Video options can also select frames, audio, or transcripts.
+The same content blocks work in typed function result subcontent.
+
+```dart
+final selection = DocumentContent(
+  uri: uploadedFile.uri,
+  mimeType: 'application/pdf',
+  processing: const InteractionDocumentProcessing.select(
+    pageOptions: InteractionPageProcessingOptions(
+      startPage: 2,
+      endPage: 4,
+      contentLayers: [InteractionPageLayer.text],
+    ),
+  ),
+);
+```
+
+This example uses stable Gemini Developer Interactions. Check the guide for
+supported MIME types, resolution and content layers.
+[Runnable example](example/interactions_media_slicing.dart) ·
+[Document processing](https://aistudio.google.com/docs/document-processing#customize-document-processing) ·
+[Video processing](https://aistudio.google.com/docs/video-understanding#customize-video-processing) ·
+[Function result files](https://aistudio.google.com/docs/function-calling#file-inspection-options)
+
+</details>
+
 ### How do I use the Live API?
 
 <details>
@@ -980,6 +1013,7 @@ See the [example/](example/) directory for complete examples:
 | [`google_maps_example.dart`](example/google_maps_example.dart) | Google Maps grounding |
 | [`google_search_example.dart`](example/google_search_example.dart) | Grounding with Google Search |
 | [`image_generation_example.dart`](example/image_generation_example.dart) | Image generation |
+| [`interactions_media_slicing.dart`](example/interactions_media_slicing.dart) | Select pages and layers for Interactions media |
 | [`interactions_example.dart`](example/interactions_example.dart) | Stable Interactions, streaming, state and function calls |
 | [`interactions_long_decode.dart`](example/interactions_long_decode.dart) | Opt-in automatic continuation on Gemini 4 |
 | [`live_example.dart`](example/live_example.dart) | Live API WebSocket sessions |

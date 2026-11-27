@@ -168,6 +168,7 @@ export 'src/models/interactions/interaction_input.dart';
 export 'src/models/interactions/interaction_review_snippet.dart';
 export 'src/models/interactions/interaction_status.dart';
 export 'src/models/interactions/list_interactions_response.dart';
+export 'src/models/interactions/media_processing.dart';
 export 'src/models/interactions/media_resolution.dart';
 export 'src/models/interactions/modality_tokens.dart';
 export 'src/models/interactions/response_formats/response_formats.dart';

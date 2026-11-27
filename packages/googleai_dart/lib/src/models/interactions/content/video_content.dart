@@ -17,8 +17,21 @@ class VideoContent extends InteractionContent {
   /// The resolution of the media.
   final InteractionMediaResolution? resolution;
 
+  /// Video processing mode or clip and layer selection.
+  final InteractionVideoProcessing? processing;
+
+  /// The name the model can use to refer to this content block.
+  final String? name;
+
   /// Creates a [VideoContent] instance.
-  const VideoContent({this.data, this.uri, this.mimeType, this.resolution});
+  const VideoContent({
+    this.data,
+    this.uri,
+    this.mimeType,
+    this.resolution,
+    this.processing,
+    this.name,
+  });
 
   /// Creates a [VideoContent] from JSON.
   factory VideoContent.fromJson(Map<String, dynamic> json) => VideoContent(
@@ -28,6 +41,10 @@ class VideoContent extends InteractionContent {
     resolution: json['resolution'] != null
         ? interactionMediaResolutionFromString(json['resolution'] as String?)
         : null,
+    processing: json['processing'] == null
+        ? null
+        : InteractionVideoProcessing.fromJson(json['processing'] as Object),
+    name: json['name'] as String?,
   );
 
   @override
@@ -38,6 +55,8 @@ class VideoContent extends InteractionContent {
     if (mimeType != null) 'mime_type': mimeType,
     if (resolution != null)
       'resolution': interactionMediaResolutionToString(resolution!),
+    'processing': ?processing?.toJson(),
+    'name': ?name,
   };
 
   /// Creates a copy with replaced values.
@@ -46,6 +65,8 @@ class VideoContent extends InteractionContent {
     Object? uri = unsetCopyWithValue,
     Object? mimeType = unsetCopyWithValue,
     Object? resolution = unsetCopyWithValue,
+    Object? processing = unsetCopyWithValue,
+    Object? name = unsetCopyWithValue,
   }) {
     return VideoContent(
       data: data == unsetCopyWithValue ? this.data : data as String?,
@@ -56,6 +77,10 @@ class VideoContent extends InteractionContent {
       resolution: resolution == unsetCopyWithValue
           ? this.resolution
           : resolution as InteractionMediaResolution?,
+      processing: processing == unsetCopyWithValue
+          ? this.processing
+          : processing as InteractionVideoProcessing?,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
     );
   }
 }

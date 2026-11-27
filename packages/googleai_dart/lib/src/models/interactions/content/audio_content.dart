@@ -20,6 +20,9 @@ class AudioContent extends InteractionContent {
   /// The sample rate of the audio.
   final int? sampleRate;
 
+  /// Audio processing mode or interval selection.
+  final InteractionAudioProcessing? processing;
+
   /// Creates an [AudioContent] instance.
   const AudioContent({
     this.data,
@@ -27,6 +30,7 @@ class AudioContent extends InteractionContent {
     this.mimeType,
     this.channels,
     this.sampleRate,
+    this.processing,
   });
 
   /// Creates an [AudioContent] from JSON.
@@ -36,6 +40,9 @@ class AudioContent extends InteractionContent {
     mimeType: json['mime_type'] as String?,
     channels: json['channels'] as int?,
     sampleRate: json['sample_rate'] as int?,
+    processing: json['processing'] == null
+        ? null
+        : InteractionAudioProcessing.fromJson(json['processing'] as Object),
   );
 
   @override
@@ -46,6 +53,7 @@ class AudioContent extends InteractionContent {
     if (mimeType != null) 'mime_type': mimeType,
     if (channels != null) 'channels': channels,
     if (sampleRate != null) 'sample_rate': sampleRate,
+    'processing': ?processing?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -55,6 +63,7 @@ class AudioContent extends InteractionContent {
     Object? mimeType = unsetCopyWithValue,
     Object? channels = unsetCopyWithValue,
     Object? sampleRate = unsetCopyWithValue,
+    Object? processing = unsetCopyWithValue,
   }) {
     return AudioContent(
       data: data == unsetCopyWithValue ? this.data : data as String?,
@@ -68,6 +77,9 @@ class AudioContent extends InteractionContent {
       sampleRate: sampleRate == unsetCopyWithValue
           ? this.sampleRate
           : sampleRate as int?,
+      processing: processing == unsetCopyWithValue
+          ? this.processing
+          : processing as InteractionAudioProcessing?,
     );
   }
 }
