@@ -147,6 +147,40 @@ Mistral plans to retire offset-based voice listing on March 31, 2027.
 Switch from `list(limit: 10, offset: 0)` to `search(pageSize: 10)` and pass
 `nextPageToken` as `pageToken` for the next page.
 
+### Managed Workflow Deployments
+
+Create and update requests use `repositoryUrl` or `archiveId` for the build
+source and a backend spec for build settings. Deployments configure the
+entrypoint and working directory in their Dockerfile. Managed resource
+settings on the API now accept `replicas`.
+
+Before
+
+```dart
+const spec = DeploymentWorkerSpecInput(
+  githubUrl: 'https://github.com/my-org/worker',
+  entrypoint: 'worker:main',
+  workingDir: 'workers',
+);
+```
+
+After
+
+```dart
+const spec = DeploymentWorkerSpecInput(
+  repositoryUrl: 'https://github.com/my-org/worker',
+  backendSpec: DeploymentMistralCloudBackendSpec(
+    buildDirectory: 'workers',
+    dockerfilePath: 'Dockerfile',
+  ),
+);
+```
+
+Use `workflows.core.executeAsync(workflowIdentifier: ..., request: ...)` or
+`executeSync` for new executions. Replace calls to the deprecated
+`workflows.registrations.executeAsync` or `executeSync` with those methods
+and pass the workflow identifier instead of the registration ID.
+
 ---
 
 ## Migrating from v7.x to v8.0.0

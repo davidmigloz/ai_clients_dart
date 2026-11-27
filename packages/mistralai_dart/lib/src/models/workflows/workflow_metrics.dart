@@ -22,6 +22,7 @@ class WorkflowMetrics {
   final TimeSeriesMetric latencyOverTime;
 
   /// Retry rate.
+  /// Mistral has deprecated this metric.
   final ScalarMetric retryRate;
 
   /// Creates a [WorkflowMetrics].

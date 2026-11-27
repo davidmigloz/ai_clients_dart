@@ -18,8 +18,12 @@ class WorkflowExecutionStartedAttributesResponse {
   /// The display name.
   final String? displayName;
 
+  /// Attempt number for this execution.
+  final int attempt;
+
   /// Creates a [WorkflowExecutionStartedAttributesResponse].
   const WorkflowExecutionStartedAttributesResponse({
+    this.attempt = 1,
     required this.taskId,
     required this.workflowName,
     required this.input,
@@ -30,6 +34,7 @@ class WorkflowExecutionStartedAttributesResponse {
   factory WorkflowExecutionStartedAttributesResponse.fromJson(
     Map<String, dynamic> json,
   ) => WorkflowExecutionStartedAttributesResponse(
+    attempt: json['attempt'] as int? ?? 1,
     taskId: json['task_id'] as String? ?? '',
     workflowName: json['workflow_name'] as String? ?? '',
     input: JSONPayloadResponse.fromJson(json['input'] as Map<String, dynamic>),
@@ -38,6 +43,7 @@ class WorkflowExecutionStartedAttributesResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    'attempt': attempt,
     'task_id': taskId,
     'workflow_name': workflowName,
     'input': input.toJson(),
@@ -46,12 +52,14 @@ class WorkflowExecutionStartedAttributesResponse {
 
   /// Creates a copy with replaced values.
   WorkflowExecutionStartedAttributesResponse copyWith({
+    int? attempt,
     String? taskId,
     String? workflowName,
     JSONPayloadResponse? input,
     Object? displayName = unsetCopyWithValue,
   }) {
     return WorkflowExecutionStartedAttributesResponse(
+      attempt: attempt ?? this.attempt,
       taskId: taskId ?? this.taskId,
       workflowName: workflowName ?? this.workflowName,
       input: input ?? this.input,
@@ -66,16 +74,18 @@ class WorkflowExecutionStartedAttributesResponse {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionStartedAttributesResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return taskId == other.taskId &&
+    return attempt == other.attempt &&
+        taskId == other.taskId &&
         workflowName == other.workflowName &&
         input == other.input &&
         displayName == other.displayName;
   }
 
   @override
-  int get hashCode => Object.hash(taskId, workflowName, input, displayName);
+  int get hashCode =>
+      Object.hashAll([taskId, workflowName, input, displayName, attempt]);
 
   @override
   String toString() =>
-      'WorkflowExecutionStartedAttributesResponse(taskId: $taskId, workflowName: $workflowName, input: $input, displayName: $displayName)';
+      'WorkflowExecutionStartedAttributesResponse(attempt: $attempt, taskId: $taskId, workflowName: $workflowName, input: $input, displayName: $displayName)';
 }

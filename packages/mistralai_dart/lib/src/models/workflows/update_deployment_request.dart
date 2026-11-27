@@ -77,7 +77,9 @@ class UpdateDeploymentRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (resources != null)
-      'resources': resources!.toJson()
+      'resources': {
+        if (resources!.replicas != null) 'replicas': resources!.replicas,
+      }
     else if (clearResources)
       'resources': null,
     if (spec != null) 'spec': spec!.toJson() else if (clearSpec) 'spec': null,

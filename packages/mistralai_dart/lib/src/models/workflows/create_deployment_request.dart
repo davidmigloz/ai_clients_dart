@@ -13,11 +13,15 @@ class CreateDeploymentRequest {
   /// The worker spec to build and run.
   final DeploymentWorkerSpecInput spec;
 
-  /// Optional resource configuration (CPU/memory/replicas).
+  /// Optional worker replica count.
   final DeploymentResourceConfig? resources;
+
+  /// Whether to create the deployment with a separate runtime credential.
+  final bool? hardened;
 
   /// Creates a [CreateDeploymentRequest].
   const CreateDeploymentRequest({
+    this.hardened,
     required this.name,
     required this.spec,
     this.resources,
@@ -38,6 +42,7 @@ class CreateDeploymentRequest {
       );
     }
     return CreateDeploymentRequest(
+      hardened: json['hardened'] as bool?,
       name: name,
       spec: DeploymentWorkerSpecInput.fromJson(specJson),
       resources: json['resources'] != null
@@ -50,18 +55,26 @@ class CreateDeploymentRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (hardened != null) 'hardened': hardened,
     'name': name,
     'spec': spec.toJson(),
-    if (resources != null) 'resources': resources!.toJson(),
+    if (resources != null)
+      'resources': {
+        if (resources!.replicas != null) 'replicas': resources!.replicas,
+      },
   };
 
   /// Creates a copy with replaced values.
   CreateDeploymentRequest copyWith({
+    Object? hardened = unsetCopyWithValue,
     String? name,
     DeploymentWorkerSpecInput? spec,
     Object? resources = unsetCopyWithValue,
   }) {
     return CreateDeploymentRequest(
+      hardened: hardened == unsetCopyWithValue
+          ? this.hardened
+          : hardened as bool?,
       name: name ?? this.name,
       spec: spec ?? this.spec,
       resources: resources == unsetCopyWithValue
@@ -75,17 +88,18 @@ class CreateDeploymentRequest {
     if (identical(this, other)) return true;
     if (other is! CreateDeploymentRequest) return false;
     if (runtimeType != other.runtimeType) return false;
-    return name == other.name &&
+    return hardened == other.hardened &&
+        name == other.name &&
         spec == other.spec &&
         resources == other.resources;
   }
 
   @override
-  int get hashCode => Object.hash(name, spec, resources);
+  int get hashCode => Object.hashAll([name, spec, resources, hardened]);
 
   @override
   String toString() =>
-      'CreateDeploymentRequest('
+      'CreateDeploymentRequest(hardened: $hardened, '
       'name: $name, '
       'spec: $spec, '
       'resources: $resources'

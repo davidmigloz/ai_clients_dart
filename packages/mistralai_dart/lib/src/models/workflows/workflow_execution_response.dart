@@ -46,8 +46,12 @@ class WorkflowExecutionResponse {
   /// The ID of the workflow.
   final String? workflowId;
 
+  /// Search keys supplied by the workflow, when requested.
+  final Map<String, String?>? searchKeys;
+
   /// Creates a [WorkflowExecutionResponse].
   const WorkflowExecutionResponse({
+    this.searchKeys,
     required this.workflowName,
     required this.executionId,
     required this.rootExecutionId,
@@ -108,6 +112,8 @@ class WorkflowExecutionResponse {
       );
     }
     return WorkflowExecutionResponse(
+      searchKeys: (json['search_keys'] as Map<String, dynamic>?)
+          ?.cast<String, String?>(),
       workflowName: workflowName,
       executionId: executionId,
       rootExecutionId: rootExecutionId,
@@ -128,6 +134,7 @@ class WorkflowExecutionResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (searchKeys != null) 'search_keys': searchKeys,
     'workflow_name': workflowName,
     'execution_id': executionId,
     'root_execution_id': rootExecutionId,
@@ -145,6 +152,7 @@ class WorkflowExecutionResponse {
 
   /// Creates a copy with replaced values.
   WorkflowExecutionResponse copyWith({
+    Object? searchKeys = unsetCopyWithValue,
     String? workflowName,
     String? executionId,
     String? rootExecutionId,
@@ -160,6 +168,9 @@ class WorkflowExecutionResponse {
     Object? workflowId = unsetCopyWithValue,
   }) {
     return WorkflowExecutionResponse(
+      searchKeys: searchKeys == unsetCopyWithValue
+          ? this.searchKeys
+          : searchKeys as Map<String, String?>?,
       workflowName: workflowName ?? this.workflowName,
       executionId: executionId ?? this.executionId,
       rootExecutionId: rootExecutionId ?? this.rootExecutionId,
@@ -193,7 +204,8 @@ class WorkflowExecutionResponse {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return workflowName == other.workflowName &&
+    return mapsEqual(searchKeys, other.searchKeys) &&
+        workflowName == other.workflowName &&
         executionId == other.executionId &&
         rootExecutionId == other.rootExecutionId &&
         status == other.status &&
@@ -209,7 +221,7 @@ class WorkflowExecutionResponse {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     workflowName,
     executionId,
     rootExecutionId,
@@ -223,11 +235,12 @@ class WorkflowExecutionResponse {
     deploymentName,
     userId,
     workflowId,
-  );
+    mapHash(searchKeys),
+  ]);
 
   @override
   String toString() =>
-      'WorkflowExecutionResponse('
+      'WorkflowExecutionResponse(searchKeys: ${searchKeys?.length}, '
       'workflowName: $workflowName, '
       'executionId: $executionId, '
       'rootExecutionId: $rootExecutionId, '

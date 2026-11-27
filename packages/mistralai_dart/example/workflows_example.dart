@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_print
-// Workflows API (Beta)
+// Workflows API
 import 'dart:io';
 
 import 'package:mistralai_dart/mistralai_dart.dart';
 
-/// Example demonstrating the Workflows API (Beta).
+/// Example demonstrating the Workflows API.
 ///
 /// This example shows how to:
 /// - List registered workflows

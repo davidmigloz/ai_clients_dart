@@ -33,8 +33,12 @@ class DeploymentObservedState {
   /// The number of ready replicas.
   final int readyReplicas;
 
+  /// When the deployment last entered its current phase.
+  final String? lastPhaseChangedAt;
+
   /// Creates a [DeploymentObservedState].
   const DeploymentObservedState({
+    this.lastPhaseChangedAt,
     this.availableReplicas = 0,
     this.buildState,
     this.deployedRevision,
@@ -49,6 +53,7 @@ class DeploymentObservedState {
   /// Creates a [DeploymentObservedState] from JSON.
   factory DeploymentObservedState.fromJson(Map<String, dynamic> json) =>
       DeploymentObservedState(
+        lastPhaseChangedAt: json['last_phase_changed_at'] as String?,
         availableReplicas: json['available_replicas'] as int? ?? 0,
         buildState: json['build_state'] != null
             ? DeploymentBuildState.fromJson(
@@ -66,6 +71,7 @@ class DeploymentObservedState {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (lastPhaseChangedAt != null) 'last_phase_changed_at': lastPhaseChangedAt,
     'available_replicas': availableReplicas,
     if (buildState != null) 'build_state': buildState!.toJson(),
     if (deployedRevision != null) 'deployed_revision': deployedRevision,
@@ -79,6 +85,7 @@ class DeploymentObservedState {
 
   /// Creates a copy with replaced values.
   DeploymentObservedState copyWith({
+    Object? lastPhaseChangedAt = unsetCopyWithValue,
     int? availableReplicas,
     Object? buildState = unsetCopyWithValue,
     Object? deployedRevision = unsetCopyWithValue,
@@ -90,6 +97,9 @@ class DeploymentObservedState {
     int? readyReplicas,
   }) {
     return DeploymentObservedState(
+      lastPhaseChangedAt: lastPhaseChangedAt == unsetCopyWithValue
+          ? this.lastPhaseChangedAt
+          : lastPhaseChangedAt as String?,
       availableReplicas: availableReplicas ?? this.availableReplicas,
       buildState: buildState == unsetCopyWithValue
           ? this.buildState
@@ -119,7 +129,8 @@ class DeploymentObservedState {
     if (identical(this, other)) return true;
     if (other is! DeploymentObservedState) return false;
     if (runtimeType != other.runtimeType) return false;
-    return availableReplicas == other.availableReplicas &&
+    return lastPhaseChangedAt == other.lastPhaseChangedAt &&
+        availableReplicas == other.availableReplicas &&
         buildState == other.buildState &&
         deployedRevision == other.deployedRevision &&
         endpoint == other.endpoint &&
@@ -131,7 +142,7 @@ class DeploymentObservedState {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     availableReplicas,
     buildState,
     deployedRevision,
@@ -141,11 +152,12 @@ class DeploymentObservedState {
     message,
     phase,
     readyReplicas,
-  );
+    lastPhaseChangedAt,
+  ]);
 
   @override
   String toString() =>
-      'DeploymentObservedState('
+      'DeploymentObservedState(lastPhaseChangedAt: $lastPhaseChangedAt, '
       'availableReplicas: $availableReplicas, '
       'buildState: $buildState, '
       'deployedRevision: $deployedRevision, '

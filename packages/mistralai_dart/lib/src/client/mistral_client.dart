@@ -57,7 +57,7 @@ import 'retry_wrapper.dart';
 /// - [skills] - Registered reusable model instructions (Beta)
 /// - [users] - Current authenticated user identity (Beta)
 /// - [rag] - RAG ingestion pipelines and search indexes (Beta)
-/// - [workflows] - Workflow execution, scheduling, management (Beta)
+/// - [workflows] - Workflow execution, scheduling, and management
 /// - [models] - Model listing and management
 /// - [moderations] - Content moderation
 ///

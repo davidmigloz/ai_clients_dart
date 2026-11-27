@@ -15,21 +15,25 @@ class DeploymentWorkerResponse {
   /// Creation timestamp.
   final String createdAt;
 
-  /// Last update timestamp.
+  /// Last update timestamp. Prefer [lastHeartbeat].
   final String updatedAt;
 
   /// Where the worker is running; `null` if the worker did not report a
   /// location.
   final DeploymentLocation? location;
 
+  /// Most recent heartbeat timestamp.
+  final String lastHeartbeat;
+
   /// Creates a [DeploymentWorkerResponse].
   const DeploymentWorkerResponse({
+    String? lastHeartbeat,
     required this.name,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
     this.location,
-  });
+  }) : lastHeartbeat = lastHeartbeat ?? updatedAt;
 
   /// Creates a [DeploymentWorkerResponse] from JSON.
   ///
@@ -60,6 +64,7 @@ class DeploymentWorkerResponse {
       );
     }
     return DeploymentWorkerResponse(
+      lastHeartbeat: json['last_heartbeat'] as String?,
       name: name,
       isActive: isActive,
       createdAt: createdAt,
@@ -74,6 +79,7 @@ class DeploymentWorkerResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    'last_heartbeat': lastHeartbeat,
     'name': name,
     'is_active': isActive,
     'created_at': createdAt,
@@ -83,6 +89,7 @@ class DeploymentWorkerResponse {
 
   /// Creates a copy with replaced values.
   DeploymentWorkerResponse copyWith({
+    String? lastHeartbeat,
     String? name,
     bool? isActive,
     String? createdAt,
@@ -90,6 +97,7 @@ class DeploymentWorkerResponse {
     Object? location = unsetCopyWithValue,
   }) {
     return DeploymentWorkerResponse(
+      lastHeartbeat: lastHeartbeat ?? this.lastHeartbeat,
       name: name ?? this.name,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
@@ -105,7 +113,8 @@ class DeploymentWorkerResponse {
     if (identical(this, other)) return true;
     if (other is! DeploymentWorkerResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return name == other.name &&
+    return lastHeartbeat == other.lastHeartbeat &&
+        name == other.name &&
         isActive == other.isActive &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt &&
@@ -113,10 +122,16 @@ class DeploymentWorkerResponse {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(name, isActive, createdAt, updatedAt, location);
+  int get hashCode => Object.hashAll([
+    name,
+    isActive,
+    createdAt,
+    updatedAt,
+    location,
+    lastHeartbeat,
+  ]);
 
   @override
   String toString() =>
-      'DeploymentWorkerResponse(name: $name, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, location: $location)';
+      'DeploymentWorkerResponse(lastHeartbeat: $lastHeartbeat, name: $name, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, location: $location)';
 }

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/workflow_call_context.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
@@ -30,8 +31,20 @@ class WorkflowExecutionRequest {
   /// Custom tracing attributes.
   final Map<String, dynamic>? customTracingAttributes;
 
+  /// Cleartext technical IDs and flags passed to the workflow. Never include customer content.
+  final Map<String, Object>? callContext;
+
+  /// W3C trace context to join, unless forceNewTrace is set.
+  final String? traceparent;
+
+  /// Starts a new independent trace instead of joining the caller trace.
+  final bool? forceNewTrace;
+
   /// Creates a [WorkflowExecutionRequest].
   const WorkflowExecutionRequest({
+    this.callContext,
+    this.traceparent,
+    this.forceNewTrace,
     this.input,
     this.extensions,
     this.executionId,
@@ -45,6 +58,9 @@ class WorkflowExecutionRequest {
   /// Creates a [WorkflowExecutionRequest] from JSON.
   factory WorkflowExecutionRequest.fromJson(Map<String, dynamic> json) =>
       WorkflowExecutionRequest(
+        callContext: parseWorkflowCallContext(json['call_context']),
+        traceparent: json['traceparent'] as String?,
+        forceNewTrace: json['force_new_trace'] as bool?,
         input: json['input'] as Map<String, dynamic>?,
         extensions: json['extensions'] as Map<String, dynamic>?,
         executionId: json['execution_id'] as String?,
@@ -58,6 +74,10 @@ class WorkflowExecutionRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (callContext != null)
+      'call_context': workflowCallContextToJson(callContext!),
+    if (traceparent != null) 'traceparent': traceparent,
+    if (forceNewTrace != null) 'force_new_trace': forceNewTrace,
     if (input != null) 'input': input,
     if (extensions != null) 'extensions': extensions,
     if (executionId != null) 'execution_id': executionId,
@@ -71,6 +91,9 @@ class WorkflowExecutionRequest {
 
   /// Creates a copy with replaced values.
   WorkflowExecutionRequest copyWith({
+    Object? callContext = unsetCopyWithValue,
+    Object? traceparent = unsetCopyWithValue,
+    Object? forceNewTrace = unsetCopyWithValue,
     Object? input = unsetCopyWithValue,
     Object? extensions = unsetCopyWithValue,
     Object? executionId = unsetCopyWithValue,
@@ -81,6 +104,15 @@ class WorkflowExecutionRequest {
     Object? customTracingAttributes = unsetCopyWithValue,
   }) {
     return WorkflowExecutionRequest(
+      callContext: callContext == unsetCopyWithValue
+          ? this.callContext
+          : callContext as Map<String, Object>?,
+      traceparent: traceparent == unsetCopyWithValue
+          ? this.traceparent
+          : traceparent as String?,
+      forceNewTrace: forceNewTrace == unsetCopyWithValue
+          ? this.forceNewTrace
+          : forceNewTrace as bool?,
       input: input == unsetCopyWithValue
           ? this.input
           : input as Map<String, dynamic>?,
@@ -119,7 +151,10 @@ class WorkflowExecutionRequest {
     )) {
       return false;
     }
-    return executionId == other.executionId &&
+    return mapsEqual(callContext, other.callContext) &&
+        traceparent == other.traceparent &&
+        forceNewTrace == other.forceNewTrace &&
+        executionId == other.executionId &&
         deploymentName == other.deploymentName &&
         taskQueue == other.taskQueue &&
         timeoutSeconds == other.timeoutSeconds &&
@@ -127,7 +162,7 @@ class WorkflowExecutionRequest {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     mapDeepHashCode(input),
     mapDeepHashCode(extensions),
     executionId,
@@ -136,11 +171,14 @@ class WorkflowExecutionRequest {
     timeoutSeconds,
     waitForResult,
     mapDeepHashCode(customTracingAttributes),
-  );
+    mapHash(callContext),
+    traceparent,
+    forceNewTrace,
+  ]);
 
   @override
   String toString() =>
-      'WorkflowExecutionRequest('
+      'WorkflowExecutionRequest(callContext: ${callContext?.length}, traceparent: $traceparent, forceNewTrace: $forceNewTrace, '
       'input: ${input?.length ?? 'null'}, '
       'extensions: ${extensions?.length ?? 'null'}, '
       'executionId: $executionId, '

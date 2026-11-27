@@ -24,6 +24,7 @@ class RunsResource extends ResourceBase {
   /// Supports filtering by workflow identifier, search query, status,
   /// deployment, time ranges, user, sorting, and pagination.
   ///
+  /// - [status] or [statuses] filters by one or more run statuses.
   /// - [deploymentName] filters by deployment name.
   /// - [sortBy] is the field to sort by (`start_time` or `end_time`).
   /// - [order] is the sort order.
@@ -34,14 +35,17 @@ class RunsResource extends ResourceBase {
   ///   execution tree (the root and all its descendant sub-workflows).
   /// - [includeInternal] includes runs of internal/technical workflows (e.g.
   ///   `parallel-execution`); defaults to `true` server-side.
-  /// - [searchKey] filters executions by search key as repeated `key:value`
-  ///   entries; entries are AND'd together (max 3).
+  /// - [searchKey] filters by key presence (`key`), similar value (`key:value`),
+  ///   null value (`key==`), or exact value (`key==:value`). Conditions are
+  ///   combined with AND, up to three conditions.
   /// - [workflowTags] filters to runs of workflows tagged with all listed
   ///   tags (AND); max 20.
+  /// - [excludeWorkflowTags] omits runs matching any listed tag.
   Future<WorkflowExecutionListResponse> list({
     String? workflowIdentifier,
     String? search,
     String? status,
+    List<String>? statuses,
     String? deploymentName,
     String? sortBy,
     String? order,
@@ -56,8 +60,12 @@ class RunsResource extends ResourceBase {
     bool? includeInternal,
     List<String>? searchKey,
     List<String>? workflowTags,
+    List<String>? excludeWorkflowTags,
   }) async {
     ensureNotClosed?.call();
+    if (status != null && statuses != null) {
+      throw ArgumentError('Use status or statuses, not both');
+    }
     // Array query params (search_key/workflow_tags) use form/explode
     // serialization — each value is sent as a repeated parameter, not
     // comma-joined.
@@ -67,6 +75,7 @@ class RunsResource extends ResourceBase {
     }
     if (search != null) queryParams['search'] = search;
     if (status != null) queryParams['status'] = status;
+    if (statuses != null) queryParams['status'] = statuses;
     if (deploymentName != null) queryParams['deployment_name'] = deploymentName;
     if (sortBy != null) queryParams['sort_by'] = sortBy;
     if (order != null) queryParams['order'] = order;
@@ -89,6 +98,9 @@ class RunsResource extends ResourceBase {
     }
     if (searchKey != null) queryParams['search_key'] = searchKey;
     if (workflowTags != null) queryParams['workflow_tags'] = workflowTags;
+    if (excludeWorkflowTags != null) {
+      queryParams['exclude_workflow_tags'] = excludeWorkflowTags;
+    }
 
     final url = requestBuilder.buildUrl(
       '/v1/workflows/runs',

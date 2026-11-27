@@ -47,7 +47,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Agents, conversations, connectors, and libraries (beta)
 - Prompts and skills: versioned, shareable templates and instructions (beta)
 - Observability: campaigns, datasets, judges, and chat completion events (beta)
-- Workflows: execution, scheduling, managed deployments, and management (beta)
+- Workflows: execution, scheduling, management, and managed deployments (Public Preview)
 - RAG: ingestion pipeline configuration and search index management (beta)
 - Users: current authenticated user identity (beta)
 
@@ -1099,7 +1099,7 @@ await client.rag.searchIndexes.unregister(indexId: registered.id);
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.workflows` to manage and execute workflows via the workflowCore resource, check execution status, list registrations, monitor runs, view metrics, inspect workers, and configure schedules.
+Use `client.workflows` to manage and execute workflows via the workflow core resource (`client.workflows.core`), check execution status, list registrations, monitor runs, view metrics, inspect workers, and configure schedules.
 
 ```dart
 // List registered workflows
@@ -1129,8 +1129,11 @@ final metrics = await client.workflows.metrics.get(
   workflowName: 'my-workflow',
 );
 
-// Check worker status
-final worker = await client.workflows.workers.whoami();
+// List workers and continue with workers.nextCursor.
+final workers = await client.workflows.deployments.listWorkers(
+  name: 'my-deployment',
+  workerStatus: 'active',
+);
 
 // List registrations
 final registrations = await client.workflows.registrations.list();
@@ -1143,7 +1146,7 @@ final deployment = await client.workflows.deployments.create(
   request: const CreateDeploymentRequest(
     name: 'my-deployment',
     spec: DeploymentWorkerSpecInput(
-      githubUrl: 'https://github.com/my-org/my-worker',
+      repositoryUrl: 'https://github.com/my-org/my-worker',
     ),
   ),
 );
@@ -1161,7 +1164,20 @@ await for (final log in client.workflows.deployments.streamLogs(
 }
 ```
 
-→ [Full example](example/workflows_example.dart)
+Managed Deployments are a Mistral-hosted Public Preview for eligible paid
+workspaces and are subject to quotas. To deploy from an archive, request a
+signed URL with `deployments.createArchive`, PUT the raw gzipped tar file
+using a separate HTTP client and the signed headers, then create or update a
+deployment with the returned `archiveId`. Keep signed URLs and headers private.
+[Mistral Managed Deployments](https://docs.mistral.ai/resources/release-note/2026-10-09-managed-deployments-public-preview)
+
+Use `workflows.core.executeAsync` or `executeSync` with a workflow identifier
+in place of the deprecated registration execution route. Use
+`DeploymentLogType.build` in `deployments.getLogs` for managed build output.
+Streamed logs expose `eventId` for resuming from `lastEventId`.
+
+[Workflow example](example/workflows_example.dart) ·
+[Archive deployment example](example/workflow_deployment_archive_example.dart)
 
 </details>
 
@@ -1249,7 +1265,8 @@ See the [example/](example/) directory for complete examples:
 | [`skills_example.dart`](example/skills_example.dart) | Versioned model instructions and assets (beta) |
 | [`connectors_example.dart`](example/connectors_example.dart) | MCP connector management (beta) |
 | [`observability_example.dart`](example/observability_example.dart) | Observability: datasets, judges, campaigns (beta) |
-| [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and managed deployments (beta) |
+| [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution, scheduling, and management |
+| [`workflow_deployment_archive_example.dart`](example/workflow_deployment_archive_example.dart) | Signed archive upload and managed deployment (Public Preview) |
 | [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipelines and search indexes (beta) |
 | [`users_example.dart`](example/users_example.dart) | Current authenticated user identity (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
@@ -1283,7 +1300,7 @@ See the [example/](example/) directory for complete examples:
 | Prompts (Beta) | ✅ Full |
 | Skills (Beta) | ✅ Full |
 | Observability (Beta) | ✅ Full |
-| Workflows (Beta) | ✅ Full |
+| Workflows | ✅ Supported |
 | RAG (Beta) | ✅ Full |
 | Users (Beta) | ✅ Full |
 

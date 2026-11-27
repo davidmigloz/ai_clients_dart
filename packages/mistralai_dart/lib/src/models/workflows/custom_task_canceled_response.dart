@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import 'custom_task_canceled_attributes.dart';
+import 'workflow_event_run_context.dart';
 
 /// Custom task canceled event.
 @immutable
@@ -33,8 +34,24 @@ class CustomTaskCanceledResponse {
   /// The event attributes.
   final CustomTaskCanceledAttributes attributes;
 
+  /// Run and schedule identifiers carried by the event.
+  final WorkflowEventRunContext runContext;
+
+  /// Run that started this chain.
+  String? get chainRunId => runContext.chainRunId;
+
+  /// Run from which this execution continued.
+  String? get continuedRunId => runContext.continuedRunId;
+
+  /// First run of the workflow execution.
+  String? get firstExecutionRunId => runContext.firstExecutionRunId;
+
+  /// The schedule that started the workflow.
+  String? get scheduleId => runContext.scheduleId;
+
   /// Creates a [CustomTaskCanceledResponse].
   const CustomTaskCanceledResponse({
+    this.runContext = const WorkflowEventRunContext(),
     required this.eventId,
     required this.eventTimestamp,
     this.eventType = 'CUSTOM_TASK_CANCELED',
@@ -49,6 +66,7 @@ class CustomTaskCanceledResponse {
   /// Creates a [CustomTaskCanceledResponse] from JSON.
   factory CustomTaskCanceledResponse.fromJson(Map<String, dynamic> json) =>
       CustomTaskCanceledResponse(
+        runContext: WorkflowEventRunContext.fromJson(json),
         eventId: json['event_id'] as String? ?? '',
         eventTimestamp: json['event_timestamp'] as int? ?? 0,
         eventType: json['event_type'] as String? ?? 'CUSTOM_TASK_CANCELED',
@@ -64,6 +82,7 @@ class CustomTaskCanceledResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ...runContext.toJson(),
     'event_id': eventId,
     'event_timestamp': eventTimestamp,
     'event_type': eventType,
@@ -77,6 +96,7 @@ class CustomTaskCanceledResponse {
 
   /// Creates a copy with replaced values.
   CustomTaskCanceledResponse copyWith({
+    WorkflowEventRunContext? runContext,
     String? eventId,
     int? eventTimestamp,
     String? eventType,
@@ -88,6 +108,7 @@ class CustomTaskCanceledResponse {
     CustomTaskCanceledAttributes? attributes,
   }) {
     return CustomTaskCanceledResponse(
+      runContext: runContext ?? this.runContext,
       eventId: eventId ?? this.eventId,
       eventTimestamp: eventTimestamp ?? this.eventTimestamp,
       eventType: eventType ?? this.eventType,
@@ -107,7 +128,8 @@ class CustomTaskCanceledResponse {
     if (identical(this, other)) return true;
     if (other is! CustomTaskCanceledResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return eventId == other.eventId &&
+    return runContext == other.runContext &&
+        eventId == other.eventId &&
         eventTimestamp == other.eventTimestamp &&
         eventType == other.eventType &&
         rootWorkflowExecId == other.rootWorkflowExecId &&
@@ -119,7 +141,7 @@ class CustomTaskCanceledResponse {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     eventId,
     eventTimestamp,
     eventType,
@@ -129,11 +151,12 @@ class CustomTaskCanceledResponse {
     workflowRunId,
     workflowName,
     attributes,
-  );
+    runContext,
+  ]);
 
   @override
   String toString() =>
-      'CustomTaskCanceledResponse('
+      'CustomTaskCanceledResponse(runContext: $runContext, '
       'eventId: $eventId, '
       'eventTimestamp: $eventTimestamp, '
       'eventType: $eventType, '

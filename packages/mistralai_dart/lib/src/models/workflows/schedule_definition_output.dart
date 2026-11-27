@@ -65,8 +65,12 @@ class ScheduleDefinitionOutput {
   /// Recently started executions.
   final List<ScheduleRecentExecution>? recentExecutions;
 
+  /// The user who owns the schedule.
+  final String? userId;
+
   /// Creates a [ScheduleDefinitionOutput].
   ScheduleDefinitionOutput({
+    this.userId,
     required this.input,
     required this.scheduleId,
     required this.workflowName,
@@ -101,6 +105,7 @@ class ScheduleDefinitionOutput {
   /// Creates a [ScheduleDefinitionOutput] from JSON.
   factory ScheduleDefinitionOutput.fromJson(Map<String, dynamic> json) =>
       ScheduleDefinitionOutput(
+        userId: json['user_id'] as String?,
         input: json['input'] ?? const <String, dynamic>{},
         scheduleId: json['schedule_id'] as String? ?? '',
         workflowName: json['workflow_name'] as String? ?? '',
@@ -141,6 +146,7 @@ class ScheduleDefinitionOutput {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (userId != null) 'user_id': userId,
     'input': input,
     'schedule_id': scheduleId,
     'workflow_name': workflowName,
@@ -168,6 +174,7 @@ class ScheduleDefinitionOutput {
 
   /// Creates a copy with replaced values.
   ScheduleDefinitionOutput copyWith({
+    Object? userId = unsetCopyWithValue,
     Object? input,
     String? scheduleId,
     String? workflowName,
@@ -188,6 +195,7 @@ class ScheduleDefinitionOutput {
     Object? recentExecutions = unsetCopyWithValue,
   }) {
     return ScheduleDefinitionOutput(
+      userId: userId == unsetCopyWithValue ? this.userId : userId as String?,
       input: input ?? this.input,
       scheduleId: scheduleId ?? this.scheduleId,
       workflowName: workflowName ?? this.workflowName,
@@ -242,7 +250,8 @@ class ScheduleDefinitionOutput {
     if (!listsEqual(skip, other.skip)) return false;
     if (!listsEqual(futureExecutions, other.futureExecutions)) return false;
     if (!listsEqual(recentExecutions, other.recentExecutions)) return false;
-    return valuesDeepEqual(input, other.input) &&
+    return userId == other.userId &&
+        valuesDeepEqual(input, other.input) &&
         scheduleId == other.scheduleId &&
         workflowName == other.workflowName &&
         paused == other.paused &&
@@ -258,29 +267,32 @@ class ScheduleDefinitionOutput {
 
   @override
   int get hashCode => Object.hashAll([
-    valueDeepHashCode(input),
-    scheduleId,
-    workflowName,
-    paused,
-    listHash(calendars),
-    listHash(intervals),
-    listHash(cronExpressions),
-    startAt,
-    endAt,
-    jitter,
-    timeZoneName,
-    policy,
-    listHash(skip),
-    deploymentName,
-    note,
-    remainingExecutions,
-    listHash(futureExecutions),
-    listHash(recentExecutions),
+    Object.hashAll([
+      valueDeepHashCode(input),
+      scheduleId,
+      workflowName,
+      paused,
+      listHash(calendars),
+      listHash(intervals),
+      listHash(cronExpressions),
+      startAt,
+      endAt,
+      jitter,
+      timeZoneName,
+      policy,
+      listHash(skip),
+      deploymentName,
+      note,
+      remainingExecutions,
+      listHash(futureExecutions),
+      listHash(recentExecutions),
+    ]),
+    userId,
   ]);
 
   @override
   String toString() =>
-      'ScheduleDefinitionOutput('
+      'ScheduleDefinitionOutput(userId: $userId, '
       'input: $input, '
       'scheduleId: $scheduleId, '
       'workflowName: $workflowName, '
