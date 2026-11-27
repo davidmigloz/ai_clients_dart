@@ -9196,9 +9196,11 @@
       "excluded_properties": [
         "deployment_chat",
         "source",
-        "versions"
+        "versions",
+        "created_at",
+        "updated_at"
       ],
-      "note": "Permit nullable deploymentChat, source, and versions to read older Agent payloads. Current wire values decode without conversion."
+      "note": "Current values decode without conversion. Optional timestamps, deploymentChat, source and versions preserve older Agent JSON records. Equality retains Agent ID identity."
     },
     "ToolCall": {
       "spec": "main",
@@ -9489,6 +9491,510 @@
       ],
       "kind": "skip",
       "note": "This schema belongs to the deprecated duplicate group-provision path. Use the supported group workspace assignment route."
+    },
+    "ClientCapabilities": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ClientCapabilities",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ClientTasksCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ClientTasksCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ClientTasksRequestsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ClientTasksRequestsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "CompletionsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "CompletionsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ConnectorToolLocale": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorLocale",
+      "file": "lib/src/models/connectors/connector_locale.dart",
+      "schema": "ConnectorToolLocale",
+      "tags": [],
+      "note": "ConnectorToolLocale and ConnectorLocale have identical required name, description, and usage_sentence maps from locale codes to strings."
+    },
+    "ElicitationCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ElicitationCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "FormElicitationCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "FormElicitationCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "HTTPStatus": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CredentialsStatus",
+      "file": "lib/src/models/connectors/credentials_status.dart",
+      "schema": "HTTPStatus",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The HTTPStatus integer is preserved by CredentialsStatus.errorHttpCode."
+    },
+    "LoggingCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "LoggingCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "LogicalExpression": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolExecutionConfiguration",
+      "file": "lib/src/models/connectors/tool_execution_configuration.dart",
+      "schema": "LogicalExpression",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The confirmation controls retain logical expression trees or tool properties as JSON. The same fields also accept a list of tool names."
+    },
+    "MCPPrompt": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPPrompt",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPResource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPServerAuthenticationRequirement": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPServerAuthenticationRequirement",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPServerCardMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPServerCardMeta",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPServerCardTool": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPServerCardTool",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPServerRemote": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPServerRemote",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPServerRemoteHeader": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPServerRemoteHeader",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPServerRepository": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPServerRepository",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "MCPSupportedLanguage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPSupportedLanguage",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card. The same wire shape also appears in MCP tool _meta."
+    },
+    "MCPUIToolMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "MCPUIToolMeta",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card. The same wire shape also appears in MCP tool _meta."
+    },
+    "PromptArgument": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "PromptArgument",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "PromptsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "PromptsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ResourcesCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ResourcesCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "RootsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "RootsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "SamplingCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "SamplingCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "SamplingContextCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "SamplingContextCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "SamplingToolsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "SamplingToolsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ServerCapabilities": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ServerCapabilities",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ServerLocale": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ServerLocale",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ServerTasksCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ServerTasksCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ServerTasksRequestsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ServerTasksRequestsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksCallCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksCallCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksCancelCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksCancelCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksCreateElicitationCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksCreateElicitationCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksCreateMessageCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksCreateMessageCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksElicitationCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksElicitationCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksListCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksListCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksSamplingCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksSamplingCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TasksToolsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TasksToolsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "ToolProperties": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolExecutionConfiguration",
+      "file": "lib/src/models/connectors/tool_execution_configuration.dart",
+      "schema": "ToolProperties",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The confirmation controls retain logical expression trees or tool properties as JSON. The same fields also accept a list of tool names."
+    },
+    "ToolType": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ToolType",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card. The same wire shape also appears in MCP tool _meta."
+    },
+    "ToolsCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "ToolsCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TurbineMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TurbineMeta",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
+    },
+    "TurbineToolLocale": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TurbineToolLocale",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card. The same wire shape also appears in MCP tool _meta."
+    },
+    "TurbineToolMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "TurbineToolMeta",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card. The same wire shape also appears in MCP tool _meta."
+    },
+    "UrlElicitationCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "lib/src/models/connectors/connector.dart",
+      "schema": "UrlElicitationCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Connector preserves this nested MCP server-card shape verbatim in server_card."
     }
   }
 }
