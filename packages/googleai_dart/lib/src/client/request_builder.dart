@@ -27,18 +27,25 @@ class RequestBuilder {
   /// Transforms the path based on the API mode and version.
   /// Use the `{version}` placeholder in paths to insert [apiVersion] or the
   /// configured version.
+  /// Set [vertexProjectScoped] for endpoints such as Vertex Interactions,
+  /// which use a project and location without a publisher.
   /// - For Google AI: `/{version}/models/{model}:generateContent`
   /// - For Vertex AI: `/{version}/projects/{projectId}/locations/{location}/publishers/google/models/{model}:generateContent`
   Uri buildUrl(
     String path, {
     ApiVersion? apiVersion,
+    bool vertexProjectScoped = false,
     EndpointConfig? endpointConfig,
     Map<String, dynamic>? queryParams,
   }) {
     final baseUri = Uri.parse(config.baseUrl);
     final combinedPath = _joinPaths(
       baseUri.path,
-      _transformPath(path, apiVersion ?? config.apiVersion),
+      _transformPath(
+        path,
+        apiVersion ?? config.apiVersion,
+        vertexProjectScoped: vertexProjectScoped,
+      ),
     );
     final mergedParams = <String, dynamic>{
       ...baseUri.queryParametersAll,
@@ -96,7 +103,11 @@ class RequestBuilder {
   ///
   /// Replaces `{version}` placeholder with the configured version,
   /// and for Vertex AI, injects project/location path segments.
-  String _transformPath(String path, ApiVersion apiVersion) {
+  String _transformPath(
+    String path,
+    ApiVersion apiVersion, {
+    required bool vertexProjectScoped,
+  }) {
     // Replace {version} placeholder with configured version
     var transformedPath = path.replaceFirst('{version}', apiVersion.value);
 
@@ -108,12 +119,28 @@ class RequestBuilder {
 
       if (transformedPath.startsWith(versionPattern)) {
         final afterVersion = transformedPath.substring(versionPattern.length);
+        final projectId = config.projectId;
+        final location = config.location;
+        if (vertexProjectScoped) {
+          // Official SDKs omit the scope for projectless Vertex express mode.
+          if (projectId == null && location == null) return transformedPath;
+          if (projectId == null || location == null) {
+            throw StateError(
+              'Vertex Interactions requires both projectId and location for '
+              'project-scoped requests.',
+            );
+          }
+          return '$versionPattern'
+              'projects/${Uri.encodeComponent(projectId)}/'
+              'locations/${Uri.encodeComponent(location)}/'
+              '$afterVersion';
+        }
 
         // Insert project/location path
         transformedPath =
             '$versionPattern'
-            'projects/${config.projectId}/'
-            'locations/${config.location}/'
+            'projects/$projectId/'
+            'locations/$location/'
             'publishers/google/$afterVersion';
       }
     }
