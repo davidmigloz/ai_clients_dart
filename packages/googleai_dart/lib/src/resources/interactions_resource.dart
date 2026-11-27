@@ -223,13 +223,15 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
   /// Creates a streaming interaction with an agent.
   ///
+  /// [input] supplies the prompt or content for the agent.
+  ///
   /// [background] lets supported agents continue on the server after the
   /// stream disconnects. Use [resumeStream] with the interaction ID to attach
   /// again. [abortTrigger] cancels the local stream and [cancel] stops the
   /// background interaction on the server.
   Stream<InteractionEvent> createWithAgentStream({
     required String agent,
-    InteractionInput? input,
+    required InteractionInput input,
     AgentConfig? agentConfig,
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
