@@ -4,6 +4,7 @@ import '../content/content.dart';
 import '../interaction_review_snippet.dart';
 import '../thought_summary_content.dart';
 import '../tool_result.dart';
+import '../tools/tools.dart';
 
 part 'code_execution_call_step.dart';
 part 'code_execution_result_step.dart';
@@ -19,6 +20,8 @@ part 'mcp_server_tool_call_step.dart';
 part 'mcp_server_tool_result_step.dart';
 part 'model_output_step.dart';
 part 'thought_step.dart';
+part 'tool_search_call_step.dart';
+part 'tool_search_result_step.dart';
 part 'unknown_step.dart';
 part 'url_context_call_step.dart';
 part 'url_context_result_step.dart';
@@ -26,10 +29,14 @@ part 'user_input_step.dart';
 
 /// A step in an interaction.
 ///
-/// This is a sealed class with 17 documented subtypes representing the
-/// different kinds of steps an interaction can contain (user input, model
-/// output, thought, tool calls, and tool results), plus an [UnknownStep]
-/// fallback for any `type` this client does not yet model.
+/// Input and output variants include [UserInputStep], [ModelOutputStep], and
+/// [ThoughtStep]. Tool call and result variants include [FunctionCallStep],
+/// [FunctionResultStep], [CodeExecutionCallStep], [CodeExecutionResultStep],
+/// [UrlContextCallStep], [UrlContextResultStep], [GoogleSearchCallStep],
+/// [GoogleSearchResultStep], [GoogleMapsCallStep], [GoogleMapsResultStep],
+/// [FileSearchCallStep], [FileSearchResultStep], [McpServerToolCallStep],
+/// [McpServerToolResultStep], [ToolSearchCallStep], and [ToolSearchResultStep].
+/// [UnknownStep] preserves other step types.
 sealed class InteractionStep {
   /// The type discriminator for this step.
   String get type;
@@ -41,13 +48,18 @@ sealed class InteractionStep {
   /// Unrecognized `type` values are surfaced as [UnknownStep] (raw JSON
   /// preserved) so a new/undocumented step type cannot break parsing of a
   /// `steps` list or a streamed `step.start` event.
-  factory InteractionStep.fromJson(Map<String, dynamic> json) {
+  /// Set [partial] when parsing a `step.start` skeleton that will be filled by
+  /// subsequent deltas.
+  factory InteractionStep.fromJson(
+    Map<String, dynamic> json, {
+    bool partial = false,
+  }) {
     final type = json['type'] as String?;
     return switch (type) {
       'user_input' => UserInputStep.fromJson(json),
       'model_output' => ModelOutputStep.fromJson(json),
       'thought' => ThoughtStep.fromJson(json),
-      'function_call' => FunctionCallStep.fromJson(json),
+      'function_call' => FunctionCallStep.fromJson(json, partial: partial),
       'function_result' => FunctionResultStep.fromJson(json),
       'code_execution_call' => CodeExecutionCallStep.fromJson(json),
       'code_execution_result' => CodeExecutionResultStep.fromJson(json),
@@ -61,6 +73,8 @@ sealed class InteractionStep {
       'file_search_result' => FileSearchResultStep.fromJson(json),
       'mcp_server_tool_call' => McpServerToolCallStep.fromJson(json),
       'mcp_server_tool_result' => McpServerToolResultStep.fromJson(json),
+      'tool_search_call' => ToolSearchCallStep.fromJson(json, partial: partial),
+      'tool_search_result' => ToolSearchResultStep.fromJson(json),
       _ => UnknownStep.fromJson(json),
     };
   }

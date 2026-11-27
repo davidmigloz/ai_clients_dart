@@ -4,7 +4,8 @@ import 'function_result_subcontent.dart';
 ///
 /// Can represent different result formats:
 /// - [ToolResultContentList] — a list of [FunctionResultSubcontent] items
-///   ([FunctionResultSubcontentText] and/or [FunctionResultSubcontentImage])
+///   such as text, images, or function declarations from client-side tool
+///   retrieval.
 /// - [ToolResultText] — a plain text string
 /// - [ToolResultObject] — an arbitrary JSON object (fallback)
 sealed class ToolResult {
@@ -53,8 +54,8 @@ sealed class ToolResult {
 
 /// A list of subcontent items as a tool result.
 ///
-/// Contains [FunctionResultSubcontentText] and/or
-/// [FunctionResultSubcontentImage] items.
+/// Can carry function declarations as [FunctionResultSubcontentFunction]
+/// when responding to a client-side tool search.
 class ToolResultContentList extends ToolResult {
   /// The subcontent items.
   final List<FunctionResultSubcontent> items;

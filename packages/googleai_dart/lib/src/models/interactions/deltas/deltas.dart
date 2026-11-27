@@ -4,6 +4,7 @@ import '../media_resolution.dart';
 import '../steps/steps.dart';
 import '../thought_summary_content.dart';
 import '../tool_result.dart';
+import '../tools/tools.dart';
 
 part 'arguments_delta.dart';
 part 'audio_delta.dart';
@@ -26,6 +27,8 @@ part 'text_annotation_delta.dart';
 part 'text_delta.dart';
 part 'thought_signature_delta.dart';
 part 'thought_summary_delta.dart';
+part 'tool_search_call_delta.dart';
+part 'tool_search_result_delta.dart';
 part 'unknown_step_delta.dart';
 part 'url_context_call_delta.dart';
 part 'url_context_result_delta.dart';
@@ -40,11 +43,11 @@ part 'video_delta.dart';
 ///   [TextAnnotationDelta], [ArgumentsDelta].
 /// - Tool-call deltas: [CodeExecutionCallDelta], [UrlContextCallDelta],
 ///   [GoogleSearchCallDelta], [GoogleMapsCallDelta], [McpServerToolCallDelta],
-///   [FileSearchCallDelta], [RetrievalCallDelta].
+///   [FileSearchCallDelta], [RetrievalCallDelta], [ToolSearchCallDelta].
 /// - Tool-result deltas: [CodeExecutionResultDelta], [UrlContextResultDelta],
 ///   [GoogleSearchResultDelta], [GoogleMapsResultDelta],
 ///   [McpServerToolResultDelta], [FileSearchResultDelta], [FunctionResultDelta],
-///   [RetrievalResultDelta].
+///   [RetrievalResultDelta], [ToolSearchResultDelta].
 ///
 /// Plus an [UnknownStepDelta] fallback for any `type` this client does not yet
 /// model, keeping streams forward-compatible.
@@ -86,6 +89,8 @@ sealed class StepDeltaData {
       'function_result' => FunctionResultDelta.fromJson(json),
       'retrieval_call' => RetrievalCallDelta.fromJson(json),
       'retrieval_result' => RetrievalResultDelta.fromJson(json),
+      'tool_search_call' => ToolSearchCallDelta.fromJson(json),
+      'tool_search_result' => ToolSearchResultDelta.fromJson(json),
       _ => UnknownStepDelta.fromJson(json),
     };
   }

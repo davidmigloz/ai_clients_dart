@@ -279,6 +279,56 @@ Select `ApiVersion.v1beta` for the managed-agent variants
 
 </details>
 
+### How do I load tools on demand?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Tool retrieval is in Preview for Gemini 3.6 and later models on the Gemini
+Developer API `v1beta`. For server-side retrieval, declare `ToolSearchTool`
+and defer selected `FunctionTool` or `McpServerTool` schemas.
+
+```dart
+const tools = [
+  ToolSearchTool(),
+  FunctionTool(
+    name: 'lookup_inventory',
+    description: 'Returns available inventory for a product SKU.',
+    deferLoading: true,
+    parameters: {
+      'type': 'object',
+      'properties': {'sku': {'type': 'string'}},
+      'required': ['sku'],
+    },
+  ),
+];
+
+final client = GoogleAIClient.fromEnvironment(
+  interactionsApiVersion: ApiVersion.v1beta,
+);
+try {
+  final interaction = await client.interactions.create(
+    model: 'gemini-4-hydrogen',
+    tools: tools,
+    input: const InteractionInput.text('Check stock for SKU A123.'),
+  );
+  for (final call in interaction.functionCallSteps) {
+    print('${call.name}: ${call.arguments}');
+  }
+} finally {
+  client.close();
+}
+```
+
+Send the tools array on each turn. When using `store: false`, replay the
+returned steps in order and preserve their signatures. For client-side
+retrieval, declare `ToolSearchExecution.client` and return the matching
+function definitions in `FunctionResultSubcontentFunction` items.
+[Client-side example](example/tool_retrieval_example.dart) ·
+[Tool retrieval guide](https://aistudio.google.com/docs/tool-retrieval)
+
+</details>
+
 ### How do I generate text with Gemini?
 
 <details>
@@ -780,6 +830,7 @@ See the [example/](example/) directory for complete examples:
 | [`permissions_example.dart`](example/permissions_example.dart) | Permission management for resources |
 | [`prediction_example.dart`](example/prediction_example.dart) | Video generation with Veo model |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
+| [`tool_retrieval_example.dart`](example/tool_retrieval_example.dart) | Client-side tool retrieval on Gemini Developer API `v1beta` |
 | [`tts_example.dart`](example/tts_example.dart) | Text-to-speech with Gemini TTS models |
 | [`tuned_model_generation_example.dart`](example/tuned_model_generation_example.dart) | Generate content with tuned models |
 | [`tuned_models_example.dart`](example/tuned_models_example.dart) | Tuned model workflows |

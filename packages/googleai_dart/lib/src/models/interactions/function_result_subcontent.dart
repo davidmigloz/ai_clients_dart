@@ -1,12 +1,10 @@
 import 'content/content.dart';
+import 'tools/tools.dart';
 
 /// A subcontent item within a function or MCP server tool result.
 ///
-/// This is a sealed class with 2 subtypes: [TextContent] and [ImageContent],
-/// reusing the matching [InteractionContent] variants.
-///
-/// Note: this is a typedef-style wrapper — the parent [FunctionResultSubcontent]
-/// constructs these by delegating to the [InteractionContent] sealed family.
+/// Variants include [FunctionResultSubcontentText],
+/// [FunctionResultSubcontentImage], and [FunctionResultSubcontentFunction].
 sealed class FunctionResultSubcontent {
   /// The type discriminator for this subcontent.
   String get type;
@@ -18,6 +16,9 @@ sealed class FunctionResultSubcontent {
     return switch (json['type']) {
       'text' => FunctionResultSubcontentText(TextContent.fromJson(json)),
       'image' => FunctionResultSubcontentImage(ImageContent.fromJson(json)),
+      'function' => FunctionResultSubcontentFunction(
+        FunctionTool.fromJson(json),
+      ),
       _ => throw ArgumentError(
         'Unknown function result subcontent type: ${json['type']}',
       ),
@@ -56,4 +57,19 @@ class FunctionResultSubcontentImage extends FunctionResultSubcontent {
 
   @override
   Map<String, dynamic> toJson() => content.toJson();
+}
+
+/// A function declaration returned for a client-side tool search.
+class FunctionResultSubcontentFunction extends FunctionResultSubcontent {
+  @override
+  String get type => 'function';
+
+  /// The matching function declaration.
+  final FunctionTool function;
+
+  /// Creates a tool result item containing [function].
+  const FunctionResultSubcontentFunction(this.function);
+
+  @override
+  Map<String, dynamic> toJson() => function.toJson();
 }

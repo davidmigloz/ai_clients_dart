@@ -14,11 +14,14 @@ part 'google_maps_tool.dart';
 part 'google_search_tool.dart';
 part 'mcp_server_tool.dart';
 part 'retrieval_tool.dart';
+part 'tool_search_tool.dart';
 part 'url_context_tool.dart';
 
 /// A tool that can be used by the model.
 ///
-/// This is a sealed class with subtypes for different tool types.
+/// Variants include [FunctionTool], [GoogleMapsTool], [GoogleSearchTool],
+/// [CodeExecutionTool], [UrlContextTool], [ComputerUseTool], [McpServerTool],
+/// [FileSearchTool], [RetrievalTool], and [ToolSearchTool].
 sealed class InteractionTool {
   /// The type discriminator for this tool.
   String get type;
@@ -38,6 +41,7 @@ sealed class InteractionTool {
       'mcp_server' => McpServerTool.fromJson(json),
       'file_search' => FileSearchTool.fromJson(json),
       'retrieval' => RetrievalTool.fromJson(json),
+      'tool_search' => ToolSearchTool.fromJson(json),
       _ => throw ArgumentError('Unknown tool type: $type'),
     };
   }
