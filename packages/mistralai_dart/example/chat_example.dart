@@ -4,13 +4,16 @@ import 'dart:io';
 import 'package:mistralai_dart/mistralai_dart.dart';
 
 /// Example of using the Mistral AI chat API.
-void main() async {
+void main(List<String> args) async {
   // Get API key from environment
   final apiKey = Platform.environment['MISTRAL_API_KEY'];
   if (apiKey == null) {
     print('Please set MISTRAL_API_KEY environment variable');
     exit(1);
   }
+
+  final inspectLogprobs = args.contains('--logprobs');
+  final requestPriority = args.contains('--priority');
 
   // Create client
   final client = MistralClient.withApiKey(apiKey);
@@ -20,7 +23,12 @@ void main() async {
     print('=== Simple Chat ===');
     final response = await client.chat.create(
       request: ChatCompletionRequest(
-        model: 'mistral-small-latest',
+        model:
+            Platform.environment['MISTRAL_CHAT_MODEL'] ??
+            'mistral-small-latest',
+        logprobs: inspectLogprobs ? true : null,
+        topLogprobs: inspectLogprobs ? 2 : null,
+        serviceTier: requestPriority ? RequestedServiceTier.auto : null,
         messages: [
           ChatMessage.system('You are a helpful assistant.'),
           ChatMessage.user('What is the capital of France?'),
@@ -30,6 +38,15 @@ void main() async {
 
     print('Response: ${response.text}');
     print('Tokens used: ${response.usage?.totalTokens}');
+    if (requestPriority) {
+      print('Served tier: ${response.usage?.serviceTier}');
+    }
+    final tokenScores = response.choices.firstOrNull?.logprobs?.content;
+    if (tokenScores != null) {
+      for (final score in tokenScores) {
+        print('${score.token}: ${score.logprob}');
+      }
+    }
 
     // Multi-turn conversation
     print('\n=== Multi-turn Conversation ===');

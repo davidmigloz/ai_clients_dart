@@ -56,6 +56,9 @@ class FimCompletionRequest {
   final StopSequence? stop;
 
   /// Random seed for deterministic generation.
+  ///
+  /// The server accepts nonnegative values up to the signed 64-bit maximum.
+  /// For JavaScript builds, keep seeds within the safe integer range.
   final int? randomSeed;
 
   /// Custom request metadata.
@@ -200,5 +203,9 @@ class FimCompletionRequest {
 
   @override
   String toString() =>
-      'FimCompletionRequest(model: $model, prompt: ${prompt.length} chars)';
+      'FimCompletionRequest(model: $model, prompt: ${prompt.length} chars, '
+      'suffix: ${suffix?.length}, temperature: $temperature, topP: $topP, '
+      'maxTokens: $maxTokens, minTokens: $minTokens, stream: $stream, '
+      'stop: $stop, randomSeed: $randomSeed, metadata: ${metadata?.length}, '
+      'promptCacheKey: ${promptCacheKey?.length})';
 }

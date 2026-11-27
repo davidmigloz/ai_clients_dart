@@ -179,6 +179,26 @@ final response = await client.chat.create(
 print(response.text);
 ```
 
+On models that support log probabilities, set `logprobs: true` and optionally
+`topLogprobs`. Read the generated-token scores from `choice.logprobs?.content`.
+Use `promptLogprobs: true` and optionally `topPromptLogprobs` for input-token
+scores. These choices appear in both JSON responses and streaming chunks when
+the model returns them. Sampling controls such as `minTokens`, `topK`, and
+`repetitionPenalty`, and the supported reasoning levels, depend on the model.
+
+Set `serviceTier: RequestedServiceTier.auto` to request Priority Tier when
+available. Check `response.usage?.serviceTier` or the final stream chunk's usage
+for the actual tier. Priority Tier depends on account entitlement, model, and
+region. Omitting the field uses standard capacity.
+[Mistral Priority Tier](https://docs.mistral.ai/inference/priority-tier)
+
+Chat and Agent completions accept function, image generation, document library,
+and custom connector tools. Mistral accepts legacy `prediction` but ignores it.
+Use `guardrails` in new code in place of the deprecated `safePrompt` flag.
+
+Run the example with `--logprobs` to print token scores or `--priority` to
+request Priority Tier. Set `MISTRAL_CHAT_MODEL` to a supported model if needed.
+
 → [Full example](example/chat_example.dart)
 
 </details>
@@ -243,7 +263,9 @@ final response = await client.chat.create(
 <details>
 <summary><b>Show example</b></summary>
 
-Define custom tools with JSON Schema parameters, or use built-in tools like web search, code interpreter, and document library. Send tool results back in a follow-up message turn.
+Define custom functions with JSON Schema parameters and send their results
+in a follow-up message. Chat Completions also accepts image generation,
+document library, and connector tools where available.
 
 ```dart
 // Define tools
@@ -296,29 +318,6 @@ if (response.hasToolCalls) {
     );
   }
 }
-```
-
-```dart
-// Web search tool
-final webTool = Tool.webSearch();
-
-// Code interpreter
-final codeTool = Tool.codeInterpreter();
-
-// Image generation
-final imageTool = Tool.imageGeneration();
-
-// Document library (for RAG)
-final docTool = Tool.documentLibrary(libraryIds: ['lib-123']);
-
-final response = await client.chat.create(
-  request: ChatCompletionRequest(
-    model: 'mistral-large-latest',
-    messages: [ChatMessage.user('Search for latest AI news')],
-    tools: [webTool],
-    toolChoice: const ToolChoiceAuto(),
-  ),
-);
 ```
 
 → [Full example](example/tool_calling_example.dart)
@@ -740,7 +739,9 @@ print('Created voice: ${voice.id}');
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.agents` to create, list, update, and delete agents. Agents can use tools and follow custom instructions. Use `complete(...)` to chat with an agent.
+Use `client.agents` to create, list, update, and delete agents. An agent can
+follow custom instructions and use configured tools such as web search or
+the code interpreter. Use `complete(...)` to chat with an agent.
 
 ```dart
 // Create an agent
@@ -1246,7 +1247,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
-| [`chat_example.dart`](example/chat_example.dart) | Basic chat completions |
+| [`chat_example.dart`](example/chat_example.dart) | Chat completions, token scores, and Priority Tier |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
 | [`json_mode_example.dart`](example/json_mode_example.dart) | Structured output |

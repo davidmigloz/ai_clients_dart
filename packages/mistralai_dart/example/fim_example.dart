@@ -69,7 +69,7 @@ Future<void> streamingFimCompletion(MistralClient client) async {
   );
 
   await for (final chunk in stream) {
-    final content = chunk.choices.first.delta;
+    final content = chunk.choices.firstOrNull?.delta;
     if (content != null) {
       stdout.write(content);
     }

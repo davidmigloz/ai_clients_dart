@@ -102,6 +102,7 @@ export 'src/models/batch/delete_batch_job_response.dart';
 // --- Models: Chat ---
 export 'src/models/chat/chat_choice.dart';
 export 'src/models/chat/chat_choice_delta.dart';
+export 'src/models/chat/chat_choice_logprobs.dart';
 export 'src/models/chat/chat_completion_request.dart';
 export 'src/models/chat/chat_completion_response.dart';
 export 'src/models/chat/chat_completion_stream_response.dart';
@@ -202,6 +203,7 @@ export 'src/models/metadata/prediction.dart';
 export 'src/models/metadata/prompt_mode.dart';
 export 'src/models/metadata/prompt_tokens_details.dart';
 export 'src/models/metadata/reasoning_effort.dart';
+export 'src/models/metadata/requested_service_tier.dart';
 export 'src/models/metadata/response_format.dart';
 export 'src/models/metadata/stop_sequence.dart';
 export 'src/models/metadata/usage_info.dart';

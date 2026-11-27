@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/finish_reason.dart';
 import '../tools/tool_call.dart';
+import 'chat_choice_logprobs.dart';
 import 'message_content.dart';
 
 /// A choice delta in a streaming chat completion response.
@@ -18,30 +19,69 @@ class ChatChoiceDelta {
   /// The reason the model stopped generating (only in final chunk).
   final FinishReason? finishReason;
 
+  /// Log probabilities for generated tokens, when requested.
+  final ChatChoiceLogprobs? logprobs;
+
+  /// Log probabilities for input tokens, when requested.
+  final ChatChoiceLogprobs? promptLogprobs;
+
   /// Creates a [ChatChoiceDelta].
   const ChatChoiceDelta({
     required this.index,
     required this.delta,
     this.finishReason,
+    this.logprobs,
+    this.promptLogprobs,
   });
 
   /// Creates a [ChatChoiceDelta] from JSON.
-  factory ChatChoiceDelta.fromJson(Map<String, dynamic> json) =>
-      ChatChoiceDelta(
-        index: json['index'] as int? ?? 0,
-        delta: DeltaContent.fromJson(
-          json['delta'] as Map<String, dynamic>? ?? {},
-        ),
-        finishReason: finishReasonFromString(json['finish_reason'] as String?),
-      );
+  factory ChatChoiceDelta.fromJson(
+    Map<String, dynamic> json,
+  ) => ChatChoiceDelta(
+    index: json['index'] as int? ?? 0,
+    delta: DeltaContent.fromJson(json['delta'] as Map<String, dynamic>? ?? {}),
+    finishReason: finishReasonFromString(json['finish_reason'] as String?),
+    logprobs: json['logprobs'] == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(json['logprobs'] as Map<String, dynamic>),
+    promptLogprobs: json['prompt_logprobs'] == null
+        ? null
+        : ChatChoiceLogprobs.fromJson(
+            json['prompt_logprobs'] as Map<String, dynamic>,
+          ),
+  );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'index': index,
     'delta': delta.toJson(),
-    if (finishReason != null)
-      'finish_reason': finishReasonToString(finishReason!),
+    'finish_reason': finishReason == null
+        ? null
+        : finishReasonToString(finishReason!),
+    if (logprobs != null) 'logprobs': logprobs!.toJson(),
+    if (promptLogprobs != null) 'prompt_logprobs': promptLogprobs!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ChatChoiceDelta copyWith({
+    int? index,
+    DeltaContent? delta,
+    Object? finishReason = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+    Object? promptLogprobs = unsetCopyWithValue,
+  }) => ChatChoiceDelta(
+    index: index ?? this.index,
+    delta: delta ?? this.delta,
+    finishReason: finishReason == unsetCopyWithValue
+        ? this.finishReason
+        : finishReason as FinishReason?,
+    logprobs: logprobs == unsetCopyWithValue
+        ? this.logprobs
+        : logprobs as ChatChoiceLogprobs?,
+    promptLogprobs: promptLogprobs == unsetCopyWithValue
+        ? this.promptLogprobs
+        : promptLogprobs as ChatChoiceLogprobs?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -50,15 +90,19 @@ class ChatChoiceDelta {
           runtimeType == other.runtimeType &&
           index == other.index &&
           delta == other.delta &&
-          finishReason == other.finishReason;
+          finishReason == other.finishReason &&
+          logprobs == other.logprobs &&
+          promptLogprobs == other.promptLogprobs;
 
   @override
-  int get hashCode => Object.hash(index, delta, finishReason);
+  int get hashCode =>
+      Object.hash(index, delta, finishReason, logprobs, promptLogprobs);
 
   @override
   String toString() =>
       'ChatChoiceDelta(index: $index, delta: $delta, '
-      'finishReason: $finishReason)';
+      'finishReason: $finishReason, '
+      'logprobs: $logprobs, promptLogprobs: $promptLogprobs)';
 }
 
 /// Delta content in a streaming response.

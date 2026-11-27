@@ -438,7 +438,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal platform API"
+      "note": "Public tool names use a string union; Dart preserves all values including mistral_mcp"
     },
     "CampaignPreview": {
       "spec": "main",
@@ -568,6 +568,30 @@
       "schema": "ChatCompletionResponse",
       "tags": []
     },
+    "ChatCompletionResponseChoiceLogprobs": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatChoiceLogprobs",
+      "file": "lib/src/models/chat/chat_choice_logprobs.dart",
+      "schema": "ChatCompletionResponseChoiceLogprobs",
+      "tags": []
+    },
+    "ChatCompletionResponseTokenLogprobs": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatTokenLogprob",
+      "file": "lib/src/models/chat/chat_choice_logprobs.dart",
+      "schema": "ChatCompletionResponseTokenLogprobs",
+      "tags": []
+    },
+    "ChatCompletionResponseTokenLogprobsTopK": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatTokenLogprobTopK",
+      "file": "lib/src/models/chat/chat_choice_logprobs.dart",
+      "schema": "ChatCompletionResponseTokenLogprobsTopK",
+      "tags": []
+    },
     "ChatMessage": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -685,6 +709,14 @@
       "schema": "ConnectorsQueryFilters",
       "tags": []
     },
+    "CompletionResponseStreamChoice": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatChoiceDelta",
+      "file": "lib/src/models/chat/chat_choice_delta.dart",
+      "schema": "CompletionResponseStreamChoice",
+      "tags": []
+    },
     "ContentPart": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -705,7 +737,9 @@
           "AudioChunk": "input_audio",
           "ThinkChunk": "thinking",
           "ToolFileChunk": "tool_file",
-          "ToolReferenceChunk": "tool_reference"
+          "ToolReferenceChunk": "tool_reference",
+          "ResourceChunk": "resource",
+          "ResourceLinkChunk": "resource_link"
         }
       },
       "note": null
@@ -2028,14 +2062,11 @@
     },
     "PromptTokensDetails": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "PromptTokensDetails",
       "file": "lib/src/models/metadata/prompt_tokens_details.dart",
       "schema": "PromptTokensDetails",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Spec schema is now empty/unreferenced; Dart model retained (matches official client) but no longer used by UsageInfo"
+      "tags": []
     },
     "PutDatasetRecordPropertiesInSchema": {
       "spec": "main",
@@ -2091,17 +2122,20 @@
       "schema": "QueryWorkflowResponse",
       "tags": []
     },
+    "RequestedServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "RequestedServiceTier",
+      "file": "lib/src/models/metadata/requested_service_tier.dart",
+      "schema": "RequestedServiceTier",
+      "tags": []
+    },
     "ReasoningEffort": {
       "spec": "main",
       "kind": "enum",
       "dart_class": "ReasoningEffort",
       "file": "lib/src/models/metadata/reasoning_effort.dart",
-      "schema": null,
-      "enum_values": [
-        "high",
-        "none"
-      ],
-      "note": "Inline enum used by ChatCompletionRequest and AgentsCompletionRequest"
+      "schema": "ReasoningEffort"
     },
     "ReferenceChunk": {
       "spec": "main",
@@ -2118,6 +2152,22 @@
       "file": "lib/src/models/workflows/reset_invocation_body.dart",
       "schema": "ResetInvocationBody",
       "tags": []
+    },
+    "ResourceChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResourceContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ResourceChunk",
+      "parent": "ContentPart"
+    },
+    "ResourceLinkChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ResourceLinkContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ResourceLinkChunk",
+      "parent": "ContentPart"
     },
     "ResourceLink": {
       "spec": "main",

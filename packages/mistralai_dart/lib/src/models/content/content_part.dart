@@ -18,6 +18,8 @@ import '../common/equality_helpers.dart';
 /// - [ThinkContentPart] — Thinking/reasoning content.
 /// - [ToolFileContentPart] — File produced by a built-in tool.
 /// - [ToolReferenceContentPart] — Reference produced by a built-in tool.
+/// - [ResourceContentPart] — Resource URI and text or image content.
+/// - [ResourceLinkContentPart] — Resource URI and optional metadata.
 /// - [UnknownContentPart] — Unknown content type (forward compatibility).
 sealed class ContentPart {
   const ContentPart();
@@ -37,6 +39,8 @@ sealed class ContentPart {
       'thinking' => ThinkContentPart.fromJson(json),
       'tool_file' => ToolFileContentPart.fromJson(json),
       'tool_reference' => ToolReferenceContentPart.fromJson(json),
+      'resource' => ResourceContentPart.fromJson(json),
+      'resource_link' => ResourceLinkContentPart.fromJson(json),
       _ => UnknownContentPart(json),
     };
   }
@@ -51,9 +55,17 @@ sealed class ContentPart {
   factory ContentPart.imageUrl(String url) => ImageUrlContentPart(url);
 }
 
+/// A text or image payload embedded in a [ResourceContentPart].
+///
+/// [UnknownContentPart] keeps future payload kinds round-trippable.
+sealed class ResourceChunkContent {
+  /// Encodes the resource payload.
+  Map<String, dynamic> toJson();
+}
+
 /// Text content part.
 @immutable
-class TextContentPart extends ContentPart {
+class TextContentPart extends ContentPart implements ResourceChunkContent {
   @override
   String get type => 'text';
 
@@ -90,7 +102,7 @@ class TextContentPart extends ContentPart {
 
 /// Image URL content part for vision models.
 @immutable
-class ImageUrlContentPart extends ContentPart {
+class ImageUrlContentPart extends ContentPart implements ResourceChunkContent {
   @override
   String get type => 'image_url';
 
@@ -100,15 +112,24 @@ class ImageUrlContentPart extends ContentPart {
   /// (data:image/jpeg;base64,...).
   final String url;
 
+  /// Optional image detail. Current values are `low`, `auto`, and `high`.
+  final String? detail;
+
   /// Creates an [ImageUrlContentPart].
-  const ImageUrlContentPart(this.url);
+  const ImageUrlContentPart(this.url) : detail = null;
+
+  /// Creates an image URL with a detail preference.
+  const ImageUrlContentPart.withDetail(this.url, {required this.detail});
 
   /// Creates an [ImageUrlContentPart] from JSON.
   factory ImageUrlContentPart.fromJson(Map<String, dynamic> json) {
     // Handle nested format: {"image_url": {"url": "..."}}
     final imageUrl = json['image_url'];
     if (imageUrl is Map<String, dynamic>) {
-      return ImageUrlContentPart(imageUrl['url'] as String? ?? '');
+      return ImageUrlContentPart.withDetail(
+        imageUrl['url'] as String? ?? '',
+        detail: imageUrl['detail'] as String?,
+      );
     }
     // Handle flat format: {"image_url": "..."}
     return ImageUrlContentPart(imageUrl as String? ?? '');
@@ -117,25 +138,31 @@ class ImageUrlContentPart extends ContentPart {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'image_url': {'url': url},
+    'image_url': {'url': url, if (detail != null) 'detail': detail},
   };
 
   /// Creates a copy with the given fields replaced.
-  ImageUrlContentPart copyWith({String? url}) =>
-      ImageUrlContentPart(url ?? this.url);
+  ImageUrlContentPart copyWith({
+    String? url,
+    Object? detail = unsetCopyWithValue,
+  }) => ImageUrlContentPart.withDetail(
+    url ?? this.url,
+    detail: detail == unsetCopyWithValue ? this.detail : detail as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ImageUrlContentPart &&
           runtimeType == other.runtimeType &&
-          url == other.url;
+          url == other.url &&
+          detail == other.detail;
 
   @override
-  int get hashCode => Object.hash(type, url);
+  int get hashCode => Object.hash(type, url, detail);
 
   @override
-  String toString() => 'ImageUrlContentPart(url: $url)';
+  String toString() => 'ImageUrlContentPart(url: $url, detail: $detail)';
 }
 
 /// Document URL content part.
@@ -554,11 +581,156 @@ class ToolReferenceContentPart extends ContentPart {
       'url: $url, description: $description, favicon: $favicon)';
 }
 
+/// Text or an image associated with a resource URI.
+@immutable
+class ResourceContentPart extends ContentPart {
+  /// Creates an embedded resource part.
+  const ResourceContentPart({required this.uri, required this.content});
+
+  @override
+  String get type => 'resource';
+
+  /// Resource identifier.
+  final String uri;
+
+  /// Inline text or image. Future types retain their raw JSON.
+  final ResourceChunkContent content;
+
+  /// Parses a resource chunk.
+  factory ResourceContentPart.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != null && type != 'resource') {
+      throw FormatException('ResourceContentPart: unexpected type "$type"');
+    }
+    final uri = json['uri'] as String?;
+    final value = json['content'] as Map<String, dynamic>?;
+    if (uri == null || value == null) {
+      throw const FormatException(
+        'ResourceContentPart requires uri and content',
+      );
+    }
+    final ResourceChunkContent content = switch (value['type']) {
+      'text' => TextContentPart.fromJson(value),
+      'image_url' => ImageUrlContentPart.fromJson(value),
+      _ => UnknownContentPart(value),
+    };
+    return ResourceContentPart(uri: uri, content: content);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'uri': uri,
+    'content': content.toJson(),
+  };
+
+  /// Creates a copy with the given fields replaced.
+  ResourceContentPart copyWith({String? uri, ResourceChunkContent? content}) =>
+      ResourceContentPart(
+        uri: uri ?? this.uri,
+        content: content ?? this.content,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResourceContentPart &&
+          uri == other.uri &&
+          content == other.content;
+
+  @override
+  int get hashCode => Object.hash(uri, content);
+
+  @override
+  String toString() => 'ResourceContentPart(uri: $uri, content: $content)';
+}
+
+/// A link to a resource, with optional primitive-valued metadata.
+@immutable
+class ResourceLinkContentPart extends ContentPart {
+  /// Creates a resource link.
+  const ResourceLinkContentPart({required this.uri, this.metadata});
+
+  @override
+  String get type => 'resource_link';
+
+  /// Resource identifier.
+  final String uri;
+
+  /// Metadata values are strings, numbers or booleans.
+  final Map<String, Object>? metadata;
+
+  /// Parses a resource-link chunk.
+  factory ResourceLinkContentPart.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != null && type != 'resource_link') {
+      throw FormatException('ResourceLinkContentPart: unexpected type "$type"');
+    }
+    final uri = json['uri'] as String?;
+    if (uri == null) {
+      throw const FormatException('ResourceLinkContentPart requires uri');
+    }
+    final metadata = json['metadata'] as Map<String, dynamic>?;
+    if (metadata != null) {
+      _validateResourceLinkMetadata(metadata);
+    }
+    return ResourceLinkContentPart(
+      uri: uri,
+      metadata: metadata?.cast<String, Object>(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    final metadata = this.metadata;
+    if (metadata != null) {
+      _validateResourceLinkMetadata(metadata);
+    }
+    return {'type': type, 'uri': uri, 'metadata': ?metadata};
+  }
+
+  /// Creates a copy with the given fields replaced.
+  ResourceLinkContentPart copyWith({
+    String? uri,
+    Object? metadata = unsetCopyWithValue,
+  }) => ResourceLinkContentPart(
+    uri: uri ?? this.uri,
+    metadata: metadata == unsetCopyWithValue
+        ? this.metadata
+        : metadata as Map<String, Object>?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResourceLinkContentPart &&
+          uri == other.uri &&
+          mapsEqual(metadata, other.metadata);
+
+  @override
+  int get hashCode => Object.hash(uri, mapHash(metadata));
+
+  @override
+  String toString() =>
+      'ResourceLinkContentPart(uri: $uri, metadata: ${metadata?.length})';
+}
+
+void _validateResourceLinkMetadata(Map<String, Object?> metadata) {
+  for (final entry in metadata.entries) {
+    final value = entry.value;
+    if (value is! String && value is! num && value is! bool) {
+      throw FormatException(
+        'Unsupported resource-link metadata at "${entry.key}"',
+      );
+    }
+  }
+}
+
 /// Unknown content part for forward compatibility.
 ///
 /// Wraps the raw JSON map when the content type is not recognized.
 @immutable
-class UnknownContentPart extends ContentPart {
+class UnknownContentPart extends ContentPart implements ResourceChunkContent {
   @override
   String get type => _raw['type'] as String? ?? 'unknown';
 

@@ -4,13 +4,14 @@ import 'package:test/test.dart';
 void main() {
   group('ReasoningEffort', () {
     test('has expected values', () {
-      expect(ReasoningEffort.values, hasLength(7));
+      expect(ReasoningEffort.values, hasLength(8));
       expect(ReasoningEffort.none.value, 'none');
       expect(ReasoningEffort.minimal.value, 'minimal');
       expect(ReasoningEffort.low.value, 'low');
       expect(ReasoningEffort.medium.value, 'medium');
       expect(ReasoningEffort.high.value, 'high');
       expect(ReasoningEffort.xhigh.value, 'xhigh');
+      expect(ReasoningEffort.max.value, 'max');
       expect(ReasoningEffort.unknown.value, 'unknown');
     });
 
@@ -27,6 +28,7 @@ void main() {
       expect(ReasoningEffort.fromString('low'), ReasoningEffort.low);
       expect(ReasoningEffort.fromString('medium'), ReasoningEffort.medium);
       expect(ReasoningEffort.fromString('xhigh'), ReasoningEffort.xhigh);
+      expect(ReasoningEffort.fromString('max'), ReasoningEffort.max);
     });
 
     test('fromString returns null for null', () {
