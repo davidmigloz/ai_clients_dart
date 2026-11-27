@@ -143,7 +143,9 @@
     "excluded_properties": {
       "global": []
     },
-    "resource_aliases": {},
+    "resource_aliases": {
+      "context": "managed_search_indexes"
+    },
     "excluded_resources": []
   },
   "types": {
@@ -4222,6 +4224,498 @@
       "file": "lib/src/models/workflows/workflows_worker_spec_update.dart",
       "schema": "WorkflowsWorkerSpecUpdate",
       "tags": []
+    },
+    "CreateManagedIndexRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateManagedIndexRequest",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "CreateManagedIndexRequest",
+      "tags": []
+    },
+    "ManagedIndexConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexConfig",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "ManagedIndexConfig",
+      "tags": []
+    },
+    "ManagedIndexFields": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexFields",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "ManagedIndexFields",
+      "tags": []
+    },
+    "ManagedIndexResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedSearchIndex",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "ManagedIndexResponse",
+      "tags": []
+    },
+    "ListManagedIndexesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedSearchIndexPage",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "ListManagedIndexesResponse",
+      "tags": []
+    },
+    "UpdateManagedIndexRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateManagedIndexRequest",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "UpdateManagedIndexRequest",
+      "tags": []
+    },
+    "DeleteManagedIndexResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeleteManagedIndexResponse",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "DeleteManagedIndexResponse",
+      "tags": []
+    },
+    "ManagedIndexStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ManagedSearchIndexStatus",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "ManagedIndexStatus",
+      "tags": []
+    },
+    "MistralEmbeddingModel": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MistralIndexEmbedding",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "MistralEmbeddingModel",
+      "tags": []
+    },
+    "CustomEmbeddingModel": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomIndexEmbedding",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "CustomEmbeddingModel",
+      "tags": []
+    },
+    "DistanceMetric": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SearchDistanceMetric",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "DistanceMetric",
+      "tags": []
+    },
+    "VectorDType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SearchVectorDType",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "VectorDType",
+      "tags": []
+    },
+    "SearchRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedSearchRequest",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "SearchRequest",
+      "tags": []
+    },
+    "KeywordRetriever": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "KeywordRetriever",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "KeywordRetriever",
+      "tags": []
+    },
+    "NearestNeighbourRetriever": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "NearestNeighbourRetriever",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "NearestNeighbourRetriever",
+      "tags": []
+    },
+    "RRFRetriever": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RrfRetriever",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "RRFRetriever",
+      "tags": []
+    },
+    "And": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchAndFilter",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "And",
+      "tags": []
+    },
+    "Or": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchOrFilter",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "Or",
+      "tags": []
+    },
+    "Not": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchNotFilter",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "Not",
+      "tags": []
+    },
+    "Equal": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchEqualFilter",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "Equal",
+      "tags": []
+    },
+    "In": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchInFilter",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "In",
+      "tags": []
+    },
+    "Range": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchRangeFilter",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "Range",
+      "tags": []
+    },
+    "SearchResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedSearchResults",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "SearchResponse",
+      "tags": []
+    },
+    "SearchHitResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedSearchHit",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "SearchHitResponse",
+      "tags": []
+    },
+    "SearchChunkResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedSearchChunk",
+      "file": "lib/src/models/search/search_query.dart",
+      "schema": "SearchChunkResponse",
+      "tags": []
+    },
+    "IngestDocumentsRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "IngestSearchDocumentsRequest",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "IngestDocumentsRequest",
+      "tags": []
+    },
+    "IngestDocumentsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "IngestSearchDocumentsResponse",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "IngestDocumentsResponse",
+      "tags": []
+    },
+    "AcceptedDocumentResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AcceptedSearchDocument",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "AcceptedDocumentResponse",
+      "tags": []
+    },
+    "RejectedDocumentResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RejectedSearchDocument",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "RejectedDocumentResponse",
+      "tags": []
+    },
+    "DocumentFieldErrorResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchDocumentFieldError",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "DocumentFieldErrorResponse",
+      "tags": []
+    },
+    "DeleteDocumentsRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeleteSearchDocumentsRequest",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "DeleteDocumentsRequest",
+      "tags": []
+    },
+    "DeleteDocumentsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeleteSearchDocumentsResponse",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "DeleteDocumentsResponse",
+      "tags": []
+    },
+    "NavigationResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchNavigationResponse",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "NavigationResponse",
+      "tags": []
+    },
+    "NavigationChunkResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchNavigationChunk",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "NavigationChunkResponse",
+      "tags": []
+    },
+    "GrepRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchGrepRequest",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "GrepRequest",
+      "tags": []
+    },
+    "GrepMode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SearchGrepMode",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "GrepMode",
+      "tags": []
+    },
+    "NavigateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchNavigateRequest",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "NavigateRequest",
+      "tags": []
+    },
+    "NavigationDirection": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SearchNavigationDirection",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "NavigationDirection",
+      "tags": []
+    },
+    "ReadRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchReadRequest",
+      "file": "lib/src/models/search/search_documents.dart",
+      "schema": "ReadRequest",
+      "tags": []
+    },
+    "BoolArrayFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "BoolArrayFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "BoolFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "BoolFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "DenseVectorFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "DenseVectorFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "FloatArrayFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "FloatArrayFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "FloatFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "FloatFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "IntArrayFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "IntArrayFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "IntFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "IntFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "JsonFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "JsonFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "KeywordArrayFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "KeywordArrayFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "KeywordFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "KeywordFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "LongArrayFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "LongArrayFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "LongFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "LongFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "TextArrayFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "TextArrayFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "TextFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "TextFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "TimestampArrayFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "TimestampArrayFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "TimestampFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ManagedIndexField",
+      "file": "lib/src/models/search/managed_index.dart",
+      "schema": "TimestampFieldDefinition",
+      "tags": [],
+      "note": "The field definition schemas share the same wire fields. Dart preserves each type discriminator."
+    },
+    "SummaryStatus1": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SummaryStatus",
+      "file": "lib/src/models/rag/summary_status.dart",
+      "schema": "SummaryStatus1",
+      "tags": [],
+      "note": "The managed Search API uses the same summary wire types as RAG."
+    },
+    "SummaryMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SummaryStreamMetadata",
+      "file": "lib/src/models/rag/summary_stream_event.dart",
+      "schema": "SummaryMetadata",
+      "tags": [],
+      "note": "The managed Search API uses the same summary wire types as RAG."
+    },
+    "SummaryChunk": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SummaryStreamChunk",
+      "file": "lib/src/models/rag/summary_stream_event.dart",
+      "schema": "SummaryChunk",
+      "tags": [],
+      "note": "The managed Search API uses the same summary wire types as RAG."
+    },
+    "SummaryError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SummaryStreamError",
+      "file": "lib/src/models/rag/summary_stream_event.dart",
+      "schema": "SummaryError",
+      "tags": [],
+      "note": "The managed Search API uses the same summary wire types as RAG."
     }
   }
 }

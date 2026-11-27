@@ -368,6 +368,10 @@ export 'src/models/rag/vespa_schema_summary.dart';
 // --- Models: Registry (Beta) ---
 export 'src/models/registry/alias_list.dart';
 export 'src/models/registry/registry_sharing_scope.dart';
+// --- Models: Managed Search (Public Preview) ---
+export 'src/models/search/managed_index.dart';
+export 'src/models/search/search_documents.dart';
+export 'src/models/search/search_query.dart';
 // --- Models: Skills (Beta) ---
 export 'src/models/skills/create_skill_request.dart';
 export 'src/models/skills/create_skill_version_request.dart';
@@ -546,6 +550,8 @@ export 'src/models/workflows/workflow_update_request.dart';
 export 'src/models/workflows/workflow_update_response.dart';
 export 'src/models/workflows/workflow_with_worker_status.dart';
 export 'src/models/workflows/workflows_worker_spec_update.dart';
+// --- Resources ---
+export 'src/resources/managed_search_indexes_resource.dart';
 // --- Utils ---
 export 'src/utils/job_poller.dart';
 export 'src/utils/paginator.dart';
