@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../observability/pagination_info.dart';
-import 'library_timestamp.dart';
+import '../../utils/library_timestamp.dart';
 
 /// A document within a library.
 @immutable
