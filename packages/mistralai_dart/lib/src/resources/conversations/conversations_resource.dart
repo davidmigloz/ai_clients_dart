@@ -4,9 +4,11 @@ import 'package:http/http.dart' as http;
 
 import '../../models/conversations/conversation.dart';
 import '../../models/conversations/conversation_entry.dart';
+import '../../models/conversations/conversation_event.dart';
 import '../../models/conversations/conversation_request.dart';
 import '../../models/conversations/conversation_response.dart';
 import '../base_resource.dart';
+import '../streaming_resource.dart';
 
 /// Resource for managing conversations (Beta).
 ///
@@ -33,7 +35,7 @@ import '../base_resource.dart';
 /// );
 /// print(reply.text);
 /// ```
-class ConversationsResource extends ResourceBase {
+class ConversationsResource extends ResourceBase with StreamingResource {
   /// Creates a [ConversationsResource].
   ConversationsResource({
     required super.config,
@@ -43,149 +45,163 @@ class ConversationsResource extends ResourceBase {
     super.ensureNotClosed,
   });
 
-  /// Lists all conversations.
-  ///
-  /// [page] is the page number to retrieve (0-indexed).
-  /// [pageSize] is the number of conversations per page.
-  Future<ConversationList> list({int? page, int? pageSize}) async {
-    final queryParams = <String, String>{
-      if (page != null) 'page': page.toString(),
-      if (pageSize != null) 'page_size': pageSize.toString(),
-    };
+  static const _path = '/v1/conversations';
 
+  String _conversationPath(String conversationId) =>
+      '$_path/${Uri.encodeComponent(conversationId)}';
+
+  /// Lists conversations with optional pagination and metadata filters.
+  Future<ConversationList> list({
+    int? page,
+    int? pageSize,
+    Map<String, dynamic>? metadata,
+  }) async {
+    ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/conversations',
-      queryParams: queryParams.isNotEmpty ? queryParams : null,
+      _path,
+      queryParams: {
+        'page': ?page?.toString(),
+        'page_size': ?pageSize?.toString(),
+        if (metadata != null) 'metadata': jsonEncode(metadata),
+      },
     );
-    final headers = requestBuilder.buildHeaders();
-
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return ConversationList.fromJson(responseBody);
+    final request = http.Request('GET', url)
+      ..headers.addAll(requestBuilder.buildHeaders());
+    final response = await interceptorChain.execute(request);
+    return ConversationList.fromJson(jsonDecode(response.body) as Object);
   }
 
   /// Retrieves a conversation by ID.
-  ///
-  /// [conversationId] is the unique identifier of the conversation.
-  Future<Conversation> retrieve({required String conversationId}) async {
-    final url = requestBuilder.buildUrl('/v1/conversations/$conversationId');
-    final headers = requestBuilder.buildHeaders();
+  Future<Conversation> retrieve({required String conversationId}) async =>
+      Conversation.fromJson(await _get(_conversationPath(conversationId)));
 
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return Conversation.fromJson(responseBody);
-  }
-
-  /// Starts a new conversation.
-  ///
-  /// Creates a new conversation and runs completion on the provided inputs.
-  /// Returns the conversation ID and the generated outputs.
-  ///
-  /// [request] contains the model/agent ID and initial inputs.
+  /// Starts a conversation and returns the completed response.
   Future<ConversationResponse> start({
     required StartConversationRequest request,
-  }) async {
-    final url = requestBuilder.buildUrl('/v1/conversations');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+  }) => _complete(_path, request.toJson);
 
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return ConversationResponse.fromJson(responseBody);
-  }
-
-  /// Appends entries to an existing conversation.
+  /// Starts a conversation and streams its events as they arrive.
   ///
-  /// Appends new entries to the conversation, runs completion, and returns
-  /// the newly created entries.
-  ///
-  /// [conversationId] is the ID of the conversation to append to.
-  /// [request] contains the entries to append and completion parameters.
+  /// Complete [abortTrigger] or cancel the returned subscription to stop it.
+  Stream<ConversationEvent> startStream({
+    required StartConversationRequest request,
+    Future<void>? abortTrigger,
+  }) => _stream(_path, request.toJson, abortTrigger: abortTrigger);
+
+  /// Appends entries to a conversation and returns the completed response.
   Future<ConversationResponse> append({
     required String conversationId,
     required AppendConversationRequest request,
-  }) async {
-    final url = requestBuilder.buildUrl('/v1/conversations/$conversationId');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+  }) => _complete(_conversationPath(conversationId), request.toJson);
 
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return ConversationResponse.fromJson(responseBody);
-  }
-
-  /// Retrieves all entries in a conversation.
+  /// Appends entries to a conversation and streams its events as they arrive.
   ///
-  /// Returns all entries belonging to the conversation, sorted in the order
-  /// they were appended.
-  ///
-  /// [conversationId] is the ID of the conversation.
+  /// Complete [abortTrigger] or cancel the returned subscription to stop it.
+  Stream<ConversationEvent> appendStream({
+    required String conversationId,
+    required AppendConversationRequest request,
+    Future<void>? abortTrigger,
+  }) => _stream(
+    _conversationPath(conversationId),
+    request.toJson,
+    abortTrigger: abortTrigger,
+  );
+
+  /// Retrieves all conversation entries in the order they were appended.
+  Future<ConversationEntriesResponse> getHistory({
+    required String conversationId,
+  }) async => ConversationEntriesResponse.fromJson(
+    await _get('${_conversationPath(conversationId)}/history'),
+  );
+
+  /// Retrieves all conversation entries. This is an alias for [getHistory].
   Future<ConversationEntriesResponse> getEntries({
     required String conversationId,
-  }) async {
-    final url = requestBuilder.buildUrl(
-      '/v1/conversations/$conversationId/entries',
-    );
-    final headers = requestBuilder.buildHeaders();
+  }) => getHistory(conversationId: conversationId);
 
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+  /// Retrieves the input and output messages of an existing conversation.
+  Future<ConversationMessagesResponse> getMessages({
+    required String conversationId,
+  }) async => ConversationMessagesResponse.fromJson(
+    await _get('${_conversationPath(conversationId)}/messages'),
+  );
 
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return ConversationEntriesResponse.fromJson(responseBody);
-  }
-
-  /// Restarts a conversation from a specific entry.
-  ///
-  /// Creates a new conversation from the specified entry point and runs
-  /// completion. Returns the new conversation ID and generated outputs.
-  ///
-  /// [conversationId] is the ID of the original conversation.
-  /// [request] contains the entry ID to restart from.
+  /// Restarts a conversation from the requested entry.
   Future<ConversationResponse> restart({
     required String conversationId,
     required RestartConversationRequest request,
-  }) async {
-    final url = requestBuilder.buildUrl(
-      '/v1/conversations/$conversationId/restart',
-    );
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+  }) =>
+      _complete('${_conversationPath(conversationId)}/restart', request.toJson);
 
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return ConversationResponse.fromJson(responseBody);
-  }
+  /// Restarts a conversation from an entry and streams its events.
+  ///
+  /// Complete [abortTrigger] or cancel the returned subscription to stop it.
+  Stream<ConversationEvent> restartStream({
+    required String conversationId,
+    required RestartConversationRequest request,
+    Future<void>? abortTrigger,
+  }) => _stream(
+    '${_conversationPath(conversationId)}/restart',
+    request.toJson,
+    abortTrigger: abortTrigger,
+  );
 
   /// Deletes a conversation.
-  ///
-  /// [conversationId] is the unique identifier of the conversation to delete.
   Future<void> delete({required String conversationId}) async {
-    final url = requestBuilder.buildUrl('/v1/conversations/$conversationId');
-    final headers = requestBuilder.buildHeaders();
+    ensureNotClosed?.call();
+    final request = http.Request(
+      'DELETE',
+      requestBuilder.buildUrl(_conversationPath(conversationId)),
+    )..headers.addAll(requestBuilder.buildHeaders());
+    await interceptorChain.execute(request);
+  }
 
-    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+  Future<Map<String, dynamic>> _get(String path) async {
+    ensureNotClosed?.call();
+    final request = http.Request('GET', requestBuilder.buildUrl(path))
+      ..headers.addAll(requestBuilder.buildHeaders());
+    final response = await interceptorChain.execute(request);
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
 
-    await interceptorChain.execute(httpRequest);
+  Future<ConversationResponse> _complete(
+    String path,
+    Map<String, dynamic> Function() body,
+  ) async {
+    ensureNotClosed?.call();
+    final response = await interceptorChain.execute(_post(path, body()));
+    return ConversationResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  http.Request _post(
+    String path,
+    Map<String, dynamic> body, {
+    bool stream = false,
+  }) => http.Request('POST', requestBuilder.buildUrl(path))
+    ..headers.addAll(
+      requestBuilder.buildHeaders(
+        additionalHeaders: {
+          'Content-Type': 'application/json',
+          'Accept': stream ? 'text/event-stream' : 'application/json',
+        },
+      ),
+    )
+    ..body = jsonEncode({...body, 'stream': stream});
+
+  Stream<ConversationEvent> _stream(
+    String path,
+    Map<String, dynamic> Function() body, {
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    return streamRequest(() => _post(path, body(), stream: true), (event) {
+      final json = Map<String, dynamic>.of(event);
+      final eventType = json.remove('_event') as String?;
+      json.putIfAbsent('type', () => eventType);
+      return ConversationEvent.fromJson(json);
+    }, abortTrigger: abortTrigger);
   }
 
   /// Convenience method to send a message in a conversation.
@@ -221,7 +237,8 @@ class ConversationsResource extends ResourceBase {
   /// [conversationId] is the ID of the conversation.
   /// [callId] is the ID of the function call this result responds to.
   /// [result] is the result of the function execution.
-  /// [isError] indicates if the result represents an error.
+  /// Include details of function errors in [result]. The legacy [isError]
+  /// flag has no field in the Conversations API.
   Future<ConversationResponse> sendFunctionResult({
     required String conversationId,
     required String callId,

@@ -114,14 +114,16 @@ void main() {
         expect(json['model'], 'model-1');
         expect(json['agent_id'], 'agent-1');
         expect(json['store'], false);
-        expect(json['max_tokens'], 200);
-        expect(json['stop'], ['STOP']);
-        expect(json['temperature'], 0.3);
-        expect(json['top_p'], 0.8);
         expect(json['tools'], isList);
-        expect(json['tool_choice'], isNotNull);
-        expect(json['response_format'], isNotNull);
-        expect(json['random_seed'], 123);
+        expect(json['completion_args'], {
+          'max_tokens': 200,
+          'stop': ['STOP'],
+          'temperature': 0.3,
+          'top_p': 0.8,
+          'tool_choice': 'none',
+          'response_format': {'type': 'text'},
+          'random_seed': 123,
+        });
         expect(json['metadata'], {'env': 'test'});
       });
     });
@@ -265,7 +267,7 @@ void main() {
         final json = request.toJson();
         expect(json['inputs'], hasLength(1));
         expect(json['store'], true);
-        expect(json['max_tokens'], 150);
+        expect(json['completion_args'], {'max_tokens': 150});
       });
     });
 
@@ -346,9 +348,10 @@ void main() {
           temperature: 0.4,
         );
         final json = request.toJson();
-        expect(json['entry_id'], 'entry-789');
+        expect(json['from_entry_id'], 'entry-789');
+        expect(json, isNot(contains('entry_id')));
         expect(json['store'], false);
-        expect(json['temperature'], 0.4);
+        expect(json['completion_args'], {'temperature': 0.4});
       });
     });
 

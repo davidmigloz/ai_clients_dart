@@ -321,6 +321,81 @@ Use `workflows.core.executeAsync(workflowIdentifier: ..., request: ...)` or
 `workflows.registrations.executeAsync` or `executeSync` with those methods
 and pass the workflow identifier instead of the registration ID.
 
+### Read and replay Conversations entries
+
+The legacy Conversations API uses `/history` and returns `entries`.
+`getEntries` calls the same endpoint for compatibility. For message-only
+history, use `getMessages`. Each message exposes `messageContent` with all
+text and non-text parts. The existing `content` getter extracts text.
+
+Before:
+
+```dart
+final history = await client.conversations.getEntries(conversationId: id);
+final text = history.assistantMessages.first.content;
+```
+
+After:
+
+```dart
+final history = await client.conversations.getHistory(conversationId: id);
+final content = history.assistantMessages.first.messageContent;
+if (content is MessagePartsContent) {
+  for (final part in content.parts) {
+    print(part.toJson());
+  }
+}
+```
+
+For an exhaustive `ConversationEntry` switch, include
+`UnknownConversationEntry`. Its `rawJson` preserves unfamiliar entries.
+
+### Use the current Conversations request format
+
+The existing Dart parameters `maxTokens`, `stop`, and `temperature` map
+into `completion_args`. Use `CompletionArgs` for additional controls or a
+single string stop sequence. If you pass both forms, typed values take
+precedence for the fields they set. Conversations tool choice accepts
+`ToolChoice.auto`, `ToolChoice.none`, `ToolChoice.any` or `ToolChoice.required`.
+Configure available tools when you start the conversation or on the Agent.
+
+Before:
+
+```dart
+final request = AppendConversationRequest.withMessage(
+  message: 'Continue.',
+  maxTokens: 128,
+);
+```
+
+After:
+
+```dart
+const request = AppendConversationRequest(
+  inputText: 'Continue.',
+  completionArgs: CompletionArgs(maxTokens: 128),
+);
+```
+
+If you store or construct wire payloads, use `from_entry_id` for restart and
+`tool_call_id` for function calls and results. Dart still reads the previous
+`entry_id` and `call_id` keys. Put details of function failures in the
+`result` string. Use `guardrailResults` to read the service's open guardrail
+result objects.
+
+Before:
+
+```dart
+final payload = {'type': 'function.result', 'call_id': callId, 'result': 'OK'};
+```
+
+After:
+
+```dart
+final payload = FunctionResultEntry(callId: callId, result: 'OK').toJson();
+// {'type': 'function.result', 'tool_call_id': callId, 'result': 'OK'}
+```
+
 ---
 
 ## Migrating from v7.x to v8.0.0

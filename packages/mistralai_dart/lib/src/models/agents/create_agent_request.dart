@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../metadata/completion_args.dart';
 import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
 
@@ -30,6 +32,12 @@ class CreateAgentRequest {
   /// Message describing the changes in this version.
   final String? versionMessage;
 
+  /// Completion settings for generated messages.
+  final CompletionArgs? completionArgs;
+
+  /// IDs of agents this agent can hand off to.
+  final List<String>? handoffs;
+
   /// Creates a [CreateAgentRequest].
   const CreateAgentRequest({
     required this.name,
@@ -40,6 +48,8 @@ class CreateAgentRequest {
     this.metadata,
     this.guardrails,
     this.versionMessage,
+    this.completionArgs,
+    this.handoffs,
   });
 
   /// Creates a [CreateAgentRequest] from JSON.
@@ -57,6 +67,12 @@ class CreateAgentRequest {
             ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
             .toList(),
         versionMessage: json['version_message'] as String?,
+        completionArgs: json['completion_args'] == null
+            ? null
+            : CompletionArgs.fromJson(
+                json['completion_args'] as Map<String, dynamic>,
+              ),
+        handoffs: (json['handoffs'] as List?)?.cast<String>(),
       );
 
   /// Converts to JSON.
@@ -70,6 +86,8 @@ class CreateAgentRequest {
     if (guardrails != null)
       'guardrails': guardrails!.map((e) => e.toJson()).toList(),
     if (versionMessage != null) 'version_message': versionMessage,
+    'completion_args': ?completionArgs?.toJson(),
+    'handoffs': ?handoffs,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -82,6 +100,8 @@ class CreateAgentRequest {
     Map<String, dynamic>? metadata,
     List<GuardrailConfig>? guardrails,
     String? versionMessage,
+    Object? completionArgs = unsetCopyWithValue,
+    Object? handoffs = unsetCopyWithValue,
   }) => CreateAgentRequest(
     name: name ?? this.name,
     description: description ?? this.description,
@@ -91,6 +111,12 @@ class CreateAgentRequest {
     metadata: metadata ?? this.metadata,
     guardrails: guardrails ?? this.guardrails,
     versionMessage: versionMessage ?? this.versionMessage,
+    completionArgs: completionArgs == unsetCopyWithValue
+        ? this.completionArgs
+        : completionArgs as CompletionArgs?,
+    handoffs: handoffs == unsetCopyWithValue
+        ? this.handoffs
+        : (handoffs as List?)?.cast<String>(),
   );
 
   @override

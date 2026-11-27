@@ -215,7 +215,8 @@ void main() {
           expect(json['name'], 'search');
           expect(json['arguments'], '{}');
           expect(json['id'], 'fc-1');
-          expect(json['call_id'], 'call-1');
+          expect(json['tool_call_id'], 'call-1');
+          expect(json, isNot(contains('call_id')));
           expect(json.containsKey('agent_id'), isFalse);
           expect(json.containsKey('confirmation_status'), isFalse);
           expect(json.containsKey('model'), isFalse);
@@ -317,9 +318,10 @@ void main() {
           );
           final json = entry.toJson();
           expect(json['type'], 'function.result');
-          expect(json['call_id'], 'call-1');
+          expect(json['tool_call_id'], 'call-1');
+          expect(json, isNot(contains('call_id')));
           expect(json['result'], 'Success');
-          expect(json['is_error'], false);
+          expect(json, isNot(contains('is_error')));
         });
       });
 
@@ -384,10 +386,10 @@ void main() {
           );
           final json = entry.toJson();
           expect(json['type'], 'tool.execution');
-          expect(json['tool_type'], 'web_search');
-          expect(json['input'], {'query': 'test'});
-          expect(json['output'], {'results': <dynamic>[]});
-          expect(json['status'], 'success');
+          expect(json['name'], 'web_search');
+          expect(json['arguments'], '{"query":"test"}');
+          expect(json['info'], {'results': <dynamic>[]});
+          expect(json, isNot(contains('status')));
           expect(json.containsKey('agent_id'), isFalse);
           expect(json.containsKey('model'), isFalse);
         });
@@ -461,9 +463,9 @@ void main() {
           );
           final json = entry.toJson();
           expect(json['type'], 'agent.handoff');
-          expect(json['target_agent_id'], 'agent-3');
-          expect(json['reason'], 'Escalation');
-          expect(json['context'], {'priority': 'high'});
+          expect(json['next_agent_id'], 'agent-3');
+          expect(json, isNot(contains('reason')));
+          expect(json, isNot(contains('context')));
         });
       });
 
@@ -542,13 +544,14 @@ void main() {
         expect(entry, isA<AgentHandoffEntry>());
       });
 
-      test('defaults to MessageInputEntry for unknown type', () {
+      test('preserves unknown entry types and their data', () {
         final json = <String, dynamic>{
           'type': 'unknown.type',
           'content': 'test',
         };
         final entry = ConversationEntry.fromJson(json);
-        expect(entry, isA<MessageInputEntry>());
+        expect(entry, isA<UnknownConversationEntry>());
+        expect(entry.toJson(), json);
       });
     });
 
