@@ -8713,6 +8713,72 @@
       "file": "lib/src/models/service_accounts/update_service_account_request.dart",
       "schema": "UpdateServiceAccountRequest",
       "tags": []
+    },
+    "ManagedSearchQueryError": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ManagedSearchQueryError",
+      "file": "lib/src/models/search/managed_search_query_error.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "EmbeddingMismatchResponse": "embedding_mismatch",
+          "IncorrectFieldTypeResponse": "incorrect_field_type",
+          "MaxCandidatesTooSmallResponse": "max_candidates_too_small",
+          "MissingEmbeddingResponse": "missing_embedding",
+          "MissingFieldResponse": "missing_field",
+          "TopKTooLargeResponse": "top_k_too_large"
+        }
+      }
+    },
+    "EmbeddingMismatchResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchEmbeddingMismatch",
+      "file": "lib/src/models/search/managed_search_query_error.dart",
+      "schema": "EmbeddingMismatchResponse",
+      "parent": "ManagedSearchQueryError"
+    },
+    "IncorrectFieldTypeResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchIncorrectFieldType",
+      "file": "lib/src/models/search/managed_search_query_error.dart",
+      "schema": "IncorrectFieldTypeResponse",
+      "parent": "ManagedSearchQueryError"
+    },
+    "MaxCandidatesTooSmallResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchMaxCandidatesTooSmall",
+      "file": "lib/src/models/search/managed_search_query_error.dart",
+      "schema": "MaxCandidatesTooSmallResponse",
+      "parent": "ManagedSearchQueryError"
+    },
+    "MissingEmbeddingResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchMissingEmbedding",
+      "file": "lib/src/models/search/managed_search_query_error.dart",
+      "schema": "MissingEmbeddingResponse",
+      "parent": "ManagedSearchQueryError"
+    },
+    "MissingFieldResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchMissingField",
+      "file": "lib/src/models/search/managed_search_query_error.dart",
+      "schema": "MissingFieldResponse",
+      "parent": "ManagedSearchQueryError"
+    },
+    "TopKTooLargeResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchTopKTooLarge",
+      "file": "lib/src/models/search/managed_search_query_error.dart",
+      "schema": "TopKTooLargeResponse",
+      "parent": "ManagedSearchQueryError"
     }
   }
 }
