@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:mistralai_dart/mistralai_dart.dart';
 
-/// Example demonstrating the Conversations API (Beta).
+/// Example demonstrating the legacy Conversations API (beta).
 ///
 /// This example shows how to:
 /// - Start a new conversation with a model or agent
@@ -21,7 +21,8 @@ void main() async {
 
   try {
     // Example: Start and continue a conversation
-    await basicConversationExample(client);
+    final conversationId = await basicConversationExample(client);
+    await streamingConversationExample(client, conversationId);
 
     // Example: Conversation with function calls
     await functionCallConversationExample(client);
@@ -31,15 +32,14 @@ void main() async {
 }
 
 /// Starts a new conversation and sends follow-up messages.
-Future<void> basicConversationExample(MistralClient client) async {
+Future<String> basicConversationExample(MistralClient client) async {
   print('=== Basic Conversation Example ===\n');
 
   // Start a new conversation
-  final startRequest = StartConversationRequest.withMessage(
+  const startRequest = StartConversationRequest(
     model: 'mistral-large-latest',
-    message: 'Hello! Can you explain what machine learning is in simple terms?',
-    maxTokens: 500,
-    temperature: 0.7,
+    inputText: 'Can you explain what machine learning is in simple terms?',
+    completionArgs: CompletionArgs(maxTokens: 500, temperature: 0.7),
   );
 
   print('Starting conversation...');
@@ -64,7 +64,7 @@ Future<void> basicConversationExample(MistralClient client) async {
 
   // Retrieve the full conversation history
   print('Retrieving conversation history...');
-  final entries = await client.conversations.getEntries(
+  final entries = await client.conversations.getHistory(
     conversationId: startResponse.conversationId,
   );
 
@@ -72,6 +72,7 @@ Future<void> basicConversationExample(MistralClient client) async {
   print('  - User messages: ${entries.userMessages.length}');
   print('  - Assistant messages: ${entries.assistantMessages.length}');
   print('');
+  return startResponse.conversationId;
 }
 
 /// Demonstrates a conversation with function calling.
@@ -115,9 +116,11 @@ Future<void> functionCallConversationExample(MistralClient client) async {
 
       // Provide the function result
       print('\nProviding function result...');
+      final toolCallId = functionCalls.first.toolCallId;
+      if (toolCallId == null) return;
       final resultResponse = await client.conversations.sendFunctionResult(
         conversationId: response.conversationId,
-        callId: functionCalls.first.callId ?? 'call-1',
+        callId: toolCallId,
         result: '{"temperature": 22, "condition": "sunny", "humidity": 45}',
       );
 
@@ -211,35 +214,30 @@ Future<void> agentConversationExample(
   print('');
 }
 
-/// Demonstrates streaming responses (when available).
-Future<void> streamingConversationExample(MistralClient client) async {
+/// Streams a follow-up with typed text deltas, usage, and service errors.
+Future<void> streamingConversationExample(
+  MistralClient client,
+  String conversationId,
+) async {
   print('=== Streaming Conversation ===\n');
 
-  // Note: Streaming for conversations may require the append endpoint
-  // with streaming support. This example shows the concept.
-
-  const request = StartConversationRequest(
-    model: 'mistral-large-latest',
-    inputs: [
-      MessageInputEntry(content: 'Tell me a short story about a robot.'),
-    ],
-    maxTokens: 500,
-  );
-
-  print('Starting conversation...');
-
-  try {
-    final response = await client.conversations.start(request: request);
-
-    print('Response:');
-    for (final output in response.outputs) {
-      if (output is MessageOutputEntry) {
-        stdout.write(output.content);
-      }
+  await for (final event in client.conversations.appendStream(
+    conversationId: conversationId,
+    request: const AppendConversationRequest(
+      inputText: 'Give one final example in a sentence.',
+      completionArgs: CompletionArgs(maxTokens: 64),
+    ),
+  )) {
+    switch (event) {
+      case ConversationMessageDelta(:final text):
+        if (text != null) stdout.write(text);
+      case ConversationResponseDone(:final usage):
+        print('\nUsage: ${usage.totalTokens} tokens');
+      case ConversationResponseError(:final code, :final message):
+        print('\nConversation error $code: $message');
+      default:
+        break;
     }
-    print('\n');
-  } on ApiException catch (e) {
-    print('API error: ${e.message}');
   }
 }
 
