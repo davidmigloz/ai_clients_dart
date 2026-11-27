@@ -459,6 +459,20 @@
       "schema": "AssistantMessage",
       "parent": "ChatMessage"
     },
+    "AudioSpeechCapabilities": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioSpeechCapabilities",
+      "file": "lib/src/models/models/model_audio_capabilities.dart",
+      "schema": "AudioSpeechCapabilities"
+    },
+    "AudioTranscriptionCapabilities": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTranscriptionCapabilities",
+      "file": "lib/src/models/models/model_audio_capabilities.dart",
+      "schema": "AudioTranscriptionCapabilities"
+    },
     "AudioChunk": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -663,6 +677,32 @@
         "acknowledged"
       ],
       "note": "Internal platform observability"
+    },
+    "ChatClassificationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatClassificationRequest",
+      "file": "lib/src/models/classifications/chat_classification_request.dart",
+      "schema": "ChatClassificationRequest",
+      "note": "The Dart request models the single and batched InstructRequest messages envelopes inline."
+    },
+    "ChatClassificationRequestInputs": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatClassificationRequest",
+      "file": "lib/src/models/classifications/chat_classification_request.dart",
+      "schema": "ChatClassificationRequestInputs",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "An inline union in ChatClassificationRequest; wire coverage is exercised through the client."
+    },
+    "ChatModerationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatModerationRequest",
+      "file": "lib/src/models/moderations/chat_moderation_request.dart",
+      "schema": "ChatModerationRequest"
     },
     "ChatCompletionRequest": {
       "spec": "main",
@@ -1137,6 +1177,27 @@
       "schema": "DeploymentWorkerResponse",
       "tags": []
     },
+    "ClassificationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ClassificationRequest",
+      "file": "lib/src/models/classifications/classification_request.dart",
+      "schema": "ClassificationRequest"
+    },
+    "ClassificationResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ClassificationResponse",
+      "file": "lib/src/models/classifications/classification_response.dart",
+      "schema": "ClassificationResponse"
+    },
+    "ClassificationTargetResult": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ClassificationTargetResult",
+      "file": "lib/src/models/classifications/classification_target_result.dart",
+      "schema": "ClassificationTargetResult"
+    },
     "DocumentURLChunk": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -1156,6 +1217,17 @@
       ],
       "note": "Internal MCP protocol type"
     },
+    "EmbeddingInput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EmbedInput",
+      "file": "lib/src/models/embeddings/embed_input.dart",
+      "schema": "EmbeddingInput",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "An untagged union over string and content chunks; round-trip tests verify the wire forms."
+    },
     "EmbeddingRequest": {
       "spec": "main",
       "kind": "object",
@@ -1166,13 +1238,22 @@
         "critical"
       ]
     },
+    "EmbeddingResponseData": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbeddingData",
+      "file": "lib/src/models/embeddings/embedding_data.dart",
+      "schema": "EmbeddingResponseData",
+      "note": "Also preserves a base64 string if the server returns one for the documented encoding format."
+    },
     "EmbeddingResponse": {
       "spec": "main",
       "kind": "object",
       "dart_class": "EmbeddingResponse",
       "file": "lib/src/models/embeddings/embedding_response.dart",
       "schema": "EmbeddingResponse",
-      "tags": []
+      "tags": [],
+      "note": "Both SDK schemas describe numeric vectors. The request supports base64 encoding and Dart also preserves a string embedding when returned."
     },
     "EncodedPayloadOptions": {
       "spec": "main",
@@ -1295,6 +1376,18 @@
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 filtering"
+    },
+    "FTModelCard": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Model",
+      "file": "lib/src/models/models/model.dart",
+      "schema": "FTModelCard",
+      "excluded_properties": [
+        "job",
+        "root"
+      ],
+      "note": "Model covers both base and fine-tuned cards. The fine-tuned-only job and root fields are decoded but nullable on the shared type."
     },
     "FileChunk": {
       "spec": "main",
@@ -1696,11 +1789,30 @@
       "dart_class": "Model",
       "file": "lib/src/models/models/model.dart",
       "schema": "BaseModelCard",
-      "tags": [],
-      "excluded_properties": [
-        "deprecation",
-        "deprecation_replacement_model"
-      ]
+      "tags": []
+    },
+    "ModerationObject": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationResult",
+      "file": "lib/src/models/moderations/moderation_result.dart",
+      "schema": "ModerationObject"
+    },
+    "ModerationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationRequest",
+      "file": "lib/src/models/moderations/moderation_request.dart",
+      "schema": "ModerationRequest",
+      "note": "The public spec and Python SDK expose named queries; the pinned TypeScript SDK uses ClassificationRequest."
+    },
+    "ModerationResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationResponse",
+      "file": "lib/src/models/moderations/moderation_response.dart",
+      "schema": "ModerationResponse",
+      "note": "Also decodes usage from examples in the official moderation guide."
     },
     "ModerationLLMAction": {
       "spec": "main",
@@ -1746,6 +1858,13 @@
       "file": "lib/src/models/ocr/ocr_block.dart",
       "schema": "OCRAsideTextBlock",
       "parent": "OcrBlock"
+    },
+    "OCRBlockConfidenceScores": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrBlockConfidenceScores",
+      "file": "lib/src/models/ocr/ocr_block_confidence_scores.dart",
+      "schema": "OCRBlockConfidenceScores"
     },
     "OCRCaptionBlock": {
       "spec": "main",
@@ -2721,6 +2840,13 @@
       "schema": null,
       "parent": "ToolChoice",
       "note": "Uses string values or object for discrimination"
+    },
+    "StreamingDelayRange": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "StreamingDelayRange",
+      "file": "lib/src/models/models/model_audio_capabilities.dart",
+      "schema": "StreamingDelayRange"
     },
     "ToolFileChunk": {
       "spec": "main",

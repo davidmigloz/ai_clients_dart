@@ -396,6 +396,26 @@ final response = await client.embeddings.create(
 );
 ```
 
+For multimodal embeddings, pass the model ID available to your account. Mistral Multimodal Embed is in public preview. Supported models accept text and image chunks. The API also defines audio chunks for models that accept audio. [Mistral Multimodal Embed model card](https://docs.mistral.ai/models/mistral-multimodal-embed) · [Embeddings API](https://docs.mistral.ai/api/endpoint/embeddings)
+
+```dart
+final response = await client.embeddings.create(
+  request: EmbeddingRequest(
+    model: multimodalModelId,
+    input: const EmbedInput.batch([
+      EmbedInputString('A product photo'),
+      EmbedInputImage(ImageUrlContentPart('https://example.com/product.png')),
+    ]),
+    encodingFormat: 'base64',
+  ),
+);
+final encoded = response.data.first.embeddingBase64;
+```
+
+Use `EmbeddingData.embedding` for numeric vectors and `embeddingBase64` for encoded vectors. The byte layout depends on `outputDtype`.
+
+Set `MISTRAL_MULTIMODAL_EMBED_MODEL` and `MISTRAL_EMBED_IMAGE_URL` to run the multimodal part of the example.
+
 → [Full example](example/embeddings_example.dart)
 
 </details>
@@ -450,6 +470,12 @@ for (final model in models.data) {
 // Get a specific model
 final model = await client.models.get('mistral-small-latest');
 print('Max context: ${model.maxContextLength}');
+
+// Audio model cards can report supported modes and formats.
+final audio = await client.models.get(audioModelId);
+print(audio.audioTranscriptionCapabilities?.modes);
+print(audio.audioSpeechCapabilities?.responseFormats);
+print(audio.billingModelName);
 
 // Delete a fine-tuned model
 await client.models.delete('ft:mistral-small:my-model:xyz');
@@ -581,7 +607,7 @@ read `outputs`.
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.moderations` for text and chat-aware content moderation, and `client.classifications` for text classification. Both flag content categories automatically.
+Use `client.moderations` for safety flags and scores on text or conversations. Read `categoryScores.scores` for the category names returned by the selected model. Use `ChatModerationRequest.batch` to submit multiple conversations in one request. [Moderation guide](https://docs.mistral.ai/studio/safety-moderation)
 
 ```dart
 // Text moderation
@@ -610,20 +636,26 @@ final result = await client.moderations.createChat(
 );
 ```
 
+Use `client.classifications` with the ID of an existing classifier. Each result contains a map of configured targets and their label scores. Mistral lists Classifier Factory as deprecated. [Classifier API](https://docs.mistral.ai/api/endpoint/classifiers) · [Deprecated features](https://docs.mistral.ai/resources/deprecated)
+
 ```dart
-final result = await client.classifications.create(
-  request: ClassificationRequest(
-    model: 'mistral-moderation-2603',
-    input: ['Is this spam?'],
+final classifications = await client.classifications.create(
+  request: ClassificationRequest.text(
+    model: classifierModelId,
+    input: 'Please send me a copy of the invoice.',
   ),
 );
 
-for (final item in result.results) {
-  print('Categories: ${item.categories}');
+for (final result in classifications.results) {
+  for (final target in result.targets.entries) {
+    print('${target.key}: ${target.value.scores}');
+  }
 }
 ```
 
-→ [Full example](example/moderation_example.dart)
+Set `MISTRAL_CLASSIFIER_MODEL` to run the classifier example.
+
+→ [Moderation example](example/moderation_example.dart) · [Classification example](example/classification_example.dart)
 
 </details>
 
@@ -632,29 +664,36 @@ for (final item in result.results) {
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.ocr.process(...)` to extract text from documents and images. Supports both URL and base64-encoded inputs, and returns markdown per page.
+Use `client.ocr.process(...)` to extract Markdown and paragraph-level blocks from URLs, uploaded files, or base64-encoded documents and images. Mistral retired `mistral-ocr-4-0` on September 30, 2026. Use `mistral-ocr-4-1` or `mistral-ocr-latest` for block-level confidence scores. [OCR 4.1 release](https://docs.mistral.ai/resources/release-note/2026-08-31-ocr-4-1-general-availability) · [OCR 4.0 retirement](https://docs.mistral.ai/resources/release-note/2026-09-29-ocr-4-0-deprecation)
 
 ```dart
 // From URL
 final result = await client.ocr.process(
   request: OcrRequest(
     model: 'mistral-ocr-latest',
-    document: OcrDocument.fromUrl('https://example.com/document.pdf'),
+    document: OcrDocument.url('https://example.com/document.pdf'),
+    includeBlocks: true,
+    confidenceScoresGranularity: OcrConfidenceScoresGranularity.block,
   ),
 );
 
 for (final page in result.pages) {
   print('Page ${page.index}: ${page.markdown}');
+  for (final block in page.blocks ?? const <OcrBlock>[]) {
+    print('${block.type}: ${block.confidenceScores?.blockTypeConfidenceScore}');
+  }
 }
 
 // From base64
 final result = await client.ocr.process(
   request: OcrRequest(
     model: 'mistral-ocr-latest',
-    document: OcrDocument.fromBase64(base64Data, type: 'application/pdf'),
+    document: OcrDocument.base64(data: base64Data, mimeType: 'application/pdf'),
   ),
 );
 ```
+
+Pass a local PDF path to the example to request block confidence.
 
 → [Full example](example/ocr_example.dart)
 
@@ -1288,14 +1327,14 @@ See the [example/](example/) directory for complete examples:
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
 | [`json_mode_example.dart`](example/json_mode_example.dart) | Structured output |
 | [`vision_example.dart`](example/vision_example.dart) | Multimodal inputs |
-| [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
+| [`embeddings_example.dart`](example/embeddings_example.dart) | Text and multimodal embeddings |
 | [`fim_example.dart`](example/fim_example.dart) | Code completion |
 | [`files_example.dart`](example/files_example.dart) | File uploads, filters, and signed URLs |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuned model management |
 | [`batch_example.dart`](example/batch_example.dart) | Batch filtering, inline results, and polling |
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
-| [`classification_example.dart`](example/classification_example.dart) | Text classification |
-| [`ocr_example.dart`](example/ocr_example.dart) | Document text extraction |
+| [`classification_example.dart`](example/classification_example.dart) | Text and chat classification with target scores |
+| [`ocr_example.dart`](example/ocr_example.dart) | OCR 4.1 with block confidence |
 | [`audio_example.dart`](example/audio_example.dart) | Voxtral file transcription, SSE, speech, voice search, and WAV samples |
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |

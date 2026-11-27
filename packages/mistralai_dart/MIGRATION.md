@@ -156,6 +156,74 @@ in JSON. Read precise timestamps with `createdAtDateTime` and
 `updatedAtDateTime`. The deprecated PUT methods are still available. Prefer
 `updatePartial` for library and document PATCH requests.
 
+### OCR 4.1 documents and confidence
+
+Replace the retired `mistral-ocr-4-0` model with `mistral-ocr-4-1` or
+`mistral-ocr-latest`. Add `OcrConfidenceScoresGranularity.block` to exhaustive
+switches over the granularity enum and `ImageDocument` to exhaustive switches
+over `OcrDocument`.
+
+```dart
+// Before
+final request = OcrRequest(
+  model: 'mistral-ocr-4-0',
+  document: OcrDocument.url(documentUrl),
+);
+
+// After
+final request = OcrRequest(
+  model: 'mistral-ocr-4-1',
+  document: OcrDocument.url(documentUrl),
+  includeBlocks: true,
+  confidenceScoresGranularity: OcrConfidenceScoresGranularity.block,
+);
+```
+
+`OcrDocument.base64(data: ..., mimeType: ...)` now writes a data URL in
+`document_url` or `image_url`. If you read stored requests with
+`OcrDocument.fromJson`, it accepts the previous
+`{"type":"base64","data":"...","mime_type":"..."}` shape.
+
+### Embedding input variants
+
+Add the image, audio, and mixed batch variants to exhaustive switches over
+`EmbedInput`. Text calls can continue using `EmbedInput.string` and
+`EmbedInput.list`.
+
+```dart
+// Before
+final count = switch (input) {
+  EmbedInputString() => 1,
+  EmbedInputList(:final values) => values.length,
+};
+
+// After
+final count = switch (input) {
+  EmbedInputItem() => 1,
+  EmbedInputList(:final values) => values.length,
+  EmbedInputBatch(:final items) => items.length,
+};
+```
+
+### Read classifier targets
+
+`ChatClassificationRequest(input: messages)` now sends
+`{"input":{"messages":[...]}}`. `ChatClassificationRequest.batch` sends
+one such envelope per conversation. Dart also reads previously stored flat
+message arrays.
+
+```dart
+// Before
+final scores = response.results.first.categoryScores;
+
+// After
+final targets = response.results.first.targets;
+final billingScore = targets['topic']?.scores['billing'];
+```
+
+Use the target and label names configured on your classifier.
+`client.moderations` provides safety flags and model-defined category scores.
+
 ### Voxtral transcription timing
 
 Voxtral 3 provides segment timestamps. Use an explicit segment granularity
@@ -1125,7 +1193,7 @@ final job = await client.batch.jobs.create(
 final response = await client.ocr.process(
   request: OcrRequest(
     model: 'mistral-ocr-latest',
-    document: OcrDocument.fromUrl('https://example.com/document.pdf'),
+    document: OcrDocument.url('https://example.com/document.pdf'),
   ),
 );
 ```

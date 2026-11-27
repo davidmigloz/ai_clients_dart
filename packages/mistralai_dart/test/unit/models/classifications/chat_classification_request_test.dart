@@ -73,7 +73,12 @@ void main() {
         final json = request.toJson();
 
         expect(json['model'], 'mistral-moderation-2603');
-        expect(json['input'], hasLength(2));
+        expect(json['input'], {
+          'messages': [
+            {'role': 'user', 'content': 'Hello'},
+            {'role': 'assistant', 'content': 'Hi!'},
+          ],
+        });
       });
     });
 

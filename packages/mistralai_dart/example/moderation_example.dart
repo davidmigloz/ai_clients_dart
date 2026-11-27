@@ -32,9 +32,7 @@ void main() async {
     if (textResponse.firstResult != null) {
       final result = textResponse.firstResult!;
       print('Categories: ${result.categories}');
-      print('Sexual score: ${result.categoryScores.sexual}');
-      print('Hate score: ${result.categoryScores.hate}');
-      print('Violence score: ${result.categoryScores.violence}');
+      print('Category scores: ${result.categoryScores.scores}');
     }
 
     // --- Example 2: Batch text moderation ---
@@ -88,23 +86,10 @@ void main() async {
     );
 
     if (analysisResponse.firstResult != null) {
-      final scores = analysisResponse.firstResult!.categoryScores;
-      print('Content Safety Analysis:');
-      print('  Sexual content: ${(scores.sexual * 100).toStringAsFixed(2)}%');
-      print('  Hate speech: ${(scores.hate * 100).toStringAsFixed(2)}%');
-      print('  Violence: ${(scores.violence * 100).toStringAsFixed(2)}%');
-      print('  Harassment: ${(scores.harassment * 100).toStringAsFixed(2)}%');
-      print('  Self-harm: ${(scores.selfHarm * 100).toStringAsFixed(2)}%');
-
-      // Check against custom threshold
-      const threshold = 0.1;
-      final lowRisk =
-          scores.sexual < threshold &&
-          scores.hate < threshold &&
-          scores.violence < threshold &&
-          scores.harassment < threshold;
-
-      print('\nContent is ${lowRisk ? "LOW RISK" : "REQUIRES REVIEW"}');
+      final scores = analysisResponse.firstResult!.categoryScores.scores;
+      for (final entry in scores.entries) {
+        print('${entry.key}: ${(entry.value * 100).toStringAsFixed(2)}%');
+      }
     }
   } finally {
     client.close();

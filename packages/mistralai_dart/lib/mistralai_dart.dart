@@ -118,6 +118,7 @@ export 'src/models/classifications/chat_classification_request.dart';
 export 'src/models/classifications/classification_request.dart';
 export 'src/models/classifications/classification_response.dart';
 export 'src/models/classifications/classification_result.dart';
+export 'src/models/classifications/classification_target_result.dart';
 // --- Models: Connectors (Beta) ---
 export 'src/models/connectors/auth_data.dart';
 export 'src/models/connectors/auth_status.dart';
@@ -214,6 +215,7 @@ export 'src/models/metadata/stop_sequence.dart';
 export 'src/models/metadata/usage_info.dart';
 // --- Models: Models API ---
 export 'src/models/models/model.dart';
+export 'src/models/models/model_audio_capabilities.dart';
 export 'src/models/models/model_list.dart';
 // --- Models: Moderations ---
 export 'src/models/moderations/category_scores.dart';
@@ -310,6 +312,7 @@ export 'src/models/observability/traces_request.dart';
 export 'src/models/observability/update_dataset_record_payload_request.dart';
 // --- Models: OCR ---
 export 'src/models/ocr/ocr_block.dart';
+export 'src/models/ocr/ocr_block_confidence_scores.dart';
 export 'src/models/ocr/ocr_confidence_score.dart';
 export 'src/models/ocr/ocr_confidence_scores_granularity.dart';
 export 'src/models/ocr/ocr_document.dart';

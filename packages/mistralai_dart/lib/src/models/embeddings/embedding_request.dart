@@ -11,10 +11,10 @@ class EmbeddingRequest {
   /// The model to use for generating embeddings.
   final String model;
 
-  /// The input text(s) to generate embeddings for.
+  /// The inputs to generate embeddings for.
   ///
-  /// Can be a single string ([EmbedInputString]) or a list of strings
-  /// ([EmbedInputList]).
+  /// Use text with any compatible text model. Multimodal models may accept
+  /// image and audio chunks as well as mixed batches.
   final EmbedInput input;
 
   /// The format to return embeddings in.
@@ -142,7 +142,7 @@ class EmbeddingRequest {
           encodingFormat == other.encodingFormat &&
           outputDimension == other.outputDimension &&
           outputDtype == other.outputDtype &&
-          mapsEqual(metadata, other.metadata);
+          mapsDeepEqual(metadata, other.metadata);
 
   @override
   int get hashCode => Object.hash(
@@ -151,7 +151,7 @@ class EmbeddingRequest {
     encodingFormat,
     outputDimension,
     outputDtype,
-    mapHash(metadata),
+    mapDeepHashCode(metadata),
   );
 
   @override
