@@ -12,6 +12,7 @@
 
 - [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/chat_example.dart) (~625 tokens): Chat completions, token scores, and Priority Tier.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/streaming_example.dart) (~267 tokens): Streaming responses.
+- [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/responses_example.dart): Stateless generation, SSE and input token counts.
 - [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/vision_example.dart) (~476 tokens): Multimodal inputs.
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/tool_calling_example.dart) (~1.3k tokens): Tool calling.
 - [json_mode_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/json_mode_example.dart) (~1.3k tokens): Structured output.

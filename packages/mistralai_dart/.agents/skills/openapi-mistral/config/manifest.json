@@ -4828,6 +4828,597 @@
       "schema": "SummaryError",
       "tags": [],
       "note": "The managed Search API uses the same summary wire types as RAG."
+    },
+    "ResponsesInputText": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputTextPart",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesInputText",
+      "tags": []
+    },
+    "ResponsesInputImage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputImagePart",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesInputImage",
+      "tags": []
+    },
+    "ResponsesInputFile": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputFilePart",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesInputFile",
+      "tags": []
+    },
+    "ResponsesPromptCacheBreakpoint": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponsePromptCacheBreakpoint",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesPromptCacheBreakpoint",
+      "tags": []
+    },
+    "ResponsesOutputText": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputText",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesOutputText",
+      "tags": []
+    },
+    "ResponsesOutputRefusal": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputRefusal",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesOutputRefusal",
+      "tags": []
+    },
+    "ResponsesPartReasoningText": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseReasoningText",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesPartReasoningText",
+      "tags": []
+    },
+    "ResponsesSummary": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseReasoningSummary",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesSummary",
+      "tags": []
+    },
+    "ResponsesAnnotationContainerFileCitation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseContainerFileCitation",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesAnnotationContainerFileCitation",
+      "tags": []
+    },
+    "ResponsesAnnotationFileCitation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFileCitation",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesAnnotationFileCitation",
+      "tags": []
+    },
+    "ResponsesAnnotationFilePath": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFilePath",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesAnnotationFilePath",
+      "tags": []
+    },
+    "ResponsesAnnotationURLCitation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseUrlCitation",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesAnnotationURLCitation",
+      "tags": []
+    },
+    "ResponsesOutputTextLogprob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputTokenLogprob",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesOutputTextLogprob",
+      "tags": []
+    },
+    "ResponsesOutputTextLogprobTopLogprob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputTopLogprob",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesOutputTextLogprobTopLogprob",
+      "tags": []
+    },
+    "ResponsesTextDeltaEventLogprob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseStreamTokenLogprob",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesTextDeltaEventLogprob",
+      "tags": []
+    },
+    "ResponsesTextDeltaEventLogprobTopLogprob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseStreamTopLogprob",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesTextDeltaEventLogprobTopLogprob",
+      "tags": []
+    },
+    "ResponsesInputImageContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFunctionImagePart",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesInputImageContent",
+      "tags": []
+    },
+    "ResponsesInputTextContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputTextPart",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesInputTextContent",
+      "tags": []
+    },
+    "ResponsesInputFileContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputFilePart",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesInputFileContent",
+      "tags": []
+    },
+    "ResponsesContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseReasoningText",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesContent",
+      "tags": []
+    },
+    "ResponsesTextDoneEventLogprob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseStreamTokenLogprob",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesTextDoneEventLogprob",
+      "tags": []
+    },
+    "ResponsesTextDoneEventLogprobTopLogprob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseStreamTopLogprob",
+      "file": "lib/src/models/responses/response_content.dart",
+      "schema": "ResponsesTextDoneEventLogprobTopLogprob",
+      "tags": []
+    },
+    "ResponsesEasyInputMessage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputMessage",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesEasyInputMessage",
+      "tags": []
+    },
+    "ResponsesOutputMessage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputMessage",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesOutputMessage",
+      "tags": []
+    },
+    "ResponsesFunctionToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFunctionCall",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesFunctionToolCall",
+      "tags": []
+    },
+    "ResponsesFunctionCallOutput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFunctionCallOutput",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesFunctionCallOutput",
+      "tags": []
+    },
+    "ResponsesReasoningItem": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseReasoningItem",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesReasoningItem",
+      "tags": []
+    },
+    "ResponsesCallerDirect": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseDirectCaller",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesCallerDirect",
+      "tags": []
+    },
+    "ResponsesCallerProgram": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseProgramCaller",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesCallerProgram",
+      "tags": []
+    },
+    "ResponsesFunctionCallOutputCallerDirect": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseDirectCaller",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesFunctionCallOutputCallerDirect",
+      "tags": []
+    },
+    "ResponsesFunctionCallOutputCallerProgram": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseProgramCaller",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesFunctionCallOutputCallerProgram",
+      "tags": []
+    },
+    "ResponsesMessage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputMessage",
+      "file": "lib/src/models/responses/response_item.dart",
+      "schema": "ResponsesMessage",
+      "tags": []
+    },
+    "ResponsesFunctionTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFunctionTool",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesFunctionTool",
+      "tags": []
+    },
+    "ResponsesNamespaceTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseNamespaceTool",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesNamespaceTool",
+      "tags": []
+    },
+    "ResponsesCustomTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseCustomTool",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesCustomTool",
+      "tags": []
+    },
+    "ResponsesText": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseCustomTextFormat",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesText",
+      "tags": []
+    },
+    "ResponsesGrammar": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseCustomGrammarFormat",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesGrammar",
+      "tags": []
+    },
+    "ResponsesToolChoiceFunction": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseToolChoiceFunction",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesToolChoiceFunction",
+      "tags": []
+    },
+    "ResponsesFormatText": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseTextFormatPlain",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesFormatText",
+      "tags": []
+    },
+    "ResponsesFormatJSONObject": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseTextFormatJsonObject",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesFormatJSONObject",
+      "tags": []
+    },
+    "ResponsesFormatTextJSONSchemaConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseTextFormatJsonSchema",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesFormatTextJSONSchemaConfig",
+      "tags": []
+    },
+    "ResponsesTextConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseTextConfig",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesTextConfig",
+      "tags": []
+    },
+    "ResponsesSupportedReasoning": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseReasoning",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesSupportedReasoning",
+      "tags": []
+    },
+    "ResponsesToolFunction": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseNestedFunctionTool",
+      "file": "lib/src/models/responses/response_tool.dart",
+      "schema": "ResponsesToolFunction",
+      "tags": []
+    },
+    "CreateResponseRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateResponseRequest",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "CreateResponseRequest",
+      "tags": [],
+      "excluded_properties": [
+        "conversation",
+        "previous_response_id",
+        "prompt",
+        "moderation",
+        "store",
+        "top_logprobs"
+      ]
+    },
+    "CreateResponseResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MistralResponse",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "CreateResponseResponse",
+      "tags": []
+    },
+    "CountResponseInputTokensRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CountResponseInputTokensRequest",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "CountResponseInputTokensRequest",
+      "tags": [],
+      "excluded_properties": [
+        "conversation",
+        "previous_response_id",
+        "prompt"
+      ]
+    },
+    "CountResponseInputTokensResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputTokenCount",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "CountResponseInputTokensResponse",
+      "tags": []
+    },
+    "ResponsesError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseError",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "ResponsesError",
+      "tags": []
+    },
+    "ResponsesIncompleteDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseIncompleteDetails",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "ResponsesIncompleteDetails",
+      "tags": []
+    },
+    "ResponsesUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseUsage",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "ResponsesUsage",
+      "tags": []
+    },
+    "ResponsesInputTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInputTokensDetails",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "ResponsesInputTokensDetails",
+      "tags": []
+    },
+    "ResponsesOutputTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputTokensDetails",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "ResponsesOutputTokensDetails",
+      "tags": []
+    },
+    "ResponsesMisalignment": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseMisalignment",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "ResponsesMisalignment",
+      "tags": []
+    },
+    "ResponsesMisalignmentSteer": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseMisalignmentSteer",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "ResponsesMisalignmentSteer",
+      "tags": []
+    },
+    "ResponsesErrorEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseStreamErrorEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesErrorEvent",
+      "tags": []
+    },
+    "ResponsesCompletedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseCompletedEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesCompletedEvent",
+      "tags": []
+    },
+    "ResponsesContentPartAddedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseContentPartAddedEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesContentPartAddedEvent",
+      "tags": []
+    },
+    "ResponsesContentPartDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseContentPartDoneEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesContentPartDoneEvent",
+      "tags": []
+    },
+    "ResponsesCreatedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseCreatedEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesCreatedEvent",
+      "tags": []
+    },
+    "ResponsesFailedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFailedEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesFailedEvent",
+      "tags": []
+    },
+    "ResponsesFunctionCallArgumentsDeltaEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFunctionArgumentsDeltaEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesFunctionCallArgumentsDeltaEvent",
+      "tags": []
+    },
+    "ResponsesFunctionCallArgumentsDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseFunctionArgumentsDoneEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesFunctionCallArgumentsDoneEvent",
+      "tags": []
+    },
+    "ResponsesInProgressEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInProgressEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesInProgressEvent",
+      "tags": []
+    },
+    "ResponsesIncompleteEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseIncompleteEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesIncompleteEvent",
+      "tags": []
+    },
+    "ResponsesOutputItemAddedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputItemAddedEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesOutputItemAddedEvent",
+      "tags": []
+    },
+    "ResponsesOutputItemDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseOutputItemDoneEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesOutputItemDoneEvent",
+      "tags": []
+    },
+    "ResponsesTextDeltaEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseTextDeltaEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesTextDeltaEvent",
+      "tags": []
+    },
+    "ResponsesTextDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseTextDoneEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesTextDoneEvent",
+      "tags": []
+    },
+    "ResponsesReasoningTextDeltaEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseReasoningTextDeltaEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesReasoningTextDeltaEvent",
+      "tags": []
+    },
+    "ResponsesReasoningTextDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseReasoningTextDoneEvent",
+      "file": "lib/src/models/responses/response_stream_event.dart",
+      "schema": "ResponsesReasoningTextDoneEvent",
+      "tags": []
+    },
+    "ResponsesStreamFrame": {
+      "spec": "main",
+      "kind": "skip",
+      "schema": "ResponsesStreamFrame",
+      "file": "",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SDK frame wrapper around SSE event name and data. Dart decodes the event wire shape directly."
     }
   }
 }

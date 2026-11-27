@@ -32,6 +32,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 ### Generation and streaming
 
 - Chat completions with streaming, tool calling, vision, JSON mode, and structured output
+- Stateless Responses with SSE, multimodal input, function tools, and token counting
 - Embeddings, FIM code completions, and reasoning effort control
 - Model management and discovery
 
@@ -229,6 +230,41 @@ await for (final chunk in stream) {
 ```
 
 → [Full example](example/streaming_example.dart)
+
+</details>
+
+### How do I use the Responses API?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.responses` to create a stateless response, stream server-sent
+events, or count input tokens. Keep conversation state in your app. Send the
+ordered history, prior output items and client-executed tool results in the
+next request. Requests run in the foreground.
+
+```dart
+const request = CreateResponseRequest(
+  model: 'mistral-large-latest',
+  input: ResponseInput.text('Summarize how Dart streams work.'),
+);
+
+final result = await client.responses.create(request: request);
+print(result.outputText);
+
+await for (final event in client.responses.createStream(request: request)) {
+  if (event is ResponseTextDeltaEvent) {
+    print(event.delta);
+  }
+}
+```
+
+Use `ResponseInput.items` for text, image and file messages or tool results,
+and `ResponseTextConfig` for structured output. Mistral's API supports JSON
+and SSE with the same request. For migration from a stored Responses API,
+replay the full history instead of passing a previous response ID.
+
+→ [Full example](example/responses_example.dart)
 
 </details>
 
@@ -1285,6 +1321,7 @@ See the [example/](example/) directory for complete examples:
 |---------|-------------|
 | [`chat_example.dart`](example/chat_example.dart) | Chat completions, token scores, and Priority Tier |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
+| [`responses_example.dart`](example/responses_example.dart) | Stateless Responses and token counting |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
 | [`json_mode_example.dart`](example/json_mode_example.dart) | Structured output |
 | [`vision_example.dart`](example/vision_example.dart) | Multimodal inputs |
@@ -1323,6 +1360,7 @@ See the [example/](example/) directory for complete examples:
 | API | Status |
 |-----|--------|
 | Chat | ✅ Full |
+| Responses | Stateless generation, streaming and input token counting |
 | Embeddings | ✅ Full |
 | Models | ✅ Full |
 | FIM | ✅ Full |

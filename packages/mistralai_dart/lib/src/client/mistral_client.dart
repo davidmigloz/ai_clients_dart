@@ -24,6 +24,7 @@ import '../resources/observability/observability_resource.dart';
 import '../resources/ocr_resource.dart';
 import '../resources/prompts/prompts_resource.dart';
 import '../resources/rag/rag_resource.dart';
+import '../resources/responses_resource.dart';
 import '../resources/skills/skills_resource.dart';
 import '../resources/users/users_resource.dart';
 import '../resources/workflows/workflows_resource.dart';
@@ -41,6 +42,7 @@ import 'retry_wrapper.dart';
 ///
 /// API methods are grouped into logical resources:
 /// - [chat] - Chat completions with streaming support
+/// - [responses] - Stateless Responses, streaming, and token counting
 /// - [classifications] - Text classification
 /// - [embeddings] - Text embeddings
 /// - [files] - File upload and management
@@ -135,6 +137,9 @@ class MistralClient {
 
   /// Resource for chat completions.
   late final ChatResource chat;
+
+  /// Resource for stateless Responses and input token counts.
+  late final ResponsesResource responses;
 
   /// Resource for embeddings.
   late final EmbeddingsResource embeddings;
@@ -246,6 +251,14 @@ class MistralClient {
 
     // Initialize all API resources
     chat = ChatResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    responses = ResponsesResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
