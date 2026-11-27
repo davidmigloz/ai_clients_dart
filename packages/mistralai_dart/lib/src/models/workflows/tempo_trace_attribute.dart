@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import 'tempo_trace_attribute_double_value.dart';
 
 /// A trace attribute key-value pair.
 @immutable
@@ -10,6 +11,23 @@ class TempoTraceAttribute {
 
   /// The attribute value.
   final Map<String, dynamic> value;
+
+  /// Floating-point value when the attribute has a double representation.
+  double? get doubleValue => value['doubleValue'] == null
+      ? null
+      : TempoTraceAttributeDoubleValue.fromJson(value).doubleValue;
+
+  /// Array elements when the attribute has an array representation.
+  List<TempoTraceAttributeArrayElement>? get arrayElements {
+    final array = value['arrayValue'] as Map<String, dynamic>?;
+    return (array?['values'] as List<dynamic>?)
+        ?.map(
+          (element) => TempoTraceAttributeArrayElement.fromJson(
+            element as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
 
   /// Creates a [TempoTraceAttribute].
   const TempoTraceAttribute({required this.key, required this.value});

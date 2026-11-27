@@ -20,6 +20,7 @@ import '../../models/workflows/workflow_execution_response.dart';
 import '../../models/workflows/workflow_execution_trace_events_response.dart';
 import '../../models/workflows/workflow_execution_trace_o_tel_response.dart';
 import '../../models/workflows/workflow_execution_trace_summary_response.dart';
+import '../../utils/streaming_parser.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -38,10 +39,17 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
   });
 
   /// Gets a workflow execution by ID.
-  Future<WorkflowExecutionResponse> get({required String executionId}) async {
+  Future<WorkflowExecutionResponse> get({
+    required String executionId,
+    bool? includeSearchKeys,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(
-      '/v1/workflows/executions/$executionId',
+      '/v1/workflows/executions/${Uri.encodeComponent(executionId)}',
+      queryParams: {
+        if (includeSearchKeys != null)
+          'include_search_keys': includeSearchKeys.toString(),
+      },
     );
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
@@ -74,13 +82,16 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
         '/v1/workflows/executions/$executionId/stream',
         queryParams: queryParams,
       );
-      final headers = requestBuilder.buildHeaders();
+      final headers = requestBuilder.buildHeaders(
+        additionalHeaders: {'Accept': 'text/event-stream'},
+      );
 
       final httpRequest = http.Request('GET', url)..headers.addAll(headers);
       return httpRequest;
     },
     StreamEventSsePayload.fromJson,
     abortTrigger: abortTrigger,
+    parseEvents: (bytes) => parseSSE(bytes, includeEventId: true),
   );
 
   /// Gets logs for a workflow execution.
@@ -188,9 +199,10 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
         queryParams: queryParams,
       );
       final headers = requestBuilder.buildHeaders(
-        additionalHeaders: lastEventId != null
-            ? {'Last-Event-ID': lastEventId}
-            : null,
+        additionalHeaders: {
+          'Accept': 'text/event-stream',
+          'Last-Event-ID': ?lastEventId,
+        },
       );
 
       final httpRequest = http.Request('GET', url)..headers.addAll(headers);
@@ -198,6 +210,7 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
     },
     ExecutionLogRecord.fromJson,
     abortTrigger: abortTrigger,
+    parseEvents: (bytes) => parseSSE(bytes, includeEventId: true),
   );
 
   /// Cancels a single workflow execution.

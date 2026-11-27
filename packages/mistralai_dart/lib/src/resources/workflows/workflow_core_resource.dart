@@ -13,6 +13,7 @@ import '../../models/workflows/workflow_execution_sync_response.dart';
 import '../../models/workflows/workflow_get_response.dart';
 import '../../models/workflows/workflow_list_response.dart';
 import '../../models/workflows/workflow_registration_list_response.dart';
+import '../../models/workflows/workflow_tags_add_request.dart';
 import '../../models/workflows/workflow_unarchive_response.dart';
 import '../../models/workflows/workflow_update_request.dart';
 import '../../models/workflows/workflow_update_response.dart';
@@ -39,13 +40,17 @@ class WorkflowCoreResource extends ResourceBase {
   Future<WorkflowRegistrationListResponse> list({
     bool? archived,
     String? search,
+    String? workflowName,
+    List<String>? excludeTags,
     int? limit,
     String? cursor,
   }) async {
     ensureNotClosed?.call();
-    final queryParams = <String, String>{};
+    final queryParams = <String, Object>{};
     if (archived != null) queryParams['archived'] = archived.toString();
     if (search != null) queryParams['workflow_search'] = search;
+    if (workflowName != null) queryParams['workflow_name'] = workflowName;
+    if (excludeTags != null) queryParams['exclude_tags'] = excludeTags;
     if (limit != null) queryParams['limit'] = limit.toString();
     if (cursor != null) queryParams['cursor'] = cursor;
 
@@ -71,6 +76,7 @@ class WorkflowCoreResource extends ResourceBase {
   /// - [deploymentStatus] filters by deployment activity (`active`/`inactive`).
   /// - [archived] filters by archived state.
   /// - [tags] filters to workflows tagged with all listed tags.
+  /// - [excludeTags] omits workflows tagged with any listed tag.
   /// - [sortBy] is the field to sort by.
   /// - [order] is the sort order.
   /// - [cursor] is the pagination cursor.
@@ -86,6 +92,7 @@ class WorkflowCoreResource extends ResourceBase {
     String? deploymentStatus,
     bool? archived,
     List<String>? tags,
+    List<String>? excludeTags,
     String? sortBy,
     String? order,
     String? cursor,
@@ -115,6 +122,7 @@ class WorkflowCoreResource extends ResourceBase {
     }
     if (archived != null) queryParams['archived'] = archived.toString();
     if (tags != null) queryParams['tags'] = tags;
+    if (excludeTags != null) queryParams['exclude_tags'] = excludeTags;
     if (sortBy != null) queryParams['sort_by'] = sortBy;
     if (order != null) queryParams['order'] = order;
     if (cursor != null) queryParams['cursor'] = cursor;
@@ -160,6 +168,24 @@ class WorkflowCoreResource extends ResourceBase {
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return WorkflowUpdateResponse.fromJson(responseBody);
+  }
+
+  /// Adds tags to a workflow.
+  Future<void> addTags({
+    required String workflowIdentifier,
+    required WorkflowTagsAddRequest request,
+  }) async {
+    ensureNotClosed?.call();
+    final identifier = Uri.encodeComponent(workflowIdentifier);
+    final url = requestBuilder.buildUrl('/v1/workflows/$identifier/tags');
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(
+        requestBuilder.buildHeaders(
+          additionalHeaders: {'Content-Type': 'application/json'},
+        ),
+      )
+      ..body = jsonEncode(request.toJson());
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Archives a workflow.

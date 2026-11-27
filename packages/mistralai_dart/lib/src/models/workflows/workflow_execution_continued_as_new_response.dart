@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import 'workflow_event_run_context.dart';
 import 'workflow_execution_continued_as_new_attributes_response.dart';
 
 /// Workflow execution continued-as-new event.
@@ -33,8 +34,24 @@ class WorkflowExecutionContinuedAsNewResponse {
   /// The event attributes.
   final WorkflowExecutionContinuedAsNewAttributesResponse attributes;
 
+  /// Run and schedule identifiers carried by the event.
+  final WorkflowEventRunContext runContext;
+
+  /// Run that started this chain.
+  String? get chainRunId => runContext.chainRunId;
+
+  /// Run from which this execution continued.
+  String? get continuedRunId => runContext.continuedRunId;
+
+  /// First run of the workflow execution.
+  String? get firstExecutionRunId => runContext.firstExecutionRunId;
+
+  /// The schedule that started the workflow.
+  String? get scheduleId => runContext.scheduleId;
+
   /// Creates a [WorkflowExecutionContinuedAsNewResponse].
   const WorkflowExecutionContinuedAsNewResponse({
+    this.runContext = const WorkflowEventRunContext(),
     required this.eventId,
     required this.eventTimestamp,
     this.eventType = 'WORKFLOW_EXECUTION_CONTINUED_AS_NEW',
@@ -50,6 +67,7 @@ class WorkflowExecutionContinuedAsNewResponse {
   factory WorkflowExecutionContinuedAsNewResponse.fromJson(
     Map<String, dynamic> json,
   ) => WorkflowExecutionContinuedAsNewResponse(
+    runContext: WorkflowEventRunContext.fromJson(json),
     eventId: json['event_id'] as String? ?? '',
     eventTimestamp: json['event_timestamp'] as int? ?? 0,
     eventType:
@@ -66,6 +84,7 @@ class WorkflowExecutionContinuedAsNewResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ...runContext.toJson(),
     'event_id': eventId,
     'event_timestamp': eventTimestamp,
     'event_type': eventType,
@@ -79,6 +98,7 @@ class WorkflowExecutionContinuedAsNewResponse {
 
   /// Creates a copy with replaced values.
   WorkflowExecutionContinuedAsNewResponse copyWith({
+    WorkflowEventRunContext? runContext,
     String? eventId,
     int? eventTimestamp,
     String? eventType,
@@ -90,6 +110,7 @@ class WorkflowExecutionContinuedAsNewResponse {
     WorkflowExecutionContinuedAsNewAttributesResponse? attributes,
   }) {
     return WorkflowExecutionContinuedAsNewResponse(
+      runContext: runContext ?? this.runContext,
       eventId: eventId ?? this.eventId,
       eventTimestamp: eventTimestamp ?? this.eventTimestamp,
       eventType: eventType ?? this.eventType,
@@ -109,7 +130,8 @@ class WorkflowExecutionContinuedAsNewResponse {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionContinuedAsNewResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return eventId == other.eventId &&
+    return runContext == other.runContext &&
+        eventId == other.eventId &&
         eventTimestamp == other.eventTimestamp &&
         eventType == other.eventType &&
         rootWorkflowExecId == other.rootWorkflowExecId &&
@@ -121,7 +143,7 @@ class WorkflowExecutionContinuedAsNewResponse {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     eventId,
     eventTimestamp,
     eventType,
@@ -131,11 +153,12 @@ class WorkflowExecutionContinuedAsNewResponse {
     workflowRunId,
     workflowName,
     attributes,
-  );
+    runContext,
+  ]);
 
   @override
   String toString() =>
-      'WorkflowExecutionContinuedAsNewResponse('
+      'WorkflowExecutionContinuedAsNewResponse(runContext: $runContext, '
       'eventId: $eventId, '
       'eventTimestamp: $eventTimestamp, '
       'eventType: $eventType, '

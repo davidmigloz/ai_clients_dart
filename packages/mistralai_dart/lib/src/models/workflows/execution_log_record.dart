@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// A single log record emitted by a workflow execution.
@@ -25,6 +26,7 @@ class ExecutionLogRecord {
 
   /// Creates an [ExecutionLogRecord].
   ExecutionLogRecord({
+    this.eventId,
     required this.timestamp,
     required this.traceId,
     required this.spanId,
@@ -36,6 +38,7 @@ class ExecutionLogRecord {
   /// Creates an [ExecutionLogRecord] from JSON.
   factory ExecutionLogRecord.fromJson(Map<String, dynamic> json) =>
       ExecutionLogRecord(
+        eventId: json['_event_id'] as String?,
         timestamp: json['timestamp'] as String? ?? '',
         traceId: json['trace_id'] as String? ?? '',
         spanId: json['span_id'] as String? ?? '',
@@ -58,8 +61,12 @@ class ExecutionLogRecord {
     'log_attributes': logAttributes,
   };
 
+  /// Resume cursor supplied in the SSE envelope.
+  final String? eventId;
+
   /// Creates a copy with replaced values.
   ExecutionLogRecord copyWith({
+    Object? eventId = unsetCopyWithValue,
     String? timestamp,
     String? traceId,
     String? spanId,
@@ -68,6 +75,9 @@ class ExecutionLogRecord {
     Map<String, String>? logAttributes,
   }) {
     return ExecutionLogRecord(
+      eventId: eventId == unsetCopyWithValue
+          ? this.eventId
+          : eventId as String?,
       timestamp: timestamp ?? this.timestamp,
       traceId: traceId ?? this.traceId,
       spanId: spanId ?? this.spanId,
@@ -82,7 +92,8 @@ class ExecutionLogRecord {
     if (identical(this, other)) return true;
     if (other is! ExecutionLogRecord) return false;
     if (runtimeType != other.runtimeType) return false;
-    return timestamp == other.timestamp &&
+    return eventId == other.eventId &&
+        timestamp == other.timestamp &&
         traceId == other.traceId &&
         spanId == other.spanId &&
         severityText == other.severityText &&
@@ -91,18 +102,19 @@ class ExecutionLogRecord {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     timestamp,
     traceId,
     spanId,
     severityText,
     body,
     mapDeepHashCode(logAttributes),
-  );
+    eventId,
+  ]);
 
   @override
   String toString() =>
-      'ExecutionLogRecord('
+      'ExecutionLogRecord(eventId: $eventId, '
       'timestamp: $timestamp, '
       'traceId: $traceId, '
       'spanId: $spanId, '

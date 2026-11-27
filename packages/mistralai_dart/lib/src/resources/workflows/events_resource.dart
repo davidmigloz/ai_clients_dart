@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../models/workflows/list_workflow_event_response.dart';
 import '../../models/workflows/stream_event_sse_payload.dart';
 import '../../models/workflows/workflow_event_type.dart';
+import '../../utils/streaming_parser.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -110,7 +111,7 @@ class EventsResource extends ResourceBase with StreamingResource {
         queryParams: queryParams,
       );
 
-      final additionalHeaders = <String, String>{};
+      final additionalHeaders = {'Accept': 'text/event-stream'};
       if (lastEventId != null) {
         additionalHeaders['last-event-id'] = lastEventId;
       }
@@ -124,5 +125,6 @@ class EventsResource extends ResourceBase with StreamingResource {
     },
     StreamEventSsePayload.fromJson,
     abortTrigger: abortTrigger,
+    parseEvents: (bytes) => parseSSE(bytes, includeEventId: true),
   );
 }

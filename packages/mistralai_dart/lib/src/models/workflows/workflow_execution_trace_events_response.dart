@@ -49,8 +49,12 @@ class WorkflowExecutionTraceEventsResponse {
   /// The ID of the workflow.
   final String? workflowId;
 
+  /// Search keys supplied by the workflow, when requested.
+  final Map<String, String?>? searchKeys;
+
   /// Creates a [WorkflowExecutionTraceEventsResponse].
   WorkflowExecutionTraceEventsResponse({
+    this.searchKeys,
     required this.workflowName,
     required this.executionId,
     required this.rootExecutionId,
@@ -120,6 +124,8 @@ class WorkflowExecutionTraceEventsResponse {
       );
     }
     return WorkflowExecutionTraceEventsResponse(
+      searchKeys: (json['search_keys'] as Map<String, dynamic>?)
+          ?.cast<String, String?>(),
       workflowName: workflowName,
       executionId: executionId,
       rootExecutionId: rootExecutionId,
@@ -141,6 +147,7 @@ class WorkflowExecutionTraceEventsResponse {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (searchKeys != null) 'search_keys': searchKeys,
     'workflow_name': workflowName,
     'execution_id': executionId,
     'root_execution_id': rootExecutionId,
@@ -159,6 +166,7 @@ class WorkflowExecutionTraceEventsResponse {
 
   /// Creates a copy with replaced values.
   WorkflowExecutionTraceEventsResponse copyWith({
+    Object? searchKeys = unsetCopyWithValue,
     String? workflowName,
     String? executionId,
     String? rootExecutionId,
@@ -175,6 +183,11 @@ class WorkflowExecutionTraceEventsResponse {
     Object? workflowId = unsetCopyWithValue,
   }) {
     return WorkflowExecutionTraceEventsResponse(
+      searchKeys: searchKeys == unsetCopyWithValue
+          ? this.searchKeys
+          : searchKeys == null
+          ? null
+          : Map<String, String?>.from(searchKeys as Map<Object?, Object?>),
       workflowName: workflowName ?? this.workflowName,
       executionId: executionId ?? this.executionId,
       rootExecutionId: rootExecutionId ?? this.rootExecutionId,
@@ -212,7 +225,8 @@ class WorkflowExecutionTraceEventsResponse {
     if (other is! WorkflowExecutionTraceEventsResponse) return false;
     if (runtimeType != other.runtimeType) return false;
     if (!listOfMapsDeepEqual(events, other.events)) return false;
-    return workflowName == other.workflowName &&
+    return mapsEqual(searchKeys, other.searchKeys) &&
+        workflowName == other.workflowName &&
         executionId == other.executionId &&
         rootExecutionId == other.rootExecutionId &&
         status == other.status &&
@@ -228,7 +242,7 @@ class WorkflowExecutionTraceEventsResponse {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     workflowName,
     executionId,
     rootExecutionId,
@@ -243,11 +257,12 @@ class WorkflowExecutionTraceEventsResponse {
     deploymentName,
     userId,
     workflowId,
-  );
+    mapHash(searchKeys),
+  ]);
 
   @override
   String toString() =>
-      'WorkflowExecutionTraceEventsResponse('
+      'WorkflowExecutionTraceEventsResponse(searchKeys: ${searchKeys?.length}, '
       'workflowName: $workflowName, '
       'executionId: $executionId, '
       'rootExecutionId: $rootExecutionId, '

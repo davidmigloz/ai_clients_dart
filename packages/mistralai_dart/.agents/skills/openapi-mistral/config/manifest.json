@@ -147,6 +147,118 @@
     "excluded_resources": []
   },
   "types": {
+    "CreateDeploymentArchiveRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateDeploymentArchiveRequest",
+      "file": "lib/src/models/workflows/deployment_archive.dart",
+      "schema": "CreateDeploymentArchiveRequest",
+      "tags": []
+    },
+    "DeploymentArchiveResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentArchiveResponse",
+      "file": "lib/src/models/workflows/deployment_archive.dart",
+      "schema": "DeploymentArchiveResponse",
+      "tags": []
+    },
+    "DeploymentArchiveUploadResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentArchiveUploadResponse",
+      "file": "lib/src/models/workflows/deployment_archive.dart",
+      "schema": "DeploymentArchiveUploadResponse",
+      "tags": []
+    },
+    "DeploymentWorkerListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentWorkerListResponse",
+      "file": "lib/src/models/workflows/deployment_worker_list_response.dart",
+      "schema": "DeploymentWorkerListResponse",
+      "tags": []
+    },
+    "DeploymentLogType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "DeploymentLogType",
+      "file": "lib/src/models/workflows/deployment_log_type.dart",
+      "schema": "DeploymentLogType",
+      "tags": []
+    },
+    "PrincipalType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PrincipalType",
+      "file": "lib/src/models/workflows/principal_type.dart",
+      "schema": "PrincipalType",
+      "tags": []
+    },
+    "DeploymentK8sBackendSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentK8sBackendSpec",
+      "file": "lib/src/models/workflows/deployment_backend_spec.dart",
+      "schema": "DeploymentK8sBackendSpec",
+      "tags": []
+    },
+    "DeploymentMistralCloudBackendSpec": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentMistralCloudBackendSpec",
+      "file": "lib/src/models/workflows/deployment_backend_spec.dart",
+      "schema": "DeploymentMistralCloudBackendSpec",
+      "tags": []
+    },
+    "DeploymentSecretBinding": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentSecretBinding",
+      "file": "lib/src/models/workflows/deployment_backend_spec.dart",
+      "schema": "DeploymentSecretBinding",
+      "tags": []
+    },
+    "GitCommitAuthor": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GitCommitAuthor",
+      "file": "lib/src/models/workflows/git_commit_metadata.dart",
+      "schema": "GitCommitAuthor",
+      "tags": []
+    },
+    "GitCommitMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GitCommitMetadata",
+      "file": "lib/src/models/workflows/git_commit_metadata.dart",
+      "schema": "GitCommitMetadata",
+      "tags": []
+    },
+    "TempoTraceAttributeArrayElement": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceAttributeArrayElement",
+      "file": "lib/src/models/workflows/tempo_trace_attribute_double_value.dart",
+      "schema": "TempoTraceAttributeArrayElement",
+      "tags": []
+    },
+    "TempoTraceAttributeDoubleValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceAttributeDoubleValue",
+      "file": "lib/src/models/workflows/tempo_trace_attribute_double_value.dart",
+      "schema": "TempoTraceAttributeDoubleValue",
+      "tags": []
+    },
+    "WorkflowTagsAddRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowTagsAddRequest",
+      "file": "lib/src/models/workflows/workflow_tags_add_request.dart",
+      "schema": "WorkflowTagsAddRequest",
+      "tags": []
+    },
     "IngestionPipelineConfiguration": {
       "spec": "main",
       "kind": "object",

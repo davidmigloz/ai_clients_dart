@@ -58,7 +58,6 @@ void main() {
           'name': 'my-deployment',
           'spec': {
             'github_url': 'https://github.com/org/repo',
-            'entrypoint': 'worker:main',
             'revision': 'main',
           },
         });

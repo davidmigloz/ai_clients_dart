@@ -30,7 +30,9 @@ class RegistrationsResource extends ResourceBase {
     String? taskQueue,
     bool? activeOnly,
     bool? includeShared,
+    String? workflowName,
     String? workflowSearch,
+    List<String>? excludeTags,
     bool? archived,
     bool? withWorkflow,
     bool? availableInChatAssistant,
@@ -38,14 +40,16 @@ class RegistrationsResource extends ResourceBase {
     String? cursor,
   }) async {
     ensureNotClosed?.call();
-    final queryParams = <String, String>{};
+    final queryParams = <String, Object>{};
     if (workflowId != null) queryParams['workflow_id'] = workflowId;
     if (taskQueue != null) queryParams['task_queue'] = taskQueue;
     if (activeOnly != null) queryParams['active_only'] = activeOnly.toString();
     if (includeShared != null) {
       queryParams['include_shared'] = includeShared.toString();
     }
+    if (workflowName != null) queryParams['workflow_name'] = workflowName;
     if (workflowSearch != null) queryParams['workflow_search'] = workflowSearch;
+    if (excludeTags != null) queryParams['exclude_tags'] = excludeTags;
     if (archived != null) queryParams['archived'] = archived.toString();
     if (withWorkflow != null) {
       queryParams['with_workflow'] = withWorkflow.toString();
@@ -99,6 +103,7 @@ class RegistrationsResource extends ResourceBase {
   /// Returns raw JSON as the response may be either a
   /// [WorkflowExecutionResponse] or [WorkflowExecutionSyncResponse] depending
   /// on the [WorkflowExecutionRequest.waitForResult] flag.
+  @Deprecated('Execute directly using client.workflows.core.')
   Future<Map<String, dynamic>> execute({
     required String workflowRegistrationId,
     required WorkflowExecutionRequest request,
@@ -121,6 +126,7 @@ class RegistrationsResource extends ResourceBase {
   ///
   /// When [WorkflowExecutionRequest.waitForResult] is false (default),
   /// returns a [WorkflowExecutionResponse].
+  @Deprecated('Execute directly using client.workflows.core.')
   Future<WorkflowExecutionResponse> executeAsync({
     required String workflowRegistrationId,
     required WorkflowExecutionRequest request,
@@ -135,6 +141,7 @@ class RegistrationsResource extends ResourceBase {
   /// Executes a workflow registration and waits for the result.
   ///
   /// Returns a [WorkflowExecutionSyncResponse] with the execution result.
+  @Deprecated('Execute directly using client.workflows.core.')
   Future<WorkflowExecutionSyncResponse> executeSync({
     required String workflowRegistrationId,
     required WorkflowExecutionRequest request,

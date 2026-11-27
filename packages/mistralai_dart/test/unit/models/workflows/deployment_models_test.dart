@@ -15,7 +15,7 @@ void main() {
 
       final json = spec.toJson();
       expect(json['github_url'], 'https://github.com/org/repo');
-      expect(json['entrypoint'], 'worker:main');
+      expect(json, isNot(contains('entrypoint')));
       expect(json['revision'], 'main');
 
       expect(DeploymentWorkerSpecInput.fromJson(json), spec);

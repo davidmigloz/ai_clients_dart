@@ -11,8 +11,12 @@ class WorkflowExecutionCanceledAttributes {
   /// The cancellation reason.
   final String? reason;
 
+  /// Attempt number for this execution.
+  final int attempt;
+
   /// Creates a [WorkflowExecutionCanceledAttributes].
   const WorkflowExecutionCanceledAttributes({
+    this.attempt = 1,
     required this.taskId,
     this.reason,
   });
@@ -21,22 +25,26 @@ class WorkflowExecutionCanceledAttributes {
   factory WorkflowExecutionCanceledAttributes.fromJson(
     Map<String, dynamic> json,
   ) => WorkflowExecutionCanceledAttributes(
+    attempt: json['attempt'] as int? ?? 1,
     taskId: json['task_id'] as String? ?? '',
     reason: json['reason'] as String?,
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    'attempt': attempt,
     'task_id': taskId,
     if (reason != null) 'reason': reason,
   };
 
   /// Creates a copy with replaced values.
   WorkflowExecutionCanceledAttributes copyWith({
+    int? attempt,
     String? taskId,
     Object? reason = unsetCopyWithValue,
   }) {
     return WorkflowExecutionCanceledAttributes(
+      attempt: attempt ?? this.attempt,
       taskId: taskId ?? this.taskId,
       reason: reason == unsetCopyWithValue ? this.reason : reason as String?,
     );
@@ -47,13 +55,15 @@ class WorkflowExecutionCanceledAttributes {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionCanceledAttributes) return false;
     if (runtimeType != other.runtimeType) return false;
-    return taskId == other.taskId && reason == other.reason;
+    return attempt == other.attempt &&
+        taskId == other.taskId &&
+        reason == other.reason;
   }
 
   @override
-  int get hashCode => Object.hash(taskId, reason);
+  int get hashCode => Object.hashAll([taskId, reason, attempt]);
 
   @override
   String toString() =>
-      'WorkflowExecutionCanceledAttributes(taskId: $taskId, reason: $reason)';
+      'WorkflowExecutionCanceledAttributes(attempt: $attempt, taskId: $taskId, reason: $reason)';
 }
