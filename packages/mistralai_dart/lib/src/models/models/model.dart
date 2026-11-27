@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'model_audio_capabilities.dart';
 
 /// Information about a model.
 @immutable
@@ -42,6 +43,30 @@ class Model {
   /// Whether this model is internal-only.
   final bool internal;
 
+  /// Model name used for billing.
+  final String? billingModelName;
+
+  /// Deprecation timestamp when the model has one.
+  final String? deprecation;
+
+  /// Model to use in place of this deprecated model.
+  final String? deprecationReplacementModel;
+
+  /// Job identifier for a fine-tuned model.
+  final String? job;
+
+  /// Root model identifier for a fine-tuned model.
+  final String? root;
+
+  /// Whether the fine-tuned model is archived.
+  final bool? archived;
+
+  /// Speech generation capabilities, when reported.
+  final AudioSpeechCapabilities? audioSpeechCapabilities;
+
+  /// Speech recognition capabilities, when reported.
+  final AudioTranscriptionCapabilities? audioTranscriptionCapabilities;
+
   /// Creates a [Model].
   const Model({
     required this.id,
@@ -56,6 +81,14 @@ class Model {
     this.type,
     this.capabilities = const ModelCapabilities(),
     this.internal = false,
+    this.billingModelName,
+    this.deprecation,
+    this.deprecationReplacementModel,
+    this.job,
+    this.root,
+    this.archived,
+    this.audioSpeechCapabilities,
+    this.audioTranscriptionCapabilities,
   });
 
   /// Creates a [Model] from JSON.
@@ -77,6 +110,24 @@ class Model {
           )
         : const ModelCapabilities(),
     internal: json['internal'] as bool? ?? false,
+    billingModelName: json['billing_model_name'] as String?,
+    deprecation: json['deprecation'] as String?,
+    deprecationReplacementModel:
+        json['deprecation_replacement_model'] as String?,
+    job: json['job'] as String?,
+    root: json['root'] as String?,
+    archived: json['archived'] as bool?,
+    audioSpeechCapabilities: json['audio_speech_capabilities'] == null
+        ? null
+        : AudioSpeechCapabilities.fromJson(
+            json['audio_speech_capabilities'] as Map<String, dynamic>,
+          ),
+    audioTranscriptionCapabilities:
+        json['audio_transcription_capabilities'] == null
+        ? null
+        : AudioTranscriptionCapabilities.fromJson(
+            json['audio_transcription_capabilities'] as Map<String, dynamic>,
+          ),
   );
 
   /// Creates a copy with the given fields replaced.
@@ -93,6 +144,14 @@ class Model {
     Object? type = unsetCopyWithValue,
     ModelCapabilities? capabilities,
     bool? internal,
+    Object? billingModelName = unsetCopyWithValue,
+    Object? deprecation = unsetCopyWithValue,
+    Object? deprecationReplacementModel = unsetCopyWithValue,
+    Object? job = unsetCopyWithValue,
+    Object? root = unsetCopyWithValue,
+    Object? archived = unsetCopyWithValue,
+    Object? audioSpeechCapabilities = unsetCopyWithValue,
+    Object? audioTranscriptionCapabilities = unsetCopyWithValue,
   }) => Model(
     id: id ?? this.id,
     object: object ?? this.object,
@@ -114,6 +173,28 @@ class Model {
     type: type == unsetCopyWithValue ? this.type : type as String?,
     capabilities: capabilities ?? this.capabilities,
     internal: internal ?? this.internal,
+    billingModelName: billingModelName == unsetCopyWithValue
+        ? this.billingModelName
+        : billingModelName as String?,
+    deprecation: deprecation == unsetCopyWithValue
+        ? this.deprecation
+        : deprecation as String?,
+    deprecationReplacementModel:
+        deprecationReplacementModel == unsetCopyWithValue
+        ? this.deprecationReplacementModel
+        : deprecationReplacementModel as String?,
+    job: job == unsetCopyWithValue ? this.job : job as String?,
+    root: root == unsetCopyWithValue ? this.root : root as String?,
+    archived: archived == unsetCopyWithValue
+        ? this.archived
+        : archived as bool?,
+    audioSpeechCapabilities: audioSpeechCapabilities == unsetCopyWithValue
+        ? this.audioSpeechCapabilities
+        : audioSpeechCapabilities as AudioSpeechCapabilities?,
+    audioTranscriptionCapabilities:
+        audioTranscriptionCapabilities == unsetCopyWithValue
+        ? this.audioTranscriptionCapabilities
+        : audioTranscriptionCapabilities as AudioTranscriptionCapabilities?,
   );
 
   /// Converts to JSON.
@@ -131,6 +212,18 @@ class Model {
     if (type != null) 'type': type,
     'capabilities': capabilities.toJson(),
     'internal': internal,
+    if (billingModelName != null) 'billing_model_name': billingModelName,
+    if (deprecation != null) 'deprecation': deprecation,
+    if (deprecationReplacementModel != null)
+      'deprecation_replacement_model': deprecationReplacementModel,
+    if (job != null) 'job': job,
+    if (root != null) 'root': root,
+    if (archived != null) 'archived': archived,
+    if (audioSpeechCapabilities != null)
+      'audio_speech_capabilities': audioSpeechCapabilities!.toJson(),
+    if (audioTranscriptionCapabilities != null)
+      'audio_transcription_capabilities': audioTranscriptionCapabilities!
+          .toJson(),
   };
 
   @override
@@ -149,10 +242,19 @@ class Model {
           defaultModelTemperature == other.defaultModelTemperature &&
           type == other.type &&
           capabilities == other.capabilities &&
-          internal == other.internal;
+          internal == other.internal &&
+          billingModelName == other.billingModelName &&
+          deprecation == other.deprecation &&
+          deprecationReplacementModel == other.deprecationReplacementModel &&
+          job == other.job &&
+          root == other.root &&
+          archived == other.archived &&
+          audioSpeechCapabilities == other.audioSpeechCapabilities &&
+          audioTranscriptionCapabilities ==
+              other.audioTranscriptionCapabilities;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     object,
     created,
@@ -165,7 +267,15 @@ class Model {
     type,
     capabilities,
     internal,
-  );
+    billingModelName,
+    deprecation,
+    deprecationReplacementModel,
+    job,
+    root,
+    archived,
+    audioSpeechCapabilities,
+    audioTranscriptionCapabilities,
+  ]);
 
   @override
   String toString() =>
@@ -173,7 +283,15 @@ class Model {
       'ownedBy: $ownedBy, name: $name, description: $description, '
       'maxContextLength: $maxContextLength, aliases: $aliases, '
       'defaultModelTemperature: $defaultModelTemperature, '
-      'type: $type, capabilities: $capabilities, internal: $internal)';
+      'type: $type, capabilities: $capabilities, internal: $internal, '
+      'billingModelName: $billingModelName, '
+      'deprecation: $deprecation, '
+      'deprecationReplacementModel: $deprecationReplacementModel, '
+      'job: $job, '
+      'root: $root, '
+      'archived: $archived, '
+      'audioSpeechCapabilities: $audioSpeechCapabilities, '
+      'audioTranscriptionCapabilities: $audioTranscriptionCapabilities)';
 }
 
 /// Capabilities of a model.

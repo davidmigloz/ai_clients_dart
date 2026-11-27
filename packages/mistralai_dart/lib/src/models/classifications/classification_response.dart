@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'classification_result.dart';
 
 /// Response from a classification request.
@@ -43,11 +44,22 @@ class ClassificationResponse {
     'results': results.map((e) => e.toJson()).toList(),
   };
 
+  /// Creates a copy with replaced values.
+  ClassificationResponse copyWith({
+    String? id,
+    String? model,
+    List<ClassificationResult>? results,
+  }) => ClassificationResponse(
+    id: id ?? this.id,
+    model: model ?? this.model,
+    results: results ?? this.results,
+  );
+
   /// Returns the first result, if any.
   ClassificationResult? get firstResult =>
       results.isNotEmpty ? results.first : null;
 
-  /// Returns true if any result was flagged.
+  /// Returns true if any legacy moderation-shaped result was flagged.
   bool get flagged => results.any((r) => r.flagged);
 
   @override
@@ -56,10 +68,11 @@ class ClassificationResponse {
       other is ClassificationResponse &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          model == other.model;
+          model == other.model &&
+          listsEqual(results, other.results);
 
   @override
-  int get hashCode => Object.hash(id, model, results);
+  int get hashCode => Object.hash(id, model, listHash(results));
 
   @override
   String toString() =>

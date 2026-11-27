@@ -1,6 +1,11 @@
 import 'package:meta/meta.dart';
 
-/// Scores for each moderation category.
+import '../common/equality_helpers.dart';
+
+/// Scores returned by a moderation model.
+///
+/// Read [scores] or index this object using the exact API category names.
+/// The named getters retain the original legacy moderation categories.
 ///
 /// Each score is between 0.0 and 1.0, with higher values indicating
 /// higher confidence that the content belongs to that category.
@@ -42,7 +47,9 @@ class CategoryScores {
   /// Personal Identifiable Information (PII) score.
   final double? pii;
 
-  /// Creates [CategoryScores].
+  final Map<String, double>? _wireScores;
+
+  /// Creates legacy category scores.
   const CategoryScores({
     required this.sexual,
     required this.hate,
@@ -56,69 +63,82 @@ class CategoryScores {
     required this.harassment,
     required this.harassmentThreatening,
     this.pii,
-  });
+  }) : _wireScores = null;
 
-  /// Creates [CategoryScores] from JSON.
-  factory CategoryScores.fromJson(Map<String, dynamic> json) => CategoryScores(
-    sexual: (json['sexual'] as num?)?.toDouble() ?? 0.0,
-    hate: (json['hate'] as num?)?.toDouble() ?? 0.0,
-    violence: (json['violence'] as num?)?.toDouble() ?? 0.0,
-    selfHarm: (json['self-harm'] as num?)?.toDouble() ?? 0.0,
-    sexualMinors: (json['sexual/minors'] as num?)?.toDouble() ?? 0.0,
-    hateThreatening: (json['hate/threatening'] as num?)?.toDouble() ?? 0.0,
-    violenceGraphic: (json['violence/graphic'] as num?)?.toDouble() ?? 0.0,
-    selfHarmIntent: (json['self-harm/intent'] as num?)?.toDouble() ?? 0.0,
-    selfHarmInstructions:
-        (json['self-harm/instructions'] as num?)?.toDouble() ?? 0.0,
-    harassment: (json['harassment'] as num?)?.toDouble() ?? 0.0,
-    harassmentThreatening:
-        (json['harassment/threatening'] as num?)?.toDouble() ?? 0.0,
-    pii: (json['pii'] as num?)?.toDouble(),
-  );
+  /// Creates an empty set of scores.
+  const CategoryScores.empty()
+    : _wireScores = const {},
+      sexual = 0.0,
+      hate = 0.0,
+      violence = 0.0,
+      selfHarm = 0.0,
+      sexualMinors = 0.0,
+      hateThreatening = 0.0,
+      violenceGraphic = 0.0,
+      selfHarmIntent = 0.0,
+      selfHarmInstructions = 0.0,
+      harassment = 0.0,
+      harassmentThreatening = 0.0,
+      pii = null;
+
+  CategoryScores._fromScores(Map<String, double> scores)
+    : _wireScores = Map.unmodifiable(scores),
+      sexual = scores['sexual'] ?? 0.0,
+      hate = scores['hate'] ?? 0.0,
+      violence = scores['violence'] ?? 0.0,
+      selfHarm = scores['self-harm'] ?? 0.0,
+      sexualMinors = scores['sexual/minors'] ?? 0.0,
+      hateThreatening = scores['hate/threatening'] ?? 0.0,
+      violenceGraphic = scores['violence/graphic'] ?? 0.0,
+      selfHarmIntent = scores['self-harm/intent'] ?? 0.0,
+      selfHarmInstructions = scores['self-harm/instructions'] ?? 0.0,
+      harassment = scores['harassment'] ?? 0.0,
+      harassmentThreatening = scores['harassment/threatening'] ?? 0.0,
+      pii = scores['pii'];
+
+  /// Creates [CategoryScores] from the exact category names in the response.
+  factory CategoryScores.fromJson(Map<String, dynamic> json) =>
+      CategoryScores._fromScores({
+        for (final entry in json.entries)
+          if (entry.value != null) entry.key: (entry.value as num).toDouble(),
+      });
+
+  /// Scores keyed by the category names returned by the API.
+  Map<String, double> get scores =>
+      _wireScores ??
+      Map.unmodifiable({
+        'sexual': sexual,
+        'hate': hate,
+        'violence': violence,
+        'self-harm': selfHarm,
+        'sexual/minors': sexualMinors,
+        'hate/threatening': hateThreatening,
+        'violence/graphic': violenceGraphic,
+        'self-harm/intent': selfHarmIntent,
+        'self-harm/instructions': selfHarmInstructions,
+        'harassment': harassment,
+        'harassment/threatening': harassmentThreatening,
+        'pii': ?pii,
+      });
+
+  /// Returns the score for an exact API category name, when reported.
+  double? operator [](String category) => scores[category];
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    'sexual': sexual,
-    'hate': hate,
-    'violence': violence,
-    'self-harm': selfHarm,
-    'sexual/minors': sexualMinors,
-    'hate/threatening': hateThreatening,
-    'violence/graphic': violenceGraphic,
-    'self-harm/intent': selfHarmIntent,
-    'self-harm/instructions': selfHarmInstructions,
-    'harassment': harassment,
-    'harassment/threatening': harassmentThreatening,
-    if (pii != null) 'pii': pii,
-  };
+  Map<String, dynamic> toJson() => {...scores};
+
+  /// Creates a copy with replaced scores.
+  CategoryScores copyWith({Map<String, double>? scores}) =>
+      scores == null ? this : CategoryScores._fromScores(scores);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CategoryScores &&
-          runtimeType == other.runtimeType &&
-          sexual == other.sexual &&
-          hate == other.hate &&
-          violence == other.violence &&
-          selfHarm == other.selfHarm;
+      other is CategoryScores && mapsEqual(scores, other.scores);
 
   @override
-  int get hashCode => Object.hash(
-    sexual,
-    hate,
-    violence,
-    selfHarm,
-    sexualMinors,
-    hateThreatening,
-    violenceGraphic,
-    selfHarmIntent,
-    selfHarmInstructions,
-    harassment,
-    harassmentThreatening,
-  );
+  int get hashCode => mapHash(scores);
 
   @override
-  String toString() =>
-      'CategoryScores(sexual: $sexual, hate: $hate, '
-      'violence: $violence, harassment: $harassment)';
+  String toString() => 'CategoryScores(scores: $scores)';
 }

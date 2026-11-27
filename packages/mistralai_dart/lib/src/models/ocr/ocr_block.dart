@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'ocr_block_confidence_scores.dart';
 
 /// A content block extracted from a document page (block extraction).
 ///
@@ -23,6 +24,9 @@ sealed class OcrBlock {
 
   /// The structural label of the block (the `type` discriminator).
   String get type;
+
+  /// Confidence scores when the model provides block-level scores.
+  OcrBlockConfidenceScores? get confidenceScores;
 
   /// Creates an [OcrBlock] from JSON, dispatching on the `type` discriminator.
   ///
@@ -74,6 +78,7 @@ class OcrTextBlock extends OcrBlock {
 
   /// Creates an [OcrTextBlock].
   const OcrTextBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -121,6 +126,11 @@ class OcrTextBlock extends OcrBlock {
       );
     }
     return OcrTextBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -131,6 +141,8 @@ class OcrTextBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -139,14 +151,22 @@ class OcrTextBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrTextBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrTextBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -158,6 +178,7 @@ class OcrTextBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrTextBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -166,18 +187,19 @@ class OcrTextBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrTextBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrTextBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -206,6 +228,7 @@ class OcrTitleBlock extends OcrBlock {
 
   /// Creates an [OcrTitleBlock].
   const OcrTitleBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -255,6 +278,11 @@ class OcrTitleBlock extends OcrBlock {
       );
     }
     return OcrTitleBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -265,6 +293,8 @@ class OcrTitleBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -273,14 +303,22 @@ class OcrTitleBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrTitleBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrTitleBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -292,6 +330,7 @@ class OcrTitleBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrTitleBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -300,18 +339,19 @@ class OcrTitleBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrTitleBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrTitleBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -340,6 +380,7 @@ class OcrListBlock extends OcrBlock {
 
   /// Creates an [OcrListBlock].
   const OcrListBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -387,6 +428,11 @@ class OcrListBlock extends OcrBlock {
       );
     }
     return OcrListBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -397,6 +443,8 @@ class OcrListBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -405,14 +453,22 @@ class OcrListBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrListBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrListBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -424,6 +480,7 @@ class OcrListBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrListBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -432,18 +489,19 @@ class OcrListBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrListBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrListBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -476,6 +534,7 @@ class OcrTableBlock extends OcrBlock {
 
   /// Creates an [OcrTableBlock].
   const OcrTableBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -526,6 +585,11 @@ class OcrTableBlock extends OcrBlock {
       );
     }
     return OcrTableBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -537,6 +601,8 @@ class OcrTableBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -546,10 +612,15 @@ class OcrTableBlock extends OcrBlock {
     if (tableId != null) 'table_id': tableId,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   ///
   /// Pass `null` explicitly to clear nullable fields.
   OcrTableBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
@@ -557,6 +628,9 @@ class OcrTableBlock extends OcrBlock {
     String? content,
     Object? tableId = unsetCopyWithValue,
   }) => OcrTableBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -569,6 +643,7 @@ class OcrTableBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrTableBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -578,7 +653,7 @@ class OcrTableBlock extends OcrBlock {
           tableId == other.tableId;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
@@ -586,11 +661,12 @@ class OcrTableBlock extends OcrBlock {
     bottomRightY,
     content,
     tableId,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrTableBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrTableBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars, tableId: $tableId)';
 }
@@ -622,6 +698,7 @@ class OcrImageBlock extends OcrBlock {
 
   /// Creates an [OcrImageBlock].
   const OcrImageBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -678,6 +755,11 @@ class OcrImageBlock extends OcrBlock {
       );
     }
     return OcrImageBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -689,6 +771,8 @@ class OcrImageBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -698,8 +782,13 @@ class OcrImageBlock extends OcrBlock {
     'image_id': imageId,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrImageBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
@@ -707,6 +796,9 @@ class OcrImageBlock extends OcrBlock {
     String? content,
     String? imageId,
   }) => OcrImageBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -719,6 +811,7 @@ class OcrImageBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrImageBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -728,7 +821,7 @@ class OcrImageBlock extends OcrBlock {
           imageId == other.imageId;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
@@ -736,11 +829,12 @@ class OcrImageBlock extends OcrBlock {
     bottomRightY,
     content,
     imageId,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrImageBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrImageBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars, imageId: $imageId)';
 }
@@ -769,6 +863,7 @@ class OcrEquationBlock extends OcrBlock {
 
   /// Creates an [OcrEquationBlock].
   const OcrEquationBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -818,6 +913,11 @@ class OcrEquationBlock extends OcrBlock {
       );
     }
     return OcrEquationBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -828,6 +928,8 @@ class OcrEquationBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -836,14 +938,22 @@ class OcrEquationBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrEquationBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrEquationBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -855,6 +965,7 @@ class OcrEquationBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrEquationBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -863,18 +974,19 @@ class OcrEquationBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrEquationBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrEquationBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -903,6 +1015,7 @@ class OcrCaptionBlock extends OcrBlock {
 
   /// Creates an [OcrCaptionBlock].
   const OcrCaptionBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -952,6 +1065,11 @@ class OcrCaptionBlock extends OcrBlock {
       );
     }
     return OcrCaptionBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -962,6 +1080,8 @@ class OcrCaptionBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -970,14 +1090,22 @@ class OcrCaptionBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrCaptionBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrCaptionBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -989,6 +1117,7 @@ class OcrCaptionBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrCaptionBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -997,18 +1126,19 @@ class OcrCaptionBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrCaptionBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrCaptionBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -1037,6 +1167,7 @@ class OcrCodeBlock extends OcrBlock {
 
   /// Creates an [OcrCodeBlock].
   const OcrCodeBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -1084,6 +1215,11 @@ class OcrCodeBlock extends OcrBlock {
       );
     }
     return OcrCodeBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -1094,6 +1230,8 @@ class OcrCodeBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -1102,14 +1240,22 @@ class OcrCodeBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrCodeBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrCodeBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -1121,6 +1267,7 @@ class OcrCodeBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrCodeBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -1129,18 +1276,19 @@ class OcrCodeBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrCodeBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrCodeBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -1169,6 +1317,7 @@ class OcrReferencesBlock extends OcrBlock {
 
   /// Creates an [OcrReferencesBlock].
   const OcrReferencesBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -1218,6 +1367,11 @@ class OcrReferencesBlock extends OcrBlock {
       );
     }
     return OcrReferencesBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -1228,6 +1382,8 @@ class OcrReferencesBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -1236,14 +1392,22 @@ class OcrReferencesBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrReferencesBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrReferencesBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -1255,6 +1419,7 @@ class OcrReferencesBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrReferencesBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -1263,18 +1428,19 @@ class OcrReferencesBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrReferencesBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrReferencesBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -1303,6 +1469,7 @@ class OcrAsideTextBlock extends OcrBlock {
 
   /// Creates an [OcrAsideTextBlock].
   const OcrAsideTextBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -1352,6 +1519,11 @@ class OcrAsideTextBlock extends OcrBlock {
       );
     }
     return OcrAsideTextBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -1362,6 +1534,8 @@ class OcrAsideTextBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -1370,14 +1544,22 @@ class OcrAsideTextBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrAsideTextBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrAsideTextBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -1389,6 +1571,7 @@ class OcrAsideTextBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrAsideTextBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -1397,18 +1580,19 @@ class OcrAsideTextBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrAsideTextBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrAsideTextBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -1437,6 +1621,7 @@ class OcrHeaderBlock extends OcrBlock {
 
   /// Creates an [OcrHeaderBlock].
   const OcrHeaderBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -1486,6 +1671,11 @@ class OcrHeaderBlock extends OcrBlock {
       );
     }
     return OcrHeaderBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -1496,6 +1686,8 @@ class OcrHeaderBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -1504,14 +1696,22 @@ class OcrHeaderBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrHeaderBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrHeaderBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -1523,6 +1723,7 @@ class OcrHeaderBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrHeaderBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -1531,18 +1732,19 @@ class OcrHeaderBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrHeaderBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrHeaderBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -1571,6 +1773,7 @@ class OcrFooterBlock extends OcrBlock {
 
   /// Creates an [OcrFooterBlock].
   const OcrFooterBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -1620,6 +1823,11 @@ class OcrFooterBlock extends OcrBlock {
       );
     }
     return OcrFooterBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -1630,6 +1838,8 @@ class OcrFooterBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -1638,14 +1848,22 @@ class OcrFooterBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrFooterBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrFooterBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -1657,6 +1875,7 @@ class OcrFooterBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrFooterBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -1665,18 +1884,19 @@ class OcrFooterBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrFooterBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrFooterBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -1705,6 +1925,7 @@ class OcrSignatureBlock extends OcrBlock {
 
   /// Creates an [OcrSignatureBlock].
   const OcrSignatureBlock({
+    this.confidenceScores,
     required this.topLeftX,
     required this.topLeftY,
     required this.bottomRightX,
@@ -1754,6 +1975,11 @@ class OcrSignatureBlock extends OcrBlock {
       );
     }
     return OcrSignatureBlock(
+      confidenceScores: json['confidence_scores'] == null
+          ? null
+          : OcrBlockConfidenceScores.fromJson(
+              json['confidence_scores'] as Map<String, dynamic>,
+            ),
       topLeftX: topLeftX,
       topLeftY: topLeftY,
       bottomRightX: bottomRightX,
@@ -1764,6 +1990,8 @@ class OcrSignatureBlock extends OcrBlock {
 
   @override
   Map<String, dynamic> toJson() => {
+    if (confidenceScores != null)
+      'confidence_scores': confidenceScores!.toJson(),
     'type': type,
     'top_left_x': topLeftX,
     'top_left_y': topLeftY,
@@ -1772,14 +2000,22 @@ class OcrSignatureBlock extends OcrBlock {
     'content': content,
   };
 
+  /// Scores of the block content and structural label.
+  @override
+  final OcrBlockConfidenceScores? confidenceScores;
+
   /// Creates a copy with the specified fields replaced.
   OcrSignatureBlock copyWith({
+    Object? confidenceScores = unsetCopyWithValue,
     int? topLeftX,
     int? topLeftY,
     int? bottomRightX,
     int? bottomRightY,
     String? content,
   }) => OcrSignatureBlock(
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrBlockConfidenceScores?,
     topLeftX: topLeftX ?? this.topLeftX,
     topLeftY: topLeftY ?? this.topLeftY,
     bottomRightX: bottomRightX ?? this.bottomRightX,
@@ -1791,6 +2027,7 @@ class OcrSignatureBlock extends OcrBlock {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is OcrSignatureBlock &&
+          confidenceScores == other.confidenceScores &&
           runtimeType == other.runtimeType &&
           topLeftX == other.topLeftX &&
           topLeftY == other.topLeftY &&
@@ -1799,18 +2036,19 @@ class OcrSignatureBlock extends OcrBlock {
           content == other.content;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     type,
     topLeftX,
     topLeftY,
     bottomRightX,
     bottomRightY,
     content,
-  );
+    confidenceScores,
+  ]);
 
   @override
   String toString() =>
-      'OcrSignatureBlock(topLeft: ($topLeftX, $topLeftY), '
+      'OcrSignatureBlock(confidenceScores: $confidenceScores, topLeft: ($topLeftX, $topLeftY), '
       'bottomRight: ($bottomRightX, $bottomRightY), '
       'content: ${content.length} chars)';
 }
@@ -1825,6 +2063,14 @@ class UnknownOcrBlock extends OcrBlock {
     : _raw = Map<String, dynamic>.unmodifiable(raw);
 
   final Map<String, dynamic> _raw;
+
+  @override
+  OcrBlockConfidenceScores? get confidenceScores {
+    final data = _raw['confidence_scores'];
+    return data is Map<String, dynamic>
+        ? OcrBlockConfidenceScores.fromJson(data)
+        : null;
+  }
 
   /// The raw JSON data for the unrecognized block.
   Map<String, dynamic> get raw => _raw;

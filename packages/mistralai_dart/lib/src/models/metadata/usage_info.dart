@@ -36,8 +36,12 @@ class UsageInfo {
   /// Capacity tier that served the request, such as `standard` or `priority`.
   final String? serviceTier;
 
+  /// The number of requests accounted for by the response, when reported.
+  final int? requestCount;
+
   /// Creates a [UsageInfo].
   const UsageInfo({
+    this.requestCount,
     required this.promptTokens,
     required this.completionTokens,
     required this.totalTokens,
@@ -51,6 +55,7 @@ class UsageInfo {
 
   /// Creates a [UsageInfo] from JSON.
   factory UsageInfo.fromJson(Map<String, dynamic> json) => UsageInfo(
+    requestCount: json['request_count'] as int?,
     promptTokens: json['prompt_tokens'] as int? ?? 0,
     completionTokens: json['completion_tokens'] as int? ?? 0,
     totalTokens: json['total_tokens'] as int? ?? 0,
@@ -76,6 +81,7 @@ class UsageInfo {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (requestCount != null) 'request_count': requestCount,
     'prompt_tokens': promptTokens,
     'completion_tokens': completionTokens,
     'total_tokens': totalTokens,
@@ -92,6 +98,7 @@ class UsageInfo {
 
   /// Creates a copy with the given fields replaced.
   UsageInfo copyWith({
+    Object? requestCount = unsetCopyWithValue,
     int? promptTokens,
     int? completionTokens,
     int? totalTokens,
@@ -102,6 +109,9 @@ class UsageInfo {
     Object? completionTokensDetails = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
   }) => UsageInfo(
+    requestCount: requestCount == unsetCopyWithValue
+        ? this.requestCount
+        : requestCount as int?,
     promptTokens: promptTokens ?? this.promptTokens,
     completionTokens: completionTokens ?? this.completionTokens,
     totalTokens: totalTokens ?? this.totalTokens,
@@ -129,6 +139,7 @@ class UsageInfo {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UsageInfo &&
+          requestCount == other.requestCount &&
           runtimeType == other.runtimeType &&
           promptTokens == other.promptTokens &&
           completionTokens == other.completionTokens &&
@@ -141,7 +152,7 @@ class UsageInfo {
           serviceTier == other.serviceTier;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     promptTokens,
     completionTokens,
     totalTokens,
@@ -151,11 +162,12 @@ class UsageInfo {
     promptTokenDetails,
     completionTokensDetails,
     serviceTier,
-  );
+    requestCount,
+  ]);
 
   @override
   String toString() =>
-      'UsageInfo(promptTokens: $promptTokens, '
+      'UsageInfo(requestCount: $requestCount, promptTokens: $promptTokens, '
       'completionTokens: $completionTokens, '
       'totalTokens: $totalTokens, '
       'promptAudioSeconds: $promptAudioSeconds, '

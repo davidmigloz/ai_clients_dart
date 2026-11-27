@@ -12,6 +12,9 @@ enum OcrConfidenceScoresGranularity {
   /// Page-level aggregate confidence scores only.
   page('page'),
 
+  /// Return page-level and block-level confidence scores.
+  block('block'),
+
   /// Unknown granularity (forward compatibility).
   unknown('unknown');
 
@@ -28,6 +31,7 @@ enum OcrConfidenceScoresGranularity {
       switch (value) {
         'word' => word,
         'page' => page,
+        'block' => block,
         null => null,
         _ => unknown,
       };

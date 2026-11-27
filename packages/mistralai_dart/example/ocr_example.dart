@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:mistralai_dart/mistralai_dart.dart';
@@ -15,7 +16,7 @@ import 'package:mistralai_dart/mistralai_dart.dart';
 /// - PDF documents
 /// - Images (PNG, JPEG, etc.)
 /// - Other document formats
-void main() {
+Future<void> main(List<String> arguments) async {
   final apiKey = Platform.environment['MISTRAL_API_KEY'];
   if (apiKey == null) {
     print('Please set MISTRAL_API_KEY environment variable');
@@ -25,6 +26,27 @@ void main() {
   final client = MistralClient.withApiKey(apiKey);
 
   try {
+    if (arguments.isNotEmpty) {
+      final data = base64Encode(await File(arguments.first).readAsBytes());
+      final response = await client.ocr.process(
+        request: OcrRequest(
+          model: 'mistral-ocr-4-1',
+          document: OcrDocument.base64(data: data, mimeType: 'application/pdf'),
+          includeBlocks: true,
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.block,
+        ),
+      );
+      for (final page in response.pages) {
+        print(page.markdown);
+        for (final block in page.blocks ?? const <OcrBlock>[]) {
+          print(
+            '${block.type}: ${block.confidenceScores?.blockTypeConfidenceScore}',
+          );
+        }
+      }
+      return;
+    }
+
     // --- Example 1: Process document from URL ---
     print('=== OCR from URL ===\n');
 

@@ -64,6 +64,25 @@ void main() async {
     print(
       'Similarity between text 2 and 3: ${cosineSimilarity(emb2, emb3).toStringAsFixed(4)}',
     );
+    final model = Platform.environment['MISTRAL_MULTIMODAL_EMBED_MODEL'];
+    final imageUrl = Platform.environment['MISTRAL_EMBED_IMAGE_URL'];
+    if (model != null && imageUrl != null) {
+      final multimodal = await client.embeddings.create(
+        request: EmbeddingRequest(
+          model: model,
+          input: EmbedInput.batch([
+            const EmbedInputString('A product photo'),
+            EmbedInputImage(ImageUrlContentPart(imageUrl)),
+          ]),
+          encodingFormat: 'base64',
+        ),
+      );
+      for (final item in multimodal.data) {
+        print(
+          'Input ${item.index}: ${item.embeddingBase64?.length} base64 characters',
+        );
+      }
+    }
   } finally {
     client.close();
   }

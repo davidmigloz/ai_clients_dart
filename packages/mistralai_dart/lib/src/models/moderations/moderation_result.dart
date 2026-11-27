@@ -37,6 +37,15 @@ class ModerationResult {
     'category_scores': categoryScores.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ModerationResult copyWith({
+    Map<String, bool>? categories,
+    CategoryScores? categoryScores,
+  }) => ModerationResult(
+    categories: categories ?? this.categories,
+    categoryScores: categoryScores ?? this.categoryScores,
+  );
+
   /// Returns true if any category was flagged.
   bool get flagged => categories.values.any((v) => v);
 
@@ -53,5 +62,6 @@ class ModerationResult {
 
   @override
   String toString() =>
-      'ModerationResult(flagged: $flagged, categories: $categories)';
+      'ModerationResult(flagged: $flagged, categories: $categories, '
+      'categoryScores: $categoryScores)';
 }

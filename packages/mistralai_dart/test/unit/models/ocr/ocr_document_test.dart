@@ -48,9 +48,11 @@ void main() {
 
         final json = doc.toJson();
 
-        expect(json['type'], 'base64');
-        expect(json['data'], 'base64data');
-        expect(json['mime_type'], 'image/png');
+        expect(json, {
+          'type': 'image_url',
+          'image_url': 'data:image/png;base64,base64data',
+        });
+        expect(OcrDocument.fromJson(json), doc);
       });
 
       test('equality works correctly', () {

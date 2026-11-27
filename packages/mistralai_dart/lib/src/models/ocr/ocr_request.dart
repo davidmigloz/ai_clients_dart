@@ -64,9 +64,10 @@ class OcrRequest {
 
   /// Granularity of confidence scores returned in the response.
   ///
-  /// `word` returns per-word scores plus the page aggregate; `page` returns
-  /// only the page aggregate. When omitted, no confidence scores are
-  /// returned, which keeps the response payload small.
+  /// Use `word` for per-word scores and the page aggregate, `page` for the
+  /// page aggregate, or `block` for the confidence of each returned block.
+  /// Enable [includeBlocks] to request blocks. Omit the granularity to skip
+  /// confidence scores.
   final OcrConfidenceScoresGranularity? confidenceScoresGranularity;
 
   /// Creates an [OcrRequest].
