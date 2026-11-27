@@ -18,7 +18,7 @@ import '../streaming_resource.dart';
 /// final response = await client.audio.speech.create(
 ///   request: SpeechRequest(
 ///     input: 'Hello, world!',
-///     model: 'mistral-speech-latest',
+///     model: 'voxtral-mini-tts-3-0',
 ///     voiceId: 'voice-123',
 ///   ),
 /// );
@@ -56,7 +56,10 @@ class SpeechResource extends ResourceBase with StreamingResource {
     final url = requestBuilder.buildUrl('/v1/audio/speech');
 
     final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+      additionalHeaders: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
     );
 
     // Ensure stream is false for non-streaming
@@ -87,7 +90,10 @@ class SpeechResource extends ResourceBase with StreamingResource {
       final url = requestBuilder.buildUrl('/v1/audio/speech');
 
       final headers = requestBuilder.buildHeaders(
-        additionalHeaders: {'Content-Type': 'application/json'},
+        additionalHeaders: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+        },
       );
 
       // Add stream: true to the request
@@ -101,7 +107,11 @@ class SpeechResource extends ResourceBase with StreamingResource {
         ..body = jsonEncode(requestData);
       return httpRequest;
     },
-    SpeechStreamEvent.fromJson,
+    (event) => SpeechStreamEvent.fromJson({
+      ...event,
+      if (event['type'] == null && event['_event'] is String)
+        'type': event['_event'],
+    }),
     abortTrigger: abortTrigger,
   );
 }

@@ -1,241 +1,132 @@
-// ignore_for_file: avoid_print, unreachable_from_main
+// ignore_for_file: avoid_print
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:mistralai_dart/mistralai_dart.dart';
 
-/// Example demonstrating audio transcription with the Mistral AI API.
-///
-/// This example shows how to:
-/// 1. Transcribe audio to text
-/// 2. Stream transcription results in real-time
-/// 3. Get word-level and segment-level timing information
-///
-/// Before running, set the MISTRAL_API_KEY environment variable.
-/// The audio can be passed as bytes, as a URL, or as the ID of a file
-/// uploaded with the Files API.
-void main() {
+const _transcriptionModel = 'voxtral-mini-transcribe-3-0';
+const _speechModel = 'voxtral-mini-tts-3-0';
+
+/// Run an audio example against the API with your own credentials.
+Future<void> main(List<String> args) async {
+  if (args.isEmpty || args.contains('--help')) {
+    print('''
+Usage
+  dart run example/audio_example.dart transcribe recording.wav
+  dart run example/audio_example.dart stream recording.wav
+  dart run example/audio_example.dart voices
+  dart run example/audio_example.dart sample VOICE_ID sample.wav
+  dart run example/audio_example.dart speech VOICE_ID output.wav
+
+Set MISTRAL_API_KEY before calling the API.
+Transcription and speech use Voxtral 3 Public Preview models.
+''');
+    return;
+  }
+
   final apiKey = Platform.environment['MISTRAL_API_KEY'];
-  if (apiKey == null) {
-    print('Please set MISTRAL_API_KEY environment variable');
-    exit(1);
+  if (apiKey == null || apiKey.isEmpty) {
+    stderr.writeln('Set MISTRAL_API_KEY before calling the API.');
+    exitCode = 1;
+    return;
   }
 
   final client = MistralClient.withApiKey(apiKey);
-
   try {
-    // Example 1: Basic transcription (requires an audio.mp3 file)
-    // Uncomment and point at an actual audio file to test
-    // await basicTranscription(client);
-
-    // Example 2: Transcription with verbose output
-    // await verboseTranscription(client);
-
-    // Example 3: Streaming transcription
-    // await streamingTranscription(client);
-
-    // For demonstration, show how the API would be called
-    demonstrateUsage();
+    switch (args) {
+      case ['transcribe', final path]:
+        await _transcribe(client, path);
+      case ['stream', final path]:
+        await _streamTranscription(client, path);
+      case ['voices']:
+        await _listVoices(client);
+      case ['sample', final voiceId, final output]:
+        final bytes = await client.audio.voices.getSampleAudio(
+          voiceId: voiceId,
+        );
+        await File(output).writeAsBytes(bytes);
+        print('Saved the voice sample to $output.');
+      case ['speech', final voiceId, final output]:
+        await _generateSpeech(client, voiceId, output);
+      default:
+        stderr.writeln('Unknown command. Run with --help for usage.');
+        exitCode = 1;
+    }
   } finally {
     client.close();
   }
 }
 
-/// Demonstrates basic audio transcription.
-Future<void> basicTranscription(MistralClient client) async {
-  print('=== Basic Audio Transcription ===\n');
+Future<TranscriptionRequest> _transcriptionRequest(String path) async =>
+    TranscriptionRequest(
+      model: _transcriptionModel,
+      fileName: File(path).uri.pathSegments.last,
+      fileBytes: await File(path).readAsBytes(),
+      diarize: true,
+      timestampGranularityOptions: const [
+        TranscriptionTimestampGranularity.segment,
+      ],
+      contextBias: const ['Mistral', 'Voxtral'],
+    );
 
-  // The audio is sent inline; no upload to the Files API is needed
-  final bytes = await File('audio.mp3').readAsBytes();
-
+Future<void> _transcribe(MistralClient client, String path) async {
   final response = await client.audio.transcriptions.create(
-    request: TranscriptionRequest(
-      fileBytes: bytes,
-      fileName: 'audio.mp3',
-      model: 'mistral-audio-latest',
-      language: 'en', // Optional: specify language for better accuracy
-    ),
+    request: await _transcriptionRequest(path),
   );
-
-  print('Transcribed text:');
   print(response.text);
-
-  if (response.duration != null) {
-    print('\nAudio duration: ${response.duration} seconds');
-  }
-
-  if (response.language != null) {
-    print('Detected language: ${response.language}');
+  for (final segment in response.segments ?? const <TranscriptionSegment>[]) {
+    print(
+      '  ${segment.start ?? '?'}–${segment.end ?? '?'}s '
+      '${segment.speakerId ?? 'speaker'}: ${segment.text}',
+    );
   }
 }
 
-/// Demonstrates transcription with verbose output including timing.
-Future<void> verboseTranscription(MistralClient client) async {
-  print('=== Verbose Audio Transcription ===\n');
-
-  const fileId = 'your-audio-file-id'; // Replace with actual file ID
-
-  final response = await client.audio.transcriptions.create(
-    request: const TranscriptionRequest(
-      file: fileId,
-      model: 'mistral-audio-latest',
-      responseFormat: 'verbose_json', // Get detailed timing info
-      timestampGranularities: true, // Include word-level timestamps
-    ),
-  );
-
-  print('Full transcription:');
-  print(response.text);
-  print('');
-
-  // Print segment information
-  if (response.segments != null && response.segments!.isNotEmpty) {
-    print('Segments:');
-    for (final segment in response.segments!) {
-      print(
-        '  [${_formatTime(segment.start)} - ${_formatTime(segment.end)}] '
-        '${segment.text}',
-      );
-    }
-    print('');
-  }
-
-  // Print word-level timing
-  if (response.words != null && response.words!.isNotEmpty) {
-    print('Words with timing:');
-    for (final word in response.words!) {
-      print(
-        '  ${word.word}: ${_formatTime(word.start)} - ${_formatTime(word.end)} '
-        '(${word.duration.toStringAsFixed(2)}s)',
-      );
-    }
-  }
-}
-
-/// Demonstrates streaming transcription.
-Future<void> streamingTranscription(MistralClient client) async {
-  print('=== Streaming Audio Transcription ===\n');
-
-  const fileId = 'your-audio-file-id'; // Replace with actual file ID
-
+Future<void> _streamTranscription(MistralClient client, String path) async {
   final stream = client.audio.transcriptions.createStream(
-    request: const TranscriptionRequest(
-      file: fileId,
-      model: 'mistral-audio-latest',
-    ),
+    request: await _transcriptionRequest(path),
   );
-
-  print('Transcribing (streaming)...\n');
-
   await for (final event in stream) {
-    switch (event.type) {
-      case 'start':
-        print('Started transcription (ID: ${event.id})');
-
-      case 'text':
-      case 'text_delta':
-        // Print text as it arrives
-        if (event.text != null) {
-          stdout.write(event.text);
-        }
-
-      case 'word':
-        // Optionally handle word events
-        if (event.word != null) {
-          // Could use for timing visualization
-        }
-
-      case 'segment':
-        // Handle segment completion
-        if (event.segment != null) {
-          print('\n[Segment ${event.segment!.id} complete]');
-        }
-
-      case 'end':
-      case 'done':
-        print('\n\nTranscription complete.');
-
-      default:
-        // Handle other event types
-        break;
+    if (event.type == 'transcription.text.delta') {
+      stdout.write(event.text ?? '');
+    } else if (event.isDone) {
+      stdout.writeln();
     }
   }
 }
 
-/// Demonstrates how the API would be used without making actual calls.
-void demonstrateUsage() {
-  print('=== Audio Transcription API Usage ===\n');
+Future<void> _listVoices(MistralClient client) async {
+  final page = await client.audio.voices.search(pageSize: 10, type: 'preset');
+  for (final voice in page.data) {
+    print('${voice.name}: ${voice.id} (${voice.kind?.value ?? 'unknown'})');
+  }
 
-  print('1. Transcribe audio bytes directly:');
-  print('''
-   final bytes = await File('recording.mp3').readAsBytes();
-   final response = await client.audio.transcriptions.create(
-     request: TranscriptionRequest(
-       fileBytes: bytes,
-       fileName: 'recording.mp3',
-       model: 'mistral-audio-latest',
-       language: 'en',  // Optional
-     ),
-   );
-   print(response.text);
-''');
-
-  print('2. Or transcribe a file uploaded with the Files API:');
-  print('''
-   final file = await client.files.upload(
-     filePath: 'recording.mp3',
-     purpose: FilePurpose.audio,
-   );
-   final response = await client.audio.transcriptions.create(
-     request: TranscriptionRequest(
-       file: file.id,
-       model: 'mistral-audio-latest',
-     ),
-   );
-''');
-
-  print('3. Stream transcription for real-time results:');
-  print('''
-   final stream = client.audio.transcriptions.createStream(
-     request: TranscriptionRequest(
-       file: file.id,
-       model: 'mistral-audio-latest',
-     ),
-   );
-
-   await for (final event in stream) {
-     if (event.text != null) {
-       stdout.write(event.text);
-     }
-   }
-''');
-
-  print('4. Get detailed timing information:');
-  print(r'''
-   final response = await client.audio.transcriptions.create(
-     request: TranscriptionRequest(
-       file: file.id,
-       model: 'mistral-audio-latest',
-       responseFormat: 'verbose_json',
-       timestampGranularities: true,
-     ),
-   );
-
-   for (final word in response.words ?? []) {
-     print('${word.word}: ${word.start}s - ${word.end}s');
-   }
-''');
-
-  print('Supported response formats:');
-  print('  - json: Standard JSON response');
-  print('  - text: Plain text only');
-  print('  - srt: SubRip subtitle format');
-  print('  - vtt: WebVTT subtitle format');
-  print('  - verbose_json: JSON with detailed timing info');
+  if (page.nextPageToken case final cursor?) {
+    final next = await client.audio.voices.search(
+      pageSize: 10,
+      pageToken: cursor,
+      type: 'preset',
+    );
+    for (final voice in next.data) {
+      print('${voice.name}: ${voice.id} (${voice.kind?.value ?? 'unknown'})');
+    }
+  }
 }
 
-/// Formats a time in seconds as MM:SS.mmm
-String _formatTime(double seconds) {
-  final mins = (seconds / 60).floor();
-  final secs = seconds % 60;
-  return '${mins.toString().padLeft(2, '0')}:${secs.toStringAsFixed(3).padLeft(6, '0')}';
+Future<void> _generateSpeech(
+  MistralClient client,
+  String voiceId,
+  String output,
+) async {
+  final response = await client.audio.speech.create(
+    request: SpeechRequest(
+      model: _speechModel,
+      voiceId: voiceId,
+      input: 'Hello from the Dart Mistral client.',
+      responseFormat: SpeechOutputFormat.wav,
+      expressiveness: 1.5,
+    ),
+  );
+  await File(output).writeAsBytes(base64Decode(response.audioData));
+  print('Saved speech to $output.');
 }

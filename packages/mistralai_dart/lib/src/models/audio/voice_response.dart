@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'voice_enums.dart';
 
 /// Response containing voice information.
 @immutable
@@ -45,6 +46,14 @@ class VoiceResponse {
   /// The duration in seconds the audio sample was trimmed to.
   final double? trimmedSeconds;
 
+  /// Whether the voice is supplied by Mistral or custom-created.
+  ///
+  /// Older responses can omit this field.
+  final VoiceType? type;
+
+  /// Cloning technology reported for the voice, if present.
+  final VoiceKind? kind;
+
   /// Creates a [VoiceResponse].
   const VoiceResponse({
     required this.id,
@@ -60,6 +69,8 @@ class VoiceResponse {
     this.tags,
     this.retentionNotice = 30,
     this.trimmedSeconds,
+    this.type,
+    this.kind,
   });
 
   /// Creates a [VoiceResponse] from JSON.
@@ -79,6 +90,8 @@ class VoiceResponse {
     tags: (json['tags'] as List?)?.cast<String>(),
     retentionNotice: json['retention_notice'] as int? ?? 30,
     trimmedSeconds: (json['trimmed_seconds'] as num?)?.toDouble(),
+    type: VoiceType.fromJson(json['type'] as String?),
+    kind: VoiceKind.fromJson(json['kind'] as String?),
   );
 
   /// Converts to JSON.
@@ -87,7 +100,7 @@ class VoiceResponse {
     'name': name,
     if (description != null) 'description': description,
     'created_at': createdAt.toIso8601String(),
-    if (userId != null) 'user_id': userId,
+    if (userId != null || type != null) 'user_id': userId,
     if (slug != null) 'slug': slug,
     if (gender != null) 'gender': gender,
     if (age != null) 'age': age,
@@ -96,6 +109,8 @@ class VoiceResponse {
     if (tags != null) 'tags': tags,
     'retention_notice': retentionNotice,
     if (trimmedSeconds != null) 'trimmed_seconds': trimmedSeconds,
+    if (type != null) 'type': type!.value,
+    if (kind != null) 'kind': kind!.value,
   };
 
   /// Creates a copy with the given fields replaced.
@@ -113,6 +128,8 @@ class VoiceResponse {
     Object? tags = unsetCopyWithValue,
     int? retentionNotice,
     Object? trimmedSeconds = unsetCopyWithValue,
+    Object? type = unsetCopyWithValue,
+    Object? kind = unsetCopyWithValue,
   }) => VoiceResponse(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -130,7 +147,9 @@ class VoiceResponse {
     retentionNotice: retentionNotice ?? this.retentionNotice,
     trimmedSeconds: trimmedSeconds == unsetCopyWithValue
         ? this.trimmedSeconds
-        : trimmedSeconds as double?,
+        : (trimmedSeconds as num?)?.toDouble(),
+    type: type == unsetCopyWithValue ? this.type : type as VoiceType?,
+    kind: kind == unsetCopyWithValue ? this.kind : kind as VoiceKind?,
   );
 
   @override
@@ -150,7 +169,9 @@ class VoiceResponse {
           listsEqual(languages, other.languages) &&
           listsEqual(tags, other.tags) &&
           retentionNotice == other.retentionNotice &&
-          trimmedSeconds == other.trimmedSeconds;
+          trimmedSeconds == other.trimmedSeconds &&
+          type == other.type &&
+          kind == other.kind;
 
   @override
   int get hashCode => Object.hash(
@@ -167,6 +188,8 @@ class VoiceResponse {
     listHash(tags),
     retentionNotice,
     trimmedSeconds,
+    type,
+    kind,
   );
 
   @override
@@ -183,5 +206,5 @@ class VoiceResponse {
       'languages: $languages, '
       'tags: $tags, '
       'retentionNotice: $retentionNotice, '
-      'trimmedSeconds: $trimmedSeconds)';
+      'trimmedSeconds: $trimmedSeconds, type: $type, kind: $kind)';
 }

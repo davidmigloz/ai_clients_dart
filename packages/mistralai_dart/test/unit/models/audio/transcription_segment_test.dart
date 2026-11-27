@@ -183,14 +183,29 @@ void main() {
         expect(segment.end, 35.0);
       });
 
-      test('handles missing required fields with defaults', () {
-        final json = <String, dynamic>{};
-        final segment = TranscriptionSegment.fromJson(json);
-        expect(segment.id, 0);
-        expect(segment.start, 0.0);
-        expect(segment.end, 0.0);
-        expect(segment.text, '');
-      });
+      test(
+        'preserves null timings and speaker metadata from current models',
+        () {
+          final json = <String, dynamic>{
+            'type': 'transcription_segment',
+            'text': 'Speaker test',
+            'start': null,
+            'end': null,
+            'speaker_id': 'speaker_0',
+            'score': 0.7,
+          };
+          final segment = TranscriptionSegment.fromJson(json);
+
+          expect(segment.id, isNull);
+          expect(segment.speakerId, 'speaker_0');
+          expect(segment.start, isNull);
+          expect(segment.end, isNull);
+          expect(segment.duration, isNull);
+          expect(segment.toJson(), json);
+          expect(segment.copyWith(speakerId: null), isNot(segment));
+          expect(segment.copyWith(start: 0, end: 1.5).duration, 1.5);
+        },
+      );
     });
 
     group('duration', () {
@@ -260,7 +275,7 @@ void main() {
         );
         expect(
           segment.toString(),
-          'TranscriptionSegment(id: 1, text: 11 chars)',
+          contains('TranscriptionSegment(id: 1, text: 11 chars,'),
         );
       });
     });

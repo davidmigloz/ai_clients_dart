@@ -2,7 +2,9 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'ipa_phoneme.dart';
 import 'speech_output_format.dart';
+import 'speech_turn.dart';
 
 /// Request for speech synthesis (text-to-speech).
 ///
@@ -34,6 +36,18 @@ class SpeechRequest {
   /// Cache key for reusing prompt processing across requests.
   final String? promptCacheKey;
 
+  /// Delivery strength for Voxtral 3 speech, between 1 and 5.
+  final double? expressiveness;
+
+  /// Pronunciation overrides mapping a written term to IPA phonemes.
+  final Map<String, List<IpaPhoneme>>? phonemeHints;
+
+  /// Prior audio turns in chronological order, ending in the user turn
+  /// that [input] answers. Requires a preset PVC [voiceId].
+  ///
+  /// Cannot be combined with [refAudio].
+  final List<SpeechTurn>? conversationHistory;
+
   /// Additional properties not covered by the named fields.
   final Map<String, dynamic>? extra;
 
@@ -47,6 +61,9 @@ class SpeechRequest {
     this.stream,
     this.metadata,
     this.promptCacheKey,
+    this.expressiveness,
+    this.phonemeHints,
+    this.conversationHistory,
     this.extra,
   });
 
@@ -61,6 +78,9 @@ class SpeechRequest {
       'stream',
       'metadata',
       'prompt_cache_key',
+      'expressiveness',
+      'phoneme_hints',
+      'conversation_history',
     };
     final extraEntries = {
       for (final entry in json.entries)
@@ -77,6 +97,16 @@ class SpeechRequest {
       stream: json['stream'] as bool?,
       metadata: json['metadata'] as Map<String, dynamic>?,
       promptCacheKey: json['prompt_cache_key'] as String?,
+      expressiveness: (json['expressiveness'] as num?)?.toDouble(),
+      phonemeHints: (json['phoneme_hints'] as Map<String, dynamic>?)?.map(
+        (term, values) => MapEntry(
+          term,
+          (values as List).cast<String>().map(IpaPhoneme.fromJson).toList(),
+        ),
+      ),
+      conversationHistory: (json['conversation_history'] as List?)
+          ?.map((turn) => SpeechTurn.fromJson(turn as Map<String, dynamic>))
+          .toList(),
       extra: extraEntries.isEmpty ? null : extraEntries,
     );
   }
@@ -95,6 +125,14 @@ class SpeechRequest {
     if (stream != null) 'stream': stream,
     if (metadata != null) 'metadata': metadata,
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
+    if (expressiveness != null) 'expressiveness': expressiveness,
+    if (phonemeHints case final hints?)
+      'phoneme_hints': hints.map(
+        (term, values) =>
+            MapEntry(term, values.map((value) => value.value).toList()),
+      ),
+    if (conversationHistory case final history?)
+      'conversation_history': history.map((turn) => turn.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -107,6 +145,9 @@ class SpeechRequest {
     Object? stream = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
+    Object? expressiveness = unsetCopyWithValue,
+    Object? phonemeHints = unsetCopyWithValue,
+    Object? conversationHistory = unsetCopyWithValue,
     Object? extra = unsetCopyWithValue,
   }) {
     return SpeechRequest(
@@ -128,6 +169,15 @@ class SpeechRequest {
       promptCacheKey: promptCacheKey == unsetCopyWithValue
           ? this.promptCacheKey
           : promptCacheKey as String?,
+      expressiveness: expressiveness == unsetCopyWithValue
+          ? this.expressiveness
+          : (expressiveness as num?)?.toDouble(),
+      phonemeHints: phonemeHints == unsetCopyWithValue
+          ? this.phonemeHints
+          : (phonemeHints as Map?)?.cast<String, List<IpaPhoneme>>(),
+      conversationHistory: conversationHistory == unsetCopyWithValue
+          ? this.conversationHistory
+          : (conversationHistory as List?)?.cast<SpeechTurn>(),
       extra: extra == unsetCopyWithValue
           ? this.extra
           : extra as Map<String, dynamic>?,
@@ -147,6 +197,9 @@ class SpeechRequest {
           stream == other.stream &&
           mapsDeepEqual(metadata, other.metadata) &&
           promptCacheKey == other.promptCacheKey &&
+          expressiveness == other.expressiveness &&
+          mapsDeepEqual(phonemeHints, other.phonemeHints) &&
+          listsEqual(conversationHistory, other.conversationHistory) &&
           mapsDeepEqual(extra, other.extra);
 
   @override
@@ -159,6 +212,9 @@ class SpeechRequest {
     stream,
     mapDeepHashCode(metadata),
     promptCacheKey,
+    expressiveness,
+    mapDeepHashCode(phonemeHints),
+    listHash(conversationHistory),
     mapDeepHashCode(extra),
   );
 
@@ -172,5 +228,8 @@ class SpeechRequest {
       'stream: $stream, '
       'metadata: $metadata, '
       'promptCacheKey: $promptCacheKey, '
+      'expressiveness: $expressiveness, '
+      'phonemeHints: ${phonemeHints?.length}, '
+      'conversationHistory: ${conversationHistory?.length}, '
       'extra: ${extra != null ? '${extra!.length} entries' : null})';
 }

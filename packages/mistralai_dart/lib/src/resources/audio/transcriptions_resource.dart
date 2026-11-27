@@ -6,6 +6,7 @@ import '../../errors/exceptions.dart';
 import '../../models/audio/transcription_request.dart';
 import '../../models/audio/transcription_response.dart';
 import '../../models/audio/transcription_stream_event.dart';
+import '../../models/audio/transcription_timestamp_granularity.dart';
 import '../base_resource.dart';
 import '../streaming_resource.dart';
 
@@ -22,7 +23,7 @@ import '../streaming_resource.dart';
 ///   request: TranscriptionRequest(
 ///     fileBytes: bytes,
 ///     fileName: 'recording.wav',
-///     model: 'voxtral-mini-latest',
+///     model: 'voxtral-mini-transcribe-3-0',
 ///   ),
 /// );
 /// print(response.text);
@@ -57,7 +58,7 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   request: TranscriptionRequest(
   ///     fileBytes: bytes,
   ///     fileName: 'recording.wav',
-  ///     model: 'voxtral-mini-latest',
+  ///     model: 'voxtral-mini-transcribe-3-0',
   ///     language: 'en',
   ///   ),
   /// );
@@ -90,13 +91,13 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   request: TranscriptionRequest(
   ///     fileBytes: bytes,
   ///     fileName: 'recording.wav',
-  ///     model: 'voxtral-mini-latest',
+  ///     model: 'voxtral-mini-transcribe-3-0',
   ///   ),
   /// );
   ///
   /// await for (final event in stream) {
-  ///   if (event.text != null) {
-  ///     stdout.write(event.text);
+  ///   if (event.type == 'transcription.text.delta') {
+  ///     stdout.write(event.text ?? '');
   ///   }
   /// }
   /// ```
@@ -173,15 +174,28 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
     }
     // Repeated form fields (arrays) cannot be expressed through `fields`,
     // which is a map; a part without a filename is a plain form value.
-    if (request.timestampGranularities ?? false) {
-      for (final granularity in const ['segment', 'word']) {
-        parts.add(
-          http.MultipartFile.fromString('timestamp_granularities', granularity),
-        );
-      }
+    final granularities =
+        request.timestampGranularityOptions ??
+        (request.timestampGranularities == true
+            ? const [
+                TranscriptionTimestampGranularity.segment,
+                TranscriptionTimestampGranularity.word,
+              ]
+            : const <TranscriptionTimestampGranularity>[]);
+    for (final granularity in granularities) {
+      parts.add(
+        http.MultipartFile.fromString(
+          'timestamp_granularities',
+          granularity.value,
+        ),
+      );
     }
     for (final term in request.contextBias ?? const <String>[]) {
       parts.add(http.MultipartFile.fromString('context_bias', term));
+    }
+    if (request.speakerReferences case final references?) {
+      // The TypeScript SDK sends one JSON-valued form field for this map.
+      fields['speaker_references'] = jsonEncode(references);
     }
     if (stream) {
       fields['stream'] = 'true';
@@ -190,6 +204,15 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   }
 
   void _validateAudioSource(TranscriptionRequest request) {
+    if ((request.speakerReferences?.isNotEmpty ?? false) &&
+        request.diarize != true) {
+      throw const ValidationException(
+        message: 'Speaker references require diarize: true',
+        fieldErrors: {
+          'diarize': ['Enable diarization when providing speaker references'],
+        },
+      );
+    }
     if (!request.hasSingleAudioSource) {
       throw const ValidationException(
         message: 'Exactly one of file, fileUrl, or fileBytes must be provided',

@@ -129,6 +129,27 @@ void main() {
       });
     });
 
+    test('parses explicit granularity and speaker references from JSON', () {
+      final request = TranscriptionRequest.fromJson(const {
+        'model': 'voxtral-mini-transcribe-3-0',
+        'file_id': 'file-123',
+        'diarize': true,
+        'timestamp_granularities': ['segment'],
+        'speaker_references': {'Speaker': 'YXVkaW8='},
+      });
+
+      expect(request.file, 'file-123');
+      expect(request.timestampGranularityOptions, [
+        TranscriptionTimestampGranularity.segment,
+      ]);
+      expect(request.speakerReferences, {'Speaker': 'YXVkaW8='});
+      expect(request.toJson()['timestamp_granularities'], ['segment']);
+      expect(request.toJson()['speaker_references'], request.speakerReferences);
+      expect(TranscriptionRequest.fromJson(request.toJson()), request);
+      expect(request.copyWith(speakerReferences: null), isNot(request));
+      expect(request.toString(), isNot(contains('YXVkaW8=')));
+    });
+
     group('audio sources', () {
       test('accepts audio bytes with a file name', () {
         const request = TranscriptionRequest(
