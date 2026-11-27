@@ -33,7 +33,12 @@
     "fineTuningModels": "fine_tuning",
     "transcriptions": "audio",
     "managed_search_indexes": "managed_search_indexes",
-    "realtime": "realtime_audio"
+    "realtime": "realtime_audio",
+    "admin_groups": "admin",
+    "admin_roles": "admin",
+    "admin_scim": "admin",
+    "admin_users": "admin",
+    "admin_workspaces": "admin"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

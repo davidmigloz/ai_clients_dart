@@ -52,6 +52,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Managed Search indexes, document ingestion, and retrieval (Mistral-hosted Public Preview)
 - RAG ingestion pipeline configuration (beta)
 - Users: current authenticated user identity (beta)
+- Organization users, groups, workspaces, roles, and SCIM (Admin API Enterprise Preview)
 
 ## Why choose this client?
 
@@ -1388,6 +1389,38 @@ print('Workspace: ${identity.workspace?.name}');
 
 </details>
 
+### How do I manage an organization with the Admin API?
+
+<details>
+<summary><b>Show example</b></summary>
+
+The Admin API is available to Enterprise Preview organizations. Create an
+organization Admin API key in the Mistral Admin Panel and keep it server-side.
+Use a standalone `MistralAdminClient` to manage Admin users and invitations,
+Admin groups and their assignments, and Admin workspaces and their members.
+Use Admin roles to look up role IDs and Admin SCIM to manage sync runs.
+
+```dart
+final admin = MistralAdminClient.withApiKey(organizationAdminKey);
+
+try {
+  final roles = await admin.roles.list();
+  final workspaces = await admin.workspaces.list(page: 1, pageSize: 10);
+  print(roles.organizationRoles.map((role) => role.name).join(', '));
+  print('Workspace count: ${workspaces.total}');
+} finally {
+  admin.close();
+}
+```
+
+The Admin client uses the `x-api-key` header specified in the authentication
+guide. Configure SAML or SCIM in the Admin Panel before using the SCIM
+synchronization endpoints.
+
+[Admin example](example/admin_example.dart) · [Admin authentication](https://docs.mistral.ai/admin/admin-api/authentication)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -1460,6 +1493,7 @@ See the [example/](example/) directory for complete examples:
 | [`managed_search_indexes_example.dart`](example/managed_search_indexes_example.dart) | Mistral-hosted Managed Search |
 | [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipeline configuration (beta) |
 | [`users_example.dart`](example/users_example.dart) | Current authenticated user identity (beta) |
+| [`admin_example.dart`](example/admin_example.dart) | Organization roles and workspaces (Enterprise Preview) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`config_example.dart`](example/config_example.dart) | Client configuration options |
@@ -1497,6 +1531,7 @@ See the [example/](example/) directory for complete examples:
 | Managed Search | Mistral-hosted Public Preview |
 | RAG (Beta) | Ingestion pipeline configuration and legacy index wrappers |
 | Users (Beta) | ✅ Full |
+| Admin Directory | Enterprise Preview |
 
 ## Official Documentation
 
