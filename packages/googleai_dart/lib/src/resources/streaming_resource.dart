@@ -430,6 +430,7 @@ mixin StreamingResource on ResourceBase {
         message = body;
       }
     }
+    message = Redactor.continuationTokens.redactString(message);
 
     if (statusCode == 401) {
       return AuthenticationException(message: message, details: details);
@@ -490,11 +491,15 @@ mixin StreamingResource on ResourceBase {
       message = 'Unknown stream error';
     }
 
-    Logger('GoogleAI.HTTP').warning('Inline stream error: $message');
+    final safeMessage = Redactor.continuationTokens.redactString(message);
+    Logger('GoogleAI.HTTP').warning('Inline stream error: $safeMessage');
 
     final cleanJson = Map<String, dynamic>.from(json)
       ..remove('_event')
       ..remove('_rawData');
-    throw StreamException(message: message, partialData: jsonEncode(cleanJson));
+    throw StreamException(
+      message: safeMessage,
+      partialData: jsonEncode(cleanJson),
+    );
   }
 }

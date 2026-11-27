@@ -150,6 +150,101 @@ void main() {
     expect(chunks.last.usageMetadata?.totalTokenCount, 65536);
   });
 
+  for (final field in ['continuationToken', 'continuation_token']) {
+    test(
+      'redacts a long $field before truncating the HTTP error excerpt',
+      () async {
+        final token = 'checkpoint-${List.filled(240, 'x').join()}';
+        final error = {
+          'message': 'Continuation rejected',
+          'details': [
+            {'reason': 'INVALID_TOKEN'},
+          ],
+        };
+        final client = GoogleAIClient(
+          httpClient: MockClient(
+            (_) async => http.Response(
+              '{"$field" : "$token","error":${jsonEncode(error)}}',
+              400,
+            ),
+          ),
+        );
+        addTearDown(client.close);
+
+        await expectLater(
+          client.models.generateContent(model: model, request: request),
+          throwsA(
+            isA<ApiException>()
+                .having((error) => error.statusCode, 'status', 400)
+                .having(
+                  (error) => error.message,
+                  'message',
+                  'Continuation rejected',
+                )
+                .having((error) => error.details, 'details', error['details'])
+                .having(
+                  (error) => error.responseMetadata?.bodyExcerpt,
+                  'excerpt',
+                  allOf(
+                    contains('"$field": "***REDACTED***"'),
+                    isNot(contains(token.substring(0, 32))),
+                  ),
+                ),
+          ),
+        );
+      },
+    );
+  }
+
+  test('redacts an echoed continuation token in stream diagnostics', () async {
+    final logs = <String>[];
+    final subscription = Logger.root.onRecord.listen((log) {
+      logs.add(log.message);
+    });
+    addTearDown(subscription.cancel);
+
+    const message = 'Rejected continuationToken=$continuationToken';
+    final error = jsonEncode({
+      'error': {'message': message, 'status': 'INVALID_ARGUMENT'},
+    });
+    final responses = [
+      http.Response(error, 400),
+      http.Response('event: error\ndata: $error\n\n', 200),
+    ].iterator;
+    final client = GoogleAIClient(
+      httpClient: MockClient((_) async {
+        expect(responses.moveNext(), isTrue);
+        return responses.current;
+      }),
+    );
+    addTearDown(client.close);
+
+    Stream<GenerateContentResponse> openStream() =>
+        client.models.streamGenerateContent(model: model, request: request);
+
+    const safeMessage = 'Rejected continuationToken=***REDACTED***';
+    await expectLater(
+      openStream().drain<void>(),
+      throwsA(
+        isA<ApiException>().having((e) => e.message, 'message', safeMessage),
+      ),
+    );
+    await expectLater(
+      openStream().drain<void>(),
+      throwsA(
+        isA<StreamException>()
+            .having((e) => e.message, 'message', safeMessage)
+            .having(
+              (e) => e.partialData,
+              'partial data',
+              contains('INVALID_ARGUMENT'),
+            ),
+      ),
+    );
+    expect(logs, contains('Inline stream error: $safeMessage'));
+    expect(logs, everyElement(isNot(contains(continuationToken))));
+  });
+
   test('round-trips and clears candidate continuation tokens', () {
     const json = {
       'finishReason': 'CONTINUATION',

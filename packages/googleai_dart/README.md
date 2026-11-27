@@ -288,13 +288,20 @@ Future<void> main() async {
 
 → [Full example](example/generate_content.dart)
 
-Gemini 4 models support long decode through unary and streaming `GenerateContent`.
-Set `GenerationConfig.maxOutputTokens` above the model's per-request limit. When
-`Candidate.finishReason` is `FinishReason.continuation` and the candidate includes
-a token, send the original `GenerateContentRequest` again with
-`copyWith(continuationToken: candidate.continuationToken)`.
-Keep the request inputs and total token budget the same across hops and collect each
-hop's output separately. On Vertex AI, select `ApiVersion.v1beta1`.
+For long decode on supported Gemini 4 models, use `streamGenerateContent` and
+set `GenerationConfig.maxOutputTokens` above 65,536. Gemini 4 Neon and Hydrogen
+also support unary long decode. An initial direct unary request to Gemini 4
+Carbon or Argon with a limit above 32,768 can return HTTP 400.
+
+When a candidate has `FinishReason.continuation` and a token, start the next
+hop with the original request and
+`copyWith(continuationToken: candidate.continuationToken)`. Keep the original
+inputs and total token budget across hops. On a stream, a checkpoint token
+can arrive before a finish reason. Keep output since the last checkpoint
+pending so you can discard it if the stream drops and resume from that
+checkpoint. To resume after `FinishReason.maxTokens` with a token, raise the
+budget above the tokens already used. On Vertex AI, select
+`ApiVersion.v1beta1`.
 [Gemini Developer API long decode](https://aistudio.google.com/docs/long-decode?generate-content=true) ·
 [Vertex AI inference reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/inference)
 

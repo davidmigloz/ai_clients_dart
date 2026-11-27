@@ -1,5 +1,16 @@
 /// Utility for redacting sensitive data from logs.
 class Redactor {
+  /// JSON and diagnostic field names for opaque continuation tokens.
+  static const continuationTokenFields = [
+    'continuationToken',
+    'continuation_token',
+  ];
+
+  /// Redacts continuation tokens without changing unrelated error text.
+  static const continuationTokens = Redactor(
+    redactionList: continuationTokenFields,
+  );
+
   /// Fields to redact (case-insensitive).
   final List<String> redactionList;
 
@@ -39,7 +50,7 @@ class Redactor {
     for (final field in redactionList) {
       // Redact JSON-style: "field": "value"
       result = result.replaceAllMapped(
-        RegExp('"$field":\\s*"([^"]*)"', caseSensitive: false),
+        RegExp('"$field"\\s*:\\s*"([^"]*)"', caseSensitive: false),
         (match) => '"$field": "$replacement"',
       );
 

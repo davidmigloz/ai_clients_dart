@@ -72,6 +72,7 @@ class ErrorInterceptor implements Interceptor {
         message = body.isNotEmpty ? body : message;
       }
     }
+    message = Redactor.continuationTokens.redactString(message);
 
     // Extract request metadata from context
     final correlationId =
@@ -90,6 +91,7 @@ class ErrorInterceptor implements Interceptor {
         'api_key',
         'x-goog-api-key',
         'token',
+        ...Redactor.continuationTokenFields,
       ],
     );
     final redactedHeaders = redactor.redactMap(context.request.headers);
@@ -105,11 +107,13 @@ class ErrorInterceptor implements Interceptor {
     );
 
     // Create response metadata
-    final bodyExcerpt = body.length > 200 ? body.substring(0, 200) : body;
+    final safeBody = redactor.redactString(body);
     final responseMetadata = ResponseMetadata(
       statusCode: statusCode,
       headers: response.headers,
-      bodyExcerpt: redactor.redactString(bodyExcerpt),
+      bodyExcerpt: safeBody.length > 200
+          ? safeBody.substring(0, 200)
+          : safeBody,
       latency: latency,
     );
 

@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 import '../auth/auth_provider.dart';
 import '../models/copy_with_sentinel.dart';
 import '../platform/environment.dart';
+import '../utils/redactor.dart';
 
 /// API version for the GoogleAI and Vertex AI APIs.
 /// https://ai.google.dev/gemini-api/docs/api-versions
@@ -140,7 +141,7 @@ class GoogleAIConfig {
       'api_key',
       'x-goog-api-key',
       'token',
-      'continuationToken',
+      ...Redactor.continuationTokenFields,
       'password',
       'secret',
       'bearer',
@@ -173,7 +174,7 @@ class GoogleAIConfig {
       'api_key',
       'x-goog-api-key',
       'token',
-      'continuationToken',
+      ...Redactor.continuationTokenFields,
       'password',
       'secret',
       'bearer',
@@ -237,7 +238,7 @@ class GoogleAIConfig {
       'api_key',
       'x-goog-api-key',
       'token',
-      'continuationToken',
+      ...Redactor.continuationTokenFields,
       'password',
       'secret',
       'bearer',
