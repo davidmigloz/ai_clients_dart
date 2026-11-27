@@ -38,7 +38,11 @@
     "admin_roles": "admin",
     "admin_scim": "admin",
     "admin_users": "admin",
-    "admin_workspaces": "admin"
+    "admin_workspaces": "admin",
+    "admin_api_keys": "admin_usage",
+    "admin_audit_logs": "admin_usage",
+    "admin_usage": "admin_usage",
+    "admin_vibe_analytics": "admin_usage"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

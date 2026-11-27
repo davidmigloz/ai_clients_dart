@@ -197,6 +197,7 @@ class _AdminErrorSanitizer implements Interceptor {
         'x_api_key' ||
         'authorization' ||
         'key' ||
+        'hidden_key' ||
         'token' ||
         'client_secret' ||
         'secret' ||

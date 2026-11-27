@@ -117,16 +117,9 @@
   },
   "coverage": {
     "excluded_paths": [
-      "^/v1/admin/(analytics|api-keys|audit-logs|rate-limit|spend-limit|usage)(/|$)",
       "^/v1/admin/user-groups/provision-workspace$"
     ],
-    "excluded_tags": [
-      "beta.admin.api-keys",
-      "beta.admin.audit-logs",
-      "beta.admin.billing",
-      "beta.admin.vibe-code-analytics",
-      "beta.admin.vibe-work-analytics"
-    ],
+    "excluded_tags": [],
     "priority_resources": [
       "chat",
       "embeddings",
@@ -135,7 +128,7 @@
       "agents"
     ],
     "notes": {
-      "admin": "Directory operations are implemented. Legacy group provisioning is superseded by POST /v1/admin/user-groups/{group_uuid}/workspaces. Remaining Admin operations are tracked in #610."
+      "admin": "Admin Enterprise Preview operations are implemented. Legacy group provisioning is superseded by POST /v1/admin/user-groups/{group_uuid}/workspaces."
     },
     "expected_properties": {},
     "excluded_properties": {
@@ -6282,6 +6275,476 @@
         "acknowledged"
       ],
       "note": "The SSE parser unwraps the event name and data before dispatching typed ConversationEvent payloads."
+    },
+    "APIKeysExtendedOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminApiKeyList",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "APIKeysExtendedOUT",
+      "tags": []
+    },
+    "AdminCreateAPIKeyIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAdminApiKeyRequest",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "AdminCreateAPIKeyIN",
+      "tags": []
+    },
+    "APIKeyOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminCreatedApiKey",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "APIKeyOUT",
+      "tags": []
+    },
+    "DeleteAPIKeyOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminDeletedApiKey",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "DeleteAPIKeyOUT",
+      "tags": []
+    },
+    "APIKeyExtendedOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminApiKeySummary",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "APIKeyExtendedOUT",
+      "tags": []
+    },
+    "APIKeyActions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminApiKeyActions",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "APIKeyActions",
+      "tags": []
+    },
+    "APIKeyProduct": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminApiKeyProduct",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "APIKeyProduct",
+      "tags": []
+    },
+    "ActionAvailable": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdminApiKeyActionAvailable",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "ActionAvailable",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The Dart sealed AdminApiKeyAction dispatches on the fixed status and preserves the optional reason code on its unavailable subtype. The public API key fixtures exercise both branches."
+    },
+    "ActionUnavailable_DeleteUnavailableReason_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdminApiKeyActionUnavailable",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "ActionUnavailable_DeleteUnavailableReason_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The Dart sealed AdminApiKeyAction dispatches on the fixed status and preserves the optional reason code on its unavailable subtype. The public API key fixtures exercise both branches."
+    },
+    "ActionUnavailable_RotateUnavailableReason_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdminApiKeyActionUnavailable",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "ActionUnavailable_RotateUnavailableReason_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The Dart sealed AdminApiKeyAction dispatches on the fixed status and preserves the optional reason code on its unavailable subtype. The public API key fixtures exercise both branches."
+    },
+    "DeleteUnavailableReason": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminApiKeyUnavailableReason",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "DeleteUnavailableReason",
+      "tags": [],
+      "note": "The common action reason type shares not_allowed with the superset of rotation reasons. This response also preserves unknown raw reason strings."
+    },
+    "RotateUnavailableReason": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminApiKeyUnavailableReason",
+      "file": "lib/src/models/admin/admin_api_keys.dart",
+      "schema": "RotateUnavailableReason",
+      "tags": []
+    },
+    "AuditLogOut": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminAuditLog",
+      "file": "lib/src/models/admin/admin_audit_logs.dart",
+      "schema": "AuditLogOut",
+      "tags": []
+    },
+    "ActorType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminAuditActorType",
+      "file": "lib/src/models/admin/admin_audit_logs.dart",
+      "schema": "ActorType",
+      "tags": []
+    },
+    "AuditLogEventType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminAuditEventType",
+      "file": "lib/src/models/admin/admin_audit_logs.dart",
+      "schema": "AuditLogEventType",
+      "tags": []
+    },
+    "TargetType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminAuditTargetType",
+      "file": "lib/src/models/admin/admin_audit_logs.dart",
+      "schema": "TargetType",
+      "tags": []
+    },
+    "UsageOUTJSON": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminMonthlyUsage",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageOUTJSON",
+      "tags": []
+    },
+    "UsageQueryIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageQuery",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageQueryIN",
+      "tags": []
+    },
+    "UsageQueryOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageQueryResult",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageQueryOUT",
+      "tags": []
+    },
+    "RateLimitsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminRateLimits",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "RateLimitsOUT",
+      "tags": []
+    },
+    "LimitsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminSpendLimits",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "LimitsOUT",
+      "tags": []
+    },
+    "NewUsageLimitIN": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAdminSpendLimitRequest",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "NewUsageLimitIN",
+      "tags": []
+    },
+    "ApiZone": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminApiZone",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "ApiZone",
+      "tags": []
+    },
+    "BasicModelUsageDataJSON": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminModelUsage",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "BasicModelUsageDataJSON",
+      "tags": []
+    },
+    "FineTuningDataJSON": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminFineTuningUsage",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "FineTuningDataJSON",
+      "tags": []
+    },
+    "LibrariesAPIUsageDataJSON": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminLibrariesUsage",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "LibrariesAPIUsageDataJSON",
+      "tags": []
+    },
+    "PriceData": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsagePrice",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "PriceData",
+      "tags": []
+    },
+    "VibeCodeUsageDataJSON": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminVibeCodeUsage",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "VibeCodeUsageDataJSON",
+      "tags": []
+    },
+    "AdminUsageQueryFilter": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageFilter",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "AdminUsageQueryFilter",
+      "tags": [],
+      "excluded_properties": [
+        "operator"
+      ],
+      "note": "The Dart matchOperator property encodes and decodes the operator key. The verifier cannot infer the accessor rename."
+    },
+    "UsageType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminUsageType",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageType",
+      "tags": []
+    },
+    "UsageQueryAggregatesOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageQueryAggregates",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageQueryAggregatesOUT",
+      "tags": []
+    },
+    "UsageQueryRowOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageQueryRow",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageQueryRowOUT",
+      "tags": []
+    },
+    "UsageQueryMetadataOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageQueryMetadata",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageQueryMetadataOUT",
+      "tags": []
+    },
+    "TokenLimitsByModel": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminModelRateLimits",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "TokenLimitsByModel",
+      "tags": []
+    },
+    "LimitsContext": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminSpendLimitContext",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "LimitsContext",
+      "tags": []
+    },
+    "LagoEventType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminBillingEventType",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "LagoEventType",
+      "tags": []
+    },
+    "ServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdminBilledServiceTier",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "ServiceTier",
+      "tags": []
+    },
+    "UsageQueryParamsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageQueryParameters",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageQueryParamsOUT",
+      "tags": []
+    },
+    "UsageLimits": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AdminUsageLimit",
+      "file": "lib/src/models/admin/admin_usage.dart",
+      "schema": "UsageLimits",
+      "tags": []
+    },
+    "VibeOrganizationStatsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeCodeOrganizationUsage",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeOrganizationStatsOUT",
+      "tags": []
+    },
+    "VibeWorkspaceStatsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeCodeWorkspaceUsage",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeWorkspaceStatsOUT",
+      "tags": []
+    },
+    "VibeWorkByAgentStatsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeWorkAgentUsage",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeWorkByAgentStatsOUT",
+      "tags": []
+    },
+    "VibeWorkByTimeStatsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeWorkTimeUsage",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeWorkByTimeStatsOUT",
+      "tags": []
+    },
+    "VibeWorkByUserStatsOUT": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeWorkUserUsage",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeWorkByUserStatsOUT",
+      "tags": []
+    },
+    "VibeNextEditActiveUsersStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeNextEditActiveUsersStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeNextEditActiveUsersStat",
+      "tags": []
+    },
+    "VibeNextEditModifiedLOCStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeNextEditModifiedLinesStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeNextEditModifiedLOCStat",
+      "tags": []
+    },
+    "VibeNextEditSuggestionStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeNextEditSuggestionStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeNextEditSuggestionStat",
+      "tags": []
+    },
+    "VibeActiveUsersStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeActiveUsersStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeActiveUsersStat",
+      "tags": []
+    },
+    "VibeConsumedTokensStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeConsumedTokensStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeConsumedTokensStat",
+      "tags": []
+    },
+    "VibeSessionDurationStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeSessionDurationStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeSessionDurationStat",
+      "tags": []
+    },
+    "VibeSessionStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeSessionStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeSessionStat",
+      "tags": []
+    },
+    "VibeToolCallsStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeToolCallsStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeToolCallsStat",
+      "tags": []
+    },
+    "VibeToolCallsByNameStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeToolCallsByNameStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeToolCallsByNameStat",
+      "tags": []
+    },
+    "VibeUserPromptsStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeUserPromptsStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeUserPromptsStat",
+      "tags": []
+    },
+    "VibeWorkByAgentStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeWorkByAgentStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeWorkByAgentStat",
+      "tags": []
+    },
+    "VibeWorkByTimeStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeWorkByTimeStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeWorkByTimeStat",
+      "tags": []
+    },
+    "VibeWorkByUserStat": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VibeWorkByUserStat",
+      "file": "lib/src/models/admin/admin_vibe_analytics.dart",
+      "schema": "VibeWorkByUserStat",
+      "tags": []
     }
   }
 }
