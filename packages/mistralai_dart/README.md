@@ -1093,6 +1093,9 @@ final response = await client.chat.create(
 await client.libraries.delete(libraryId: library.id);
 ```
 
+`deleteSharing` returns the deleted access record on HTTP 200 and
+`null` when the API confirms removal with HTTP 204.
+
 → [Full example](example/libraries_example.dart)
 
 </details>
