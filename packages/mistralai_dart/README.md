@@ -58,7 +58,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 ## Why choose this client?
 
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
-- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Type-safe request and response models with `http`, `web_socket`, `crypto`, `logging`, and `meta`.
 - Streaming, retries, interceptors, and error handling built into the client.
 - Resource APIs for inference, media, workflows, document storage, and managed search.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
@@ -934,8 +934,10 @@ The room RPC returns the committed configuration as a
 turn boundary. The app owns the connection and calls `close()` to release
 the LiveKit room and stop the server session through the backend callback.
 
-SIP calling requires Enterprise access. Session metadata and the transfer
-and hang-up tool declarations are available through this client.
+SIP calling requires Enterprise access. The Mistral account team sets up
+phone numbers and binds them to agents. Dart exposes session metadata and
+the transfer and hang-up declarations published in the REST schema.
+Mistral's telephony guide currently lists transfer to a person as unavailable.
 [Mistral browser guide](https://docs.mistral.ai/studio/audio/voice-agents/browser) ·
 [Telephony guide](https://docs.mistral.ai/studio/audio/voice-agents/telephony)
 
@@ -955,8 +957,8 @@ if (event case VoiceAgentCallEndedEvent(:final sessionId, :final transcript)) {
 ```
 
 Use the session ID and event type to deduplicate retried deliveries.
-Configure phone number provisioning and webhook subscriptions in the
-Mistral console. [Signed Voice Agent deliveries](https://docs.mistral.ai/studio/audio/voice-agents/webhooks)
+Configure webhook endpoints and subscriptions in the Mistral console.
+[Signed Voice Agent deliveries](https://docs.mistral.ai/studio/audio/voice-agents/webhooks)
 
 → [Session management example](example/voice_agents_example.dart) ·
 [Offline webhook example](example/voice_agent_webhooks_example.dart)
@@ -1736,7 +1738,7 @@ See the [example/](example/) directory for complete examples:
 - [API reference](https://pub.dev/documentation/mistralai_dart/latest/)
 - [Mistral AI API docs](https://docs.mistral.ai/)
 - [Mistral AI Python SDK](https://github.com/mistralai/client-python)
-- [Mistral AI JS SDK](https://github.com/mistralai/client-js)
+- [Mistral AI TypeScript SDK](https://github.com/mistralai/client-ts)
 
 ## Sponsor
 

@@ -13,7 +13,7 @@
         "schema_aliases": {},
         "reference_impl": {
           "repo": "mistralai/client-python",
-          "ref": "main",
+          "ref": "6e9e31ac6f982c1fdfe177787ded223f458c9f69",
           "resources": {
             "adapter": "python_client_members",
             "path": "src/mistralai/client/sdk.py",

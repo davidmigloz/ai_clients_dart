@@ -732,7 +732,7 @@ void main() {
           expect(request.url.queryParametersAll, isEmpty);
           expect(request.body, isEmpty);
           return http.Response(
-            r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"first_name":null,"last_name":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"uuid":"fixture"}''',
+            r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"first_name":null,"last_name":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"status":"blocked","uuid":"fixture"}''',
             200,
           );
         }),
@@ -741,9 +741,11 @@ void main() {
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"first_name":null,"last_name":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"uuid":"fixture"}''',
+          r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"first_name":null,"last_name":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"status":"blocked","uuid":"fixture"}''',
         ),
       );
+      expect(result.status, AdminMemberStatus.blocked);
+      expect(result.copyWith(status: null).toJson(), isNot(contains('status')));
     });
 
     test('PATCH /v1/admin/users/{user_id}', () async {
@@ -763,7 +765,7 @@ void main() {
             jsonDecode(r'''{"role_name":"Member"}'''),
           );
           return http.Response(
-            r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"uuid":"fixture"}''',
+            r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"status":"deactivated","uuid":"fixture"}''',
             200,
           );
         }),
@@ -777,9 +779,10 @@ void main() {
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"uuid":"fixture"}''',
+          r'''{"created_at":"2026-11-27T13:00:00.123Z","email":null,"name":null,"oid_id":null,"raw_role":"0d48f530-095c-43fe-8aea-6673bcacabe6","raw_roles":["0d48f530-095c-43fe-8aea-6673bcacabe6"],"status":"deactivated","uuid":"fixture"}''',
         ),
       );
+      expect(result.status, AdminMemberStatus.deactivated);
     });
 
     test('POST /v1/admin/users/{user_id}/deactivate', () async {
@@ -876,7 +879,7 @@ void main() {
           });
           expect(request.body, isEmpty);
           return http.Response(
-            r'''{"items":[{"description":null,"icon":null,"is_default":true,"name":"fixture","uuid":"fixture"}],"page":2,"page_size":2,"total":2}''',
+            r'''{"items":[{"description":null,"icon":null,"is_default":true,"name":"fixture","uuid":"fixture"}],"object":"list","page":2,"page_size":2,"total":2}''',
             200,
           );
         }),
@@ -890,9 +893,10 @@ void main() {
       expect(
         result.toJson(),
         jsonDecode(
-          r'''{"items":[{"description":null,"icon":null,"is_default":true,"name":"fixture","uuid":"fixture"}],"page":2,"page_size":2,"total":2}''',
+          r'''{"items":[{"description":null,"icon":null,"is_default":true,"name":"fixture","uuid":"fixture"}],"object":"list","page":2,"page_size":2,"total":2}''',
         ),
       );
+      expect(result.object, AdminApiObjectType.list);
     });
 
     test('POST /v1/admin/workspaces', () async {

@@ -1,42 +1,43 @@
 # Mistral AI Dart Client
 
-> Dart client for the Mistral AI API with chat completions, streaming, tool calling, multimodal inputs, TTS, voice management, reasoning effort, embeddings, OCR, and more.
+> Dart client for the Mistral AI API with chat, Responses, streaming, multimodal inference, Voxtral, Voice Agents, Managed Search, Workflows, and Enterprise Admin.
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/README.md) (~6.9k tokens): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/CHANGELOG.md) (~6.1k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/MIGRATION.md) (~4.9k tokens): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/README.md) (~14.1k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/CHANGELOG.md) (~9.5k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/MIGRATION.md) (~11.2k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
-- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/chat_example.dart) (~625 tokens): Chat completions, token scores, and Priority Tier.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/streaming_example.dart) (~267 tokens): Streaming responses.
-- [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/responses_example.dart): Stateless generation, SSE and input token counts.
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/chat_example.dart) (~603 tokens): Chat completions, token scores, and Priority Tier.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/streaming_example.dart) (~263 tokens): Streaming responses.
+- [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/responses_example.dart) (~253 tokens): Stateless generation, SSE and input token counts.
 - [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/vision_example.dart) (~476 tokens): Multimodal inputs.
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/tool_calling_example.dart) (~1.3k tokens): Tool calling.
 - [json_mode_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/json_mode_example.dart) (~1.3k tokens): Structured output.
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/embeddings_example.dart) — Text and multimodal embeddings with optional base64 output.
-- [fim_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fim_example.dart) (~749 tokens): Code completion.
+- [fim_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fim_example.dart) (~752 tokens): Code completion.
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/models_example.dart) (~892 tokens): Model listing.
-- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/files_example.dart) (~857 tokens): Multipart file uploads and signed downloads.
-- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fine_tuning_example.dart) (~1.3k tokens): Existing fine-tuned model management.
-- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/moderation_example.dart) (~879 tokens): Content moderation.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/files_example.dart) (~883 tokens): Multipart file uploads and signed downloads.
+- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fine_tuning_example.dart) (~551 tokens): Existing fine-tuned model management.
+- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/moderation_example.dart) (~682 tokens): Content moderation.
 - [ocr_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/ocr_example.dart) — OCR 4.1 document extraction and block confidence.
-- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/audio_example.dart) (~1.1k tokens): Voxtral file transcription, SSE, speech generation, voice search, and sample downloads.
-- [realtime_audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/realtime_audio_example.dart): Realtime Voxtral transcription and speech over WebSockets.
-- [voice_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/voice_agents_example.dart): Versioned voice agents, hosted audio sessions, and room credentials.
-- [voice_agent_webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/voice_agent_webhooks_example.dart): Verify signed call lifecycle deliveries offline.
+- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/audio_example.dart) (~999 tokens): Voxtral file transcription, SSE, speech generation, voice search, and sample downloads.
+- [realtime_audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/realtime_audio_example.dart) (~859 tokens): Realtime Voxtral transcription and speech over WebSockets.
+- [voice_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/voice_agents_example.dart) (~529 tokens): Versioned voice agents, hosted audio sessions, and room credentials.
+- [voice_agent_webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/voice_agent_webhooks_example.dart) (~429 tokens): Verify signed call lifecycle deliveries offline.
 - [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/agents_example.dart) (~1.6k tokens): Legacy Agents API (beta), including cursor pagination.
 - [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/conversations_example.dart) (~1.7k tokens): Legacy Conversations API (beta) with typed SSE and history.
-- [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart) (~2.2k tokens): Multipart library documents and access (beta).
-- [prompts_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/prompts_example.dart): Versioned prompt templates (beta).
-- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/skills_example.dart): Versioned skills and workspace sharing (beta).
+- [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart) (~2k tokens): Multipart library documents and access (beta).
+- [prompts_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/prompts_example.dart) (~755 tokens): Versioned prompt templates (beta).
+- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/skills_example.dart) (~827 tokens): Versioned skills and workspace sharing (beta).
 - [connectors_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/connectors_example.dart) — MCP and HTTP connector lifecycle and tool discovery.
-- [managed_search_indexes_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/managed_search_indexes_example.dart): Mistral-hosted index search (Public Preview).
+- [managed_search_indexes_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/managed_search_indexes_example.dart) (~259 tokens): Mistral-hosted index search (Public Preview).
+- [rag_index_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/rag_index_example.dart) (~365 tokens): Legacy RAG ingestion and external index wrappers.
 - [observability_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/observability_example.dart) — Enterprise Public Preview projects, datasets, scorers, and telemetry.
-- [workflows_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflows_example.dart) (~1.3k tokens): Workflow execution, scheduling, and management.
-- [workflow_deployment_archive_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflow_deployment_archive_example.dart): Signed archive upload and managed deployment (Public Preview).
+- [workflows_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflows_example.dart) (~1.2k tokens): Workflow execution, scheduling, and management.
+- [workflow_deployment_archive_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflow_deployment_archive_example.dart) (~566 tokens): Signed archive upload and managed deployment (Public Preview).
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/error_handling_example.dart) (~893 tokens): Exception handling patterns.
 - [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/batch_example.dart) (~1.9k tokens): Batch polling, filters, and inline results.
 - [classification_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/classification_example.dart) — Text and chat classification with configured target scores.
@@ -47,13 +48,14 @@
 - [semantic_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/semantic_search_example.dart) (~1.6k tokens): Semantic search with embeddings.
 - [system_message_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/system_message_example.dart) (~1.2k tokens): System message patterns.
 - [platform_identity_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/platform_identity_example.dart) — Caller identity, user memberships, billing, and service-account roles.
+- [users_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/users_example.dart) (~286 tokens): Current caller profile via the beta users API.
 - [workflow_trigger_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflow_trigger_example.dart) — Inbound provider webhooks and workflow trigger events.
 
-- [admin_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/admin_example.dart): Organization roles and workspaces using an Enterprise Preview Admin API key.
-- [admin_usage_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/admin_usage_example.dart): Read-only organization usage, key inventory, audit activity, and Vibe analytics.
+- [admin_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/admin_example.dart) (~268 tokens): Organization roles and workspaces using an Enterprise Preview Admin API key.
+- [admin_usage_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/admin_usage_example.dart) (~409 tokens): Read-only organization usage, key inventory, audit activity, and Vibe analytics.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/mistralai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~49.6k tokens**
+**Total: ~71.4k tokens**
