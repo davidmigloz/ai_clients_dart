@@ -3,6 +3,22 @@ import 'package:test/test.dart';
 
 void main() {
   group('VoiceUpdateRequest', () {
+    test('round-trips explicit null and keeps omission distinct', () {
+      const json = <String, dynamic>{
+        'description': null,
+        'retention_notice': 21,
+      };
+      final request = VoiceUpdateRequest.fromJson(json);
+      expect(request.toJson(), json);
+      expect(request.retentionNotice, 21);
+      expect(request.clearFields, {VoiceUpdateField.description});
+      expect(request.copyWith(clearFields: {}), isNot(request));
+      expect(request.copyWith(description: 'A voice').toJson(), {
+        ...json,
+        'description': 'A voice',
+      });
+    });
+
     group('constructor', () {
       test('creates with no fields (all optional)', () {
         const request = VoiceUpdateRequest();

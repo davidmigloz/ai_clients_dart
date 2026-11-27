@@ -9,14 +9,11 @@ class VoiceCreateRequest {
   /// The voice name.
   final String name;
 
-  /// Base64-encoded audio file.
-  final String sampleAudio;
+  /// An optional base64-encoded audio sample.
+  final String? sampleAudio;
 
   /// A description of the voice.
   final String? description;
-
-  /// The voice slug identifier.
-  final String? slug;
 
   /// The voice gender.
   final String? gender;
@@ -42,9 +39,8 @@ class VoiceCreateRequest {
   /// Creates a [VoiceCreateRequest].
   const VoiceCreateRequest({
     required this.name,
-    required this.sampleAudio,
+    this.sampleAudio,
     this.description,
-    this.slug,
     this.gender,
     this.age,
     this.color,
@@ -58,9 +54,8 @@ class VoiceCreateRequest {
   factory VoiceCreateRequest.fromJson(Map<String, dynamic> json) =>
       VoiceCreateRequest(
         name: json['name'] as String? ?? '',
-        sampleAudio: json['sample_audio'] as String? ?? '',
+        sampleAudio: json['sample_audio'] as String?,
         description: json['description'] as String?,
-        slug: json['slug'] as String?,
         gender: json['gender'] as String?,
         age: json['age'] as int?,
         color: json['color'] as String?,
@@ -73,9 +68,8 @@ class VoiceCreateRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'name': name,
-    'sample_audio': sampleAudio,
+    if (sampleAudio != null) 'sample_audio': sampleAudio,
     if (description != null) 'description': description,
-    if (slug != null) 'slug': slug,
     if (gender != null) 'gender': gender,
     if (age != null) 'age': age,
     if (color != null) 'color': color,
@@ -88,9 +82,8 @@ class VoiceCreateRequest {
   /// Creates a copy with replaced values.
   VoiceCreateRequest copyWith({
     String? name,
-    String? sampleAudio,
+    Object? sampleAudio = unsetCopyWithValue,
     Object? description = unsetCopyWithValue,
-    Object? slug = unsetCopyWithValue,
     Object? gender = unsetCopyWithValue,
     Object? age = unsetCopyWithValue,
     Object? color = unsetCopyWithValue,
@@ -101,11 +94,12 @@ class VoiceCreateRequest {
   }) {
     return VoiceCreateRequest(
       name: name ?? this.name,
-      sampleAudio: sampleAudio ?? this.sampleAudio,
+      sampleAudio: sampleAudio == unsetCopyWithValue
+          ? this.sampleAudio
+          : sampleAudio as String?,
       description: description == unsetCopyWithValue
           ? this.description
           : description as String?,
-      slug: slug == unsetCopyWithValue ? this.slug : slug as String?,
       gender: gender == unsetCopyWithValue ? this.gender : gender as String?,
       age: age == unsetCopyWithValue ? this.age : age as int?,
       color: color == unsetCopyWithValue ? this.color : color as String?,
@@ -130,7 +124,6 @@ class VoiceCreateRequest {
           name == other.name &&
           sampleAudio == other.sampleAudio &&
           description == other.description &&
-          slug == other.slug &&
           gender == other.gender &&
           age == other.age &&
           color == other.color &&
@@ -144,7 +137,6 @@ class VoiceCreateRequest {
     name,
     sampleAudio,
     description,
-    slug,
     gender,
     age,
     color,
@@ -157,9 +149,8 @@ class VoiceCreateRequest {
   @override
   String toString() =>
       'VoiceCreateRequest(name: $name, '
-      'sampleAudio: ${sampleAudio.length} chars, '
+      'sampleAudio: ${sampleAudio == null ? 'null' : '${sampleAudio!.length} chars'}, '
       'description: $description, '
-      'slug: $slug, '
       'gender: $gender, '
       'age: $age, '
       'color: $color, '

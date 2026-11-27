@@ -647,88 +647,69 @@ final result = await client.ocr.process(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.audio.transcriptions` for speech-to-text, `client.audio.speech` for text-to-speech, and `client.audio.voices` to manage custom voices. Both transcription and speech support streaming.
+Use `client.audio.transcriptions` for speech-to-text, `client.audio.speech` for
+text-to-speech, and `client.audio.voices` to manage voices. Voxtral 3 models are
+in Public Preview. Their HTTP streams return results as they are generated
+from a complete recording or text input.
 
 ```dart
-// Transcribe audio bytes directly (nothing is uploaded to the Files store)
+// Transcribe bytes without uploading them to the Files store.
 final bytes = await File('recording.wav').readAsBytes();
-final result = await client.audio.transcriptions.create(
-  request: TranscriptionRequest(
-    model: 'voxtral-mini-latest',
-    fileBytes: bytes,
-    fileName: 'recording.wav',
-    language: 'en',
-    contextBias: ['Mistral', 'Voxtral'],
-  ),
+final request = TranscriptionRequest(
+  model: 'voxtral-mini-transcribe-3-0',
+  fileBytes: bytes,
+  fileName: 'recording.wav',
+  diarize: true,
+  timestampGranularityOptions: [TranscriptionTimestampGranularity.segment],
+  contextBias: ['Mistral', 'Voxtral'],
 );
 
-print('Transcription: ${result.text}');
-
-// Or point at a URL, or at a file uploaded with client.files.upload()
-await client.audio.transcriptions.create(
-  request: TranscriptionRequest(
-    model: 'voxtral-mini-latest',
-    fileUrl: 'https://example.com/audio.mp3',
-  ),
-);
-await client.audio.transcriptions.create(
-  request: TranscriptionRequest(
-    model: 'voxtral-mini-latest',
-    file: uploadedFile.id,
-  ),
-);
-
-// Streaming transcription
-final stream = client.audio.transcriptions.createStream(
-  request: TranscriptionRequest(
-    model: 'voxtral-mini-latest',
-    fileBytes: bytes,
-    fileName: 'recording.wav',
-  ),
-);
-
-await for (final event in stream) {
-  print(event.text);
+final result = await client.audio.transcriptions.create(request: request);
+print(result.text);
+for (final segment in result.segments ?? <TranscriptionSegment>[]) {
+  print('${segment.speakerId ?? 'speaker'}: ${segment.text}');
 }
-```
 
-```dart
-// Generate speech
-final response = await client.audio.speech.create(
-  request: SpeechRequest(
-    input: 'Hello, world!',
-    voiceId: 'voice-id',
-  ),
-);
-print('Audio data: ${response.audioData.length} chars');
-
-// Stream speech
-final stream = client.audio.speech.createStream(
-  request: SpeechRequest(input: 'Hello!'),
-);
-await for (final event in stream) {
-  if (event is SpeechStreamAudioDelta) {
-    // Process audio chunk
+// A fileUrl or an uploaded file ID (file) can also identify the recording.
+await for (final event in client.audio.transcriptions.createStream(request: request)) {
+  if (event.type == 'transcription.text.delta') {
+    stdout.write(event.text ?? '');
   }
 }
 ```
 
-```dart
-// List voices
-final voices = await client.audio.voices.list();
-for (final voice in voices.items) {
-  print('${voice.name}: ${voice.id}');
-}
+Voxtral 3 supports segment timestamps. Keep the legacy word granularity for
+models that support it. Speaker reference clips go in
+`TranscriptionRequest.speakerReferences` with `diarize: true`.
 
-// Create a custom voice
-final voice = await client.audio.voices.create(
-  request: VoiceCreateRequest(
-    name: 'My Voice',
-    sampleAudio: base64EncodedAudio,
-  ),
-);
-print('Created voice: ${voice.id}');
+```dart
+// Find preset voices, then download a sample or generate speech.
+final page = await client.audio.voices.search(type: 'preset', language: ['en']);
+if (page.data.isNotEmpty) {
+  final voiceId = page.data.first.id;
+  final sample = await client.audio.voices.getSampleAudio(voiceId: voiceId);
+  await File('sample.wav').writeAsBytes(sample);
+
+  final response = await client.audio.speech.create(
+    request: SpeechRequest(
+      model: 'voxtral-mini-tts-3-0',
+      voiceId: voiceId,
+      input: 'Hello, world!',
+      responseFormat: SpeechOutputFormat.wav,
+      expressiveness: 1.5,
+    ),
+  );
+  await File('speech.wav').writeAsBytes(base64Decode(response.audioData));
+}
 ```
+
+Use `SpeechRequest.phonemeHints` for pronunciation and `conversationHistory`
+with eligible preset PVC voices for contextual delivery. Use
+`client.audio.speech.createStream()` to receive audio chunks.
+
+Pass the returned `nextPageToken` as `pageToken` with the same search filters
+to retrieve the next page. The offset-based `voices.list()` endpoint is
+scheduled to retire on March 31, 2027.
 
 → [Full example](example/audio_example.dart)
 
@@ -1260,7 +1241,7 @@ See the [example/](example/) directory for complete examples:
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
 | [`classification_example.dart`](example/classification_example.dart) | Text classification |
 | [`ocr_example.dart`](example/ocr_example.dart) | Document text extraction |
-| [`audio_example.dart`](example/audio_example.dart) | Audio transcription and TTS |
+| [`audio_example.dart`](example/audio_example.dart) | Voxtral file transcription, SSE, speech, voice search, and WAV samples |
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
 | [`libraries_example.dart`](example/libraries_example.dart) | Document storage (beta) |
