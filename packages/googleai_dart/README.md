@@ -505,6 +505,36 @@ Future<void> main() async {
 
 </details>
 
+### How do I evaluate a decision with Gemini?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Gemini Decision 1 evaluates yes/no, choice, and rubric questions against
+shared text or multimodal input. It returns scores or probabilities with
+confidence values. Use the Gemini Developer API with `ApiVersion.v1beta`.
+
+```dart
+final response = await client.decisions.create(
+  model: 'gemini-decision-1',
+  input: const DecisionInput.text('My delivery arrived two days late.'),
+  questions: const {
+    'late_delivery': DecisionQuestion.noul(
+      instructions: DecisionInstructions.text('Did the delivery arrive late?'),
+    ),
+  },
+);
+
+if (response.answers?['late_delivery'] case NoulAnswer(:final noul)) {
+  print('Probability: $noul');
+}
+```
+
+[Full example](example/decisions_example.dart) ·
+[Decisions API guide](https://aistudio.google.com/docs/decisions-api)
+
+</details>
+
 ### How do I create embeddings?
 
 <details>
@@ -655,6 +685,7 @@ See the [example/](example/) directory for complete examples:
 | [`caching_example.dart`](example/caching_example.dart) | Context caching API usage |
 | [`complete_api_example.dart`](example/complete_api_example.dart) | Complete API coverage demo |
 | [`corpora_example.dart`](example/corpora_example.dart) | Corpus management for semantic retrieval |
+| [`decisions_example.dart`](example/decisions_example.dart) | Gemini Decision 1 question and answer types |
 | [`documents_example.dart`](example/documents_example.dart) | Document management within corpora |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
@@ -693,6 +724,7 @@ See the [example/](example/) directory for complete examples:
 | Tuned Models | ✅ Full |
 | Files | ✅ Full |
 | Generated Files | ✅ Full |
+| Decisions | Gemini Developer API `v1beta`, `gemini-decision-1` |
 | Cached Contents | ✅ Full |
 | Batches | ✅ Full |
 | Corpora | ✅ Full |
