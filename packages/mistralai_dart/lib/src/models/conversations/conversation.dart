@@ -1,6 +1,10 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../metadata/completion_args.dart';
+import '../moderations/guardrail_config.dart';
+import '../tools/tool.dart';
 import 'conversation_entry.dart';
 
 /// A conversation with an AI agent or model.
@@ -23,10 +27,22 @@ class Conversation {
   final String? agentId;
 
   /// When this conversation was created (Unix timestamp).
-  final int? createdAt;
+  int? get createdAt =>
+      _createdAt is int ? _createdAt : _seconds(createdAtDateTime);
+
+  /// When this conversation was created, with precise time.
+  DateTime? get createdAtDateTime => _conversationTime(_createdAt);
+
+  final Object? _createdAt;
 
   /// When this conversation was last updated (Unix timestamp).
-  final int? updatedAt;
+  int? get updatedAt =>
+      _updatedAt is int ? _updatedAt : _seconds(updatedAtDateTime);
+
+  /// When this conversation was last updated, with precise time.
+  DateTime? get updatedAtDateTime => _conversationTime(_updatedAt);
+
+  final Object? _updatedAt;
 
   /// Optional metadata associated with the conversation.
   final Map<String, dynamic>? metadata;
@@ -34,17 +50,48 @@ class Conversation {
   /// The entries in this conversation.
   final List<ConversationEntry>? entries;
 
+  /// Agent version number or alias.
+  final Object? agentVersion;
+
+  /// Display name of the conversation.
+  final String? name;
+
+  /// Description of the conversation.
+  final String? description;
+
+  /// System instructions for a model conversation.
+  final String? instructions;
+
+  /// Tools available to the model.
+  final List<Tool>? tools;
+
+  /// Generation defaults for a model conversation.
+  final CompletionArgs? completionArgs;
+
+  /// Guardrail configuration for a model conversation.
+  final List<GuardrailConfig>? guardrails;
+
   /// Creates a [Conversation].
   const Conversation({
     required this.id,
     this.object = 'conversation',
     this.model,
     this.agentId,
-    this.createdAt,
-    this.updatedAt,
+    int? createdAt,
+    DateTime? createdAtDateTime,
+    int? updatedAt,
+    DateTime? updatedAtDateTime,
     this.metadata,
     this.entries,
-  });
+    this.agentVersion,
+    this.name,
+    this.description,
+    this.instructions,
+    this.tools,
+    this.completionArgs,
+    this.guardrails,
+  }) : _createdAt = createdAtDateTime ?? createdAt,
+       _updatedAt = updatedAtDateTime ?? updatedAt;
 
   /// Creates a [Conversation] from JSON.
   factory Conversation.fromJson(Map<String, dynamic> json) {
@@ -53,11 +100,30 @@ class Conversation {
       object: json['object'] as String? ?? 'conversation',
       model: json['model'] as String?,
       agentId: json['agent_id'] as String?,
-      createdAt: json['created_at'] as int?,
-      updatedAt: json['updated_at'] as int?,
+      createdAt: _legacySeconds(json['created_at']),
+      createdAtDateTime: _parseIsoTime(json['created_at']),
+      updatedAt: _legacySeconds(json['updated_at']),
+      updatedAtDateTime: _parseIsoTime(json['updated_at']),
       metadata: json['metadata'] as Map<String, dynamic>?,
       entries: (json['entries'] as List<dynamic>?)
           ?.map((e) => ConversationEntry.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      agentVersion: json['agent_version'] as Object?,
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      instructions: json['instructions'] as String?,
+      tools: (json['tools'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .map(Tool.fromJson)
+          .toList(),
+      completionArgs: json['completion_args'] == null
+          ? null
+          : CompletionArgs.fromJson(
+              json['completion_args'] as Map<String, dynamic>,
+            ),
+      guardrails: (json['guardrails'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .map(GuardrailConfig.fromJson)
           .toList(),
     );
   }
@@ -69,10 +135,17 @@ class Conversation {
       'object': object,
       if (model != null) 'model': model,
       if (agentId != null) 'agent_id': agentId,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
+      'created_at': ?_wireTime(_createdAt),
+      'updated_at': ?_wireTime(_updatedAt),
       if (metadata != null) 'metadata': metadata,
       if (entries != null) 'entries': entries!.map((e) => e.toJson()).toList(),
+      'agent_version': ?agentVersion,
+      'name': ?name,
+      'description': ?description,
+      'instructions': ?instructions,
+      'tools': ?tools?.map((entry) => entry.toJson()).toList(),
+      'completion_args': ?completionArgs?.toJson(),
+      'guardrails': ?guardrails?.map((entry) => entry.toJson()).toList(),
     };
   }
 
@@ -83,19 +156,65 @@ class Conversation {
     String? model,
     String? agentId,
     int? createdAt,
+    Object? createdAtDateTime = unsetCopyWithValue,
     int? updatedAt,
+    Object? updatedAtDateTime = unsetCopyWithValue,
     Map<String, dynamic>? metadata,
     List<ConversationEntry>? entries,
+    Object? agentVersion = unsetCopyWithValue,
+    Object? name = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+    Object? instructions = unsetCopyWithValue,
+    Object? tools = unsetCopyWithValue,
+    Object? completionArgs = unsetCopyWithValue,
+    Object? guardrails = unsetCopyWithValue,
   }) {
     return Conversation(
       id: id ?? this.id,
       object: object ?? this.object,
       model: model ?? this.model,
       agentId: agentId ?? this.agentId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt:
+          createdAt ??
+          (createdAtDateTime == unsetCopyWithValue
+              ? _legacySeconds(_createdAt)
+              : null),
+      createdAtDateTime: createdAtDateTime != unsetCopyWithValue
+          ? createdAtDateTime as DateTime?
+          : (createdAt == null && _createdAt is DateTime
+                ? this.createdAtDateTime
+                : null),
+      updatedAt:
+          updatedAt ??
+          (updatedAtDateTime == unsetCopyWithValue
+              ? _legacySeconds(_updatedAt)
+              : null),
+      updatedAtDateTime: updatedAtDateTime != unsetCopyWithValue
+          ? updatedAtDateTime as DateTime?
+          : (updatedAt == null && _updatedAt is DateTime
+                ? this.updatedAtDateTime
+                : null),
       metadata: metadata ?? this.metadata,
       entries: entries ?? this.entries,
+      agentVersion: agentVersion == unsetCopyWithValue
+          ? this.agentVersion
+          : agentVersion,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
+      instructions: instructions == unsetCopyWithValue
+          ? this.instructions
+          : instructions as String?,
+      tools: tools == unsetCopyWithValue
+          ? this.tools
+          : (tools as List?)?.cast<Tool>(),
+      completionArgs: completionArgs == unsetCopyWithValue
+          ? this.completionArgs
+          : completionArgs as CompletionArgs?,
+      guardrails: guardrails == unsetCopyWithValue
+          ? this.guardrails
+          : (guardrails as List?)?.cast<GuardrailConfig>(),
     );
   }
 
@@ -149,7 +268,18 @@ class ConversationList {
   });
 
   /// Creates a [ConversationList] from JSON.
-  factory ConversationList.fromJson(Map<String, dynamic> json) {
+  factory ConversationList.fromJson(Object json) {
+    if (json is List) {
+      return ConversationList(
+        data: json
+            .cast<Map<String, dynamic>>()
+            .map(Conversation.fromJson)
+            .toList(),
+      );
+    }
+    if (json is! Map<String, dynamic>) {
+      throw const FormatException('Expected a conversation list.');
+    }
     return ConversationList(
       object: json['object'] as String? ?? 'list',
       data:
@@ -197,3 +327,24 @@ class ConversationList {
   @override
   String toString() => 'ConversationList(count: $length, total: $total)';
 }
+
+int? _seconds(DateTime? value) =>
+    value == null ? null : value.millisecondsSinceEpoch ~/ 1000;
+
+DateTime? _conversationTime(Object? value) => switch (value) {
+  final DateTime timestamp => timestamp,
+  final String timestamp => DateTime.parse(timestamp),
+  final int seconds => DateTime.fromMillisecondsSinceEpoch(
+    seconds * 1000,
+    isUtc: true,
+  ),
+  _ => null,
+};
+
+int? _legacySeconds(Object? value) => value is int ? value : null;
+
+DateTime? _parseIsoTime(Object? value) =>
+    value is String ? DateTime.parse(value) : null;
+
+Object? _wireTime(Object? value) =>
+    value is DateTime ? value.toUtc().toIso8601String() : value;

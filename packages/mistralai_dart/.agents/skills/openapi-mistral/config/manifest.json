@@ -798,25 +798,22 @@
     },
     "CompletionArgs": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "CompletionArgs",
-      "file": "",
+      "file": "lib/src/models/metadata/completion_args.dart",
       "schema": "CompletionArgs",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal fine-tuning detail"
+      "tags": []
     },
     "CompletionArgsStop": {
       "spec": "main",
       "kind": "skip",
-      "dart_class": "CompletionArgsStop",
+      "dart_class": "StopSequence",
       "file": "",
       "schema": "CompletionArgsStop",
       "tags": [
         "acknowledged"
       ],
-      "note": "Internal fine-tuning detail"
+      "note": "String, list, and null are modeled by nullable StopSequence."
     },
     "Connector": {
       "spec": "main",
@@ -5580,6 +5577,105 @@
         "acknowledged"
       ],
       "note": "SDK frame wrapper around SSE event name and data. Dart decodes the event wire shape directly."
+    },
+    "ConversationMessages": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationMessagesResponse",
+      "file": "lib/src/models/conversations/conversation_response.dart",
+      "schema": "ConversationMessages",
+      "tags": []
+    },
+    "ResponseStartedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationResponseStarted",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "ResponseStartedEvent",
+      "tags": []
+    },
+    "ResponseDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationResponseDone",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "ResponseDoneEvent",
+      "tags": []
+    },
+    "ResponseErrorEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationResponseError",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "ResponseErrorEvent",
+      "tags": []
+    },
+    "MessageOutputEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationMessageDelta",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "MessageOutputEvent",
+      "tags": []
+    },
+    "FunctionCallEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationFunctionCallDelta",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "FunctionCallEvent",
+      "tags": []
+    },
+    "ToolExecutionStartedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationToolExecutionStarted",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "ToolExecutionStartedEvent",
+      "tags": []
+    },
+    "ToolExecutionDeltaEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationToolExecutionDelta",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "ToolExecutionDeltaEvent",
+      "tags": []
+    },
+    "ToolExecutionDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationToolExecutionDone",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "ToolExecutionDoneEvent",
+      "tags": []
+    },
+    "AgentHandoffStartedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationAgentHandoffStarted",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "AgentHandoffStartedEvent",
+      "tags": []
+    },
+    "AgentHandoffDoneEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConversationAgentHandoffDone",
+      "file": "lib/src/models/conversations/conversation_event.dart",
+      "schema": "AgentHandoffDoneEvent",
+      "tags": []
+    },
+    "ConversationEvents": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConversationEvent",
+      "file": "",
+      "schema": "ConversationEvents",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The SSE parser unwraps the event name and data before dispatching typed ConversationEvent payloads."
     }
   }
 }

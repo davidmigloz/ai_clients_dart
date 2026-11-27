@@ -24,6 +24,20 @@ final _routes = <String, Stream<Object> Function(MistralClient, Future<void>?)>{
     ),
     abortTrigger: a,
   ),
+  'conversation start': (c, a) => c.conversations.startStream(
+    request: const StartConversationRequest(model: 'test', inputText: 'Hi'),
+    abortTrigger: a,
+  ),
+  'conversation append': (c, a) => c.conversations.appendStream(
+    conversationId: 'c',
+    request: const AppendConversationRequest(inputText: 'Hi'),
+    abortTrigger: a,
+  ),
+  'conversation restart': (c, a) => c.conversations.restartStream(
+    conversationId: 'c',
+    request: const RestartConversationRequest(entryId: 'e'),
+    abortTrigger: a,
+  ),
   'speech': (c, a) => c.audio.speech.createStream(
     request: const SpeechRequest(input: 'Hi'),
     abortTrigger: a,

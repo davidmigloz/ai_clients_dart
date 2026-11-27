@@ -26,17 +26,29 @@ class AgentList {
     this.hasMore,
   });
 
-  /// Creates an [AgentList] from JSON.
-  factory AgentList.fromJson(Map<String, dynamic> json) => AgentList(
-    object: json['object'] as String? ?? 'list',
-    data:
-        (json['data'] as List?)
-            ?.map((e) => Agent.fromJson(e as Map<String, dynamic>))
-            .toList() ??
-        [],
-    total: json['total'] as int?,
-    hasMore: json['has_more'] as bool?,
-  );
+  /// Creates an [AgentList] from an API array or a legacy list object.
+  factory AgentList.fromJson(Object value) {
+    if (value is List) {
+      return AgentList(
+        data: value
+            .map((e) => Agent.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+    if (value is! Map<String, dynamic>) {
+      throw const FormatException('Expected an agent list.');
+    }
+    return AgentList(
+      object: value['object'] as String? ?? 'list',
+      data:
+          (value['data'] as List?)
+              ?.map((e) => Agent.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      total: value['total'] as int?,
+      hasMore: value['has_more'] as bool?,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

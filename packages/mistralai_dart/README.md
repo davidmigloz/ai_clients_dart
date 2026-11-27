@@ -45,7 +45,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 ### Operational APIs
 
 - Files, fine-tuned model management, and batch processing
-- Agents, conversations, connectors, and libraries (beta)
+- Legacy Agents and Conversations (beta), connectors, and libraries
 - Prompts and skills: versioned, shareable templates and instructions (beta)
 - Observability: campaigns, datasets, judges, and chat completion events (beta)
 - Workflows: execution, scheduling, management, and managed deployments (Public Preview)
@@ -876,9 +876,9 @@ final connection = await browser.audio.realtime.connect(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.agents` to create, list, update, and delete agents. An agent can
-follow custom instructions and use configured tools such as web search or
-the code interpreter. Use `complete(...)` to chat with an agent.
+Use `client.agents` for the legacy Agents API (beta). An agent can follow
+custom instructions and use configured tools. Use `complete(...)` for agent
+completions and `listPages(...)` for cursor pagination.
 
 ```dart
 // Create an agent
@@ -900,8 +900,8 @@ final response = await client.agents.complete(
 );
 print(response.text); // Extension for output text content
 
-// List agents
-final agents = await client.agents.list();
+// List agents. Pass agents.nextPageToken to fetch the next page.
+final agents = await client.agents.listPages(pageSize: 20);
 
 // Update agent
 await client.agents.update(
@@ -913,6 +913,9 @@ await client.agents.update(
 await client.agents.delete(agentId: agent.id);
 ```
 
+Mistral directs new Managed Agents projects to its separate
+`mistralai-agents` Python runtime. See the [Mistral migration guide](https://docs.mistral.ai/studio/agents/getting-started/from-agents-api).
+
 → [Full example](example/agents_example.dart)
 
 </details>
@@ -922,30 +925,38 @@ await client.agents.delete(agentId: agent.id);
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.conversations` to manage stateful multi-turn conversations with agents. The server maintains conversation history so you do not have to resend it.
+Use `client.conversations` for the legacy Conversations API (beta). Mistral
+keeps state for a stored conversation, allowing requests by conversation ID.
 
 ```dart
-// Start a conversation
 final conversation = await client.conversations.start(
-  request: StartConversationRequest(
-    agentId: 'agent-123',
-    inputs: [MessageInputEntry(content: 'Hello!')],
+  request: const StartConversationRequest(
+    model: 'mistral-large-latest',
+    inputText: 'Describe one way to learn Dart.',
+    completionArgs: CompletionArgs(maxTokens: 256),
   ),
 );
+print(conversation.text);
 
-print('Assistant: ${conversation.text}');
-
-// Continue the conversation
-final response = await client.conversations.sendMessage(
+await for (final event in client.conversations.appendStream(
   conversationId: conversation.conversationId,
-  message: 'Tell me more',
-);
+  request: const AppendConversationRequest(inputText: 'Give me an example.'),
+)) {
+  if (event is ConversationMessageDelta) {
+    print(event.text);
+  }
+}
 
-// Get conversation details
-final details = await client.conversations.retrieve(
+final history = await client.conversations.getHistory(
   conversationId: conversation.conversationId,
 );
+print(history.entries.length);
 ```
+
+Use `getMessages` for just message inputs and outputs. `startStream`,
+`appendStream`, and `restartStream` return typed events for text, tools,
+handoffs, usage, and service errors. Supply an `abortTrigger` or cancel the
+subscription to stop a stream.
 
 → [Full example](example/conversations_example.dart)
 
@@ -1437,8 +1448,8 @@ See the [example/](example/) directory for complete examples:
 | [`ocr_example.dart`](example/ocr_example.dart) | OCR 4.1 with block confidence |
 | [`audio_example.dart`](example/audio_example.dart) | Voxtral file transcription, SSE, speech, voice search, and WAV samples |
 | [`realtime_audio_example.dart`](example/realtime_audio_example.dart) | Realtime Voxtral transcription and speech over WebSockets |
-| [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
-| [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
+| [`agents_example.dart`](example/agents_example.dart) | Legacy Agents (beta), cursor pagination |
+| [`conversations_example.dart`](example/conversations_example.dart) | Legacy Conversations (beta), typed streaming |
 | [`libraries_example.dart`](example/libraries_example.dart) | Library and document uploads (beta) |
 | [`prompts_example.dart`](example/prompts_example.dart) | Versioned prompt templates (beta) |
 | [`skills_example.dart`](example/skills_example.dart) | Versioned model instructions and assets (beta) |
@@ -1475,8 +1486,8 @@ See the [example/](example/) directory for complete examples:
 | OCR | ✅ Full |
 | Audio (Transcription, Speech, Voices) | ✅ Full |
 | Voxtral realtime transcription and speech | Public Preview. Native STT and TTS, browser STT with a scoped token |
-| Agents (Beta) | ✅ Full |
-| Conversations (Beta) | ✅ Full |
+| Agents (legacy beta) | Entities, versions, aliases, and completions |
+| Conversations (legacy beta) | JSON, typed SSE, history, and messages |
 | Libraries (Beta) | ✅ Full |
 | Connectors (Beta) | ✅ Full |
 | Prompts (Beta) | ✅ Full |

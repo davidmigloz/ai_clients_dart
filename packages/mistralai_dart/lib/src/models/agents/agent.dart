@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../metadata/completion_args.dart';
 import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
 
@@ -45,6 +46,24 @@ class Agent {
   /// When the agent was last updated.
   final DateTime? updatedAt;
 
+  /// Completion settings for generated messages.
+  final CompletionArgs? completionArgs;
+
+  /// IDs of agents this agent can hand off to.
+  final List<String>? handoffs;
+
+  /// Whether the agent is available for chat deployments.
+  final bool? deploymentChat;
+
+  /// ID of the agent owner, when available.
+  final String? ownerId;
+
+  /// Origin of the agent configuration.
+  final String? source;
+
+  /// Version numbers available for this agent.
+  final List<int>? versions;
+
   /// Creates an [Agent].
   const Agent({
     required this.id,
@@ -60,6 +79,12 @@ class Agent {
     this.version = 1,
     this.createdAt,
     this.updatedAt,
+    this.completionArgs,
+    this.handoffs,
+    this.deploymentChat,
+    this.ownerId,
+    this.source,
+    this.versions,
   });
 
   /// Creates an [Agent] from JSON.
@@ -81,6 +106,16 @@ class Agent {
     version: json['version'] as int? ?? 1,
     createdAt: _parseDateTime(json['created_at']),
     updatedAt: _parseDateTime(json['updated_at']),
+    completionArgs: json['completion_args'] == null
+        ? null
+        : CompletionArgs.fromJson(
+            json['completion_args'] as Map<String, dynamic>,
+          ),
+    handoffs: (json['handoffs'] as List?)?.cast<String>(),
+    deploymentChat: json['deployment_chat'] as bool?,
+    ownerId: json['owner_id'] as String?,
+    source: json['source'] as String?,
+    versions: (json['versions'] as List?)?.cast<int>(),
   );
 
   /// Converts to JSON.
@@ -99,6 +134,12 @@ class Agent {
     'version': version,
     if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
     if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
+    'completion_args': ?completionArgs?.toJson(),
+    'handoffs': ?handoffs,
+    'deployment_chat': ?deploymentChat,
+    'owner_id': ?ownerId,
+    'source': ?source,
+    'versions': ?versions,
   };
 
   @override
