@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:mistralai_dart/mistralai_dart.dart';
 
-/// Example demonstrating the Agents API (Beta).
+/// Example demonstrating the legacy Agents API (beta).
 ///
 /// This example shows how to:
 /// - Create a new agent with instructions and tools
@@ -77,9 +77,8 @@ Future<void> listAgentsExample(MistralClient client) async {
   print('=== Listing Agents ===\n');
 
   // Get first page
-  final page1 = await client.agents.list(page: 0, pageSize: 10);
+  final page1 = await client.agents.listPages(pageSize: 10);
 
-  print('Found ${page1.total ?? page1.length} agents');
   print('Page 1 (${page1.length} agents):');
 
   for (final agent in page1.data) {
@@ -90,9 +89,13 @@ Future<void> listAgentsExample(MistralClient client) async {
     }
   }
 
-  // Check if there are more pages
-  if (page1.hasMore ?? false) {
-    print('\nMore agents available...');
+  final cursor = page1.nextPageToken;
+  if (cursor != null) {
+    final page2 = await client.agents.listPages(
+      pageSize: 10,
+      pageToken: cursor,
+    );
+    print('Page 2 contains ${page2.length} agents');
   }
 
   print('');

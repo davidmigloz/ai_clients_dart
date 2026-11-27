@@ -163,6 +163,7 @@ export 'src/models/content/content_part.dart';
 export 'src/models/conversations/confirmation_status.dart';
 export 'src/models/conversations/conversation.dart';
 export 'src/models/conversations/conversation_entry.dart';
+export 'src/models/conversations/conversation_event.dart';
 export 'src/models/conversations/conversation_request.dart';
 export 'src/models/conversations/conversation_response.dart';
 // --- Models: Embeddings ---
@@ -203,6 +204,7 @@ export 'src/models/libraries/sharing_response.dart';
 export 'src/models/libraries/update_document_request.dart';
 export 'src/models/libraries/update_library_request.dart';
 // --- Models: Metadata ---
+export 'src/models/metadata/completion_args.dart';
 export 'src/models/metadata/completion_tokens_details.dart';
 export 'src/models/metadata/finish_reason.dart';
 export 'src/models/metadata/prediction.dart';

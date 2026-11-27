@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../metadata/completion_args.dart';
 import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
 
@@ -30,6 +32,15 @@ class UpdateAgentRequest {
   /// Message describing the changes in this version.
   final String? versionMessage;
 
+  /// Completion settings for generated messages.
+  final CompletionArgs? completionArgs;
+
+  /// IDs of agents this agent can hand off to.
+  final List<String>? handoffs;
+
+  /// Whether the agent is available for chat deployments.
+  final bool? deploymentChat;
+
   /// Creates an [UpdateAgentRequest].
   const UpdateAgentRequest({
     this.name,
@@ -40,6 +51,9 @@ class UpdateAgentRequest {
     this.metadata,
     this.guardrails,
     this.versionMessage,
+    this.completionArgs,
+    this.handoffs,
+    this.deploymentChat,
   });
 
   /// Creates an [UpdateAgentRequest] from JSON.
@@ -57,6 +71,13 @@ class UpdateAgentRequest {
             ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
             .toList(),
         versionMessage: json['version_message'] as String?,
+        completionArgs: json['completion_args'] == null
+            ? null
+            : CompletionArgs.fromJson(
+                json['completion_args'] as Map<String, dynamic>,
+              ),
+        handoffs: (json['handoffs'] as List?)?.cast<String>(),
+        deploymentChat: json['deployment_chat'] as bool?,
       );
 
   /// Converts to JSON.
@@ -70,6 +91,9 @@ class UpdateAgentRequest {
     if (guardrails != null)
       'guardrails': guardrails!.map((e) => e.toJson()).toList(),
     if (versionMessage != null) 'version_message': versionMessage,
+    'completion_args': ?completionArgs?.toJson(),
+    'handoffs': ?handoffs,
+    'deployment_chat': ?deploymentChat,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -82,6 +106,9 @@ class UpdateAgentRequest {
     Map<String, dynamic>? metadata,
     List<GuardrailConfig>? guardrails,
     String? versionMessage,
+    Object? completionArgs = unsetCopyWithValue,
+    Object? handoffs = unsetCopyWithValue,
+    Object? deploymentChat = unsetCopyWithValue,
   }) => UpdateAgentRequest(
     name: name ?? this.name,
     description: description ?? this.description,
@@ -91,6 +118,15 @@ class UpdateAgentRequest {
     metadata: metadata ?? this.metadata,
     guardrails: guardrails ?? this.guardrails,
     versionMessage: versionMessage ?? this.versionMessage,
+    completionArgs: completionArgs == unsetCopyWithValue
+        ? this.completionArgs
+        : completionArgs as CompletionArgs?,
+    handoffs: handoffs == unsetCopyWithValue
+        ? this.handoffs
+        : handoffs as List<String>?,
+    deploymentChat: deploymentChat == unsetCopyWithValue
+        ? this.deploymentChat
+        : deploymentChat as bool?,
   );
 
   @override

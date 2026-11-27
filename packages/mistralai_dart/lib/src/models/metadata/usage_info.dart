@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'completion_tokens_details.dart';
 import 'prompt_tokens_details.dart';
 
@@ -39,6 +40,12 @@ class UsageInfo {
   /// The number of requests accounted for by the response, when reported.
   final int? requestCount;
 
+  /// Total tokens used by connectors, when reported for a conversation.
+  final int? connectorTokens;
+
+  /// Usage by connector, when reported for a conversation.
+  final Map<String, int>? connectors;
+
   /// Creates a [UsageInfo].
   const UsageInfo({
     this.requestCount,
@@ -51,6 +58,8 @@ class UsageInfo {
     this.promptTokenDetails,
     this.completionTokensDetails,
     this.serviceTier,
+    this.connectorTokens,
+    this.connectors,
   });
 
   /// Creates a [UsageInfo] from JSON.
@@ -62,6 +71,9 @@ class UsageInfo {
     promptAudioSeconds: json['prompt_audio_seconds'] as int?,
     numCachedTokens: json['num_cached_tokens'] as int?,
     serviceTier: json['service_tier'] as String?,
+    connectorTokens: json['connector_tokens'] as int?,
+    connectors: (json['connectors'] as Map<String, dynamic>?)
+        ?.cast<String, int>(),
     promptTokensDetails: json['prompt_tokens_details'] != null
         ? PromptTokensDetails.fromJson(
             json['prompt_tokens_details'] as Map<String, dynamic>,
@@ -92,6 +104,8 @@ class UsageInfo {
     if (promptTokenDetails != null)
       'prompt_token_details': promptTokenDetails!.toJson(),
     if (serviceTier != null) 'service_tier': serviceTier,
+    'connector_tokens': ?connectorTokens,
+    'connectors': ?connectors,
     if (completionTokensDetails != null)
       'completion_tokens_details': completionTokensDetails!.toJson(),
   };
@@ -108,6 +122,8 @@ class UsageInfo {
     Object? promptTokenDetails = unsetCopyWithValue,
     Object? completionTokensDetails = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? connectorTokens = unsetCopyWithValue,
+    Object? connectors = unsetCopyWithValue,
   }) => UsageInfo(
     requestCount: requestCount == unsetCopyWithValue
         ? this.requestCount
@@ -127,6 +143,12 @@ class UsageInfo {
     promptTokenDetails: promptTokenDetails == unsetCopyWithValue
         ? this.promptTokenDetails
         : promptTokenDetails as PromptTokensDetails?,
+    connectorTokens: connectorTokens == unsetCopyWithValue
+        ? this.connectorTokens
+        : connectorTokens as int?,
+    connectors: connectors == unsetCopyWithValue
+        ? this.connectors
+        : connectors as Map<String, int>?,
     serviceTier: serviceTier == unsetCopyWithValue
         ? this.serviceTier
         : serviceTier as String?,
@@ -149,7 +171,9 @@ class UsageInfo {
           promptTokensDetails == other.promptTokensDetails &&
           promptTokenDetails == other.promptTokenDetails &&
           completionTokensDetails == other.completionTokensDetails &&
-          serviceTier == other.serviceTier;
+          serviceTier == other.serviceTier &&
+          connectorTokens == other.connectorTokens &&
+          mapsEqual(connectors, other.connectors);
 
   @override
   int get hashCode => Object.hashAll([
@@ -163,6 +187,8 @@ class UsageInfo {
     completionTokensDetails,
     serviceTier,
     requestCount,
+    connectorTokens,
+    mapHash(connectors),
   ]);
 
   @override
@@ -175,5 +201,6 @@ class UsageInfo {
       'promptTokensDetails: $promptTokensDetails, '
       'promptTokenDetails: $promptTokenDetails, '
       'completionTokensDetails: $completionTokensDetails, '
-      'serviceTier: $serviceTier)';
+      'serviceTier: $serviceTier, connectorTokens: $connectorTokens, '
+      'connectors: $connectors)';
 }
