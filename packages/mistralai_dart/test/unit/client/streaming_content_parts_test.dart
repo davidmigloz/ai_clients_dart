@@ -7,14 +7,17 @@ import 'package:test/test.dart';
 
 void main() {
   test('streams thinking, transition and answer phases', () async {
+    const model = 'mistral-large-latest';
     String event(Object content) =>
         'data: ${jsonEncode({
           'id': 'x',
+          'model': model,
           'object': 'chat.completion.chunk',
           'choices': [
             {
               'index': 0,
               'delta': {'content': content},
+              'finish_reason': null,
             },
           ],
         })}\n\n';
@@ -46,15 +49,15 @@ void main() {
         ),
       ),
     );
+    addTearDown(client.close);
 
     final stream = client.chat.createStream(
       request: ChatCompletionRequest(
-        model: 'mistral-large-latest',
+        model: model,
         messages: [ChatMessage.user('Hi')],
       ),
     );
 
     expect(await stream.text, 'Hello');
-    client.close();
   });
 }

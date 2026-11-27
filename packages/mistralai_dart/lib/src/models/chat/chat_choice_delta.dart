@@ -122,6 +122,9 @@ class DeltaContent {
   };
 
   /// Creates a copy with replaced values.
+  ///
+  /// Pass a [MessageContent] or a plain string to replace the content, or
+  /// `null` to clear it. Omitting `content` keeps the existing value.
   DeltaContent copyWith({
     Object? role = unsetCopyWithValue,
     Object? content = unsetCopyWithValue,
@@ -131,9 +134,11 @@ class DeltaContent {
     Object? metadata = unsetCopyWithValue,
   }) => DeltaContent(
     role: role == unsetCopyWithValue ? this.role : role as String?,
-    content: content == unsetCopyWithValue
-        ? this.content
-        : content as MessageContent?,
+    content: switch (content) {
+      unsetCopyWithValue => this.content,
+      final String text => MessageContent.text(text),
+      _ => content as MessageContent?,
+    },
     toolCalls: toolCalls == unsetCopyWithValue
         ? this.toolCalls
         : toolCalls as List<ToolCall>?,

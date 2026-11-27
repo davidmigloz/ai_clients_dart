@@ -31,6 +31,8 @@ if (content is MessagePartsContent) {
 
 When building a `DeltaContent` yourself, wrap strings: `DeltaContent(content: MessageContent.text('Hi'))`.
 
+`delta.copyWith(content: 'Hi')` still accepts a plain string. You can also pass a `MessageContent` value to replace the content or `null` to clear it.
+
 `response.text`, `response.allText` and `ChatChoice.text` now also return the text of list content. Previously they returned `null` for it.
 
 ---

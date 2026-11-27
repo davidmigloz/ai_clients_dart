@@ -63,5 +63,18 @@ void main() {
       expect(delta.toJson(), json);
       expect(DeltaContent.fromJson(delta.toJson()), delta);
     });
+
+    test('copyWith accepts legacy strings, parts, and null', () {
+      const original = DeltaContent(content: MessageContent.text('Original'));
+      const replacement = MessageContent.parts([TextContentPart('Updated')]);
+
+      expect(original.copyWith().content, original.content);
+      expect(
+        original.copyWith(content: 'Updated').content,
+        const MessageContent.text('Updated'),
+      );
+      expect(original.copyWith(content: replacement).content, replacement);
+      expect(original.copyWith(content: null).content, isNull);
+    });
   });
 }
