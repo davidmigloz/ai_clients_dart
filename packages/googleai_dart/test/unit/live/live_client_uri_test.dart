@@ -95,6 +95,50 @@ void main() {
       expect(uri.queryParameters['key'], equals('default'));
     });
 
+    test('a supplied token selects the constrained v1beta endpoint', () {
+      const config = GoogleAIConfig(
+        apiVersion: ApiVersion.v1,
+        baseUrl: 'https://proxy.example.com/tenant/?key=base&tag=a&tag=b',
+        defaultQueryParams: {
+          'access_token': 'default-token',
+          'x-goog-api-key': 'default-key',
+        },
+      );
+      final uri = LiveClient.buildWebSocketUri(config, {
+        'access_token': 'auth_tokens/test-token',
+        'key': 'provider-key',
+      });
+      expect(
+        uri.path,
+        '/tenant/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained',
+      );
+      expect(uri.queryParametersAll, {
+        'tag': ['a', 'b'],
+        'access_token': ['auth_tokens/test-token'],
+      });
+    });
+
+    test(
+      'header placement selects the constrained path without auth query',
+      () {
+        const config = GoogleAIConfig(
+          baseUrl:
+              'https://proxy.example.com/?access_token=base-token&key=base',
+          defaultQueryParams: {
+            'ACCESS_TOKEN': 'default-token',
+            'key': 'default',
+          },
+        );
+        final uri = LiveClient.buildWebSocketUri(
+          config,
+          {},
+          useEphemeralHeader: true,
+        );
+        expect(uri.path.endsWith('.BidiGenerateContentConstrained'), isTrue);
+        expect(uri.queryParameters, isEmpty);
+      },
+    );
+
     test('uses the configured API version in the path', () {
       const config = GoogleAIConfig(apiVersion: ApiVersion.v1);
 
@@ -117,7 +161,7 @@ void main() {
     };
 
     for (final entry in locationHosts.entries) {
-      test('${entry.key} uses its endpoint and keeps the location parameter', () {
+      test('${entry.key} uses its dedicated endpoint', () {
         final config = GoogleAIConfig.vertexAI(
           projectId: 'test-project',
           location: entry.key,
@@ -130,14 +174,13 @@ void main() {
         expect(uri.host, entry.value);
         expect(
           uri.path,
-          '/ws/google.cloud.aiplatform.v1.PredictionService.BidiGenerateContent',
+          '/ws/google.cloud.aiplatform.v1.LlmBidiService/BidiGenerateContent',
         );
-        expect(uri.queryParameters['project'], 'test-project');
-        expect(uri.queryParameters['location'], entry.key);
+        expect(uri.queryParameters, isEmpty);
       });
     }
 
-    test('builds the vertex wss URI with project/location params', () {
+    test('builds the regional Vertex beta URI', () {
       const config = GoogleAIConfig(
         apiMode: ApiMode.vertexAI,
         projectId: 'P',
@@ -151,14 +194,13 @@ void main() {
       expect(
         uri.path,
         equals(
-          '/ws/google.cloud.aiplatform.v1beta1.PredictionService.BidiGenerateContent',
+          '/ws/google.cloud.aiplatform.v1beta1.LlmBidiService/BidiGenerateContent',
         ),
       );
-      expect(uri.queryParameters['project'], equals('P'));
-      expect(uri.queryParameters['location'], equals('us-central1'));
+      expect(uri.queryParameters, isEmpty);
     });
 
-    test('maps ApiVersion.v1 to the v1 prediction service', () {
+    test('maps ApiVersion.v1 to the v1 Live service', () {
       const config = GoogleAIConfig(
         apiMode: ApiMode.vertexAI,
         apiVersion: ApiVersion.v1,
@@ -171,9 +213,32 @@ void main() {
       expect(
         uri.path,
         equals(
-          '/ws/google.cloud.aiplatform.v1.PredictionService.BidiGenerateContent',
+          '/ws/google.cloud.aiplatform.v1.LlmBidiService/BidiGenerateContent',
         ),
       );
+    });
+
+    test('preserves a custom base URI but discards URL bearer credentials', () {
+      final config =
+          GoogleAIConfig.vertexAI(
+            projectId: 'P',
+            location: 'eu',
+            authProvider: const BearerTokenProvider('adc'),
+          ).copyWith(
+            baseUrl:
+                'http://proxy.example.com:8765/tenant?access_token=bad&tag=a&tag=b',
+          );
+      final uri = LiveClient.buildWebSocketUri(config, {});
+      expect(uri.scheme, 'ws');
+      expect(uri.host, 'proxy.example.com');
+      expect(uri.port, 8765);
+      expect(
+        uri.path,
+        '/tenant/ws/google.cloud.aiplatform.v1.LlmBidiService/BidiGenerateContent',
+      );
+      expect(uri.queryParametersAll, {
+        'tag': ['a', 'b'],
+      });
     });
 
     test('throws LiveSessionSetupException when projectId is missing', () {

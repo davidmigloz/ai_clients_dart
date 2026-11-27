@@ -1,7 +1,8 @@
-import 'dart:async' show Completer, StreamSubscription, unawaited;
+import 'dart:async' show Completer;
 
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:web_socket/web_socket.dart';
 
 import '../auth/auth_provider.dart';
 import '../client/config.dart';
@@ -25,10 +26,10 @@ import 'websocket_connector.dart' as ws;
 /// final liveClient = client.createLiveClient();
 ///
 /// final session = await liveClient.connect(
-///   model: 'gemini-2.0-flash-live-001',
+///   model: 'gemini-3.8-live',
 ///   liveConfig: LiveConfig(
 ///     generationConfig: LiveGenerationConfig(
-///       responseModalities: [ResponseModality.audio, ResponseModality.text],
+///       responseModalities: [ResponseModality.audio],
 ///     ),
 ///   ),
 /// );
@@ -49,10 +50,13 @@ class LiveClient {
 
   /// Connects to the Live API and starts a new session.
   ///
-  /// [model] is the model to use (e.g., 'gemini-2.0-flash-live-001').
+  /// [model] is the model to use (e.g., 'gemini-3.8-live').
   /// [liveConfig] contains session configuration (generation, VAD, tools, etc.).
   /// [accessToken] is an optional ephemeral token for client-side authentication.
-  /// When provided, this token is used instead of the configured auth provider.
+  /// When provided, this token takes precedence over configured credentials
+  /// and uses the Gemini Developer API's constrained `v1beta` endpoint.
+  /// Alternatively, configure an `EphemeralTokenProvider`. Browsers require
+  /// query-parameter placement. Vertex AI Live uses native OAuth headers.
   ///
   /// Returns a [LiveSession] for bidirectional streaming.
   ///
@@ -62,7 +66,8 @@ class LiveClient {
   /// ## Using Ephemeral Tokens
   ///
   /// Ephemeral tokens allow secure client-side authentication without exposing
-  /// the main API key. Create tokens server-side using [AuthTokensResource.create]:
+  /// the main API key. Create tokens server-side using `client.authTokens.create`
+  /// with Gemini Developer API `v1beta`:
   ///
   /// ```dart
   /// // Server-side
@@ -75,7 +80,7 @@ class LiveClient {
   ///
   /// // Client-side
   /// final session = await liveClient.connect(
-  ///   model: 'gemini-2.0-flash-live-001',
+  ///   model: 'gemini-3.8-live',
   ///   accessToken: tokenFromServer,
   /// );
   /// ```
@@ -84,56 +89,92 @@ class LiveClient {
     LiveConfig? liveConfig,
     String? accessToken,
   }) async {
-    final uri = await _buildWebSocketUri(model, accessToken: accessToken);
-    _log.fine('Connecting to Live API');
-
-    // Get headers for Vertex AI OAuth (native platforms only)
-    // Web platforms don't support WebSocket headers - the connector will throw
-    // a clear error if headers are needed but not supported.
-    Map<String, String>? headers;
-    if (_config.apiMode == ApiMode.vertexAI && accessToken == null) {
-      final credentials = await _config.authProvider?.getCredentials();
-      if (credentials is BearerTokenCredentials) {
-        headers = {'Authorization': 'Bearer ${credentials.token}'};
-      }
+    final credentials = await _getCredentials(accessToken);
+    final isVertex = _config.apiMode == ApiMode.vertexAI;
+    if (isVertex && credentials is EphemeralTokenCredentials) {
+      throw const LiveConnectionException(
+        message: 'Ephemeral Live tokens require the Gemini Developer API.',
+      );
     }
 
-    // Phase 1: Establish WebSocket connection
-    LiveSession session;
+    final useEphemeralHeader =
+        credentials is EphemeralTokenCredentials &&
+        credentials.placement == EphemeralTokenPlacement.header;
+    final authQueryParams = <String, String>{};
+    Map<String, String>? headers;
+    switch (credentials) {
+      case ApiKeyCredentials(:final apiKey):
+        authQueryParams['key'] = apiKey;
+      case EphemeralTokenCredentials(:final token):
+        if (useEphemeralHeader) {
+          headers = {'Authorization': 'Token $token'};
+        } else {
+          authQueryParams['access_token'] = token;
+        }
+      case BearerTokenCredentials(:final token) when isVertex:
+        headers = {'Authorization': 'Bearer $token'};
+      default:
+        break;
+    }
+    final Uri uri;
     try {
-      // Connect WebSocket with optional auth headers
-      // On native platforms (dart:io), headers are passed to the WebSocket.
-      // On web platforms, if headers are provided, a clear error is thrown.
-      final socket = await ws.connectWebSocket(uri, headers: headers);
+      uri = buildWebSocketUri(
+        _config,
+        authQueryParams,
+        useEphemeralHeader: useEphemeralHeader,
+      );
+    } on FormatException {
+      throw const LiveConnectionException(
+        message: 'Invalid Live API base URL.',
+      );
+    }
+    _log.fine('Connecting to Live API');
 
-      // Create session
+    final LiveSession session;
+    try {
+      final socket = await ws.connectWebSocket(uri, headers: headers);
       session = LiveSession.fromWebSocket(socket);
       _sessions.add(session);
-    } on Exception catch (e) {
+    } on LiveConnectionException catch (error, stackTrace) {
+      // Platform connectors supply static, credential-free guidance here.
       throw LiveConnectionException(
-        message: 'Failed to connect to Live API: $e',
-        uri: uri,
-        cause: e,
+        message: error.message,
+        uri: _diagnosticUri(uri),
+        stackTrace: stackTrace,
+      );
+    } on UnsupportedError {
+      rethrow;
+    } catch (error, stackTrace) {
+      final cause = error is WebSocketException
+          ? WebSocketException(
+              _safeSocketMessage(error.message, uri, credentials),
+            )
+          : null;
+      throw LiveConnectionException(
+        message:
+            'Failed to connect to Live API: ${cause?.message ?? error.runtimeType}',
+        uri: _diagnosticUri(uri),
+        stackTrace: stackTrace,
+        cause: cause,
       );
     }
 
     // Phase 2: Setup session (separate try block to surface setup errors)
     try {
       await _setupSession(session, model, liveConfig);
-      _log.fine('Live session established: ${session.sessionId}');
+      _log.fine('Live session established');
       return session;
     } on LiveSessionSetupException {
       // Clean up failed session and rethrow setup errors directly
       await session.close();
       _sessions.remove(session);
       rethrow;
-    } on Exception catch (e) {
-      // Clean up failed session and wrap other errors
+    } on Exception catch (error, stackTrace) {
       await session.close();
       _sessions.remove(session);
       throw LiveSessionSetupException(
-        message: 'Session setup failed: $e',
-        cause: e,
+        message: 'Live session setup failed (${error.runtimeType}).',
+        stackTrace: stackTrace,
       );
     }
   }
@@ -175,128 +216,134 @@ class LiveClient {
     }
   }
 
-  Future<Uri> _buildWebSocketUri(String model, {String? accessToken}) async {
-    // Get auth credentials for query params
-    final authQueryParams = await _getAuthQueryParams(accessToken: accessToken);
-    return buildWebSocketUri(_config, authQueryParams);
+  Future<AuthCredentials?> _getCredentials(String? accessToken) async {
+    if (accessToken != null) return EphemeralTokenCredentials(accessToken);
+    try {
+      return await _config.authProvider?.getCredentials();
+    } catch (_, stackTrace) {
+      throw LiveConnectionException(
+        message: 'Unable to obtain Live API credentials.',
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Builds the WebSocket URI for a Live API connection.
   ///
-  /// For Google AI mode, the configured base URL is parsed so a trailing
-  /// slash, sub-path (proxy), explicit port, or query params carried by the
-  /// base URL are handled correctly. An `http`/`ws` base URL maps to `ws`;
-  /// anything else (including scheme-less values) maps to `wss`.
+  /// Query parameters normally merge in order: base URL → auth → config
+  /// defaults. For constrained Developer API connections, an explicit or
+  /// provider-issued token takes precedence and API keys are removed. Set
+  /// [useEphemeralHeader] when the ephemeral token is in an auth header.
   ///
-  /// Merges query parameters in order: base URL → auth → config defaults
-  /// (last-write-wins by key).
+  /// A base URL may use a proxy path and explicit port. An `http` or `ws`
+  /// base URL maps to `ws`. Other schemes and scheme-less hosts map to `wss`.
   @visibleForTesting
   static Uri buildWebSocketUri(
     GoogleAIConfig config,
-    Map<String, String> authQueryParams,
-  ) {
-    switch (config.apiMode) {
-      case ApiMode.googleAI:
-        // Google AI endpoint
-        // wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent
-        var raw = config.baseUrl.isNotEmpty
-            ? config.baseUrl
-            : 'https://generativelanguage.googleapis.com';
-        // Back-compat: scheme-less host strings were previously accepted.
-        if (!raw.contains('://')) {
-          raw = 'https://$raw';
-        }
-        final baseUri = Uri.parse(raw);
-        final basePath = baseUri.path.endsWith('/')
-            ? baseUri.path.substring(0, baseUri.path.length - 1)
-            : baseUri.path;
-        final secure = baseUri.scheme != 'http' && baseUri.scheme != 'ws';
-
-        final queryParams = <String, dynamic>{
-          ...baseUri.queryParametersAll,
-          ...authQueryParams,
-          ...config.defaultQueryParams,
-        };
-
-        return Uri(
-          scheme: secure ? 'wss' : 'ws',
-          host: baseUri.host,
-          // Explicit port to avoid :0 issue.
-          port: baseUri.hasPort ? baseUri.port : (secure ? 443 : 80),
-          path:
-              '$basePath/ws/google.ai.generativelanguage.${config.apiVersion.value}.GenerativeService.BidiGenerateContent',
-          queryParameters: queryParams.isEmpty ? null : queryParams,
-        );
-
-      case ApiMode.vertexAI:
-        // Use the shared global, multi-region, or regional Vertex AI hostname.
-        final location = config.location ?? 'us-central1';
-        final projectId = config.projectId;
-
-        if (projectId == null) {
-          throw const LiveSessionSetupException(
-            message: 'Project ID is required for Vertex AI',
-          );
-        }
-
-        final host = GoogleAIConfig.vertexAIHost(location);
-        final version = config.apiVersion == ApiVersion.v1 ? 'v1' : 'v1beta1';
-
-        final queryParams = <String, String>{
-          ...authQueryParams,
-          'project': projectId,
-          'location': location,
-          ...config.defaultQueryParams,
-        };
-
-        // Note: Vertex AI requires OAuth Bearer token in headers.
-        // On native platforms, the websocket_connector passes headers to dart:io.
-        // On web platforms, headers aren't supported and an error is thrown.
-        return Uri(
-          scheme: 'wss',
-          host: host,
-          path:
-              '/ws/google.cloud.aiplatform.$version.PredictionService.BidiGenerateContent',
-          queryParameters: queryParams,
-        );
+    Map<String, String> authQueryParams, {
+    bool useEphemeralHeader = false,
+  }) {
+    const googleBase = 'https://generativelanguage.googleapis.com';
+    final isVertex = config.apiMode == ApiMode.vertexAI;
+    if (isVertex && config.projectId == null) {
+      throw const LiveSessionSetupException(
+        message: 'Project ID is required for Vertex AI',
+      );
     }
-  }
+    final defaultBase = isVertex
+        ? GoogleAIConfig.vertexAIBaseUrl(config.location ?? 'us-central1')
+        : googleBase;
+    final raw =
+        config.baseUrl.isEmpty || (isVertex && config.baseUrl == googleBase)
+        ? defaultBase
+        : config.baseUrl;
+    final baseUri = Uri.parse(raw.contains('://') ? raw : 'https://$raw');
+    final basePath = baseUri.path.endsWith('/')
+        ? baseUri.path.substring(0, baseUri.path.length - 1)
+        : baseUri.path;
+    final secure = baseUri.scheme != 'http' && baseUri.scheme != 'ws';
+    final queryParams = <String, dynamic>{
+      ...baseUri.queryParametersAll,
+      ...authQueryParams,
+      ...config.defaultQueryParams,
+    };
 
-  Future<Map<String, String>> _getAuthQueryParams({String? accessToken}) async {
-    final params = <String, String>{};
-
-    // If an ephemeral access token is provided, use it directly
-    if (accessToken != null) {
-      params['access_token'] = accessToken;
-      return params;
-    }
-
-    // Otherwise, get credentials from the auth provider
-    if (_config.authProvider != null) {
-      final credentials = await _config.authProvider!.getCredentials();
-
-      switch (credentials) {
-        case ApiKeyCredentials(:final apiKey):
-          // API key goes in query params for WebSocket
-          params['key'] = apiKey;
-        case BearerTokenCredentials():
-          // OAuth bearer tokens are handled via Authorization header
-          // by the platform-specific WebSocket connector.
-          // Do NOT add to query params - this would leak the token to logs,
-          // proxies, and caches. The connector will either:
-          // - Add the header (native platforms)
-          // - Throw a clear error (web platforms)
-          break;
-        case EphemeralTokenCredentials(:final token):
-          // Ephemeral tokens use access_token query parameter
-          params['access_token'] = token;
-        case NoAuthCredentials():
-          // No auth needed
-          break;
+    final String endpoint;
+    if (isVertex) {
+      final version = config.apiVersion == ApiVersion.v1 ? 'v1' : 'v1beta1';
+      endpoint =
+          '/ws/google.cloud.aiplatform.$version.LlmBidiService/BidiGenerateContent';
+      queryParams.removeWhere(
+        (name, _) => name.toLowerCase() == 'access_token',
+      );
+    } else {
+      final accessToken =
+          authQueryParams['access_token'] ?? queryParams['access_token'];
+      final constrained = useEphemeralHeader || accessToken != null;
+      final version = constrained ? 'v1beta' : config.apiVersion.value;
+      final method = constrained
+          ? 'BidiGenerateContentConstrained'
+          : 'BidiGenerateContent';
+      endpoint =
+          '/ws/google.ai.generativelanguage.$version.GenerativeService.$method';
+      if (constrained) {
+        const credentialKeys = {
+          'key',
+          'api_key',
+          'api-key',
+          'x-goog-api-key',
+          'access_token',
+        };
+        queryParams.removeWhere(
+          (name, _) => credentialKeys.contains(name.toLowerCase()),
+        );
+        if (!useEphemeralHeader && accessToken != null) {
+          queryParams['access_token'] = accessToken;
+        }
       }
     }
 
-    return params;
+    return Uri(
+      scheme: secure ? 'wss' : 'ws',
+      host: baseUri.host,
+      port: baseUri.hasPort ? baseUri.port : (secure ? 443 : 80),
+      path: '$basePath$endpoint',
+      queryParameters: queryParams.isEmpty ? null : queryParams,
+    );
+  }
+
+  static Uri _diagnosticUri(Uri uri) =>
+      Uri(scheme: uri.scheme, host: uri.host, port: uri.port, path: uri.path);
+
+  static String _safeSocketMessage(
+    String message,
+    Uri uri,
+    AuthCredentials? credentials,
+  ) {
+    var safe = message.replaceAll(
+      uri.toString(),
+      _diagnosticUri(uri).toString(),
+    );
+    final credential = switch (credentials) {
+      ApiKeyCredentials(:final apiKey) => apiKey,
+      BearerTokenCredentials(:final token) ||
+      EphemeralTokenCredentials(:final token) => token,
+      _ => null,
+    };
+    for (final value in {
+      ...uri.queryParametersAll.values.expand((values) => values),
+      ?credential,
+    }) {
+      if (value.isEmpty) continue;
+      for (final form in {
+        value,
+        Uri.encodeComponent(value),
+        Uri.encodeQueryComponent(value),
+      }) {
+        safe = safe.replaceAll(form, '[redacted]');
+      }
+    }
+    return safe;
   }
 
   Future<void> _setupSession(
@@ -318,8 +365,10 @@ class LiveClient {
           );
         }
         final location = _config.location ?? 'us-central1';
-        modelPath =
-            'projects/$projectId/locations/$location/publishers/google/models/$model';
+        final publisherModel = model.startsWith('publishers/')
+            ? model
+            : 'publishers/google/${model.startsWith('models/') ? model : 'models/$model'}';
+        modelPath = 'projects/$projectId/locations/$location/$publisherModel';
       }
     } else {
       // Google AI: models/{model}
@@ -340,26 +389,19 @@ class LiveClient {
       historyConfig: liveConfig?.historyConfig,
     );
 
-    // Send setup
-    session.send(setup);
-
-    // Wait for setup complete or error
+    // Subscribe before sending setup so an immediate response cannot be lost.
     final completer = Completer<void>();
-    StreamSubscription<BidiGenerateContentServerMessage>? subscription;
-
-    subscription = session.messages.listen(
+    final subscription = session.messages.listen(
       (message) {
         if (message is BidiGenerateContentSetupComplete) {
-          unawaited(subscription?.cancel());
           if (!completer.isCompleted) {
             completer.complete();
           }
         }
       },
-      onError: (Object error) {
-        unawaited(subscription?.cancel());
+      onError: (Object error, StackTrace stackTrace) {
         if (!completer.isCompleted) {
-          completer.completeError(error);
+          completer.completeError(error, stackTrace);
         }
       },
       onDone: () {
@@ -373,21 +415,18 @@ class LiveClient {
       },
     );
 
-    // Timeout for setup
     try {
+      session.send(setup);
       await completer.future.timeout(
         const Duration(seconds: 30),
         onTimeout: () {
-          unawaited(subscription?.cancel());
           throw const LiveSessionSetupException(
             message: 'Setup timed out after 30 seconds',
           );
         },
       );
-    } on LiveSessionSetupException {
-      rethrow;
-    } on Exception catch (e) {
-      throw LiveSessionSetupException(message: 'Setup failed: $e', cause: e);
+    } finally {
+      await subscription.cancel();
     }
   }
 

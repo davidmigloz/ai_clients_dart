@@ -2,29 +2,18 @@ import 'package:web_socket/web_socket.dart';
 
 import '../errors/exceptions.dart';
 
-/// Web implementation using the web_socket package.
-///
-/// Web browsers do not support custom headers on WebSocket connections,
-/// so Vertex AI OAuth tokens cannot be passed via Authorization header.
-/// In this case, an error is thrown with guidance.
+/// Browser WebSockets cannot send custom upgrade headers.
 Future<WebSocket> connectWebSocket(Uri uri, {Map<String, String>? headers}) {
-  // Web browsers don't support custom headers on WebSocket connections
   if (headers != null && headers.isNotEmpty) {
-    // Check if this is an OAuth authorization header (Vertex AI)
-    if (headers.containsKey('Authorization')) {
-      throw LiveConnectionException(
-        message:
-            'Vertex AI Live API requires OAuth headers which are not '
-            'supported by browser WebSocket connections. '
-            'On web platforms, use Google AI mode with an API key, or use '
-            'ephemeral tokens (accessToken parameter) for authentication. '
-            'Vertex AI Live API with OAuth is supported on native platforms '
-            '(server, CLI, mobile).',
-        uri: uri,
-      );
-    }
+    final authorization = headers['Authorization'];
+    final message = authorization != null && authorization.startsWith('Token ')
+        ? 'Browser Live connections require a Gemini ephemeral token in the '
+              'query. Use connect(accessToken: ...) or an '
+              'EphemeralTokenProvider with query placement.'
+        : 'Vertex AI Live requires OAuth headers, which browser WebSockets '
+              'cannot send. Use a native client or connect to the Gemini '
+              'Developer API with a short-lived ephemeral token.';
+    throw LiveConnectionException(message: message);
   }
-
-  // Use the web_socket package for browser connections
   return WebSocket.connect(uri);
 }
