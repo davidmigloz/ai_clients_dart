@@ -35,17 +35,24 @@ class InterceptorChain {
   /// each call. Headers and connection settings from the intercepted request
   /// are copied onto each attempt.
   ///
+  /// [authInApiKeyHeader] selects the x-api-key authentication header.
+  /// [redactErrorBody] omits the body from diagnostic errors.
+  ///
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
     http.BaseRequest Function()? requestFactory,
+    bool authInApiKeyHeader = false,
+    bool redactErrorBody = false,
   }) {
     ensureNotClosed?.call();
     final context = RequestContext(
       request: request,
       metadata: {},
       abortTrigger: abortTrigger,
+      authInApiKeyHeader: authInApiKeyHeader,
+      redactErrorBody: redactErrorBody,
     );
 
     return _buildChain(0, requestFactory)(context);
