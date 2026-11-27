@@ -414,7 +414,9 @@ mixin StreamingResource on ResourceBase {
     final details = <Object>[];
 
     try {
-      final errorDetails = jsonDecode(body);
+      final errorDetails = Redactor.continuationTokens.redactJson(
+        jsonDecode(body),
+      );
       if (errorDetails is Map<String, dynamic>) {
         final error = errorDetails['error'] as Map<String, dynamic>?;
         message = error?['message']?.toString() ?? message;
@@ -430,6 +432,7 @@ mixin StreamingResource on ResourceBase {
         message = body;
       }
     }
+    message = Redactor.continuationTokens.redactString(message);
 
     if (statusCode == 401) {
       return AuthenticationException(message: message, details: details);
@@ -478,23 +481,31 @@ mixin StreamingResource on ResourceBase {
     String? sseEvent,
     Object? error,
   ) {
+    final safeError = Redactor.continuationTokens.redactJson(error);
     String message;
-    if (error is Map<String, dynamic>) {
-      message = (error['message'] ?? error['error'] ?? 'Unknown stream error')
-          .toString();
-    } else if (error is String) {
-      message = error;
+    if (safeError is Map<String, dynamic>) {
+      message =
+          (safeError['message'] ?? safeError['error'] ?? 'Unknown stream error')
+              .toString();
+    } else if (safeError is String) {
+      message = safeError;
     } else if (sseEvent == 'error') {
       message = (json['_rawData'] as String?) ?? 'Stream error event received';
     } else {
       message = 'Unknown stream error';
     }
 
-    Logger('GoogleAI.HTTP').warning('Inline stream error: $message');
+    final safeMessage = Redactor.continuationTokens.redactString(message);
+    Logger('GoogleAI.HTTP').warning('Inline stream error: $safeMessage');
 
     final cleanJson = Map<String, dynamic>.from(json)
       ..remove('_event')
       ..remove('_rawData');
-    throw StreamException(message: message, partialData: jsonEncode(cleanJson));
+    throw StreamException(
+      message: safeMessage,
+      partialData: jsonEncode(
+        Redactor.continuationTokens.redactJson(cleanJson),
+      ),
+    );
   }
 }

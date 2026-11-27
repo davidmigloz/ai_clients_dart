@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 import '../auth/auth_provider.dart';
 import '../models/copy_with_sentinel.dart';
 import '../platform/environment.dart';
+import '../utils/redactor.dart';
 
 /// API version for the GoogleAI and Vertex AI APIs.
 /// https://ai.google.dev/gemini-api/docs/api-versions
@@ -9,8 +10,11 @@ enum ApiVersion {
   /// Stable version (v1) - Production-ready with guaranteed stability.
   v1('v1'),
 
-  /// Beta version (v1beta) - Early-access features, subject to breaking changes.
-  v1beta('v1beta');
+  /// Beta version (v1beta) for Gemini Developer API preview features.
+  v1beta('v1beta'),
+
+  /// Beta version (v1beta1) for Vertex AI preview features.
+  v1beta1('v1beta1');
 
   /// The version string used in API URLs.
   final String value;
@@ -63,7 +67,7 @@ class GoogleAIConfig {
   /// API mode (Google AI or Vertex AI).
   final ApiMode apiMode;
 
-  /// API version (v1 or v1beta).
+  /// API version for this backend.
   final ApiVersion apiVersion;
 
   /// API version for Interactions requests. Defaults to [apiVersion] when null.
@@ -137,6 +141,7 @@ class GoogleAIConfig {
       'api_key',
       'x-goog-api-key',
       'token',
+      ...Redactor.continuationTokenFields,
       'password',
       'secret',
       'bearer',
@@ -169,6 +174,7 @@ class GoogleAIConfig {
       'api_key',
       'x-goog-api-key',
       'token',
+      ...Redactor.continuationTokenFields,
       'password',
       'secret',
       'bearer',
@@ -193,6 +199,7 @@ class GoogleAIConfig {
   ///
   /// Requires [projectId] and [location] for GCP integration.
   /// Authentication must use OAuth 2.0 with service account credentials.
+  /// Choose [ApiVersion.v1beta1] for Vertex AI preview features that require it.
   ///
   /// The [location] determines the API endpoint:
   /// - `'global'` → `https://aiplatform.googleapis.com`
@@ -231,6 +238,7 @@ class GoogleAIConfig {
       'api_key',
       'x-goog-api-key',
       'token',
+      ...Redactor.continuationTokenFields,
       'password',
       'secret',
       'bearer',

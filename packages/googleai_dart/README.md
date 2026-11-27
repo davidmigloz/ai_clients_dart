@@ -184,6 +184,7 @@ Future<void> main() async {
 
 - `v1` is the stable choice for production rollouts.
 - `v1beta` exposes preview features earlier and is the default for Google AI.
+- `v1beta1` exposes Vertex AI preview features such as GenerateContent long decode. Select it with `GoogleAIConfig.vertexAI(apiVersion: ApiVersion.v1beta1, ...)`.
 
 **Vertex AI:**
 
@@ -286,6 +287,23 @@ Future<void> main() async {
 ```
 
 → [Full example](example/generate_content.dart)
+
+For long decode on supported Gemini 4 models, use `streamGenerateContent` and
+set `GenerationConfig.maxOutputTokens` above 65,536. Gemini 4 Neon and Hydrogen
+also support unary long decode. An initial direct unary request to Gemini 4
+Carbon or Argon with a limit above 32,768 can return HTTP 400.
+
+When a candidate has `FinishReason.continuation` and a token, start the next
+hop with the original request and
+`copyWith(continuationToken: candidate.continuationToken)`. Keep the original
+inputs and total token budget across hops. On a stream, a checkpoint token
+can arrive before a finish reason. Keep output since the last checkpoint
+pending so you can discard it if the stream drops and resume from that
+checkpoint. To resume after `FinishReason.maxTokens` with a token, raise the
+budget above the tokens already used. On Vertex AI, select
+`ApiVersion.v1beta1`.
+[Gemini Developer API long decode](https://aistudio.google.com/docs/long-decode?generate-content=true) ·
+[Vertex AI inference reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/inference)
 
 </details>
 

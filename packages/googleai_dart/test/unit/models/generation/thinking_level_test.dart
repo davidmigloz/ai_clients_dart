@@ -70,6 +70,11 @@ void main() {
       });
     });
 
+    test('maps XHIGH to the highest model-specific level', () {
+      expect(thinkingLevelFromString('xhigh'), ThinkingLevel.xhigh);
+      expect(thinkingLevelToString(ThinkingLevel.xhigh), 'XHIGH');
+    });
+
     test('round-trip conversion preserves value', () {
       for (final level in ThinkingLevel.values) {
         final str = thinkingLevelToString(level);

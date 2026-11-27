@@ -50,12 +50,16 @@ class ErrorInterceptor implements Interceptor {
     final body = response.body;
 
     // Try to parse error details from response body
-    Object? errorDetails;
+    var excerptSource = body;
     var message = 'HTTP $statusCode error';
     final details = <Object>[];
 
     try {
-      errorDetails = jsonDecode(body);
+      final decoded = jsonDecode(body);
+      final errorDetails = Redactor.continuationTokens.redactJson(decoded);
+      if (!identical(decoded, errorDetails)) {
+        excerptSource = jsonEncode(errorDetails);
+      }
       if (errorDetails is Map<String, dynamic>) {
         final error = errorDetails['error'];
         if (error is Map<String, dynamic>) {
@@ -72,6 +76,7 @@ class ErrorInterceptor implements Interceptor {
         message = body.isNotEmpty ? body : message;
       }
     }
+    message = Redactor.continuationTokens.redactString(message);
 
     // Extract request metadata from context
     final correlationId =
@@ -90,6 +95,7 @@ class ErrorInterceptor implements Interceptor {
         'api_key',
         'x-goog-api-key',
         'token',
+        ...Redactor.continuationTokenFields,
       ],
     );
     final redactedHeaders = redactor.redactMap(context.request.headers);
@@ -105,11 +111,13 @@ class ErrorInterceptor implements Interceptor {
     );
 
     // Create response metadata
-    final bodyExcerpt = body.length > 200 ? body.substring(0, 200) : body;
+    final safeBody = redactor.redactString(excerptSource);
     final responseMetadata = ResponseMetadata(
       statusCode: statusCode,
       headers: response.headers,
-      bodyExcerpt: redactor.redactString(bodyExcerpt),
+      bodyExcerpt: safeBody.length > 200
+          ? safeBody.substring(0, 200)
+          : safeBody,
       latency: latency,
     );
 

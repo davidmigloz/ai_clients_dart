@@ -111,6 +111,19 @@ void main() {
       expect(finishReasonToString(FinishReason.escalation), 'ESCALATION');
     });
 
+    test('recognizes continuation and backend-specific finish reasons', () {
+      const cases = {
+        'CONTINUATION': FinishReason.continuation,
+        'PUP_LIMITED_DISABLED': FinishReason.pupLimitedDisabled,
+        'MODEL_ARMOR': FinishReason.modelArmor,
+      };
+      for (final entry in cases.entries) {
+        final candidate = Candidate.fromJson({'finishReason': entry.key});
+        expect(candidate.finishReason, entry.value);
+        expect(candidate.toJson()['finishReason'], entry.key);
+      }
+    });
+
     test('round-trip conversion preserves all values', () {
       for (final reason in FinishReason.values) {
         final str = finishReasonToString(reason);
