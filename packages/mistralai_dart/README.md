@@ -1736,7 +1736,7 @@ See the [example/](example/) directory for complete examples:
 - [API reference](https://pub.dev/documentation/mistralai_dart/latest/)
 - [Mistral AI API docs](https://docs.mistral.ai/)
 - [Mistral AI Python SDK](https://github.com/mistralai/client-python)
-- [Mistral AI JS SDK](https://github.com/mistralai/client-js)
+- [Mistral AI TypeScript SDK](https://github.com/mistralai/client-ts)
 
 ## Sponsor
 

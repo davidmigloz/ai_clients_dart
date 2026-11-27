@@ -2,7 +2,7 @@
   "specs": {
     "main": {
       "current_version": "1.0.0",
-      "last_fetched": "2026-08-02T05:58:52.127374Z",
+      "last_fetched": "2026-11-27T17:34:25Z",
       "source_url": "https://docs.mistral.ai/openapi.yaml",
       "title": "Mistral AI API",
       "version_history": [
@@ -11,8 +11,30 @@
           "source_url": "https://docs.mistral.ai/openapi.yaml",
           "title": "Mistral AI API",
           "version": "1.0.0"
+        },
+        {
+          "fetched_at": "2026-08-02T05:58:52.127374Z",
+          "source_url": "https://docs.mistral.ai/openapi.yaml",
+          "title": "Mistral AI API",
+          "version": "1.0.0",
+          "normalized_sha256": "5569018c9b0cc44507ecc1da7eb499d654b8634e38a947d3e39d2f62793cc5b4"
         }
-      ]
+      ],
+      "cutoff_date": "2026-11-27",
+      "raw_sha256": "acf0efcbee4617601df77fc40185516ed6aae4369ce090034099317d5866b2db",
+      "normalized_sha256": "bfc5e48ee2299075592422b120a2a069e1fb65834a5cfb80ffca72f8b4f89260",
+      "normalization": "YAML 1.2 via yq, followed by ASCII-escaped, sorted JSON using two-space indentation and a final newline",
+      "sdk_references": {
+        "python": {
+          "tag": "v3.9.0",
+          "sha": "6e9e31ac6f982c1fdfe177787ded223f458c9f69"
+        },
+        "typescript": {
+          "tag": "v3.5.0",
+          "sha": "d1cf81b7e4795692689559f13ac920d1af7a26d1",
+          "supplemental_main_sha": "3e87497eea3ae73f482cd683b043469e72f12389"
+        }
+      }
     }
   }
 }
