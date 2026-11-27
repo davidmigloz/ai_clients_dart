@@ -144,38 +144,52 @@ class _AdminErrorSanitizer implements Interceptor {
     RequestContext context,
     InterceptorNext next,
   ) async {
-    final response = await next(context);
+    final http.Response response;
+    try {
+      response = await next(context);
+    } catch (error) {
+      // A supplied transport can include the request headers in an exception.
+      // Keep those credentials out of both the public exception and the log.
+      if (error.toString().contains(_credential)) {
+        throw http.ClientException('Mistral Admin transport failed.');
+      }
+      rethrow;
+    }
     if (response.statusCode < 400) return response;
 
     String cleanBody;
     try {
       cleanBody = jsonEncode(_redactJson(jsonDecode(response.body)));
     } on FormatException {
-      cleanBody = response.body.replaceAll(_credential, _redacted);
+      cleanBody = _redactText(response.body);
     }
     return http.Response(
       cleanBody,
       response.statusCode,
       headers: {
         for (final entry in response.headers.entries)
-          entry.key: _isCredentialField(entry.key)
+          _redactText(entry.key): _isCredentialField(entry.key)
               ? _redacted
-              : entry.value.replaceAll(_credential, _redacted),
+              : _redactText(entry.value),
       },
     );
   }
 
   Object? _redactJson(Object? value) => switch (value) {
-    final String text => text.replaceAll(_credential, _redacted),
+    final String text => _redactText(text),
     final List<Object?> items => items.map(_redactJson).toList(),
     final Map<String, dynamic> fields => {
       for (final entry in fields.entries)
-        entry.key: _isCredentialField(entry.key) && entry.value != null
+        _redactText(
+          entry.key,
+        ): _isCredentialField(entry.key) && entry.value != null
             ? _redacted
             : _redactJson(entry.value),
     },
     _ => value,
   };
+
+  String _redactText(String value) => value.replaceAll(_credential, _redacted);
 
   static bool _isCredentialField(String name) =>
       switch (name.toLowerCase().replaceAll('-', '_')) {

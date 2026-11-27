@@ -2,15 +2,20 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:logging/logging.dart';
 import 'package:mistralai_dart/mistralai_dart.dart';
 import 'package:test/test.dart';
 
 const _adminKey = 'admin-fixture-key';
 
-MistralAdminClient _client(http.Client transport) {
+MistralAdminClient _client(
+  http.Client transport, {
+  Level logLevel = Level.OFF,
+}) {
   final client = MistralAdminClient.withApiKey(
     _adminKey,
     httpClient: transport,
+    logLevel: logLevel,
   );
   addTearDown(client.close);
   return client;
@@ -76,6 +81,33 @@ void main() {
         ),
       );
       expect(result.toJson(), jsonDecode(r'''{"run_id":"fixture"}'''));
+    });
+
+    test('an active SCIM sync exposes the existing run on HTTP 409', () async {
+      final client = _client(
+        MockClient(
+          (_) async =>
+              http.Response('{"run_id":"run-42","status":"RUNNING"}', 409),
+        ),
+      );
+      await expectLater(
+        client.scim.startSync(request: const StartAdminScimSyncRequest()),
+        throwsA(
+          isA<AdminScimSyncConflictException>()
+              .having((error) => error.statusCode, 'HTTP status', 409)
+              .having((error) => error.activeRun.runId, 'run ID', 'run-42')
+              .having(
+                (error) => error.activeRun.status,
+                'status',
+                AdminScimRunStatus.running,
+              )
+              .having(
+                (error) => error.requestMetadata?.method,
+                'method',
+                'POST',
+              ),
+        ),
+      );
     });
 
     test('GET /v1/admin/scim/sync/{run_id}', () async {
@@ -1128,6 +1160,69 @@ void main() {
               '[REDACTED]',
             ),
       ),
+    );
+  });
+
+  test('redacts reflected Admin keys from error metadata and logs', () async {
+    final previousLevel = Logger.root.level;
+    Logger.root.level = Level.ALL;
+    final logs = <LogRecord>[];
+    final subscription = Logger.root.onRecord.listen(logs.add);
+    addTearDown(() async {
+      await subscription.cancel();
+      Logger.root.level = previousLevel;
+    });
+    final reflected = _client(
+      MockClient(
+        (_) async => http.Response(
+          jsonEncode({_adminKey: 'invalid'}),
+          409,
+          headers: {_adminKey: 'invalid'},
+        ),
+      ),
+      logLevel: Level.ALL,
+    );
+    await expectLater(
+      reflected.roles.list(),
+      throwsA(
+        isA<ApiException>()
+            .having(
+              (error) => error.message,
+              'message',
+              isNot(contains(_adminKey)),
+            )
+            .having(
+              (error) => error.responseMetadata?.bodyExcerpt,
+              'body',
+              isNot(contains(_adminKey)),
+            )
+            .having(
+              (error) => error.responseMetadata?.headers.keys,
+              'header names',
+              isNot(contains(_adminKey)),
+            ),
+      ),
+    );
+    final throwing = _client(
+      MockClient((request) {
+        throw http.ClientException('Header: ${request.headers['x-api-key']}');
+      }),
+      logLevel: Level.ALL,
+    );
+    await expectLater(
+      throwing.roles.list(),
+      throwsA(
+        isA<http.ClientException>().having(
+          (error) => error.toString(),
+          'message',
+          isNot(contains(_adminKey)),
+        ),
+      ),
+    );
+    expect(logs.where((record) => record.level == Level.WARNING), hasLength(2));
+    expect(
+      logs.map((record) => record.message).join('\n'),
+      isNot(contains(_adminKey)),
     );
   });
 
