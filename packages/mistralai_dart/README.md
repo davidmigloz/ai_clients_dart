@@ -482,25 +482,34 @@ await client.fineTuning.models.unarchive(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.files` to upload, list, download, and delete files. File-path uploads are native-only; on web, use byte-based uploads instead.
-
-> **Note**: File-path based uploads (`filePath`) are only available on native platforms. On web, use byte-based uploads (`bytes`) instead. Other file operations (list, retrieve, download, delete) are supported on all platforms.
+Use `client.files` to upload, list, download, and delete files, or to request
+a signed download URL. File paths and input streams require a native platform.
+Use bytes with a filename in a browser.
 
 ```dart
 // Upload a file
 final file = await client.files.upload(
-  filePath: 'training_data.jsonl',
-  purpose: FilePurpose.fineTune,
+  filePath: 'batch_requests.jsonl',
+  purpose: FilePurpose.batch,
+  visibility: FileVisibility.workspace,
+  mimeType: 'application/jsonl',
 );
 
-// List files
-final files = await client.files.list();
+// List files from an upload
+final files = await client.files.list(
+  purpose: FilePurpose.batch,
+  sources: ['upload'],
+  pageSize: 20,
+);
 
 // Download file content
 final content = await client.files.download(fileId: file.id);
 
-// Delete file
-await client.files.delete(fileId: file.id);
+final signed = await client.files.getSignedUrl(
+  fileId: file.id,
+  expiryHours: 1,
+);
+print(signed.url);
 ```
 
 → [Full example](example/files_example.dart)
@@ -512,7 +521,10 @@ await client.files.delete(fileId: file.id);
 <details>
 <summary><b>Show example</b></summary>
 
-The fine-tuning jobs API has been removed upstream; use `client.fineTuning.models` to manage the fine-tuned models that result from training runs launched outside this client, and `client.batch.jobs` for batch processing. Batch jobs support a polling helper for long-running operations.
+Mistral retired the fine-tuning jobs API. Version 6 removed job creation
+and polling. Use `client.fineTuning.models` to update, archive, or restore
+existing fine-tuned models. Use `client.batch.jobs` for batch inference.
+[Mistral's legacy fine-tuning notice](https://docs.mistral.ai/resources/deprecated/customization)
 
 ```dart
 // Update a fine-tuned model's metadata
@@ -525,15 +537,6 @@ final updated = await client.fineTuning.models.update(
 await client.fineTuning.models.archive(modelId: updated.id);
 await client.fineTuning.models.unarchive(modelId: updated.id);
 
-// List available models with pagination
-final paginator = Paginator<AgentList, Agent>(
-  fetcher: (page, size) => client.agents.list(page: page, pageSize: size),
-  getItems: (response) => response.data,
-);
-
-await for (final agent in paginator.items()) {
-  print('Agent: ${agent.id}');
-}
 ```
 
 ```dart
@@ -550,11 +553,25 @@ final job = await client.batch.jobs.create(
 final poller = BatchJobPoller(client: client, jobId: job.id);
 final completed = await poller.poll();
 
-// Download results
-final results = await client.files.download(fileId: completed.outputFile!);
+final outputFileId = completed.outputFileId;
+if (outputFileId != null) {
+  final results = await client.files.download(fileId: outputFileId);
+  print('Downloaded ${results.length} bytes');
+}
+
+// List one page of completed or timed-out jobs.
+final page = await client.batch.jobs.list(
+  page: 0,
+  pageSize: 20,
+  statuses: [BatchJobStatus.success, BatchJobStatus.timedOut],
+);
+print(page.data.length);
 ```
 
-→ [Full example](example/fine_tuning_example.dart)
+For jobs with inline results, call `retrieve(jobId: id, inline: true)` and
+read `outputs`.
+
+→ [Fine-tuned models](example/fine_tuning_example.dart) · [Batch](example/batch_example.dart)
 
 </details>
 
@@ -819,7 +836,9 @@ final details = await client.conversations.retrieve(
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.libraries` to create document libraries for RAG. Upload files first, add them as documents, then reference the library in chat via `Tool.documentLibrary(...)`.
+Use `client.libraries` (beta) to create document libraries for retrieval. Upload
+document bytes and wait for processing before querying with
+`Tool.documentLibrary(...)`.
 
 ```dart
 // Create a library
@@ -827,16 +846,18 @@ final library = await client.libraries.create(
   name: 'Research Papers',
 );
 
-// Add a document (file must be uploaded first via client.files.upload())
-final doc = await client.libraries.documents.create(
+// Upload a document directly. This example uses ASCII bytes for "AI notes".
+final doc = await client.libraries.documents.upload(
   libraryId: library.id,
-  fileId: fileId, // ID from client.files.upload()
+  bytes: [65, 73, 32, 110, 111, 116, 101, 115],
+  fileName: 'notes.txt',
+  mimeType: 'text/plain',
 );
 
-// List documents
 final docs = await client.libraries.documents.list(libraryId: library.id);
+print(docs.data.firstOrNull?.processingStatus);
 
-// Use library with chat
+// Once the document is processed, use the library with Chat Completions.
 final response = await client.chat.create(
   request: ChatCompletionRequest(
     model: 'mistral-large-latest',
@@ -859,6 +880,11 @@ await client.libraries.delete(libraryId: library.id);
 <summary><b>Show example</b></summary>
 
 Use `client.prompts` to manage versioned, shareable prompt templates (Beta). Each prompt has one or more versions; aliases (e.g. `production`) let you point consumers at a specific version without changing their code.
+
+Use `sortBy` and `sortDirection` to order lists. Select the fields you need
+with `fields`. For a workspace prompt, set
+`workspaceRelation: RegistryShareRelation.reader` to grant read access.
+Omitting the relation uses Mistral's writer default.
 
 ```dart
 // Create a prompt
@@ -910,6 +936,10 @@ await client.prompts.delete(promptId: prompt.id);
 <summary><b>Show example</b></summary>
 
 Use `client.skills` to manage versioned, shareable model instructions with optional file assets (Beta). Skills follow the same version/alias model as prompts.
+
+Skill lists can project `definition.description`. Retrieve an individual
+skill to read its body and assets. A workspace skill can grant read access
+with `workspaceRelation: RegistryShareRelation.reader`.
 
 ```dart
 // Create a skill with a text asset
@@ -1254,16 +1284,16 @@ See the [example/](example/) directory for complete examples:
 | [`vision_example.dart`](example/vision_example.dart) | Multimodal inputs |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
 | [`fim_example.dart`](example/fim_example.dart) | Code completion |
-| [`files_example.dart`](example/files_example.dart) | File management |
+| [`files_example.dart`](example/files_example.dart) | File uploads, filters, and signed URLs |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuned model management |
-| [`batch_example.dart`](example/batch_example.dart) | Batch processing |
+| [`batch_example.dart`](example/batch_example.dart) | Batch filtering, inline results, and polling |
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
 | [`classification_example.dart`](example/classification_example.dart) | Text classification |
 | [`ocr_example.dart`](example/ocr_example.dart) | Document text extraction |
 | [`audio_example.dart`](example/audio_example.dart) | Audio transcription and TTS |
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
-| [`libraries_example.dart`](example/libraries_example.dart) | Document storage (beta) |
+| [`libraries_example.dart`](example/libraries_example.dart) | Library and document uploads (beta) |
 | [`prompts_example.dart`](example/prompts_example.dart) | Versioned prompt templates (beta) |
 | [`skills_example.dart`](example/skills_example.dart) | Versioned model instructions and assets (beta) |
 | [`connectors_example.dart`](example/connectors_example.dart) | MCP connector management (beta) |

@@ -84,6 +84,77 @@ ReasoningEffort.max => 'Maximum',
 text. Use `assistantMessage` or `messageDelta` to read the full
 structured content from the current API.
 
+### Handle optional metadata on files, batch jobs, and fine-tuned models
+
+`FileObject.bytes`, `BatchJob.model`, and `FTModelOut.job` can be null.
+File-deletion confirmations do not include size. Agent-based batches may omit
+the model name, and an existing fine-tuned model may have no job ID.
+
+Before:
+
+```dart
+final int size = file.bytes;
+final String target = batch.model;
+final String jobId = fineTunedModel.job;
+```
+
+After:
+
+```dart
+final int? size = file.bytes;
+final String? target = batch.model ?? batch.agentId;
+final String? jobId = fineTunedModel.job;
+```
+
+Prefer `getSignedUrl(fileId: id, expiryHours: 1)` to
+`getSignedUrl(fileId: id, expiresIn: 3600)`. The old argument still takes
+seconds and rounds up to whole hours. Both use a GET request.
+
+### Use the current storage wire values
+
+Check timed-out batches using the enum rather than comparing the serialized
+status. The decoder still accepts the previous `TIMED_OUT` spelling.
+
+Before:
+
+```dart
+final timedOut = batch.status.value == 'TIMED_OUT';
+final outputId = batch.toJson()['output_file_id'];
+```
+
+After:
+
+```dart
+final timedOut = batch.status == BatchJobStatus.timedOut;
+final outputId = batch.outputFileId;
+```
+
+Batch JSON now writes `TIMEOUT_EXCEEDED`, `output_file`, `error_file`,
+and epoch seconds for timestamps. It still reads the earlier aliases and ISO
+timestamps. Add branches for `BatchJobStatus.unknown`,
+`FilePurpose.agenticSafety`, `EntityType.unknown`, and `ShareLevel.unknown`
+if your code switches exhaustively on those enums.
+
+`BatchJob`, `CreateBatchJobRequest`, `Library`, `LibraryDocument`, and
+`FileList` equality now compares their data. Compare identifiers explicitly
+when matching resource identity.
+
+Before:
+
+```dart
+final sameLibrary = previousLibrary == library;
+```
+
+After:
+
+```dart
+final sameLibrary = previousLibrary.id == library.id;
+```
+
+Library models keep epoch-second Dart getters and use ISO 8601 timestamps
+in JSON. The deprecated PUT methods are still available. Prefer
+`updatePartial` for library and document PATCH requests.
+
 ---
 
 ## Migrating from v7.x to v8.0.0

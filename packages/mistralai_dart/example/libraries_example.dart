@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print, unreachable_from_main
+import 'dart:convert';
+
 import 'package:mistralai_dart/mistralai_dart.dart';
 
 /// Example demonstrating the Libraries API (Beta).
@@ -73,10 +75,12 @@ Future<void> libraryManagementExample(MistralClient client) async {
 
   // Update the library
   print('Updating library...');
-  final updated = await client.libraries.update(
+  final updated = await client.libraries.updatePartial(
     libraryId: library.id,
-    name: 'Product Documentation v2',
-    description: 'Updated documentation library',
+    request: const UpdateLibraryRequest(
+      name: 'Product Documentation v2',
+      description: 'Updated documentation library',
+    ),
   );
   print('Updated name: ${updated.name}');
   print('Updated description: ${updated.description}');
@@ -101,26 +105,19 @@ Future<void> documentOperationsExample(MistralClient client) async {
   print('Created library: ${library.id}');
 
   try {
-    // Note: To add documents, you first need to upload a file
-    // using the Files API, then add it to the library.
-    //
-    // Example workflow:
-    // 1. Upload file: final file = await client.files.upload(...)
-    // 2. Add to library: await client.libraries.documents.create(
-    //      libraryId: library.id,
-    //      fileId: file.id,
-    //    )
+    final document = await client.libraries.documents.upload(
+      libraryId: library.id,
+      bytes: utf8.encode('The API accepts JSON request bodies.'),
+      fileName: 'api-reference.txt',
+      mimeType: 'text/plain',
+    );
+    print('Uploaded ${document.name}: ${document.processingStatus}');
+    final status = await client.libraries.documents.getStatus(
+      libraryId: library.id,
+      documentId: document.id,
+    );
+    print('Current processing status: ${status.processStatus}');
 
-    // For this example, we'll demonstrate the API structure:
-    print('');
-    print('Document workflow:');
-    print('1. Upload a file using client.files.upload()');
-    print('2. Add file to library using client.libraries.documents.create()');
-    print('3. Wait for processing (check status with retrieve())');
-    print('4. Access content with client.libraries.documents.getContent()');
-    print('');
-
-    // List documents in the library (will be empty for new library)
     print('Listing documents...');
     final documents = await client.libraries.documents.list(
       libraryId: library.id,
@@ -254,20 +251,8 @@ Future<void> fullDocumentWorkflowExample(MistralClient client) async {
   print('Created library: ${library.id}');
 
   try {
-    // 2. Upload a file (requires actual file path)
-    // final file = await client.files.upload(
-    //   filePath: 'docs/api-reference.pdf',
-    //   purpose: FilePurpose.libraries,
-    // );
-    // print('Uploaded file: ${file.id}');
-
-    // 3. Add file to library
-    // final document = await client.libraries.documents.create(
-    //   libraryId: library.id,
-    //   fileId: file.id,
-    //   documentName: 'API Reference',
-    // );
-    // print('Added document: ${document.id}');
+    // 2. Upload bytes with client.libraries.documents.upload().
+    // 3. Store the returned document ID for processing status and retrieval.
 
     // 4. Wait for processing
     // final processed = await waitForDocumentProcessing(
