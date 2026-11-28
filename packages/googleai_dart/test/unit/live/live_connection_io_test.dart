@@ -40,7 +40,7 @@ class _Server {
   final handshake = Completer<_Handshake>();
   int upgrades = 0;
 
-  _Server(this.http, {required bool reject}) {
+  _Server(this.http, {required bool reject, this.onRealtimeInput}) {
     http.listen((request) async {
       if (reject) {
         request.response.statusCode = HttpStatus.unauthorized;
@@ -53,13 +53,18 @@ class _Server {
       final apiKeyHeader = request.headers.value('x-goog-api-key');
       final socket = await WebSocketTransformer.upgrade(request);
       socket.listen((data) {
-        if (handshake.isCompleted) return;
+        final frame = jsonDecode(data as String) as Map<String, dynamic>;
+        if (handshake.isCompleted) {
+          final input = frame['realtimeInput'] as Map<String, dynamic>?;
+          if (input != null) onRealtimeInput?.call(socket, input);
+          return;
+        }
         handshake.complete(
           _Handshake(
             uri: uri,
             authorization: authorization,
             apiKeyHeader: apiKeyHeader,
-            firstMessage: jsonDecode(data as String) as Map<String, dynamic>,
+            firstMessage: frame,
           ),
         );
         socket.add(utf8.encode('{"setupComplete":{"sessionId":"loopback"}}'));
@@ -67,12 +72,18 @@ class _Server {
     });
   }
 
+  final void Function(WebSocket, Map<String, dynamic>)? onRealtimeInput;
+
   String get baseUrl => 'http://127.0.0.1:${http.port}';
 
-  static Future<_Server> start({bool reject = false}) async {
+  static Future<_Server> start({
+    bool reject = false,
+    void Function(WebSocket, Map<String, dynamic>)? onRealtimeInput,
+  }) async {
     final server = _Server(
       await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
       reject: reject,
+      onRealtimeInput: onRealtimeInput,
     );
     addTearDown(() => server.http.close(force: true));
     return server;
@@ -94,6 +105,171 @@ const _model = 'gemini-3.8-live';
 const _deadline = Duration(seconds: 4);
 
 void main() {
+  test(
+    'Live Transcribe sends settings and delivers interim and final frames',
+    () async {
+      const model = 'gemini-3.5-transcribe-live';
+      const interimFrame = {
+        'serverContent': {
+          'interimInputTranscription': {
+            'text': 'hello',
+            'finished': false,
+            'languageCode': 'en-US',
+            'startOffset': '0s',
+            'endOffset': '0.410s',
+          },
+        },
+      };
+      const finalFrame = {
+        'serverContent': {
+          'inputTranscription': {
+            'text': 'Hello world.',
+            'finished': true,
+            'languageCode': 'en-US',
+            'startOffset': '0s',
+            'endOffset': '0.790s',
+          },
+        },
+      };
+      final inputs = <Map<String, dynamic>>[];
+      final server = await _Server.start(
+        onRealtimeInput: (socket, input) {
+          inputs.add(input);
+          if (input.containsKey('audio')) socket.add(jsonEncode(interimFrame));
+          if (input['audioStreamEnd'] == true) {
+            socket.add(utf8.encode(jsonEncode(finalFrame)));
+          }
+        },
+      );
+      final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+      final session = await live
+          .connect(
+            model: model,
+            liveConfig: LiveConfig(
+              generationConfig: LiveGenerationConfig.textOnly(),
+              inputAudioTranscription: const AudioTranscriptionConfig(
+                enabled: true,
+                languageCodes: ['en-US'],
+                customVocabulary: ['Gemini'],
+                mode: AudioTranscriptionConfigMode.smart,
+                sourceText: 'Hello.',
+              ),
+              outputAudioTranscription: AudioTranscriptionConfig.disabled(),
+              realtimeInputConfig: const RealtimeInputConfig(
+                interimTranscriptTimestampEnabled: true,
+              ),
+            ),
+          )
+          .timeout(_deadline);
+      expect((await server.handshake.future).firstMessage, {
+        'setup': {
+          'model': 'models/$model',
+          'generationConfig': {
+            'responseModalities': ['TEXT'],
+          },
+          'realtimeInputConfig': {'interimTranscriptTimestampEnabled': true},
+          'inputAudioTranscription': {
+            'languageCodes': ['en-US'],
+            'customVocabulary': ['Gemini'],
+            'mode': 'SMART',
+            'sourceText': 'Hello.',
+          },
+        },
+      });
+
+      final messages = session.messages.take(2).toList().timeout(_deadline);
+      session
+        ..sendAudio([0, 1, 2, 3])
+        ..signalAudioStreamEnd();
+      final [interim, finalMessage] = await messages;
+      expect(inputs, [
+        {
+          'audio': {'data': 'AAECAw==', 'mimeType': 'audio/pcm;rate=16000'},
+        },
+        {'audioStreamEnd': true},
+      ]);
+      expect(interim, isA<BidiGenerateContentServerContent>());
+      expect(interim.toJson(), interimFrame);
+      expect(
+        (interim as BidiGenerateContentServerContent).inputTranscription,
+        isNull,
+      );
+      expect(interim.interimInputTranscription?.finished, isFalse);
+      expect(interim.interimInputTranscription?.endOffset, '0.410s');
+      expect(finalMessage.toJson(), finalFrame);
+      expect(
+        (finalMessage as BidiGenerateContentServerContent)
+            .interimInputTranscription,
+        isNull,
+      );
+      expect(finalMessage.inputTranscription?.languageCode, 'en-US');
+      expect(finalMessage.inputTranscription?.finished, isTrue);
+    },
+  );
+
+  test(
+    'manual Live activity signals keep legacy transcription enabled',
+    () async {
+      final inputs = <Map<String, dynamic>>[];
+      final server = await _Server.start(
+        onRealtimeInput: (socket, input) {
+          inputs.add(input);
+          if (input.containsKey('activityEnd')) {
+            socket.add(
+              jsonEncode({
+                'serverContent': {
+                  'outputTranscription': {'text': 'Hello!', 'finished': true},
+                },
+              }),
+            );
+          }
+        },
+      );
+      final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+      final session = await live
+          .connect(
+            model: _model,
+            liveConfig: LiveConfig(
+              inputAudioTranscription: const AudioTranscriptionConfig(),
+              outputAudioTranscription: AudioTranscriptionConfig.enabled(),
+              realtimeInputConfig: RealtimeInputConfig.manual(),
+            ),
+          )
+          .timeout(_deadline);
+      expect((await server.handshake.future).firstMessage, {
+        'setup': {
+          'model': 'models/$_model',
+          'inputAudioTranscription': <String, dynamic>{},
+          'outputAudioTranscription': <String, dynamic>{},
+          'realtimeInputConfig': {
+            'automaticActivityDetection': {'disabled': true},
+            'activityHandling': 'NO_INTERRUPTION',
+          },
+        },
+      });
+      final message = session.messages.first.timeout(_deadline);
+      session
+        ..signalActivityStart()
+        ..sendAudio([0, 1])
+        ..signalActivityEnd();
+      expect(
+        await message,
+        isA<BidiGenerateContentServerContent>().having(
+          (content) => content.outputTranscription?.text,
+          'output audio text',
+          'Hello!',
+        ),
+      );
+      expect(inputs, [
+        {'activityStart': <String, dynamic>{}},
+        {
+          'audio': {'data': 'AAE=', 'mimeType': 'audio/pcm;rate=16000'},
+        },
+        {'activityEnd': <String, dynamic>{}},
+      ]);
+    },
+  );
+
   test(
     'an explicit token uses the constrained endpoint and suppresses old keys',
     () async {

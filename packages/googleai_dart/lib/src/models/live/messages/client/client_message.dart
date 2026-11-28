@@ -180,10 +180,13 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
         'sessionResumption': sessionResumption!.toJson(),
       if (contextWindowCompression != null)
         'contextWindowCompression': contextWindowCompression!.toJson(),
-      if (inputAudioTranscription != null)
-        'inputAudioTranscription': inputAudioTranscription!.toJson(),
-      if (outputAudioTranscription != null)
-        'outputAudioTranscription': outputAudioTranscription!.toJson(),
+      // The Live protocol uses object presence as the enable flag.
+      if (inputAudioTranscription case final config?
+          when config.enabled != false)
+        'inputAudioTranscription': {...config.toJson()}..remove('enabled'),
+      if (outputAudioTranscription case final config?
+          when config.enabled != false)
+        'outputAudioTranscription': {...config.toJson()}..remove('enabled'),
       if (proactivity != null) 'proactivity': proactivity!.toJson(),
       if (historyConfig != null) 'historyConfig': historyConfig!.toJson(),
     },
@@ -333,7 +336,7 @@ class BidiGenerateContentRealtimeInput
       // Activity signals are empty objects, not boolean values
       if (activityStart ?? false) 'activityStart': <String, dynamic>{},
       if (activityEnd ?? false) 'activityEnd': <String, dynamic>{},
-      if (audioStreamEnd ?? false) 'audioStreamEnd': <String, dynamic>{},
+      if (audioStreamEnd != null) 'audioStreamEnd': audioStreamEnd,
     },
   };
 

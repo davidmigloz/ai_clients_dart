@@ -209,6 +209,7 @@ void main() {
     test('includes transcriptions when set', () {
       const content = BidiGenerateContentServerContent(
         inputTranscription: Transcription(text: 'Hello'),
+        interimInputTranscription: Transcription(text: 'Hel', finished: false),
         outputTranscription: Transcription(text: 'Hi there'),
         turnComplete: true,
       );
@@ -220,6 +221,10 @@ void main() {
       final inputTranscriptionJson =
           serverContentJson['inputTranscription'] as Map<String, dynamic>;
       expect(inputTranscriptionJson['text'], 'Hello');
+      expect(serverContentJson['interimInputTranscription'], {
+        'text': 'Hel',
+        'finished': false,
+      });
       expect(serverContentJson['outputTranscription'], isNotNull);
       final outputTranscriptionJson =
           serverContentJson['outputTranscription'] as Map<String, dynamic>;
@@ -235,6 +240,7 @@ void main() {
       expect(serverContent.containsKey('turnComplete'), true);
       expect(serverContent.containsKey('modelTurn'), false);
       expect(serverContent.containsKey('inputTranscription'), false);
+      expect(serverContent.containsKey('interimInputTranscription'), false);
       expect(serverContent.containsKey('outputTranscription'), false);
       expect(serverContent.containsKey('groundingMetadata'), false);
     });

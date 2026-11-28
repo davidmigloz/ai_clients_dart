@@ -701,6 +701,54 @@ fully qualified model name in setup.
 
 </details>
 
+### How do I transcribe live audio?
+
+<details>
+<summary><b>Set up live transcription and read interim and final text</b></summary>
+
+Use `gemini-3.5-transcribe-live` with a text response on the Gemini Developer
+API `v1beta` Live endpoint. Send 16 kHz, 16-bit mono PCM audio with
+`session.sendAudio()` and listen to `session.messages` before sending audio.
+
+```dart
+final session = await liveClient.connect(
+  model: 'gemini-3.5-transcribe-live',
+  liveConfig: LiveConfig(
+    generationConfig: LiveGenerationConfig.textOnly(),
+    inputAudioTranscription: const AudioTranscriptionConfig(
+      languageCodes: ['en-US'],
+      customVocabulary: ['Gemini'],
+    ),
+    realtimeInputConfig: const RealtimeInputConfig(
+      interimTranscriptTimestampEnabled: true,
+    ),
+  ),
+);
+```
+
+Read `BidiGenerateContentServerContent.interimInputTranscription` for
+provisional captions. Append each `inputTranscription.text` segment in the
+default verbatim mode. With `AudioTranscriptionConfigMode.smart`, replace your
+document with each finalized result and treat omitted text as an empty
+document. Use `sourceText` to provide an initial document for voice editing.
+Omit or pass an empty `languageCodes` list to detect the language automatically.
+
+Automatic activity detection can flush audio with
+`session.signalAudioStreamEnd()`. To control turn boundaries yourself, use
+`RealtimeInputConfig.manual()` and call `signalActivityStart()` and
+`signalActivityEnd()` around each audio turn.
+
+Gemini 3.5 Transcribe Live reports utterance offsets. For word-level timing and
+speaker diarization, use file transcription. Vertex AI lists the Live model in
+the `global`, `us`, and `eu` locations. Connect with the Vertex OAuth
+configuration and check option availability for your model and endpoint.
+
+[Live transcription example](example/live_transcription_example.dart) ·
+[Gemini Developer API Live transcription guide](https://aistudio.google.com/docs/live-api/live-transcribe) ·
+[Vertex AI model availability](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-transcribe#regional-availability)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -773,6 +821,7 @@ See the [example/](example/) directory for complete examples:
 | [`interactions_example.dart`](example/interactions_example.dart) | Stable Interactions, streaming, state and function calls |
 | [`interactions_long_decode.dart`](example/interactions_long_decode.dart) | Opt-in automatic continuation on Gemini 4 |
 | [`live_example.dart`](example/live_example.dart) | Live API WebSocket sessions |
+| [`live_transcription_example.dart`](example/live_transcription_example.dart) | Stream PCM audio and read interim and finalized transcripts |
 | [`models_example.dart`](example/models_example.dart) | List and inspect models |
 | [`oauth_refresh_example.dart`](example/oauth_refresh_example.dart) | OAuth token refresh during retries |
 | [`operations_example.dart`](example/operations_example.dart) | Long-running operations management |

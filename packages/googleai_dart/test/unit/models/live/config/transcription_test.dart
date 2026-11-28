@@ -3,6 +3,41 @@ import 'package:test/test.dart';
 
 void main() {
   group('Transcription', () {
+    test('round-trips SDK annotations including exact protobuf offsets', () {
+      const json = {
+        'text': 'A word',
+        'finished': true,
+        'languageCode': 'en-US',
+        'speakerLabel': 'spk_1',
+        'words': [
+          {'word': 'A', 'startOffset': '0.015000001s', 'endOffset': '0.078s'},
+          {'word': 'word', 'startOffset': '0.080s', 'endOffset': '0.190s'},
+        ],
+        'startOffset': '0.015000001s',
+        'endOffset': '0.190s',
+      };
+      final restored = Transcription.fromJson(json);
+      expect(restored.finished, isTrue);
+      expect(restored.speakerLabel, 'spk_1');
+      expect(restored.languageCode, 'en-US');
+      expect(restored.startOffset, '0.015000001s');
+      expect(restored.words?.first, isA<LiveTranscriptionWord>());
+      expect(restored.words?.first.word, 'A');
+      expect(restored.words?.first.startOffset, '0.015000001s');
+      expect(restored.words?.last.endOffset, '0.190s');
+      expect(restored.toJson(), json);
+      expect(
+        restored.copyWith(words: null).toJson(),
+        {...json}..remove('words'),
+      );
+    });
+
+    test('preserves a finished result with omitted text', () {
+      final restored = Transcription.fromJson({'finished': true});
+      expect(restored.text, isNull);
+      expect(restored.toJson(), {'finished': true});
+    });
+
     group('fromJson', () {
       test('creates Transcription with text', () {
         final json = {'text': 'Hello, world!'};

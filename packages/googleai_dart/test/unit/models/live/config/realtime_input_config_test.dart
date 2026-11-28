@@ -3,6 +3,29 @@ import 'package:test/test.dart';
 
 void main() {
   group('RealtimeInputConfig', () {
+    test('interim timestamp setting preserves false and can be cleared', () {
+      final config = RealtimeInputConfig.manual(
+        interimTranscriptTimestampEnabled: true,
+      ).copyWith(interimTranscriptTimestampEnabled: false);
+      expect(config.toJson()['interimTranscriptTimestampEnabled'], isFalse);
+      expect(
+        RealtimeInputConfig.fromJson(
+          config.toJson(),
+        ).interimTranscriptTimestampEnabled,
+        isFalse,
+      );
+      expect(
+        config.copyWith(interimTranscriptTimestampEnabled: null).toJson(),
+        isNot(contains('interimTranscriptTimestampEnabled')),
+      );
+      expect(
+        RealtimeInputConfig.withVAD(
+          interimTranscriptTimestampEnabled: true,
+        ).toJson()['interimTranscriptTimestampEnabled'],
+        isTrue,
+      );
+    });
+
     group('fromJson', () {
       test('creates RealtimeInputConfig with all fields', () {
         final json = {
