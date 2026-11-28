@@ -45,7 +45,7 @@ void main() async {
     print('       expireTime: DateTime.now().add(Duration(minutes: 15)),');
     print('       uses: 1,');
     print('       bidiGenerateContentSetup: BidiGenerateContentSetup(');
-    print('         model: "models/gemini-2.0-flash-live-001",');
+    print('         model: "models/gemini-3.8-live",');
     print('       ),');
     print('     ),');
     print('   );');
@@ -62,7 +62,7 @@ void main() async {
     print('   );');
     print('');
     print('   final session = await liveClient.connect(');
-    print('     model: "gemini-2.0-flash-live-001",');
+    print('     model: "gemini-3.8-live",');
     print('     accessToken: "${token.name}", // Token from server');
     print('   );');
     print('   ```');

@@ -22,9 +22,13 @@ import 'dart:io';
 ///
 /// ```bash
 /// export GOOGLE_CLOUD_PROJECT=your-project-id
-/// export GOOGLE_CLOUD_LOCATION=us-central1
+/// export GOOGLE_CLOUD_LOCATION=us
 /// export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
 /// ```
+///
+/// Use a supported location for the selected model. Gemini 3.8 Flash
+/// supports the US multi-region used here.
+/// https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash
 ///
 /// ## Authentication
 ///
@@ -38,8 +42,7 @@ import 'dart:io';
 /// ```
 Future<void> main() async {
   final projectId = Platform.environment['GOOGLE_CLOUD_PROJECT'];
-  final location =
-      Platform.environment['GOOGLE_CLOUD_LOCATION'] ?? 'us-central1';
+  final location = Platform.environment['GOOGLE_CLOUD_LOCATION'] ?? 'us';
   final credentialsPath =
       Platform.environment['GOOGLE_APPLICATION_CREDENTIALS'];
 
@@ -126,7 +129,7 @@ final client = GoogleAIClient(
 
 // Use the same API as Google AI!
 final response = await client.models.generateContent(
-  model: 'gemini-3.1-flash-preview',
+  model: 'gemini-3.8-flash',
   request: GenerateContentRequest(
     contents: [
       Content.text('Explain quantum computing'),

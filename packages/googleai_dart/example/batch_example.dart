@@ -16,7 +16,7 @@ void main() async {
     // 1. Create a batch for content generation
     print('1. Creating batch for content generation...');
     final generateBatch = await client.models.batchGenerateContent(
-      model: 'gemini-3.1-flash-preview',
+      model: 'gemini-3.8-flash',
       batch: GenerateContentBatch(
         displayName: 'Math Questions Batch',
         // model is auto-populated from the method parameter
@@ -101,7 +101,7 @@ void main() async {
     // 5. Create an async batch for embeddings
     print('5. Creating async batch for embeddings...');
     final embedBatch = await client.models.asyncBatchEmbedContent(
-      model: 'gemini-embedding-2-preview',
+      model: 'gemini-embedding-2',
       batch: EmbedContentBatch(
         displayName: 'Product Descriptions Embeddings',
         // model is auto-populated from the method parameter
