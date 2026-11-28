@@ -215,6 +215,7 @@ export 'src/models/live/enums/start_sensitivity.dart';
 export 'src/models/live/enums/turn_coverage.dart';
 export 'src/models/live/messages/client/client_message.dart';
 export 'src/models/live/messages/server/live_usage_metadata.dart';
+export 'src/models/live/messages/server/live_voice_activity.dart';
 export 'src/models/live/messages/server/server_message.dart';
 export 'src/models/live/music/live_music_generation_config.dart';
 export 'src/models/live/music/live_music_server_message.dart';

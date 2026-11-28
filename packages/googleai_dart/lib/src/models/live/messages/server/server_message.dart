@@ -4,6 +4,7 @@ import '../../../metadata/usage_metadata.dart';
 import '../../../tools/function_call.dart';
 import '../../config/transcription.dart';
 import 'live_usage_metadata.dart';
+import 'live_voice_activity.dart';
 
 /// Base class for server-to-client WebSocket messages.
 ///
@@ -16,15 +17,21 @@ import 'live_usage_metadata.dart';
 /// - `sessionResumptionUpdate` for [SessionResumptionUpdate]
 ///
 /// Frames without a recognized wrapper use [UnknownServerMessage]. This
-/// includes usage-only frames, which still expose [responseUsageMetadata].
+/// includes frames that carry only [responseUsageMetadata] or [voiceActivity].
 sealed class BidiGenerateContentServerMessage {
   /// Usage reported alongside the message payload at the top level.
   ///
   /// The server can send this by itself or together with a typed message.
   final LiveUsageMetadata? responseUsageMetadata;
 
+  /// Voice activity reported at the top level of this frame.
+  final LiveVoiceActivity? voiceActivity;
+
   /// Creates a message.
-  const BidiGenerateContentServerMessage({this.responseUsageMetadata});
+  const BidiGenerateContentServerMessage({
+    this.responseUsageMetadata,
+    this.voiceActivity,
+  });
 
   /// Creates a message from JSON.
   ///
@@ -34,40 +41,52 @@ sealed class BidiGenerateContentServerMessage {
       final Map<String, dynamic> usage => LiveUsageMetadata.fromJson(usage),
       _ => null,
     };
+    final voiceActivity = switch (json['voiceActivity']) {
+      final Map<String, dynamic> activity => LiveVoiceActivity.fromJson(
+        activity,
+      ),
+      _ => null,
+    };
     if (json.containsKey('setupComplete')) {
       return BidiGenerateContentSetupComplete.fromJson(
         json['setupComplete'] as Map<String, dynamic>,
         responseUsageMetadata: responseUsageMetadata,
+        voiceActivity: voiceActivity,
       );
     }
     if (json.containsKey('serverContent')) {
       return BidiGenerateContentServerContent.fromJson(
         json['serverContent'] as Map<String, dynamic>,
         responseUsageMetadata: responseUsageMetadata,
+        voiceActivity: voiceActivity,
       );
     }
     if (json.containsKey('toolCall')) {
       return BidiGenerateContentToolCall.fromJson(
         json['toolCall'] as Map<String, dynamic>,
         responseUsageMetadata: responseUsageMetadata,
+        voiceActivity: voiceActivity,
       );
     }
     if (json.containsKey('toolCallCancellation')) {
       return BidiGenerateContentToolCallCancellation.fromJson(
         json['toolCallCancellation'] as Map<String, dynamic>,
         responseUsageMetadata: responseUsageMetadata,
+        voiceActivity: voiceActivity,
       );
     }
     if (json.containsKey('goAway')) {
       return GoAway.fromJson(
         json['goAway'] as Map<String, dynamic>,
         responseUsageMetadata: responseUsageMetadata,
+        voiceActivity: voiceActivity,
       );
     }
     if (json.containsKey('sessionResumptionUpdate')) {
       return SessionResumptionUpdate.fromJson(
         json['sessionResumptionUpdate'] as Map<String, dynamic>,
         responseUsageMetadata: responseUsageMetadata,
+        voiceActivity: voiceActivity,
       );
     }
     // Return unknown message type instead of throwing to handle
@@ -75,12 +94,14 @@ sealed class BidiGenerateContentServerMessage {
     return UnknownServerMessage(
       json,
       responseUsageMetadata: responseUsageMetadata,
+      voiceActivity: voiceActivity,
     );
   }
 
-  Map<String, dynamic> get _responseUsageJson => {
+  Map<String, dynamic> get _ancillaryJson => {
     if (responseUsageMetadata != null)
       'usageMetadata': responseUsageMetadata!.toJson(),
+    if (voiceActivity != null) 'voiceActivity': voiceActivity!.toJson(),
   };
 
   /// Converts to JSON with the message type wrapper key.
@@ -100,23 +121,26 @@ class BidiGenerateContentSetupComplete
   const BidiGenerateContentSetupComplete({
     this.sessionId,
     super.responseUsageMetadata,
+    super.voiceActivity,
   });
 
   /// Creates from JSON.
   factory BidiGenerateContentSetupComplete.fromJson(
     Map<String, dynamic> json, {
     LiveUsageMetadata? responseUsageMetadata,
+    LiveVoiceActivity? voiceActivity,
   }) {
     return BidiGenerateContentSetupComplete(
       sessionId: json['sessionId'] as String?,
       responseUsageMetadata: responseUsageMetadata,
+      voiceActivity: voiceActivity,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'setupComplete': {if (sessionId != null) 'sessionId': sessionId},
-    ..._responseUsageJson,
+    ..._ancillaryJson,
   };
 
   @override
@@ -209,12 +233,14 @@ class BidiGenerateContentServerContent
     this.speechState,
     this.urlContextMetadata,
     super.responseUsageMetadata,
+    super.voiceActivity,
   });
 
   /// Creates from JSON.
   factory BidiGenerateContentServerContent.fromJson(
     Map<String, dynamic> json, {
     LiveUsageMetadata? responseUsageMetadata,
+    LiveVoiceActivity? voiceActivity,
   }) {
     return BidiGenerateContentServerContent(
       modelTurn: json['modelTurn'] != null
@@ -254,6 +280,7 @@ class BidiGenerateContentServerContent
       speechState: json['speechState'] as String?,
       urlContextMetadata: json['urlContextMetadata'] as Map<String, dynamic>?,
       responseUsageMetadata: responseUsageMetadata,
+      voiceActivity: voiceActivity,
     );
   }
 
@@ -279,7 +306,7 @@ class BidiGenerateContentServerContent
       if (speechState != null) 'speechState': speechState,
       if (urlContextMetadata != null) 'urlContextMetadata': urlContextMetadata,
     },
-    ..._responseUsageJson,
+    ..._ancillaryJson,
   };
 
   @override
@@ -304,18 +331,21 @@ class BidiGenerateContentToolCall extends BidiGenerateContentServerMessage {
   const BidiGenerateContentToolCall({
     required this.functionCalls,
     super.responseUsageMetadata,
+    super.voiceActivity,
   });
 
   /// Creates from JSON.
   factory BidiGenerateContentToolCall.fromJson(
     Map<String, dynamic> json, {
     LiveUsageMetadata? responseUsageMetadata,
+    LiveVoiceActivity? voiceActivity,
   }) {
     return BidiGenerateContentToolCall(
       functionCalls: (json['functionCalls'] as List<dynamic>)
           .map((e) => FunctionCall.fromJson(e as Map<String, dynamic>))
           .toList(),
       responseUsageMetadata: responseUsageMetadata,
+      voiceActivity: voiceActivity,
     );
   }
 
@@ -324,7 +354,7 @@ class BidiGenerateContentToolCall extends BidiGenerateContentServerMessage {
     'toolCall': {
       'functionCalls': functionCalls.map((e) => e.toJson()).toList(),
     },
-    ..._responseUsageJson,
+    ..._ancillaryJson,
   };
 
   @override
@@ -345,23 +375,26 @@ class BidiGenerateContentToolCallCancellation
   const BidiGenerateContentToolCallCancellation({
     required this.ids,
     super.responseUsageMetadata,
+    super.voiceActivity,
   });
 
   /// Creates from JSON.
   factory BidiGenerateContentToolCallCancellation.fromJson(
     Map<String, dynamic> json, {
     LiveUsageMetadata? responseUsageMetadata,
+    LiveVoiceActivity? voiceActivity,
   }) {
     return BidiGenerateContentToolCallCancellation(
       ids: (json['ids'] as List<dynamic>).cast<String>(),
       responseUsageMetadata: responseUsageMetadata,
+      voiceActivity: voiceActivity,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'toolCallCancellation': {'ids': ids},
-    ..._responseUsageJson,
+    ..._ancillaryJson,
   };
 
   @override
@@ -379,23 +412,29 @@ class GoAway extends BidiGenerateContentServerMessage {
   final String? timeLeft;
 
   /// Creates a [GoAway].
-  const GoAway({this.timeLeft, super.responseUsageMetadata});
+  const GoAway({
+    this.timeLeft,
+    super.responseUsageMetadata,
+    super.voiceActivity,
+  });
 
   /// Creates from JSON.
   factory GoAway.fromJson(
     Map<String, dynamic> json, {
     LiveUsageMetadata? responseUsageMetadata,
+    LiveVoiceActivity? voiceActivity,
   }) {
     return GoAway(
       timeLeft: json['timeLeft'] as String?,
       responseUsageMetadata: responseUsageMetadata,
+      voiceActivity: voiceActivity,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'goAway': {if (timeLeft != null) 'timeLeft': timeLeft},
-    ..._responseUsageJson,
+    ..._ancillaryJson,
   };
 
   @override
@@ -415,22 +454,41 @@ class SessionResumptionUpdate extends BidiGenerateContentServerMessage {
   /// Whether the session can be resumed.
   final bool? resumable;
 
+  /// Last client message included in the resumable state, when supplied.
+  ///
+  /// Vertex AI transparent resumption reports this as a protobuf int64
+  /// string. Keep it as a string or parse it with [BigInt.parse].
+  final String? lastConsumedClientMessageIndex;
+
   /// Creates a [SessionResumptionUpdate].
   const SessionResumptionUpdate({
     this.newHandle,
     this.resumable,
+    this.lastConsumedClientMessageIndex,
     super.responseUsageMetadata,
+    super.voiceActivity,
   });
 
   /// Creates from JSON.
   factory SessionResumptionUpdate.fromJson(
     Map<String, dynamic> json, {
     LiveUsageMetadata? responseUsageMetadata,
+    LiveVoiceActivity? voiceActivity,
   }) {
     return SessionResumptionUpdate(
       newHandle: json['newHandle'] as String?,
       resumable: json['resumable'] as bool?,
+      lastConsumedClientMessageIndex:
+          switch (json['lastConsumedClientMessageIndex']) {
+            final String index => index,
+            final int index => index.toString(),
+            null => null,
+            _ => throw const FormatException(
+              'Invalid Live resumption message index.',
+            ),
+          },
       responseUsageMetadata: responseUsageMetadata,
+      voiceActivity: voiceActivity,
     );
   }
 
@@ -439,14 +497,17 @@ class SessionResumptionUpdate extends BidiGenerateContentServerMessage {
     'sessionResumptionUpdate': {
       if (newHandle != null) 'newHandle': newHandle,
       if (resumable != null) 'resumable': resumable,
+      if (lastConsumedClientMessageIndex != null)
+        'lastConsumedClientMessageIndex': lastConsumedClientMessageIndex,
     },
-    ..._responseUsageJson,
+    ..._ancillaryJson,
   };
 
   @override
   String toString() =>
       'SessionResumptionUpdate(newHandle: ${newHandle != null ? "..." : null}, '
-      'resumable: $resumable)';
+      'resumable: $resumable, '
+      'lastConsumedClientMessageIndex: $lastConsumedClientMessageIndex)';
 }
 
 /// Unknown server message type.
@@ -468,12 +529,17 @@ class UnknownServerMessage extends BidiGenerateContentServerMessage {
   final Map<String, dynamic> rawJson;
 
   /// Creates an [UnknownServerMessage].
-  const UnknownServerMessage(this.rawJson, {super.responseUsageMetadata});
+  const UnknownServerMessage(
+    this.rawJson, {
+    super.responseUsageMetadata,
+    super.voiceActivity,
+  });
 
   @override
-  Map<String, dynamic> toJson() => responseUsageMetadata == null
+  Map<String, dynamic> toJson() =>
+      responseUsageMetadata == null && voiceActivity == null
       ? rawJson
-      : {...rawJson, ..._responseUsageJson};
+      : {..._ancillaryJson, ...rawJson};
 
   @override
   String toString() => 'UnknownServerMessage(keys: ${rawJson.keys})';

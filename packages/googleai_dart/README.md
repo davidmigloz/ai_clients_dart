@@ -909,6 +909,15 @@ generated tokens as `responseTokenCount` on both backends. Use
 `BidiGenerateContentServerContent.waitingForInput` to detect when the model
 expects the user to continue.
 
+`message.voiceActivity` exposes server-detected speech boundaries and their
+audio offsets. With session resumption enabled, inspect
+`session.lastResumableUpdate` for the most recent usable handle. Vertex AI
+transparent resumption can also report `lastConsumedClientMessageIndex` as a
+decimal string. Use it to discard acknowledged input from your buffer. The
+application calls `resume()` and replays unacknowledged input as needed.
+Check `session.resumable` before reconnecting to avoid reverting to an older
+checkpoint with missing input.
+
 [Full example](example/live_example.dart) ·
 [Gemini Developer API ephemeral tokens](https://aistudio.google.com/docs/ephemeral-tokens) ·
 [Vertex AI Live sessions](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session)

@@ -50,7 +50,7 @@ class LiveClient {
   };
 
   final GoogleAIConfig _config;
-  final List<LiveSession> _sessions = [];
+  final Set<LiveSession> _sessions = {};
 
   /// Creates a [LiveClient].
   LiveClient({required this._config});
@@ -147,7 +147,12 @@ class LiveClient {
     final LiveSession session;
     try {
       final socket = await ws.connectWebSocket(uri, headers: headers);
-      session = LiveSession.fromWebSocket(socket);
+      session = LiveSession.attach(
+        socket,
+        onClosed: _sessions.remove,
+        redactDiagnostic: (message) =>
+            _safeSocketMessage(message, uri, credentials),
+      );
       _sessions.add(session);
     } on LiveConnectionException catch (error, stackTrace) {
       // Platform connectors supply static, credential-free guidance here.
@@ -178,17 +183,17 @@ class LiveClient {
       await _setupSession(session, model, liveConfig);
       _log.fine('Live session established');
       return session;
-    } on LiveSessionSetupException {
-      // Clean up failed session and rethrow setup errors directly
-      await session.close();
-      _sessions.remove(session);
-      rethrow;
-    } on Exception catch (error, stackTrace) {
-      await session.close();
-      _sessions.remove(session);
+    } catch (error, stackTrace) {
+      try {
+        await session.close();
+      } catch (_) {
+        // The original setup failure carries the actionable error.
+      }
+      if (error is LiveSessionSetupException) rethrow;
       throw LiveSessionSetupException(
         message: 'Live session setup failed (${error.runtimeType}).',
         stackTrace: stackTrace,
+        cause: error is GoogleAIException ? error : null,
       );
     }
   }
@@ -207,13 +212,12 @@ class LiveClient {
     LiveConfig? liveConfig,
     String? accessToken,
   }) async {
-    final config =
-        liveConfig?.copyWith(
-          sessionResumption: SessionResumptionConfig.resume(resumptionToken),
-        ) ??
-        LiveConfig(
-          sessionResumption: SessionResumptionConfig.resume(resumptionToken),
-        );
+    final config = (liveConfig ?? const LiveConfig()).copyWith(
+      sessionResumption: SessionResumptionConfig.resume(
+        resumptionToken,
+        transparent: liveConfig?.sessionResumption?.transparent,
+      ),
+    );
 
     try {
       return await connect(
@@ -337,17 +341,23 @@ class LiveClient {
       EphemeralTokenCredentials(:final token) => token,
       _ => null,
     };
-    for (final value in {
-      ...uri.queryParametersAll.values.expand((values) => values),
-      ?credential,
-    }) {
-      if (value.isEmpty) continue;
-      for (final form in {
-        value,
+    final values =
+        {
+            ...uri.queryParametersAll.values.expand((values) => values),
+            ?credential,
+          }.where((value) => value.isNotEmpty).toList()
+          ..sort((a, b) => b.length.compareTo(a.length));
+    for (final value in values) {
+      safe = safe.replaceAll(value, '[redacted]');
+      for (final encoded in {
         Uri.encodeComponent(value),
         Uri.encodeQueryComponent(value),
       }) {
-        safe = safe.replaceAll(form, '[redacted]');
+        if (encoded == value) continue;
+        safe = safe.replaceAll(
+          RegExp(RegExp.escape(encoded), caseSensitive: false),
+          '[redacted]',
+        );
       }
     }
     return safe;
@@ -398,6 +408,7 @@ class LiveClient {
 
     // Subscribe before sending setup so an immediate response cannot be lost.
     final completer = Completer<void>();
+    completer.future.ignore();
     final subscription = session.messages.listen(
       (message) {
         if (message is BidiGenerateContentSetupComplete) {
@@ -424,11 +435,16 @@ class LiveClient {
 
     try {
       session.send(setup);
+      const defaultTimeout = Duration(seconds: 30);
+      final timeout = _config.timeout < defaultTimeout
+          ? _config.timeout
+          : defaultTimeout;
       await completer.future.timeout(
-        const Duration(seconds: 30),
+        timeout,
         onTimeout: () {
-          throw const LiveSessionSetupException(
-            message: 'Setup timed out after 30 seconds',
+          throw LiveSessionSetupException(
+            message:
+                'Live session setup timed out after ${timeout.inMilliseconds} ms.',
           );
         },
       );
@@ -439,11 +455,7 @@ class LiveClient {
 
   /// Closes all active sessions and cleans up resources.
   Future<void> close() async {
-    for (final session in _sessions) {
-      if (session.isConnected) {
-        await session.close();
-      }
-    }
-    _sessions.clear();
+    final active = _sessions.toList(growable: false);
+    await Future.wait(active.map((session) => session.close()));
   }
 }

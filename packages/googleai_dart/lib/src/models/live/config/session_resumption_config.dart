@@ -12,8 +12,9 @@ class SessionResumptionConfig {
 
   /// Whether to use transparent resumption behavior.
   ///
-  /// When `true`, session resumption happens transparently without
-  /// requiring explicit handling of resumption tokens.
+  /// Vertex AI can acknowledge the last client message included in each
+  /// resumption handle. Use that index to manage your outgoing message buffer.
+  /// The application reconnects and replays any unacknowledged input.
   final bool? transparent;
 
   /// Creates a [SessionResumptionConfig].
