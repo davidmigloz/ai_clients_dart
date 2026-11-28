@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import 'transcription_mode.dart';
 
 /// Configuration for speech recognition (transcription).
 class TranscriptionConfig {
@@ -24,6 +25,9 @@ class TranscriptionConfig {
   /// Supported value: `"word"`. If empty, no timestamps are generated.
   final List<String>? timestampGranularities;
 
+  /// Optional verbatim or SMART mode, with mode-specific settings.
+  final InteractionTranscriptionMode? mode;
+
   /// Creates a [TranscriptionConfig] instance.
   const TranscriptionConfig({
     @Deprecated('Use customVocabulary instead.') this.adaptationPhrases,
@@ -31,6 +35,7 @@ class TranscriptionConfig {
     this.diarizationMode,
     this.languageCodes,
     this.timestampGranularities,
+    this.mode,
   });
 
   /// Creates a [TranscriptionConfig] from JSON.
@@ -41,6 +46,9 @@ class TranscriptionConfig {
         customVocabulary: (json['custom_vocabulary'] as List?)?.cast<String>(),
         diarizationMode: json['diarization_mode'] as String?,
         languageCodes: (json['language_codes'] as List?)?.cast<String>(),
+        mode: json['mode'] == null
+            ? null
+            : InteractionTranscriptionMode.fromJson(json['mode'] as Object),
         timestampGranularities: (json['timestamp_granularities'] as List?)
             ?.cast<String>(),
       );
@@ -52,6 +60,7 @@ class TranscriptionConfig {
     if (customVocabulary != null) 'custom_vocabulary': customVocabulary,
     if (diarizationMode != null) 'diarization_mode': diarizationMode,
     if (languageCodes != null) 'language_codes': languageCodes,
+    'mode': ?mode?.toJson(),
     if (timestampGranularities != null)
       'timestamp_granularities': timestampGranularities,
   };
@@ -60,6 +69,7 @@ class TranscriptionConfig {
   TranscriptionConfig copyWith({
     Object? adaptationPhrases = unsetCopyWithValue,
     Object? customVocabulary = unsetCopyWithValue,
+    Object? mode = unsetCopyWithValue,
     Object? diarizationMode = unsetCopyWithValue,
     Object? languageCodes = unsetCopyWithValue,
     Object? timestampGranularities = unsetCopyWithValue,
@@ -73,6 +83,9 @@ class TranscriptionConfig {
       customVocabulary: customVocabulary == unsetCopyWithValue
           ? this.customVocabulary
           : customVocabulary as List<String>?,
+      mode: mode == unsetCopyWithValue
+          ? this.mode
+          : mode as InteractionTranscriptionMode?,
       diarizationMode: diarizationMode == unsetCopyWithValue
           ? this.diarizationMode
           : diarizationMode as String?,

@@ -710,6 +710,35 @@ if (response.answers?['late_delivery'] case NoulAnswer(:final noul)) {
 
 </details>
 
+### How do I configure speech, transcription, or video output?
+
+<details>
+<summary><b>Show options</b></summary>
+
+Use `InteractionGenerationConfig.structuredSpeechConfig` to select speakers
+and set text normalization for supported TTS models on Gemini Developer API
+`v1beta`. For example:
+
+```dart
+const generation = InteractionGenerationConfig(
+  structuredSpeechConfig: InteractionStructuredSpeechConfig.speakers(
+    speakers: [InteractionSpeechConfig(speaker: 'Narrator', voice: 'Puck')],
+    textNormalization: InteractionTextNormalization.enabled,
+  ),
+);
+```
+
+On the same beta surface, use `TranscriptionConfig.mode` to select SMART
+editing or verbatim transcription. For generated video, set
+`InteractionVideoResponseFormat.resolution` to a resolution supported by
+the selected model. Sampling controls `temperature` and `topP` are
+deprecated upstream and available only where the model supports them.
+
+[Speech generation](https://aistudio.google.com/docs/speech-generation) ·
+[Video output resolution](https://aistudio.google.com/docs/omni#output-resolution)
+
+</details>
+
 ### How do I manage credentials for agents?
 
 <details>

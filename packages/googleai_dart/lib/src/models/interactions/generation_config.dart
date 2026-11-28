@@ -1,6 +1,7 @@
 import '../copy_with_sentinel.dart';
 import 'image_config.dart';
 import 'speech_config.dart';
+import 'structured_speech_config.dart';
 import 'thinking_level.dart';
 import 'thinking_summaries.dart';
 import 'tool_choice.dart';
@@ -11,6 +12,16 @@ import 'video_config.dart';
 class InteractionGenerationConfig {
   /// Seed used in decoding for reproducibility.
   final int? seed;
+
+  /// Randomness of generation on supported models.
+  ///
+  /// The upstream schema marks this option deprecated.
+  final double? temperature;
+
+  /// Nucleus sampling threshold on supported models.
+  ///
+  /// The upstream schema marks this option deprecated.
+  final double? topP;
 
   /// A list of character sequences that will stop output interaction.
   final List<String>? stopSequences;
@@ -27,8 +38,16 @@ class InteractionGenerationConfig {
   /// The maximum number of tokens to include in the response.
   final int? maxOutputTokens;
 
-  /// Configuration for speech interaction.
+  /// Array-form speech settings under the existing beta wire field.
   final List<InteractionSpeechConfig>? speechConfig;
+
+  /// Object-form settings under the existing beta `speech_config` field.
+  ///
+  /// When supplied, this replaces the array form [speechConfig] in JSON.
+  final InteractionSpeakerConfig? speechConfigObject;
+
+  /// Speaker configuration and text normalization for speech generation.
+  final InteractionStructuredSpeechConfig? structuredSpeechConfig;
 
   /// Configuration for image interaction.
   final InteractionImageConfig? imageConfig;
@@ -42,12 +61,16 @@ class InteractionGenerationConfig {
   /// Creates an [InteractionGenerationConfig] instance.
   const InteractionGenerationConfig({
     this.seed,
+    this.temperature,
+    this.topP,
+    this.structuredSpeechConfig,
     this.stopSequences,
     this.toolChoice,
     this.thinkingLevel,
     this.thinkingSummaries,
     this.maxOutputTokens,
     this.speechConfig,
+    this.speechConfigObject,
     this.imageConfig,
     this.videoConfig,
     this.transcriptionConfig,
@@ -58,6 +81,13 @@ class InteractionGenerationConfig {
     Map<String, dynamic> json,
   ) => InteractionGenerationConfig(
     seed: json['seed'] as int?,
+    temperature: (json['temperature'] as num?)?.toDouble(),
+    topP: (json['top_p'] as num?)?.toDouble(),
+    structuredSpeechConfig: json['structured_speech_config'] == null
+        ? null
+        : InteractionStructuredSpeechConfig.fromJson(
+            json['structured_speech_config'] as Object,
+          ),
     stopSequences: (json['stop_sequences'] as List<dynamic>?)?.cast<String>(),
     toolChoice: json['tool_choice'] != null
         ? InteractionToolChoice.fromJson(json['tool_choice'])
@@ -71,11 +101,19 @@ class InteractionGenerationConfig {
           )
         : null,
     maxOutputTokens: json['max_output_tokens'] as int?,
-    speechConfig: (json['speech_config'] as List<dynamic>?)
-        ?.map(
-          (e) => InteractionSpeechConfig.fromJson(e as Map<String, dynamic>),
-        )
-        .toList(),
+    speechConfig: switch (json['speech_config']) {
+      final List<dynamic> entries => [
+        for (final entry in entries)
+          InteractionSpeechConfig.fromJson(entry as Map<String, dynamic>),
+      ],
+      _ => null,
+    },
+    speechConfigObject: switch (json['speech_config']) {
+      final Map<String, dynamic> object => InteractionSpeakerConfig.fromJson(
+        object,
+      ),
+      _ => null,
+    },
     imageConfig: json['image_config'] != null
         ? InteractionImageConfig.fromJson(
             json['image_config'] as Map<String, dynamic>,
@@ -96,6 +134,9 @@ class InteractionGenerationConfig {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (seed != null) 'seed': seed,
+    'temperature': ?temperature,
+    'top_p': ?topP,
+    'structured_speech_config': ?structuredSpeechConfig?.toJson(),
     if (stopSequences != null) 'stop_sequences': stopSequences,
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
     if (thinkingLevel != null)
@@ -105,7 +146,9 @@ class InteractionGenerationConfig {
         thinkingSummaries!,
       ),
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens,
-    if (speechConfig != null)
+    if (speechConfigObject != null)
+      'speech_config': speechConfigObject!.toJson()
+    else if (speechConfig != null)
       'speech_config': speechConfig!.map((e) => e.toJson()).toList(),
     if (imageConfig != null) 'image_config': imageConfig!.toJson(),
     if (videoConfig != null) 'video_config': videoConfig!.toJson(),
@@ -116,18 +159,29 @@ class InteractionGenerationConfig {
   /// Creates a copy with replaced values.
   InteractionGenerationConfig copyWith({
     Object? seed = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+    Object? topP = unsetCopyWithValue,
+    Object? structuredSpeechConfig = unsetCopyWithValue,
     Object? stopSequences = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
     Object? thinkingLevel = unsetCopyWithValue,
     Object? thinkingSummaries = unsetCopyWithValue,
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? speechConfig = unsetCopyWithValue,
+    Object? speechConfigObject = unsetCopyWithValue,
     Object? imageConfig = unsetCopyWithValue,
     Object? videoConfig = unsetCopyWithValue,
     Object? transcriptionConfig = unsetCopyWithValue,
   }) {
     return InteractionGenerationConfig(
       seed: seed == unsetCopyWithValue ? this.seed : seed as int?,
+      temperature: temperature == unsetCopyWithValue
+          ? this.temperature
+          : (temperature as num?)?.toDouble(),
+      topP: topP == unsetCopyWithValue ? this.topP : (topP as num?)?.toDouble(),
+      structuredSpeechConfig: structuredSpeechConfig == unsetCopyWithValue
+          ? this.structuredSpeechConfig
+          : structuredSpeechConfig as InteractionStructuredSpeechConfig?,
       stopSequences: stopSequences == unsetCopyWithValue
           ? this.stopSequences
           : stopSequences as List<String>?,
@@ -146,6 +200,9 @@ class InteractionGenerationConfig {
       speechConfig: speechConfig == unsetCopyWithValue
           ? this.speechConfig
           : speechConfig as List<InteractionSpeechConfig>?,
+      speechConfigObject: speechConfigObject == unsetCopyWithValue
+          ? this.speechConfigObject
+          : speechConfigObject as InteractionSpeakerConfig?,
       imageConfig: imageConfig == unsetCopyWithValue
           ? this.imageConfig
           : imageConfig as InteractionImageConfig?,

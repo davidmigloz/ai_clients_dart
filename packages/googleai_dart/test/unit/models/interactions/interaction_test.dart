@@ -705,15 +705,15 @@ void main() {
       );
     });
 
-    test('temperature and top_p are no longer part of toJson', () {
+    test('preserves beta sampling options from the pinned schema', () {
       final json = InteractionGenerationConfig.fromJson(const {
         'temperature': 0.7,
         'top_p': 0.9,
         'seed': 42,
       }).toJson();
 
-      expect(json.containsKey('temperature'), isFalse);
-      expect(json.containsKey('top_p'), isFalse);
+      expect(json['temperature'], 0.7);
+      expect(json['top_p'], 0.9);
       expect(json['seed'], 42);
     });
 
