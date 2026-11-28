@@ -272,8 +272,9 @@ class _BrowserDataChannels implements GenieWebRtcDataChannel {
   }
 
   void close() {
-    _channels.forEach(_closeChannel);
-    _channels.clear();
+    _channels
+      ..forEach(_closeChannel)
+      ..clear();
     _active = null;
     _finish();
   }
