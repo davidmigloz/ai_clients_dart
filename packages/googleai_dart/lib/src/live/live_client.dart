@@ -98,8 +98,16 @@ class LiveClient {
     LiveConfig? liveConfig,
     String? accessToken,
   }) async {
-    final credentials = await _getCredentials(accessToken);
     final isVertex = _config.apiMode == ApiMode.vertexAI;
+    if (!isVertex && liveConfig?.explicitVadSignal != null) {
+      throw UnsupportedError('Explicit Live VAD signaling requires Vertex AI.');
+    }
+    if (!isVertex &&
+        (liveConfig?.safetySettings?.any((setting) => setting.method != null) ??
+            false)) {
+      throw UnsupportedError('Live safety blocking methods require Vertex AI.');
+    }
+    final credentials = await _getCredentials(accessToken);
     if (isVertex && credentials is EphemeralTokenCredentials) {
       throw const LiveConnectionException(
         message: 'Ephemeral Live tokens require the Gemini Developer API.',
@@ -410,6 +418,9 @@ class LiveClient {
       outputAudioTranscription: liveConfig?.outputAudioTranscription,
       proactivity: liveConfig?.proactivity,
       historyConfig: liveConfig?.historyConfig,
+      labels: liveConfig?.labels,
+      safetySettings: liveConfig?.safetySettings,
+      explicitVadSignal: liveConfig?.explicitVadSignal,
     );
 
     // Subscribe before sending setup so an immediate response cannot be lost.

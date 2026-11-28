@@ -1,5 +1,7 @@
 import '../../common/speech_config.dart';
 import '../../content/content.dart';
+import '../../copy_with_sentinel.dart';
+import '../../safety/safety_setting.dart';
 import '../../tools/tool.dart';
 import 'audio_transcription_config.dart';
 import 'context_window_compression_config.dart';
@@ -44,6 +46,15 @@ class LiveConfig {
   /// Configuration for how conversation history is handled.
   final HistoryConfig? historyConfig;
 
+  /// User-defined metadata for the Live request.
+  final Map<String, String>? labels;
+
+  /// Content safety settings for the session.
+  final List<SafetySetting>? safetySettings;
+
+  /// Enables explicit VAD signaling on a supported Vertex AI model.
+  final bool? explicitVadSignal;
+
   /// Creates a [LiveConfig].
   const LiveConfig({
     this.generationConfig,
@@ -56,6 +67,9 @@ class LiveConfig {
     this.outputAudioTranscription,
     this.proactivity,
     this.historyConfig,
+    this.labels,
+    this.safetySettings,
+    this.explicitVadSignal,
   });
 
   /// Creates a basic audio configuration.
@@ -158,6 +172,12 @@ class LiveConfig {
               json['historyConfig'] as Map<String, dynamic>,
             )
           : null,
+      labels: (json['labels'] as Map?)?.cast<String, String>(),
+      safetySettings: (json['safetySettings'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .map(SafetySetting.fromJson)
+          .toList(),
+      explicitVadSignal: json['explicitVadSignal'] as bool?,
     );
   }
 
@@ -180,6 +200,12 @@ class LiveConfig {
       'outputAudioTranscription': outputAudioTranscription!.toJson(),
     if (proactivity != null) 'proactivity': proactivity!.toJson(),
     if (historyConfig != null) 'historyConfig': historyConfig!.toJson(),
+    if (labels != null) 'labels': labels,
+    if (safetySettings != null)
+      'safetySettings': safetySettings!
+          .map((setting) => setting.toJson())
+          .toList(),
+    if (explicitVadSignal != null) 'explicitVadSignal': explicitVadSignal,
   };
 
   /// Creates a copy with the given fields replaced.
@@ -194,6 +220,9 @@ class LiveConfig {
     AudioTranscriptionConfig? outputAudioTranscription,
     ProactivityConfig? proactivity,
     HistoryConfig? historyConfig,
+    Object? labels = unsetCopyWithValue,
+    Object? safetySettings = unsetCopyWithValue,
+    Object? explicitVadSignal = unsetCopyWithValue,
   }) {
     return LiveConfig(
       generationConfig: generationConfig ?? this.generationConfig,
@@ -209,9 +238,21 @@ class LiveConfig {
           outputAudioTranscription ?? this.outputAudioTranscription,
       proactivity: proactivity ?? this.proactivity,
       historyConfig: historyConfig ?? this.historyConfig,
+      labels: labels == unsetCopyWithValue
+          ? this.labels
+          : labels as Map<String, String>?,
+      safetySettings: safetySettings == unsetCopyWithValue
+          ? this.safetySettings
+          : safetySettings as List<SafetySetting>?,
+      explicitVadSignal: explicitVadSignal == unsetCopyWithValue
+          ? this.explicitVadSignal
+          : explicitVadSignal as bool?,
     );
   }
 
   @override
-  String toString() => 'LiveConfig(generationConfig: $generationConfig)';
+  String toString() =>
+      'LiveConfig(generationConfig: $generationConfig, '
+      'labelCount: ${labels?.length}, safetySettingCount: ${safetySettings?.length}, '
+      'explicitVadSignal: $explicitVadSignal)';
 }

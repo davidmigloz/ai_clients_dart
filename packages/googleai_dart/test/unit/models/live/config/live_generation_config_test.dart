@@ -2,7 +2,52 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('reads integral numeric topK and rejects nonintegral values', () {
+    final config = LiveGenerationConfig.fromJson({'topK': 40.0});
+    expect(config.topK, 40);
+    expect(config.toJson(), {'topK': 40});
+    expect(
+      () => LiveGenerationConfig.fromJson({'topK': 40.5}),
+      throwsFormatException,
+    );
+  });
+
   group('LiveGenerationConfig', () {
+    test('round-trips the supported Live generation settings', () {
+      const json = {
+        'topK': 40,
+        'mediaResolution': 'MEDIA_RESOLUTION_HIGH',
+        'seed': 0,
+        'thinkingConfig': {'thinkingLevel': 'MEDIUM'},
+        'enableAffectiveDialog': false,
+        'translationConfig': {
+          'targetLanguageCode': 'pl',
+          'echoTargetLanguage': false,
+        },
+      };
+      final config = LiveGenerationConfig.fromJson(json);
+      expect(config.topK, 40);
+      expect(config.thinkingConfig?.thinkingLevel, ThinkingLevel.medium);
+      expect(config.mediaResolution, MediaResolutionLevel.high);
+      expect(config.enableAffectiveDialog, isFalse);
+      expect(config.translationConfig?.targetLanguageCode, 'pl');
+      expect(config.copyWith().toJson(), json);
+      expect(
+        config.copyWith(thinkingConfig: null, seed: null).toJson(),
+        {...json}
+          ..remove('thinkingConfig')
+          ..remove('seed'),
+      );
+    });
+
+    test('decodes the Live Translate default target language', () {
+      final config = LiveGenerationConfig.fromJson({
+        'translationConfig': {'echoTargetLanguage': true},
+      });
+      expect(config.translationConfig?.targetLanguageCode, 'en');
+      expect(config.translationConfig?.echoTargetLanguage, isTrue);
+    });
+
     group('fromJson', () {
       test('creates LiveGenerationConfig with all fields', () {
         final json = {

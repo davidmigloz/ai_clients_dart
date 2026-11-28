@@ -24,7 +24,7 @@ void main() {
         const window = SlidingWindow(targetTokens: 3000);
         final json = window.toJson();
 
-        expect(json['targetTokens'], 3000);
+        expect(json['targetTokens'], '3000');
       });
 
       test('omits null fields', () {

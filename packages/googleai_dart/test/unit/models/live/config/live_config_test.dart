@@ -2,7 +2,64 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('preserves Vertex blocking methods through the setup envelope', () {
+    final json = {
+      'setup': {
+        'model': 'projects/P/locations/eu/publishers/google/models/fixture',
+        'safetySettings': [
+          {
+            'category': 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold': 'BLOCK_ONLY_HIGH',
+            'method': 'SEVERITY',
+          },
+        ],
+      },
+    };
+    final parsed =
+        BidiGenerateContentClientMessage.fromJson(json)
+            as BidiGenerateContentSetup;
+    final setting = parsed.safetySettings!.single;
+    expect(setting.method, HarmBlockMethod.severity);
+    expect(parsed.toJson(), json);
+    expect(setting.copyWith(method: null).toJson(), {
+      'category': 'HARM_CATEGORY_HATE_SPEECH',
+      'threshold': 'BLOCK_ONLY_HIGH',
+    });
+  });
+
   group('LiveConfig', () {
+    test('round-trips setup options and accepts protobuf int64 strings', () {
+      const json = {
+        'labels': {'safety_identifier': 'fixture'},
+        'safetySettings': [
+          {
+            'category': 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold': 'BLOCK_ONLY_HIGH',
+          },
+        ],
+        'explicitVadSignal': false,
+        'contextWindowCompression': {
+          'triggerTokens': '10000',
+          'slidingWindow': {'targetTokens': '5000'},
+        },
+        'proactivity': {'proactiveAudio': true, 'proactiveVideo': true},
+      };
+      final config = LiveConfig.fromJson(json);
+      expect(config.safetySettings?.single.category, HarmCategory.hateSpeech);
+      expect(config.explicitVadSignal, isFalse);
+      expect(config.contextWindowCompression?.triggerTokens, 10000);
+      expect(
+        config.contextWindowCompression?.slidingWindow?.targetTokens,
+        5000,
+      );
+      expect(config.proactivity?.proactiveVideo, isTrue);
+      expect(config.toJson(), json);
+      expect(
+        config.copyWith(explicitVadSignal: null).toJson(),
+        {...json}..remove('explicitVadSignal'),
+      );
+    });
+
     group('fromJson', () {
       test('creates LiveConfig with all fields', () {
         final json = {
