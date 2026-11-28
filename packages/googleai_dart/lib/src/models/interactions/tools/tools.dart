@@ -21,7 +21,8 @@ part 'url_context_tool.dart';
 ///
 /// Variants include [FunctionTool], [GoogleMapsTool], [GoogleSearchTool],
 /// [CodeExecutionTool], [UrlContextTool], [ComputerUseTool], [McpServerTool],
-/// [FileSearchTool], [RetrievalTool], and [ToolSearchTool].
+/// [FileSearchTool], [RetrievalTool], and [ToolSearchTool]. A future tool
+/// search execution mode is retained as [UnknownInteractionTool].
 sealed class InteractionTool {
   /// The type discriminator for this tool.
   String get type;
@@ -41,6 +42,9 @@ sealed class InteractionTool {
       'mcp_server' => McpServerTool.fromJson(json),
       'file_search' => FileSearchTool.fromJson(json),
       'retrieval' => RetrievalTool.fromJson(json),
+      'tool_search'
+          when !const {null, 'server', 'client'}.contains(json['execution']) =>
+        UnknownInteractionTool(json),
       'tool_search' => ToolSearchTool.fromJson(json),
       _ => throw ArgumentError('Unknown tool type: $type'),
     };
@@ -48,4 +52,21 @@ sealed class InteractionTool {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// An Interactions tool whose wire variant is newer than this client supports.
+final class UnknownInteractionTool extends InteractionTool {
+  @override
+  final String type;
+
+  /// The original tool declaration.
+  final Map<String, dynamic> rawJson;
+
+  /// Retains a tool declaration for inspection or round-tripping.
+  UnknownInteractionTool(Map<String, dynamic> json)
+    : type = json['type'] as String,
+      rawJson = Map.unmodifiable(json);
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
 }

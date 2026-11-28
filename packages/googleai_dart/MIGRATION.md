@@ -228,9 +228,11 @@ switch (tier) {
 
 Exhaustive switches over `InteractionTool`, `InteractionStep`,
 `StepDeltaData`, and `FunctionResultSubcontent` need to handle the new tool
-retrieval variants. Add a case for `ToolSearchTool`,
-`ToolSearchCallStep`, `ToolSearchResultStep`, `ToolSearchCallDelta`,
-`ToolSearchResultDelta`, or `FunctionResultSubcontentFunction` where applicable.
+retrieval variants. Add cases for `ToolSearchTool` and
+`UnknownInteractionTool` when switching over tools. The latter preserves
+future tool search execution modes. Handle `ToolSearchCallStep`,
+`ToolSearchResultStep`, `ToolSearchCallDelta`, `ToolSearchResultDelta`, or
+`FunctionResultSubcontentFunction` where applicable.
 
 For example, before the function-declaration result variant:
 

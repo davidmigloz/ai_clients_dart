@@ -456,6 +456,52 @@ void main() {
     },
   );
 
+  test('retains a future tool search mode in a public response', () async {
+    const futureTool = {
+      'type': 'tool_search',
+      'execution': 'hybrid',
+      'search_settings': {'limit': 5},
+    };
+    final client = _makeClient(
+      MockClient((request) async {
+        _readRequest(request);
+        return http.Response(
+          jsonEncode({
+            'id': 'int_future',
+            'status': 'completed',
+            'tools': [
+              {'type': 'tool_search'},
+              futureTool,
+            ],
+            'steps': [
+              {
+                'type': 'model_output',
+                'content': [
+                  {'type': 'text', 'text': 'Tool search finished.'},
+                ],
+              },
+            ],
+          }),
+          200,
+        );
+      }),
+    );
+
+    final interaction = await client.interactions.create(
+      model: 'gemini-4-hydrogen',
+      input: const InteractionInput.text(_requestText),
+    );
+    expect(interaction.outputText, 'Tool search finished.');
+    expect(interaction.tools, [
+      isA<ToolSearchTool>(),
+      isA<UnknownInteractionTool>(),
+    ]);
+    final unknown = interaction.tools!.last as UnknownInteractionTool;
+    expect(unknown.type, 'tool_search');
+    expect(unknown.rawJson, futureTool);
+    expect((interaction.toJson()['tools'] as List<Object?>).last, futureTool);
+  });
+
   test('validates known discriminators and complete tool search steps', () {
     expect(
       () => InteractionStep.fromJson({
