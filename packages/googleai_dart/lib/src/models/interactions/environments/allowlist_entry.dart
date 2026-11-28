@@ -7,6 +7,9 @@ class AllowlistEntry {
   /// injecting headers on specific ones.
   final String domain;
 
+  /// ID of a stored credential to apply to requests matching [domain].
+  final String? credential;
+
   /// Headers to inject on all outbound requests matching this [domain].
   ///
   /// Each entry is a flat `{header_name: header_value}` object; the egress
@@ -15,7 +18,7 @@ class AllowlistEntry {
   final List<Map<String, String>>? transform;
 
   /// Creates an [AllowlistEntry].
-  const AllowlistEntry({required this.domain, this.transform});
+  const AllowlistEntry({required this.domain, this.credential, this.transform});
 
   /// Creates an [AllowlistEntry] from JSON.
   ///
@@ -24,6 +27,7 @@ class AllowlistEntry {
   /// one-element list.
   factory AllowlistEntry.fromJson(Map<String, dynamic> json) => AllowlistEntry(
     domain: json['domain'] as String,
+    credential: json['credential'] as String?,
     transform: switch (json['transform']) {
       final List<dynamic> list =>
         list
@@ -37,16 +41,21 @@ class AllowlistEntry {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'domain': domain,
+    'credential': ?credential,
     if (transform != null) 'transform': transform,
   };
 
   /// Creates a copy with replaced values.
   AllowlistEntry copyWith({
     Object? domain = unsetCopyWithValue,
+    Object? credential = unsetCopyWithValue,
     Object? transform = unsetCopyWithValue,
   }) {
     return AllowlistEntry(
       domain: domain == unsetCopyWithValue ? this.domain : domain! as String,
+      credential: credential == unsetCopyWithValue
+          ? this.credential
+          : credential as String?,
       transform: transform == unsetCopyWithValue
           ? this.transform
           : transform as List<Map<String, String>>?,

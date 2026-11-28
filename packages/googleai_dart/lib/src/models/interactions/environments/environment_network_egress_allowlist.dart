@@ -3,7 +3,7 @@ part of 'environments.dart';
 /// Outbound networking configuration for an environment's sandbox.
 ///
 /// Either an allowlist object ([EnvironmentNetworkAllowlist]) restricting which
-/// external domains the sandbox can reach, or the string `"disabled"`
+/// external domains the sandbox can reach, or a disabled configuration
 /// ([EnvironmentNetworkDisabled]) to block all network access. Omit entirely to
 /// allow all outbound traffic with no header injection.
 sealed class EnvironmentNetworkEgressAllowlist {
@@ -11,8 +11,8 @@ sealed class EnvironmentNetworkEgressAllowlist {
 
   /// Creates an [EnvironmentNetworkEgressAllowlist] from a JSON value.
   ///
-  /// Accepts the `"disabled"` string ([EnvironmentNetworkDisabled]) or an
-  /// allowlist object ([EnvironmentNetworkAllowlist]).
+  /// Accepts the `"disabled"` string, an object with a disabled allowlist,
+  /// or an object with a list of [AllowlistEntry] values.
   factory EnvironmentNetworkEgressAllowlist.fromJson(Object json) {
     if (json is String) {
       if (json == 'disabled') {
@@ -24,6 +24,9 @@ sealed class EnvironmentNetworkEgressAllowlist {
       );
     }
     if (json is Map<String, dynamic>) {
+      if (json['allowlist'] == 'disabled') {
+        return const EnvironmentNetworkDisabled.allowlist();
+      }
       return EnvironmentNetworkAllowlist(
         allowlist: (json['allowlist'] as List<dynamic>?)
             ?.map((e) => AllowlistEntry.fromJson(e as Map<String, dynamic>))
@@ -56,11 +59,17 @@ class EnvironmentNetworkAllowlist extends EnvironmentNetworkEgressAllowlist {
   };
 }
 
-/// Disables all network egress for the sandbox (the `"disabled"` form).
+/// Disables all network egress for the sandbox.
 class EnvironmentNetworkDisabled extends EnvironmentNetworkEgressAllowlist {
-  /// Creates an [EnvironmentNetworkDisabled].
-  const EnvironmentNetworkDisabled();
+  final bool _allowlistForm;
+
+  /// Sends the standalone `"disabled"` value.
+  const EnvironmentNetworkDisabled() : _allowlistForm = false;
+
+  /// Sends the object containing a disabled allowlist.
+  const EnvironmentNetworkDisabled.allowlist() : _allowlistForm = true;
 
   @override
-  Object toJson() => 'disabled';
+  Object toJson() =>
+      _allowlistForm ? const {'allowlist': 'disabled'} : 'disabled';
 }

@@ -946,6 +946,11 @@ final environment = await client.environments.create(
       'APP_MODE': EnvVar.literal('production'),
       'SERVICE_TOKEN': EnvVar(credential: 'service-token'),
     }),
+    network: EnvironmentNetworkAllowlist(
+      allowlist: [
+        AllowlistEntry(domain: 'api.example.com', credential: 'service-egress'),
+      ],
+    ),
   ),
 );
 final reference = EnvironmentConfigOrId.id(environment.id);
@@ -955,6 +960,9 @@ Pass that reference to a managed-agent interaction on `v1beta`. Use
 `EnvironmentConfig` when defining an inline sandbox, or
 `CreateEnvironmentRequest(fromEnvironment: environment.id)` to copy an
 existing sandbox. Leave sources and variables empty when copying.
+Use `AllowlistEntry.credential` to attach a stored credential ID to a domain.
+The egress proxy resolves the secret when it sends a matching request.
+Use `EnvironmentNetworkDisabled` to block outbound traffic.
 
 For a self-hosted sandbox, create it with `EnvironmentMode.selfHosted` and
 optionally supply `customConfig` and `systemInstruction`. The create response
@@ -965,6 +973,7 @@ daemon. Sources, network settings, variables, and file snapshots apply to
 Google-hosted sandboxes.
 [Runnable environment configuration example](example/environment_config_example.dart) ·
 [Environment guide](https://aistudio.google.com/docs/agent-environment) ·
+[Credentials in the network allowlist](https://aistudio.google.com/docs/agent-credentials#network-allowlist) ·
 [Self-hosted environments](https://aistudio.google.com/docs/agent-environment#self-hosted-environments)
 
 </details>
