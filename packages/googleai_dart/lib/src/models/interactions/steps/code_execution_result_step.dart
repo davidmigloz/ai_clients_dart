@@ -75,7 +75,7 @@ class CodeExecutionResultStep extends InteractionStep {
     final raw = json['result'] ?? '';
     return CodeExecutionResultStep._(
       callId: callId,
-      result: _decodeResult(raw),
+      result: _decodeResult(_copyJsonValue(raw) ?? ''),
       wireResult: raw is List ? raw.map(_copyJsonValue).toList() : null,
       isError: json['is_error'] as bool?,
       signature: json['signature'] as String?,

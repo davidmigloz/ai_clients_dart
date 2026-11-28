@@ -97,6 +97,44 @@ void main() {
     },
   );
 
+  test('decodes result content independently of the caller JSON', () {
+    final ids = [1, 2];
+    final step = CodeExecutionResultStep.fromJson({
+      'type': 'code_execution_result',
+      'call_id': 'code',
+      'result': [
+        {
+          'type': 'text',
+          'text': 'record',
+          'annotations': [
+            {
+              'type': 'file_citation',
+              'custom_metadata': {'ids': ids},
+            },
+          ],
+        },
+      ],
+    });
+    ids[0] = 7;
+    final text = step.resultContent!.single as TextContent;
+    final citation = text.annotations!.single as FileCitation;
+    expect(citation.customMetadata!['ids'], [1, 2]);
+    expect(step.toJson()['result'], [
+      {
+        'type': 'text',
+        'text': 'record',
+        'annotations': [
+          {
+            'type': 'file_citation',
+            'custom_metadata': {
+              'ids': [1, 2],
+            },
+          },
+        ],
+      },
+    ]);
+  });
+
   test('retains diagnostic faults from every continuation hop', () async {
     var calls = 0;
     final client = GoogleAIClient(
