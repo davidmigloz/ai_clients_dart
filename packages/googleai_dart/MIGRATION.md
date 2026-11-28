@@ -401,6 +401,27 @@ when creating or copying a part.
 
 ---
 
+## GenerateContent speech metadata and transcripts
+
+Parsed parts now expose `speechMetadata` and `audioTranscription` as typed
+properties. Use those properties to read values that previously appeared in
+`additionalProperties`.
+
+```dart
+// Before
+final transcript = part.additionalProperties['audioTranscription']
+    as Map<String, dynamic>?;
+final speaker = transcript?['speakerLabel'] as String?;
+
+// After
+final speaker = part.audioTranscription?.speakerLabel;
+```
+
+Unfamiliar wire shapes are retained for round trips. Requests that supply
+raw properties can still use them when the corresponding typed field is unset.
+
+---
+
 ## Handling multimodal function results
 
 `FunctionResultSubcontent` now includes audio, document, video, and an
