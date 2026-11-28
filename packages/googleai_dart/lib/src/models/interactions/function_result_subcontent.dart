@@ -3,8 +3,10 @@ import 'tools/tools.dart';
 
 /// A subcontent item within a function or MCP server tool result.
 ///
-/// Variants include [FunctionResultSubcontentText],
-/// [FunctionResultSubcontentImage], and [FunctionResultSubcontentFunction].
+/// Supports [FunctionResultSubcontentText], [FunctionResultSubcontentImage],
+/// [FunctionResultSubcontentAudio], [FunctionResultSubcontentDocument],
+/// [FunctionResultSubcontentVideo], and [FunctionResultSubcontentFunction].
+/// [UnknownFunctionResultSubcontent] retains future variants.
 sealed class FunctionResultSubcontent {
   /// The type discriminator for this subcontent.
   String get type;
@@ -16,12 +18,15 @@ sealed class FunctionResultSubcontent {
     return switch (json['type']) {
       'text' => FunctionResultSubcontentText(TextContent.fromJson(json)),
       'image' => FunctionResultSubcontentImage(ImageContent.fromJson(json)),
+      'audio' => FunctionResultSubcontentAudio(AudioContent.fromJson(json)),
+      'document' => FunctionResultSubcontentDocument(
+        DocumentContent.fromJson(json),
+      ),
+      'video' => FunctionResultSubcontentVideo(VideoContent.fromJson(json)),
       'function' => FunctionResultSubcontentFunction(
         FunctionTool.fromJson(json),
       ),
-      _ => throw ArgumentError(
-        'Unknown function result subcontent type: ${json['type']}',
-      ),
+      _ => UnknownFunctionResultSubcontent(json),
     };
   }
 
@@ -72,4 +77,65 @@ class FunctionResultSubcontentFunction extends FunctionResultSubcontent {
 
   @override
   Map<String, dynamic> toJson() => function.toJson();
+}
+
+/// An [AudioContent] item used in a function or MCP tool result.
+class FunctionResultSubcontentAudio extends FunctionResultSubcontent {
+  @override
+  String get type => 'audio';
+
+  /// The wrapped audio content.
+  final AudioContent content;
+
+  /// Creates a result item containing audio.
+  const FunctionResultSubcontentAudio(this.content);
+
+  @override
+  Map<String, dynamic> toJson() => content.toJson();
+}
+
+/// A [DocumentContent] item used in a function or MCP tool result.
+class FunctionResultSubcontentDocument extends FunctionResultSubcontent {
+  @override
+  String get type => 'document';
+
+  /// The wrapped document content.
+  final DocumentContent content;
+
+  /// Creates a result item containing a document.
+  const FunctionResultSubcontentDocument(this.content);
+
+  @override
+  Map<String, dynamic> toJson() => content.toJson();
+}
+
+/// A [VideoContent] item used in a function or MCP tool result.
+class FunctionResultSubcontentVideo extends FunctionResultSubcontent {
+  @override
+  String get type => 'video';
+
+  /// The wrapped video content.
+  final VideoContent content;
+
+  /// Creates a result item containing video.
+  const FunctionResultSubcontentVideo(this.content);
+
+  @override
+  Map<String, dynamic> toJson() => content.toJson();
+}
+
+/// Function result subcontent using an unrecognized wire discriminator.
+class UnknownFunctionResultSubcontent extends FunctionResultSubcontent {
+  @override
+  String get type => rawJson['type']?.toString() ?? 'unknown';
+
+  /// The original content block.
+  final Map<String, dynamic> rawJson;
+
+  /// Preserves an unrecognized result item.
+  UnknownFunctionResultSubcontent(Map<String, dynamic> json)
+    : rawJson = Map<String, dynamic>.unmodifiable(json);
+
+  @override
+  Map<String, dynamic> toJson() => {...rawJson};
 }

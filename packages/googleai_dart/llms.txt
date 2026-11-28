@@ -13,6 +13,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 ## Examples
 
 - [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart) (~326 tokens): Stable Developer API Interactions quickstart.
+- [interactions_media_slicing.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_media_slicing.dart): Process selected Interactions document pages and layers.
 - [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart) (~1.2k tokens): Stable Interactions, streaming, state and function calls.
 - [interactions_long_decode.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_long_decode.dart): Opt-in automatic continuation for foreground Gemini 4 interactions.
 - [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart) (~194 tokens): Basic text generation.

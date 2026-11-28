@@ -4,7 +4,7 @@ import 'function_result_subcontent.dart';
 ///
 /// Can represent different result formats:
 /// - [ToolResultContentList] — a list of [FunctionResultSubcontent] items
-///   such as text, images, or function declarations from client-side tool
+///   such as text, media, or function declarations from client-side tool
 ///   retrieval.
 /// - [ToolResultText] — a plain text string
 /// - [ToolResultObject] — an arbitrary JSON object (fallback)

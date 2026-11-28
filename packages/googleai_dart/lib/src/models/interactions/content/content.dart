@@ -1,5 +1,6 @@
 import '../../copy_with_sentinel.dart';
 import '../interaction_review_snippet.dart';
+import '../media_processing.dart';
 import '../media_resolution.dart';
 
 part 'annotation.dart';

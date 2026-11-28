@@ -355,6 +355,34 @@ when creating or copying a part.
 
 ---
 
+## Handling multimodal function results
+
+`FunctionResultSubcontent` now includes audio, document, video, and an
+unknown variant. Add cases for these types to exhaustive switches.
+`UnknownFunctionResultSubcontent` retains the original provider payload.
+
+```dart
+// Before
+String kind(FunctionResultSubcontent item) => switch (item) {
+  FunctionResultSubcontentText() => 'text',
+  FunctionResultSubcontentImage() => 'image',
+  FunctionResultSubcontentFunction() => 'function',
+};
+
+// After
+String kind(FunctionResultSubcontent item) => switch (item) {
+  FunctionResultSubcontentText() => 'text',
+  FunctionResultSubcontentImage() => 'image',
+  FunctionResultSubcontentAudio() => 'audio',
+  FunctionResultSubcontentDocument() => 'document',
+  FunctionResultSubcontentVideo() => 'video',
+  FunctionResultSubcontentFunction() => 'function',
+  UnknownFunctionResultSubcontent() => 'unknown',
+};
+```
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
