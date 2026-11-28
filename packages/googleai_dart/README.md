@@ -614,10 +614,13 @@ await client.credentials.update(
 );
 ```
 
-Use the returned ID to reference the credential from a managed environment.
+Set an ID for a readable reference, or omit `id` when creating a credential to
+let the server generate a UUID. The managed-agent guide documents generated IDs
+even though the API reference lists `id` as required on create. Use the returned
+ID to reference the credential from a managed environment.
 Use `get` and `list` for metadata and `delete` to remove a stored credential.
 [Full example](example/credentials_example.dart) ·
-[Gemini managed-agent credentials](https://aistudio.google.com/docs/agent-credentials)
+[Generated IDs for managed-agent credentials](https://aistudio.google.com/docs/agent-credentials#generated-ids)
 
 </details>
 

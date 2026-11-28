@@ -37,6 +37,8 @@ class CredentialsResource extends ResourceBase {
   ];
 
   /// Stores a credential and returns its metadata.
+  ///
+  /// Omit [CredentialCreateParams.id] to use a server-generated UUID.
   Future<Credential> create({
     required CredentialCreateParams credential,
     Future<void>? abortTrigger,
@@ -133,10 +135,11 @@ class CredentialsResource extends ResourceBase {
           );
     if (body != null) request.body = jsonEncode(body);
 
-    final secrets = [
+    final secrets = {
       for (final key in _secretFields)
-        if (body?[key] case final String secret) secret,
-    ]..sort((a, b) => b.length.compareTo(a.length));
+        if (body?[key] case final String secret when secret.isNotEmpty)
+          ..._diagnosticVariants(secret),
+    }.toList()..sort((a, b) => b.length.compareTo(a.length));
     return interceptorChain.execute(
       request,
       abortTrigger: abortTrigger,
@@ -145,6 +148,22 @@ class CredentialsResource extends ResourceBase {
         sensitiveValues: secrets,
       ),
     );
+  }
+
+  static final _percentEscape = RegExp(r'%[0-9A-Fa-f]{2}');
+
+  static Iterable<String> _diagnosticVariants(String secret) sync* {
+    yield secret;
+    for (final encoded in [
+      Uri.encodeComponent(secret),
+      Uri.encodeQueryComponent(secret),
+    ]) {
+      yield encoded;
+      yield encoded.replaceAllMapped(
+        _percentEscape,
+        (match) => match[0]!.toLowerCase(),
+      );
+    }
   }
 
   Map<String, dynamic> _decode(http.Response response) {

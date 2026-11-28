@@ -102,6 +102,48 @@ void main() {
     expect(requests, hasLength(3));
   });
 
+  test('omits an unset create ID and accepts a generated UUID', () async {
+    const generatedId = '9e545973-4330-49bb-9a44-930cea9fbe3c';
+    const payloads = <Map<String, dynamic>>[
+      {
+        'type': 'environment_variable',
+        'value': _secret,
+        'injection_location': 'header',
+      },
+      {'type': 'bearer_token', 'token': _secret},
+      {
+        'type': 'oauth2',
+        'client_id': 'client',
+        'client_secret': _secret,
+        'refresh_token': _refresh,
+        'token_url': 'https://example.com/token',
+      },
+    ];
+    var requests = 0;
+    final client = _client(
+      MockClient((request) async {
+        final payload = payloads[requests++];
+        expect(request.method, 'POST');
+        expect(request.url.path, '/v1beta/credentials');
+        expect(jsonDecode(utf8.decode(request.bodyBytes)), payload);
+        return _jsonResponse({
+          'id': generatedId,
+          'type': payload['type'],
+          'status': 'active',
+        });
+      }),
+    );
+
+    for (final payload in payloads) {
+      final params = CredentialCreateParams.fromJson(payload);
+      expect(params.id, isNull);
+      expect(params.toJson(), payload);
+      final created = await client.credentials.create(credential: params);
+      expect(created.id, generatedId);
+    }
+    expect(requests, payloads.length);
+  });
+
   test('routes get, list, masked patch, and delete', () async {
     final requests = <http.Request>[];
     final client = _client(
@@ -319,6 +361,93 @@ void main() {
       logs.map((record) => record.message),
       everyElement(isNot(contains('developer-key'))),
     );
+  });
+
+  test('redacts encoded credential echoes and diagnostic keys', () async {
+    const token = 'fixture+/=token';
+    final encoded = Uri.encodeComponent(token);
+    const lowerEscape = 'fixture%2b%2f%3dtoken';
+    const replacement = '***REDACTED***';
+    final logs = <LogRecord>[];
+    final listener = Logger.root.onRecord.listen(logs.add);
+    addTearDown(listener.cancel);
+    final client = _client(
+      MockClient((request) async {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['token'], token);
+        expect(request.url.queryParameters['echo'], encoded);
+        return http.Response(
+          jsonEncode({
+            'error': {
+              'message': 'Rejected https://proxy.example/$encoded',
+              'details': [
+                {
+                  'reason': 'INVALID',
+                  'request-$token': {'echo': lowerEscape},
+                },
+              ],
+            },
+          }),
+          400,
+          headers: {
+            'content-type': 'application/json',
+            'x-redirect': 'https://proxy.example/$lowerEscape',
+          },
+        );
+      }),
+      config: _config.copyWith(
+        defaultQueryParams: {'echo': encoded, token: 'visible'},
+        defaultHeaders: {'x-client-marker': 'echo: $encoded'},
+      ),
+    );
+
+    final matcher = isA<ApiException>()
+        .having(
+          (error) => error.message,
+          'message',
+          'Rejected https://proxy.example/$replacement',
+        )
+        .having((error) => error.details, 'details', [
+          {
+            'reason': 'INVALID',
+            'request-$replacement': {'echo': replacement},
+          },
+        ])
+        .having(
+          (error) => error.requestMetadata?.url.queryParameters,
+          'query',
+          {'echo': replacement, replacement: 'visible'},
+        )
+        .having(
+          (error) => error.requestMetadata?.headers['x-client-marker'],
+          'request header',
+          'echo: $replacement',
+        )
+        .having(
+          (error) => error.responseMetadata?.headers['x-redirect'],
+          'response header',
+          'https://proxy.example/$replacement',
+        )
+        .having(
+          (error) => error.responseMetadata?.bodyExcerpt,
+          'response excerpt',
+          contains('request-$replacement'),
+        );
+
+    await expectLater(
+      client.credentials.create(
+        credential: const HttpBearerConfig(token: token),
+      ),
+      throwsA(matcher),
+    );
+    expect(
+      logs.singleWhere((record) => record.error is ApiException).error,
+      matcher,
+    );
+    final logText = logs.map((record) => record.message).join('\n');
+    for (final value in [token, encoded, lowerEscape]) {
+      expect(logText, isNot(contains(value)));
+    }
   });
 
   test(

@@ -101,8 +101,8 @@ final class MultipleInjectionLocations extends CredentialInjectionLocations {
 sealed class CredentialCreateParams {
   const CredentialCreateParams();
 
-  /// The identifier to assign to the credential.
-  String get id;
+  /// The identifier to assign. The service generates a UUID when omitted.
+  String? get id;
 
   /// The kind of credential to create.
   CredentialType get type;
@@ -123,7 +123,7 @@ sealed class CredentialCreateParams {
 /// Parameters for storing an environment variable credential.
 final class EnvironmentVariableConfig extends CredentialCreateParams {
   @override
-  final String id;
+  final String? id;
 
   @override
   CredentialType get type => CredentialType.environmentVariable;
@@ -139,9 +139,9 @@ final class EnvironmentVariableConfig extends CredentialCreateParams {
 
   /// Creates environment variable credential parameters.
   const EnvironmentVariableConfig({
-    required this.id,
     required this.value,
     required this.injectionLocation,
+    this.id,
     this.trustedDomains,
   });
 
@@ -149,7 +149,7 @@ final class EnvironmentVariableConfig extends CredentialCreateParams {
   factory EnvironmentVariableConfig.fromJson(Map<String, dynamic> json) {
     _expectType(json, CredentialType.environmentVariable);
     return EnvironmentVariableConfig(
-      id: _requiredString(json, 'id'),
+      id: _optionalString(json, 'id'),
       value: _requiredString(json, 'value'),
       injectionLocation: CredentialInjectionLocations.fromJson(
         json['injection_location'],
@@ -161,7 +161,7 @@ final class EnvironmentVariableConfig extends CredentialCreateParams {
   @override
   Map<String, dynamic> toJson() => {
     'type': type.value,
-    'id': id,
+    'id': ?id,
     'value': value,
     'injection_location': injectionLocation.toJson(),
     'trusted_domains': ?trustedDomains,
@@ -171,7 +171,7 @@ final class EnvironmentVariableConfig extends CredentialCreateParams {
 /// Parameters for storing an HTTP bearer token credential.
 final class HttpBearerConfig extends CredentialCreateParams {
   @override
-  final String id;
+  final String? id;
 
   @override
   CredentialType get type => CredentialType.bearerToken;
@@ -187,8 +187,8 @@ final class HttpBearerConfig extends CredentialCreateParams {
 
   /// Creates HTTP bearer credential parameters.
   const HttpBearerConfig({
-    required this.id,
     required this.token,
+    this.id,
     this.headerName,
     this.prefix,
   });
@@ -197,7 +197,7 @@ final class HttpBearerConfig extends CredentialCreateParams {
   factory HttpBearerConfig.fromJson(Map<String, dynamic> json) {
     _expectType(json, CredentialType.bearerToken);
     return HttpBearerConfig(
-      id: _requiredString(json, 'id'),
+      id: _optionalString(json, 'id'),
       token: _requiredString(json, 'token'),
       headerName: json['header_name'] as String?,
       prefix: json['prefix'] as String?,
@@ -207,7 +207,7 @@ final class HttpBearerConfig extends CredentialCreateParams {
   @override
   Map<String, dynamic> toJson() => {
     'type': type.value,
-    'id': id,
+    'id': ?id,
     'token': token,
     'header_name': ?headerName,
     'prefix': ?prefix,
@@ -217,7 +217,7 @@ final class HttpBearerConfig extends CredentialCreateParams {
 /// Parameters for storing an OAuth2 credential.
 final class OAuth2Config extends CredentialCreateParams {
   @override
-  final String id;
+  final String? id;
 
   @override
   CredentialType get type => CredentialType.oauth2;
@@ -239,11 +239,11 @@ final class OAuth2Config extends CredentialCreateParams {
 
   /// Creates OAuth2 credential parameters.
   const OAuth2Config({
-    required this.id,
     required this.clientId,
     required this.clientSecret,
     required this.refreshToken,
     required this.tokenUrl,
+    this.id,
     this.scopes,
   });
 
@@ -251,7 +251,7 @@ final class OAuth2Config extends CredentialCreateParams {
   factory OAuth2Config.fromJson(Map<String, dynamic> json) {
     _expectType(json, CredentialType.oauth2);
     return OAuth2Config(
-      id: _requiredString(json, 'id'),
+      id: _optionalString(json, 'id'),
       clientId: _requiredString(json, 'client_id'),
       clientSecret: _requiredString(json, 'client_secret'),
       refreshToken: _requiredString(json, 'refresh_token'),
@@ -263,7 +263,7 @@ final class OAuth2Config extends CredentialCreateParams {
   @override
   Map<String, dynamic> toJson() => {
     'type': type.value,
-    'id': id,
+    'id': ?id,
     'client_id': clientId,
     'client_secret': clientSecret,
     'refresh_token': refreshToken,
@@ -436,6 +436,9 @@ String _requiredString(Map<String, dynamic> json, String name) {
   }
   return value;
 }
+
+String? _optionalString(Map<String, dynamic> json, String name) =>
+    json[name] == null ? null : _requiredString(json, name);
 
 void _expectType(Map<String, dynamic> json, CredentialType type) {
   if (json['type'] != type.value) {

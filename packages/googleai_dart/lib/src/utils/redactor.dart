@@ -16,7 +16,7 @@ class Redactor {
   /// Fields to redact (case-insensitive).
   final List<String> redactionList;
 
-  /// Exact sensitive values to remove from diagnostic text.
+  /// Exact sensitive values to remove from diagnostic keys and text.
   final List<String> sensitiveValues;
 
   /// Replacement text for redacted values.
@@ -37,11 +37,11 @@ class Redactor {
     final lowercaseFields = redactionList.map((f) => f.toLowerCase()).toSet();
 
     for (final entry in input.entries) {
-      if (lowercaseFields.contains(entry.key.toLowerCase())) {
-        redacted[entry.key] = replacement;
-      } else {
-        redacted[entry.key] = _redactValues(entry.value);
-      }
+      redacted[_redactValues(
+        entry.key,
+      )] = lowercaseFields.contains(entry.key.toLowerCase())
+          ? replacement
+          : _redactValues(entry.value);
     }
 
     return redacted;
@@ -55,10 +55,11 @@ class Redactor {
       pathSegments: uri.pathSegments.map(_redactValues),
       queryParameters: {
         for (final entry in uri.queryParametersAll.entries)
-          entry.key: fields.contains(entry.key.toLowerCase())
+          _redactValues(entry.key): fields.contains(entry.key.toLowerCase())
               ? replacement
               : entry.value.map(_redactValues).toList(),
       },
+      fragment: uri.hasFragment ? _redactValues(uri.fragment) : null,
     );
   }
 
@@ -89,8 +90,9 @@ class Redactor {
             value != null && fields.contains(entry.key.toLowerCase())
             ? replacement
             : _redactJson(value, fields);
-        result[entry.key] = redacted;
-        changed |= redacted != value;
+        final key = _redactValues(entry.key);
+        result[key] = redacted;
+        changed |= key != entry.key || redacted != value;
       }
       return changed ? result : input;
     }
