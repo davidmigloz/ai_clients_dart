@@ -866,7 +866,7 @@ supported MIME types, resolution and content layers.
 
 </details>
 
-### How do I browse a managed environment's files?
+### How do I manage environment workspace files?
 
 <details>
 <summary><b>Show example</b></summary>
@@ -894,6 +894,18 @@ Use `nextPageToken` to continue a listing. Downloading a directory returns a
 tar archive. Browser downloads require an endpoint or gateway that serves the
 bytes directly. To find environments first, call `client.environments.list` with
 an optional `EnvironmentMode.onDemand` or `EnvironmentMode.selfHosted` filter.
+
+```dart
+await client.environments.files.upload(
+  environment: environmentId,
+  path: 'inputs/report.pdf',
+  bytes: pdfBytes,
+  mimeType: 'application/pdf',
+);
+```
+
+Set `extract: true` to unpack an archive into the destination directory, or
+`overwrite: true` to replace files already there.
 
 [Runnable environment files example](example/environment_files_example.dart) ·
 [Google's environment files guide](https://aistudio.google.com/docs/agent-environment#download-files-from-the-environment)
