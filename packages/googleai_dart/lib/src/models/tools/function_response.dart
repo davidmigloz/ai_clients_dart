@@ -1,4 +1,9 @@
+import '../content/file_data.dart';
+import '../content/media_metadata.dart';
+import '../content/media_resolution.dart';
+import '../content/media_wire_options.dart';
 import '../copy_with_sentinel.dart';
+import '../files/video_metadata.dart';
 
 /// Scheduling options for function responses.
 enum FunctionResponseScheduling {
@@ -43,73 +48,216 @@ class FunctionResponseBlob {
   /// Raw bytes for media formats (base64 encoded).
   final String? data;
 
+  /// Display name on API surfaces that accept media labels.
+  final String? displayName;
+
   /// Creates a [FunctionResponseBlob].
-  const FunctionResponseBlob({this.mimeType, this.data});
+  const FunctionResponseBlob({this.mimeType, this.data, this.displayName});
 
   /// Creates a [FunctionResponseBlob] from JSON.
   factory FunctionResponseBlob.fromJson(Map<String, dynamic> json) =>
       FunctionResponseBlob(
         mimeType: json['mimeType'] as String?,
         data: json['data'] as String?,
+        displayName: json['displayName'] as String?,
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (mimeType != null) 'mimeType': mimeType,
     if (data != null) 'data': data,
+    if (displayName != null) 'displayName': displayName,
   };
 
   /// Creates a copy with replaced values.
   FunctionResponseBlob copyWith({
     Object? mimeType = unsetCopyWithValue,
     Object? data = unsetCopyWithValue,
+    Object? displayName = unsetCopyWithValue,
   }) {
     return FunctionResponseBlob(
       mimeType: mimeType == unsetCopyWithValue
           ? this.mimeType
           : mimeType as String?,
       data: data == unsetCopyWithValue ? this.data : data as String?,
+      displayName: displayName == unsetCopyWithValue
+          ? this.displayName
+          : displayName as String?,
     );
   }
 }
 
-/// A datatype containing media that is part of a FunctionResponse message.
-///
-/// Note: This is different from `FunctionResponsePart` in part.dart which
-/// wraps a complete FunctionResponse. This class represents inline data
-/// within a FunctionResponse.
+/// An inline or URI-based media item in a function result.
 class FunctionResponseInlinePart {
   /// Inline media bytes.
   final FunctionResponseBlob? inlineData;
 
-  /// Creates a [FunctionResponseInlinePart].
-  const FunctionResponseInlinePart({this.inlineData});
+  /// URI-based media. Supply a MIME type for function results.
+  final FileData? fileData;
 
-  /// Creates a [FunctionResponseInlinePart] from JSON.
-  factory FunctionResponseInlinePart.fromJson(Map<String, dynamic> json) =>
-      FunctionResponseInlinePart(
-        inlineData: json['inlineData'] != null
-            ? FunctionResponseBlob.fromJson(
-                json['inlineData'] as Map<String, dynamic>,
-              )
-            : null,
-      );
+  /// Media resolution for input media.
+  final MediaResolution? mediaResolution;
+
+  /// Video interpretation approach on the Gemini Developer API.
+  final MediaProcessing? mediaProcessing;
+
+  /// Video clipping, sampling, and extraction options.
+  final VideoMetadata? videoMetadata;
+
+  /// Audio clipping options.
+  final AudioMetadata? audioMetadata;
+
+  /// Document page and extraction options.
+  final DocumentMetadata? documentMetadata;
+
+  /// Spreadsheet cell and extraction options.
+  final SpreadsheetMetadata? spreadsheetMetadata;
+
+  /// Creates a [FunctionResponseInlinePart].
+  const FunctionResponseInlinePart({
+    this.inlineData,
+    this.fileData,
+    this.mediaResolution,
+    this.mediaProcessing,
+    this.videoMetadata,
+    this.audioMetadata,
+    this.documentMetadata,
+    this.spreadsheetMetadata,
+  }) : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const FunctionResponseInlinePart._({
+    this.inlineData,
+    this.fileData,
+    this.mediaResolution,
+    this.mediaProcessing,
+    this.videoMetadata,
+    this.audioMetadata,
+    this.documentMetadata,
+    this.spreadsheetMetadata,
+    required this._wireExtensions,
+  });
+
+  /// Creates from JSON.
+  factory FunctionResponseInlinePart.fromJson(Map<String, dynamic> json) {
+    final wireExtensions = <String, dynamic>{};
+    return FunctionResponseInlinePart._(
+      inlineData: json['inlineData'] == null
+          ? null
+          : FunctionResponseBlob.fromJson(
+              json['inlineData'] as Map<String, dynamic>,
+            ),
+      fileData: decodeMediaOption(
+        json,
+        'fileData',
+        wireExtensions,
+        (value) => FileData.fromJson(value as Map<String, dynamic>),
+      ),
+      mediaResolution: decodeMediaOption(
+        json,
+        'mediaResolution',
+        wireExtensions,
+        (value) => MediaResolution.fromJson(value as Map<String, dynamic>),
+      ),
+      mediaProcessing: decodeMediaOption(
+        json,
+        'mediaProcessing',
+        wireExtensions,
+        (value) => MediaProcessing.fromJson(value as String),
+      ),
+      videoMetadata: decodeMediaOption(
+        json,
+        'videoMetadata',
+        wireExtensions,
+        (value) => VideoMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      audioMetadata: decodeMediaOption(
+        json,
+        'audioMetadata',
+        wireExtensions,
+        (value) => AudioMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      documentMetadata: decodeMediaOption(
+        json,
+        'documentMetadata',
+        wireExtensions,
+        (value) => DocumentMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      spreadsheetMetadata: decodeMediaOption(
+        json,
+        'spreadsheetMetadata',
+        wireExtensions,
+        (value) => SpreadsheetMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      wireExtensions: wireExtensions,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     if (inlineData != null) 'inlineData': inlineData!.toJson(),
+    if (fileData != null) 'fileData': fileData!.toJson(),
+    if (mediaResolution != null) 'mediaResolution': mediaResolution!.toJson(),
+    if (mediaProcessing != null) 'mediaProcessing': mediaProcessing!.toJson(),
+    if (videoMetadata != null) 'videoMetadata': videoMetadata!.toJson(),
+    if (audioMetadata != null) 'audioMetadata': audioMetadata!.toJson(),
+    if (documentMetadata != null)
+      'documentMetadata': documentMetadata!.toJson(),
+    if (spreadsheetMetadata != null)
+      'spreadsheetMetadata': spreadsheetMetadata!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   FunctionResponseInlinePart copyWith({
     Object? inlineData = unsetCopyWithValue,
-  }) {
-    return FunctionResponseInlinePart(
-      inlineData: inlineData == unsetCopyWithValue
-          ? this.inlineData
-          : inlineData as FunctionResponseBlob?,
-    );
-  }
+    Object? fileData = unsetCopyWithValue,
+    Object? mediaResolution = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? videoMetadata = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
+  }) => FunctionResponseInlinePart._(
+    inlineData: inlineData == unsetCopyWithValue
+        ? this.inlineData
+        : inlineData as FunctionResponseBlob?,
+    fileData: fileData == unsetCopyWithValue
+        ? this.fileData
+        : fileData as FileData?,
+    mediaResolution: mediaResolution == unsetCopyWithValue
+        ? this.mediaResolution
+        : mediaResolution as MediaResolution?,
+    mediaProcessing: mediaProcessing == unsetCopyWithValue
+        ? this.mediaProcessing
+        : mediaProcessing as MediaProcessing?,
+    videoMetadata: videoMetadata == unsetCopyWithValue
+        ? this.videoMetadata
+        : videoMetadata as VideoMetadata?,
+    audioMetadata: audioMetadata == unsetCopyWithValue
+        ? this.audioMetadata
+        : audioMetadata as AudioMetadata?,
+    documentMetadata: documentMetadata == unsetCopyWithValue
+        ? this.documentMetadata
+        : documentMetadata as DocumentMetadata?,
+    spreadsheetMetadata: spreadsheetMetadata == unsetCopyWithValue
+        ? this.spreadsheetMetadata
+        : spreadsheetMetadata as SpreadsheetMetadata?,
+    wireExtensions: Map.of(_wireExtensions)
+      ..removeWhere(
+        (key, _) => switch (key) {
+          'fileData' => fileData != unsetCopyWithValue,
+          'mediaResolution' => mediaResolution != unsetCopyWithValue,
+          'mediaProcessing' => mediaProcessing != unsetCopyWithValue,
+          'videoMetadata' => videoMetadata != unsetCopyWithValue,
+          'audioMetadata' => audioMetadata != unsetCopyWithValue,
+          'documentMetadata' => documentMetadata != unsetCopyWithValue,
+          'spreadsheetMetadata' => spreadsheetMetadata != unsetCopyWithValue,
+          _ => false,
+        },
+      ),
+  );
 }
 
 /// The result output from a function call.

@@ -10,15 +10,25 @@ class Blob {
   /// Base64-encoded binary data.
   final String data;
 
+  /// Display name on API surfaces that accept media labels.
+  final String? displayName;
+
   /// Creates a [Blob].
-  const Blob({required this.mimeType, required this.data});
+  const Blob({required this.mimeType, required this.data, this.displayName});
 
   /// Creates a [Blob] from JSON.
-  factory Blob.fromJson(Map<String, dynamic> json) =>
-      Blob(mimeType: json['mimeType'] as String, data: json['data'] as String);
+  factory Blob.fromJson(Map<String, dynamic> json) => Blob(
+    mimeType: json['mimeType'] as String,
+    data: json['data'] as String,
+    displayName: json['displayName'] as String?,
+  );
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'mimeType': mimeType, 'data': data};
+  Map<String, dynamic> toJson() => {
+    'mimeType': mimeType,
+    'data': data,
+    if (displayName != null) 'displayName': displayName,
+  };
 
   /// Creates a [Blob] from bytes.
   factory Blob.fromBytes(String mimeType, List<int> bytes) =>
@@ -31,12 +41,16 @@ class Blob {
   Blob copyWith({
     Object? mimeType = unsetCopyWithValue,
     Object? data = unsetCopyWithValue,
+    Object? displayName = unsetCopyWithValue,
   }) {
     return Blob(
       mimeType: mimeType == unsetCopyWithValue
           ? this.mimeType
           : mimeType! as String,
       data: data == unsetCopyWithValue ? this.data : data! as String,
+      displayName: displayName == unsetCopyWithValue
+          ? this.displayName
+          : displayName as String?,
     );
   }
 }

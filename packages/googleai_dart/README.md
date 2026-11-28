@@ -381,6 +381,40 @@ budget above the tokens already used. On Vertex AI, select
 
 </details>
 
+### How do I select files, pages, or clips in GenerateContent?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Set metadata on the same `InlineDataPart` or `FileDataPart` that carries the
+media. Document page ranges and spreadsheet sheet numbers start at 1. Audio
+and video offsets use protobuf duration strings such as `1.25s`.
+
+```dart
+final excerpt = InlineDataPart(
+  Blob.fromBytes('application/pdf', pdfBytes),
+  documentMetadata: const DocumentMetadata(
+    startPage: 2,
+    endPage: 4,
+    contentLayers: [DocumentContentLayer.pageText],
+  ),
+);
+```
+
+Use `SpreadsheetMetadata` to select a sheet, A1 cell range, and data, formulas
+or images. For media returned by a function, use the same metadata on a
+`FunctionResponseInlinePart` with `inlineData` or `fileData`. Video
+`MediaProcessing.static` and `MediaProcessing.agentic` select how to inspect
+video. The pinned Cloud SDKs reject explicit video processing modes in
+function results. Supported media and selection options depend on the model
+and backend.
+
+[Full example](example/generate_content_media_slicing.dart) ·
+[Document processing](https://aistudio.google.com/docs/document-processing#customize-document-processing) ·
+[Function result media](https://aistudio.google.com/docs/function-calling#file-inspection-options)
+
+</details>
+
 ### How do I use Vertex AI?
 
 <details>
@@ -895,6 +929,7 @@ See the [example/](example/) directory for complete examples:
 | [`function_calling_example.dart`](example/function_calling_example.dart) | Tool calling |
 | [`generate_answer_example.dart`](example/generate_answer_example.dart) | Grounded question answering (RAG) |
 | [`generate_content.dart`](example/generate_content.dart) | Basic text generation |
+| [`generate_content_media_slicing.dart`](example/generate_content_media_slicing.dart) | GenerateContent PDF page selection |
 | [`generated_files_example.dart`](example/generated_files_example.dart) | Generated files for video outputs |
 | [`google_maps_example.dart`](example/google_maps_example.dart) | Google Maps grounding |
 | [`google_search_example.dart`](example/google_search_example.dart) | Grounding with Google Search |
