@@ -59,6 +59,27 @@ void main() {
     );
   }
 
+  test('retains the configured Files download version on gateways', () async {
+    final client = _client(
+      MockClient((request) async {
+        expect(request.url.host, 'gateway.example');
+        expect(request.url.path, '/v1beta1/files/media-fixture:download');
+        expect(request.url.queryParameters, {'alt': 'media'});
+        return http.Response.bytes(_bytes, 200);
+      }),
+      config: const GoogleAIConfig(
+        baseUrl: 'https://gateway.example',
+        apiVersion: ApiVersion.v1beta1,
+      ),
+    );
+
+    expect(await client.files.download(name: 'files/media-fixture'), _bytes);
+    await expectLater(
+      client.generatedFiles.download(name: _generated),
+      throwsUnsupportedError,
+    );
+  });
+
   test(
     'retains generatedFiles metadata and returns raw media separately',
     () async {

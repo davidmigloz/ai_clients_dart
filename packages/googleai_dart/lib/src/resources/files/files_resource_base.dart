@@ -48,8 +48,8 @@ abstract class FilesResourceBase extends ResourceBase {
   ///
   /// Use `get` or `list` to find API-generated files with a download URI.
   /// Uploaded and Cloud Storage-registered inputs are available for prompting
-  /// and metadata. This operation is available on Developer API `v1` and
-  /// `v1beta`.
+  /// and metadata. The public Developer API documents `v1` and `v1beta`.
+  /// Requests use the client's configured version for custom gateways.
   ///
   /// Browser transports require an endpoint that serves the bytes directly
   /// because browsers cannot expose a signed redirect's location to the SDK.
@@ -58,10 +58,6 @@ abstract class FilesResourceBase extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     validateGoogleAIOnly();
-    if (config.apiVersion != ApiVersion.v1 &&
-        config.apiVersion != ApiVersion.v1beta) {
-      throw UnsupportedError('File download requires v1 or v1beta.');
-    }
     final resource = mediaResourceName(this, 'files', name);
     final bytes = await downloadDeveloperMedia(
       this,

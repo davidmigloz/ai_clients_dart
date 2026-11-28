@@ -938,7 +938,8 @@ Use `client.files.download(name: 'files/{id}')` on the Gemini Developer API
 `v1` or `v1beta` for downloadable API-generated files. Find them with
 `client.files.get` or `list` by checking `source` and `downloadUri`.
 Uploaded and Cloud Storage-registered inputs use the Files API for prompting
-and metadata.
+and metadata. Existing Developer API gateway configurations continue to use
+their configured API version.
 
 Use `client.generatedFiles.download(name: 'generatedFiles/{id}')` for the
 separate `v1beta` Generated Files collection. Both methods return bytes. The
