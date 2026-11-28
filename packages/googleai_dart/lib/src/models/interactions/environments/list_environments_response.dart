@@ -15,7 +15,9 @@ class ListEnvironmentsResponse {
   factory ListEnvironmentsResponse.fromJson(Map<String, dynamic> json) =>
       ListEnvironmentsResponse(
         environments: (json['environments'] as List<dynamic>?)
-            ?.map((e) => Environment.fromJson(e as Map<String, dynamic>))
+            ?.map(
+              (e) => Environment.fromMetadataJson(e as Map<String, dynamic>),
+            )
             .toList(),
         nextPageToken: json['next_page_token'] as String?,
       );

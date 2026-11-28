@@ -19,11 +19,31 @@ class EnvironmentConfig {
 
   /// Optional. The environment ID for the interaction. If specified, the
   /// request will update the existing environment instead of creating a new
-  /// one.
+  /// one. Leave [sources] and [env] unset when updating an existing environment.
   final String? environmentId;
 
+  /// Variables to configure in a new Google-hosted sandbox.
+  final EnvironmentVariables? env;
+
+  /// The compute lifecycle mode, when specified.
+  final EnvironmentMode? mode;
+
+  /// The original wire string when [mode] is unrecognized.
+  final String? unrecognizedMode;
+
+  /// JSON configuration for a self-hosted environment.
+  final Map<String, dynamic>? customConfig;
+
   /// Creates an [EnvironmentConfig].
-  const EnvironmentConfig({this.network, this.sources, this.environmentId});
+  const EnvironmentConfig({
+    this.network,
+    this.sources,
+    this.environmentId,
+    this.env,
+    this.mode,
+    this.unrecognizedMode,
+    this.customConfig,
+  });
 
   /// Creates an [EnvironmentConfig] from JSON.
   ///
@@ -36,6 +56,8 @@ class EnvironmentConfig {
         'Expected EnvironmentConfig type "remote" but got "$type"',
       );
     }
+    final wireMode = json['mode'] as String?;
+    final mode = EnvironmentMode.fromString(wireMode);
     return EnvironmentConfig(
       network: json['network'] != null
           ? EnvironmentNetworkEgressAllowlist.fromJson(
@@ -46,6 +68,12 @@ class EnvironmentConfig {
           ?.map((e) => Source.fromJson(e as Map<String, dynamic>))
           .toList(),
       environmentId: json['environment_id'] as String?,
+      env: json['env'] == null
+          ? null
+          : EnvironmentVariables.fromJson(json['env'] as Object),
+      mode: mode,
+      unrecognizedMode: mode == null ? wireMode : null,
+      customConfig: json['custom_config'] as Map<String, dynamic>?,
     );
   }
 
@@ -55,6 +83,9 @@ class EnvironmentConfig {
     if (network != null) 'network': network!.toJson(),
     if (sources != null) 'sources': sources!.map((e) => e.toJson()).toList(),
     if (environmentId != null) 'environment_id': environmentId,
+    'env': ?env?.toJson(),
+    'mode': ?(mode?.value ?? unrecognizedMode),
+    'custom_config': ?customConfig,
   };
 
   /// Creates a copy with replaced values.
@@ -62,6 +93,9 @@ class EnvironmentConfig {
     Object? network = unsetCopyWithValue,
     Object? sources = unsetCopyWithValue,
     Object? environmentId = unsetCopyWithValue,
+    Object? env = unsetCopyWithValue,
+    Object? mode = unsetCopyWithValue,
+    Object? customConfig = unsetCopyWithValue,
   }) {
     return EnvironmentConfig(
       network: network == unsetCopyWithValue
@@ -73,6 +107,12 @@ class EnvironmentConfig {
       environmentId: environmentId == unsetCopyWithValue
           ? this.environmentId
           : environmentId as String?,
+      env: env == unsetCopyWithValue ? this.env : env as EnvironmentVariables?,
+      mode: mode == unsetCopyWithValue ? this.mode : mode as EnvironmentMode?,
+      unrecognizedMode: mode == unsetCopyWithValue ? unrecognizedMode : null,
+      customConfig: customConfig == unsetCopyWithValue
+          ? this.customConfig
+          : customConfig as Map<String, dynamic>?,
     );
   }
 }

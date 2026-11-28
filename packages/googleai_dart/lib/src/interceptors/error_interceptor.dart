@@ -33,7 +33,9 @@ class ErrorInterceptor implements Interceptor {
       rethrow;
     } catch (error, stackTrace) {
       // Wrap unknown errors
-      final description = error.toString();
+      final description = context.statusOnlyResponseDiagnostics
+          ? 'Request failed'
+          : error.toString();
       final safeDescription =
           context.diagnosticRedactor?.redactString(description) ?? description;
       throw ApiException(
@@ -51,7 +53,8 @@ class ErrorInterceptor implements Interceptor {
     Duration latency,
   ) {
     final statusCode = response.statusCode;
-    final restrictBody = context.skipResponseBodyDiagnostics;
+    final statusOnly = context.statusOnlyResponseDiagnostics;
+    final restrictBody = context.skipResponseBodyDiagnostics || statusOnly;
     final body = restrictBody ? '' : readDiagnosticBody(response);
     final scopedRedactor = context.diagnosticRedactor;
 
@@ -60,34 +63,34 @@ class ErrorInterceptor implements Interceptor {
     var message = 'HTTP $statusCode error';
     final details = <Object>[];
 
-    try {
-      final decoded = jsonDecode(
-        restrictBody ? utf8.decode(response.bodyBytes) : body,
-      );
-      final interactionSafe = Redactor.interactionCredentials.redactJson(
-        decoded,
-      );
-      final errorDetails = scopedRedactor == null
-          ? interactionSafe
-          : scopedRedactor.redactJson(interactionSafe);
-      if (!restrictBody && !identical(decoded, errorDetails)) {
-        excerptSource = jsonEncode(errorDetails);
-      }
-      if (errorDetails is Map<String, dynamic>) {
-        final error = errorDetails['error'];
-        if (error is Map<String, dynamic>) {
-          if (restrictBody) excerptSource = jsonEncode({'error': error});
-          message = error['message']?.toString() ?? message;
-          final errorDetailsList = error['details'];
-          if (errorDetailsList is List) {
-            details.addAll(errorDetailsList.cast<Object>());
+    if (!statusOnly) {
+      try {
+        final decoded = jsonDecode(
+          restrictBody ? utf8.decode(response.bodyBytes) : body,
+        );
+        final interactionSafe = Redactor.interactionCredentials.redactJson(
+          decoded,
+        );
+        final errorDetails = scopedRedactor == null
+            ? interactionSafe
+            : scopedRedactor.redactJson(interactionSafe);
+        if (!restrictBody && !identical(decoded, errorDetails)) {
+          excerptSource = jsonEncode(errorDetails);
+        }
+        if (errorDetails is Map<String, dynamic>) {
+          final error = errorDetails['error'];
+          if (error is Map<String, dynamic>) {
+            if (restrictBody) excerptSource = jsonEncode({'error': error});
+            message = error['message']?.toString() ?? message;
+            final errorDetailsList = error['details'];
+            if (errorDetailsList is List) {
+              details.addAll(errorDetailsList.cast<Object>());
+            }
           }
         }
-      }
-    } catch (_) {
-      // If body is not JSON, use it as message if short enough
-      if (body.length < 200) {
-        message = body.isNotEmpty ? body : message;
+      } catch (_) {
+        // If body is not JSON, use it as message if short enough.
+        if (body.isNotEmpty && body.length < 200) message = body;
       }
     }
     message = Redactor.interactionCredentials.redactString(message);
@@ -133,7 +136,9 @@ class ErrorInterceptor implements Interceptor {
     );
     final responseMetadata = ResponseMetadata(
       statusCode: statusCode,
-      headers: scopedRedactor?.redactMap(response.headers) ?? response.headers,
+      headers: statusOnly
+          ? const {}
+          : scopedRedactor?.redactMap(response.headers) ?? response.headers,
       bodyExcerpt: safeBody.length > 200
           ? safeBody.substring(0, 200)
           : safeBody,

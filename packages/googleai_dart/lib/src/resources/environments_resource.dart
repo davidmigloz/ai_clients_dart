@@ -22,6 +22,9 @@ part 'environment_files_resource.dart';
 /// Provides CRUD operations on execution [Environment]s (sandboxes) that
 /// agents and interactions can run in.
 ///
+/// Creation and metadata reads record only the HTTP status and timing in
+/// response diagnostics to protect environment keys.
+///
 /// **Note:** the Environments API is part of the experimental Interactions
 /// API.
 class EnvironmentsResource extends ResourceBase {
@@ -45,6 +48,16 @@ class EnvironmentsResource extends ResourceBase {
   ///
   /// See https://ai.google.dev/gemini-api/docs/interactions-breaking-changes-may-2026
   static const _apiRevision = '2026-05-20';
+
+  static const _environmentDiagnostics = Redactor(
+    redactionList: [
+      'environment_key',
+      'environmentKey',
+      'authorization',
+      'x-goog-api-key',
+      'key',
+    ],
+  );
 
   /// Builds headers for an Environments API request, always opting into the
   /// [_apiRevision] schema via the `Api-Revision` header.
@@ -82,32 +95,54 @@ class EnvironmentsResource extends ResourceBase {
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    final response = await interceptorChain.execute(httpRequest);
-
-    final responseBody =
-        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-    return ListEnvironmentsResponse.fromJson(responseBody);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      diagnosticRedactor: _environmentDiagnostics,
+      statusOnlyResponseDiagnostics: true,
+    );
+    return _decodeEnvironmentResponse(
+      response,
+      ListEnvironmentsResponse.fromJson,
+    );
   }
 
   /// Creates a new [Environment].
   ///
-  /// Returns the created environment with its server-assigned
-  /// [Environment.id] populated.
+  /// Returns the server-assigned [Environment.id]. Self-hosted creation also
+  /// returns a one-time [Environment.environmentKey].
+  /// The new configuration options require the Gemini Developer API
+  /// with [ApiVersion.v1beta].
   Future<Environment> create({
     required CreateEnvironmentRequest environment,
   }) async {
+    if (environment.mode != null ||
+        environment.env != null ||
+        environment.customConfig != null ||
+        environment.fromEnvironment != null ||
+        environment.systemInstruction != null) {
+      _ensureDeveloperBeta();
+    }
     final url = requestBuilder.buildUrl('/{version}/environments');
 
     final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
     final httpRequest = http.Request('POST', url)
+      ..followRedirects = false
       ..headers.addAll(headers)
       ..body = jsonEncode(environment.toJson());
 
-    final response = await interceptorChain.execute(httpRequest);
-
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return Environment.fromJson(responseBody);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      diagnosticRedactor: _environmentDiagnostics,
+      statusOnlyResponseDiagnostics: true,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Environment creation failed.',
+      );
+    }
+    return _decodeEnvironmentResponse(response, Environment.fromJson);
   }
 
   /// Gets a specific environment by [id].
@@ -118,10 +153,28 @@ class EnvironmentsResource extends ResourceBase {
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      diagnosticRedactor: _environmentDiagnostics,
+      statusOnlyResponseDiagnostics: true,
+    );
+    return _decodeEnvironmentResponse(response, Environment.fromMetadataJson);
+  }
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return Environment.fromJson(responseBody);
+  T _decodeEnvironmentResponse<T>(
+    http.Response response,
+    T Function(Map<String, dynamic>) parse,
+  ) {
+    try {
+      return parse(
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>,
+      );
+    } on FormatException {
+      // Malformed provider data can contain the one-time environment key.
+    } on TypeError {
+      // Preserve a source-free diagnostic for malformed field types.
+    }
+    throw const FormatException('Invalid Environments API response.');
   }
 
   /// Deletes an environment by [id].
