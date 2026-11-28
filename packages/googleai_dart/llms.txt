@@ -27,6 +27,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart) (~490 tokens): Text embeddings.
 - [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart) (~1.5k tokens): File uploads for prompts.
 - [genie_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/genie_example.dart): Genie 4 creation, live JPEG frames, and completion.
+- [register_cloud_storage_files.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/register_cloud_storage_files.dart): Register Cloud Storage files with Gemini Files and OAuth.
 - [live_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_example.dart) (~1.2k tokens): Live API WebSocket sessions.
 - [live_transcription_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_transcription_example.dart) (~590 tokens): Gemini Live Transcribe with PCM audio, interim captions, and finalized text.
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/error_handling_example.dart) (~644 tokens): Exception handling patterns.

@@ -137,38 +137,16 @@ class CredentialsResource extends ResourceBase {
 
     final secrets = {
       for (final key in _secretFields)
-        if (body?[key] case final String secret when secret.isNotEmpty)
-          ..._diagnosticVariants(secret),
-    }.toList()..sort((a, b) => b.length.compareTo(a.length));
+        if (body?[key] case final String secret when secret.isNotEmpty) secret,
+    };
     return interceptorChain.execute(
       request,
       abortTrigger: abortTrigger,
-      diagnosticRedactor: Redactor(
+      diagnosticRedactor: Redactor.forSecrets(
         redactionList: _diagnosticFields,
-        sensitiveValues: secrets,
+        secrets: secrets,
       ),
     );
-  }
-
-  static final _percentEscape = RegExp(r'%[0-9A-Fa-f]{2}');
-
-  static Iterable<String> _diagnosticVariants(String secret) sync* {
-    // Provider messages can contain a JSON response as a string value.
-    final json = jsonEncode(secret);
-    final escaped = json.substring(1, json.length - 1);
-    for (final value in {secret, escaped}) {
-      yield value;
-      for (final encoded in {
-        Uri.encodeComponent(value),
-        Uri.encodeQueryComponent(value),
-      }) {
-        yield encoded;
-        yield encoded.replaceAllMapped(
-          _percentEscape,
-          (match) => match[0]!.toLowerCase(),
-        );
-      }
-    }
   }
 
   Map<String, dynamic> _decode(http.Response response) {

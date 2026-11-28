@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import '../client/config.dart';
 import '../errors/exceptions.dart';
+import '../utils/diagnostic_body.dart';
 import '../utils/redactor.dart';
 import 'interceptor.dart';
 
@@ -117,6 +118,9 @@ class LoggingInterceptor implements Interceptor {
   ) {
     if (request is http.Request) {
       return http.Request(request.method, request.url)
+        ..followRedirects = request.followRedirects
+        ..maxRedirects = request.maxRedirects
+        ..persistentConnection = request.persistentConnection
         ..headers.addAll(request.headers)
         ..headers['X-Request-ID'] = requestId
         ..bodyBytes = request.bodyBytes
@@ -162,10 +166,9 @@ class LoggingInterceptor implements Interceptor {
         ..fine('Headers: $headers');
 
       if (logger.level <= Level.FINE) {
+        final text = readDiagnosticBody(response);
         final body = redactor.truncate(
-          redactor.redactString(
-            scopedRedactor?.redactBody(response.body) ?? response.body,
-          ),
+          redactor.redactString(scopedRedactor?.redactBody(text) ?? text),
           500,
         );
         logger.fine('Body: $body');

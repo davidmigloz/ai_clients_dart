@@ -19,6 +19,9 @@ class RequestContext {
   /// Redaction for diagnostics specific to the operation.
   final Redactor? diagnosticRedactor;
 
+  /// Whether the operation already supplied its own authentication.
+  final bool skipAuthentication;
+
   /// Creates a [RequestContext].
   const RequestContext({
     required this.request,
@@ -26,6 +29,7 @@ class RequestContext {
     this.metadata = const {},
     this.abortTrigger,
     this.diagnosticRedactor,
+    this.skipAuthentication = false,
   });
 
   /// Creates a copy with updated values.
@@ -41,6 +45,7 @@ class RequestContext {
       metadata: metadata ?? this.metadata,
       abortTrigger: abortTrigger ?? this.abortTrigger,
       diagnosticRedactor: diagnosticRedactor,
+      skipAuthentication: skipAuthentication,
     );
   }
 }

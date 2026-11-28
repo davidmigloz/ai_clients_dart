@@ -39,12 +39,14 @@ class InterceptorChain {
   ///
   /// [diagnosticRedactor] applies additional redaction to this operation.
   ///
+  /// Set [skipAuthentication] when the operation already supplied credentials.
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
     void Function()? checkActive,
     Redactor? diagnosticRedactor,
+    bool skipAuthentication = false,
   }) {
     ensureNotClosed?.call();
 
@@ -53,6 +55,7 @@ class InterceptorChain {
       metadata: {},
       abortTrigger: abortTrigger,
       diagnosticRedactor: diagnosticRedactor,
+      skipAuthentication: skipAuthentication,
     );
 
     return _buildChain(0, checkActive)(context);
