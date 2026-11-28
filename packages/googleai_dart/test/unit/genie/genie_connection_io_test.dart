@@ -9,7 +9,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 const _socketTimeout = Duration(seconds: 4);
-const _scopedToken = 'auth_tokens/scoped-loopback-fixture';
+const _scopedToken = 'auth_tokens/scoped+loopback-fixture';
 
 class _LoopbackGenie {
   final HttpServer server;
@@ -249,6 +249,173 @@ void main() {
       await session.complete();
     },
   );
+
+  test(
+    'redacts URI-encoded diagnostics and rejects nonzero completion status',
+    () async {
+      final fixture = await _LoopbackGenie.start();
+      final session = await fixture.resource().connect(
+        'int_failed_completion',
+        authToken: _scopedToken,
+        timeout: _socketTimeout,
+      );
+      addTearDown(session.detach);
+      expect(await fixture.nextFrame(), {
+        'event_type': 'interaction.connect',
+        'id': 'int_failed_completion',
+      });
+
+      final tokenInQuery = Uri.encodeQueryComponent(_scopedToken);
+      final mixedCaseTokenInQuery = tokenInQuery.replaceFirst('%2F', '%2f');
+      final completionError = throwsA(
+        isA<GenieConnectionException>().having(
+          (e) => e.message,
+          'message',
+          contains('RPC status 13'),
+        ),
+      );
+      final completed = expectLater(session.complete(), completionError);
+      expect(await fixture.nextFrame(), {'event_type': 'interaction.complete'});
+      await fixture.send({
+        'events': [
+          {
+            'event_type': 'error',
+            'error': {
+              'code': 'permission_denied',
+              'message': 'Upstream URL ?auth_token:$tokenInQuery',
+            },
+          },
+          {
+            'event_type': 'interaction.completed',
+            'status': {
+              'code': 13,
+              'message':
+                  'Internal processing failure for $mixedCaseTokenInQuery',
+              'details': [
+                {'target-$tokenInQuery': 'raw $_scopedToken'},
+              ],
+            },
+          },
+        ],
+      });
+      await completed;
+      await expectLater(session.complete(), completionError);
+
+      final events = await session.receive().toList().timeout(_socketTimeout);
+      expect(events, hasLength(2));
+      final reportedError = (events.first as GenieErrorEvent).error;
+      expect(reportedError?.message, 'Upstream URL ?auth_token:[redacted]');
+      final terminal = events.last as GenieTerminalEvent;
+      expect(terminal.completed, isTrue);
+      expect(terminal.status?.code, 13);
+      expect(
+        terminal.status?.message,
+        'Internal processing failure for [redacted]',
+      );
+      expect(terminal.status?.details, [
+        {'target-[redacted]': 'raw [redacted]'},
+      ]);
+    },
+  );
+
+  test(
+    'detach after a terminal event discards unread events and sends no disconnect',
+    () async {
+      final fixture = await _LoopbackGenie.start();
+      final session = await fixture.resource().connect(
+        'int_finished',
+        timeout: _socketTimeout,
+      );
+      addTearDown(session.detach);
+      expect(await fixture.nextFrame(), {
+        'event_type': 'interaction.connect',
+        'id': 'int_finished',
+      });
+      final completed = session.complete();
+      expect(await fixture.nextFrame(), {'event_type': 'interaction.complete'});
+      await fixture.send({
+        'events': [
+          {'event_type': 'interaction.connected'},
+          {'event_type': 'interaction.completed'},
+        ],
+      });
+      await completed;
+      await session.detach();
+      expect(await session.receive().toList(), isEmpty);
+      expect(await fixture.frames.moveNext().timeout(_socketTimeout), isFalse);
+    },
+  );
+
+  for (final paused in [false, true]) {
+    test(
+      'preserves terminal and control events when the receiver is ${paused ? 'paused' : 'absent'}',
+      () async {
+        final fixture = await _LoopbackGenie.start();
+        final session = await fixture.resource().connect(
+          'int_backpressure',
+          timeout: _socketTimeout,
+        );
+        addTearDown(session.detach);
+        expect(await fixture.nextFrame(), {
+          'event_type': 'interaction.connect',
+          'id': 'int_backpressure',
+        });
+        final events = <GenieServerEvent>[];
+        final drained = Completer<void>();
+        final StreamSubscription<GenieServerEvent>? receiver;
+        if (paused) {
+          receiver = session.receive().listen(
+            events.add,
+            onDone: drained.complete,
+          )..pause();
+          addTearDown(receiver.cancel);
+        } else {
+          receiver = null;
+        }
+        final completed = session.complete();
+        expect(await fixture.nextFrame(), {
+          'event_type': 'interaction.complete',
+        });
+        await fixture.send({
+          'events': [
+            {'event_type': 'interaction.connected'},
+            for (var index = 0; index < 520; index++)
+              {
+                'event_type': 'step.delta',
+                'index': index,
+                'delta': {
+                  'type': 'video',
+                  'mime_type': 'image/jpeg',
+                  'data': 'AQID',
+                },
+              },
+            {'event_type': 'test.control'},
+            {'event_type': 'interaction.completed'},
+          ],
+        }, binary: true);
+        await completed.timeout(_socketTimeout);
+
+        if (receiver == null) {
+          events.addAll(
+            await session.receive().toList().timeout(_socketTimeout),
+          );
+        } else {
+          receiver.resume();
+          await drained.future.timeout(_socketTimeout);
+        }
+        expect(events, hasLength(513));
+        expect(events.first, isA<GenieConnectedEvent>());
+        expect(events[events.length - 2].eventType, 'test.control');
+        expect(events.last, isA<GenieTerminalEvent>());
+        expect(
+          events.whereType<GenieStepEvent>().map(
+            (event) => (event.step as StepDeltaEvent).index,
+          ),
+          List.generate(510, (i) => i + 10),
+        );
+      },
+    );
+  }
 
   test(
     'changing receiver does not change the connection and cancel aborts generation',

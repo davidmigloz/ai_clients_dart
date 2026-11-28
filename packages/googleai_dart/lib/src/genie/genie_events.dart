@@ -302,7 +302,8 @@ final class GenieTerminalEvent extends GenieServerEvent {
     this.usage,
   });
 
-  /// Whether this event acknowledges completion of the server interaction.
+  /// Whether the server sent the completion event.
+  /// Check [status] for the outcome when the server supplied an RPC status.
   bool get completed => eventType == 'interaction.completed';
 }
 

@@ -850,9 +850,13 @@ session.send(const GenieUserAction(action: GenieAction.keyClick, key: GenieKey.w
 Read `session.receive()` for typed events. `GenieStepEvent.mediaBytes` decodes
 24 fps JPEG frames and 48 kHz signed 16-bit little-endian stereo PCM. Call
 `await session.complete()` to request completion and wait for the server's
-terminal event, or `await session.cancel()` to abort generation.
-`detach()` closes the local socket and server-side generation can continue
-billing. Sessions cannot resume.
+terminal event, or `await session.cancel()` to abort generation. A nonzero
+completion status is available on the terminal event and causes
+`complete()` to throw `GenieConnectionException`.
+`detach()` closes the local socket, discards unread events, and can leave
+server-side generation billing. Sessions cannot resume. Keep consuming events
+during an active session to retain media. The client drops older unread media
+once the backlog reaches 512 events or 16 MiB of encoded media.
 
 For browsers, create the interaction and mint a scoped credential with
 `await genie.createAuthToken(interaction.id)` on your backend. Pass the
