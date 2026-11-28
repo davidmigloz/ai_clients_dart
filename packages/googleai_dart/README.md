@@ -379,6 +379,12 @@ budget above the tokens already used. On Vertex AI, select
 [Gemini Developer API long decode](https://aistudio.google.com/docs/long-decode?generate-content=true) ·
 [Vertex AI inference reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/inference)
 
+Use `GenerateContentRequest.labels` for request metadata on Gemini Developer
+API `v1beta` and Vertex AI. On models that support speech transcription, use
+`GenerationAudioTranscriptionConfig` to configure transcription output,
+including SMART mode and source text where available.
+[GenerateContent reference](https://aistudio.google.com/api-reference/generate-content)
+
 </details>
 
 ### How do I select files, pages, or clips in GenerateContent?

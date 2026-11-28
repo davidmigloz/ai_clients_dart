@@ -62,6 +62,25 @@ The `GoogleAIConfig.vertexAI` default remains `ApiVersion.v1`.
 
 ---
 
+## GenerateContent tool type
+
+`ToolType.mediaProcessing` represents the media processing tool in model
+responses. Add it to exhaustive switches. In a switch that handles each
+known tool, add an arm for media processing.
+
+```dart
+// Before
+ToolType.urlContext => handleUrlContext(),
+ToolType.unspecified => handleUnknown(),
+
+// After
+ToolType.urlContext => handleUrlContext(),
+ToolType.mediaProcessing => handleMediaProcessing(),
+ToolType.unspecified => handleUnknown(),
+```
+
+---
+
 ## Handling Genie WebSocket failures
 
 Exhaustive switches over the sealed `GoogleAIException` hierarchy can add

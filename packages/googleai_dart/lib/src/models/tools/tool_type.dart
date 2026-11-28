@@ -12,6 +12,9 @@ enum ToolType {
   /// Google Search web tool.
   googleSearchWeb,
 
+  /// Tool for media processing.
+  mediaProcessing,
+
   /// Unspecified tool type.
   unspecified,
 
@@ -26,6 +29,7 @@ ToolType toolTypeFromString(String? value) {
     'GOOGLE_MAPS' => ToolType.googleMaps,
     'GOOGLE_SEARCH_IMAGE' => ToolType.googleSearchImage,
     'GOOGLE_SEARCH_WEB' => ToolType.googleSearchWeb,
+    'MEDIA_PROCESSING' => ToolType.mediaProcessing,
     'URL_CONTEXT' => ToolType.urlContext,
     _ => ToolType.unspecified,
   };
@@ -38,6 +42,7 @@ String toolTypeToString(ToolType type) {
     ToolType.googleMaps => 'GOOGLE_MAPS',
     ToolType.googleSearchImage => 'GOOGLE_SEARCH_IMAGE',
     ToolType.googleSearchWeb => 'GOOGLE_SEARCH_WEB',
+    ToolType.mediaProcessing => 'MEDIA_PROCESSING',
     ToolType.urlContext => 'URL_CONTEXT',
     ToolType.unspecified => 'TOOL_TYPE_UNSPECIFIED',
   };
