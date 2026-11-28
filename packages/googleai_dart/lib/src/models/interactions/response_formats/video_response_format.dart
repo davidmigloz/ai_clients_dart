@@ -61,6 +61,21 @@ String interactionVideoResponseFormatDeliveryToString(
   };
 }
 
+/// Resolution of generated video, preserving newer API values.
+extension type const InteractionVideoResponseResolution(String value) {
+  /// 360p video.
+  static const p360 = InteractionVideoResponseResolution('360p');
+
+  /// 720p video.
+  static const p720 = InteractionVideoResponseResolution('720p');
+
+  /// 1080p video.
+  static const p1080 = InteractionVideoResponseResolution('1080p');
+
+  /// 4K video.
+  static const uhd4k = InteractionVideoResponseResolution('4k');
+}
+
 /// Configuration for video output format.
 class InteractionVideoResponseFormat extends InteractionResponseFormat {
   @override
@@ -72,6 +87,9 @@ class InteractionVideoResponseFormat extends InteractionResponseFormat {
   /// The delivery mode for the video output.
   final InteractionVideoResponseFormatDelivery? delivery;
 
+  /// The output resolution, where supported by the selected model.
+  final InteractionVideoResponseResolution? resolution;
+
   /// The duration for the video output.
   final String? duration;
 
@@ -82,6 +100,7 @@ class InteractionVideoResponseFormat extends InteractionResponseFormat {
   /// Creates an [InteractionVideoResponseFormat] instance.
   const InteractionVideoResponseFormat({
     this.aspectRatio,
+    this.resolution,
     this.delivery,
     this.duration,
     this.gcsUri,
@@ -100,6 +119,9 @@ class InteractionVideoResponseFormat extends InteractionResponseFormat {
         json['delivery'] as String?,
       ),
       duration: json['duration'] as String?,
+      resolution: json['resolution'] == null
+          ? null
+          : InteractionVideoResponseResolution(json['resolution'] as String),
       gcsUri: json['gcs_uri'] as String?,
     );
   }
@@ -114,6 +136,7 @@ class InteractionVideoResponseFormat extends InteractionResponseFormat {
     if (delivery != null)
       'delivery': interactionVideoResponseFormatDeliveryToString(delivery!),
     if (duration != null) 'duration': duration,
+    'resolution': ?resolution?.value,
     if (gcsUri != null) 'gcs_uri': gcsUri,
   };
 
@@ -122,6 +145,7 @@ class InteractionVideoResponseFormat extends InteractionResponseFormat {
     Object? aspectRatio = unsetCopyWithValue,
     Object? delivery = unsetCopyWithValue,
     Object? duration = unsetCopyWithValue,
+    Object? resolution = unsetCopyWithValue,
     Object? gcsUri = unsetCopyWithValue,
   }) {
     return InteractionVideoResponseFormat(
@@ -131,6 +155,9 @@ class InteractionVideoResponseFormat extends InteractionResponseFormat {
       delivery: delivery == unsetCopyWithValue
           ? this.delivery
           : delivery as InteractionVideoResponseFormatDelivery?,
+      resolution: resolution == unsetCopyWithValue
+          ? this.resolution
+          : resolution as InteractionVideoResponseResolution?,
       duration: duration == unsetCopyWithValue
           ? this.duration
           : duration as String?,

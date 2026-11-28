@@ -1,6 +1,7 @@
 import '../copy_with_sentinel.dart';
 import 'image_config.dart';
 import 'speech_config.dart';
+import 'structured_speech_config.dart';
 import 'thinking_level.dart';
 import 'thinking_summaries.dart';
 import 'tool_choice.dart';
@@ -11,6 +12,16 @@ import 'video_config.dart';
 class InteractionGenerationConfig {
   /// Seed used in decoding for reproducibility.
   final int? seed;
+
+  /// Randomness of generation on supported models.
+  ///
+  /// The upstream schema marks this option deprecated.
+  final double? temperature;
+
+  /// Nucleus sampling threshold on supported models.
+  ///
+  /// The upstream schema marks this option deprecated.
+  final double? topP;
 
   /// A list of character sequences that will stop output interaction.
   final List<String>? stopSequences;
@@ -30,6 +41,9 @@ class InteractionGenerationConfig {
   /// Configuration for speech interaction.
   final List<InteractionSpeechConfig>? speechConfig;
 
+  /// Speaker configuration and text normalization for speech generation.
+  final InteractionStructuredSpeechConfig? structuredSpeechConfig;
+
   /// Configuration for image interaction.
   final InteractionImageConfig? imageConfig;
 
@@ -42,6 +56,9 @@ class InteractionGenerationConfig {
   /// Creates an [InteractionGenerationConfig] instance.
   const InteractionGenerationConfig({
     this.seed,
+    this.temperature,
+    this.topP,
+    this.structuredSpeechConfig,
     this.stopSequences,
     this.toolChoice,
     this.thinkingLevel,
@@ -58,6 +75,13 @@ class InteractionGenerationConfig {
     Map<String, dynamic> json,
   ) => InteractionGenerationConfig(
     seed: json['seed'] as int?,
+    temperature: (json['temperature'] as num?)?.toDouble(),
+    topP: (json['top_p'] as num?)?.toDouble(),
+    structuredSpeechConfig: json['structured_speech_config'] == null
+        ? null
+        : InteractionStructuredSpeechConfig.fromJson(
+            json['structured_speech_config'] as Object,
+          ),
     stopSequences: (json['stop_sequences'] as List<dynamic>?)?.cast<String>(),
     toolChoice: json['tool_choice'] != null
         ? InteractionToolChoice.fromJson(json['tool_choice'])
@@ -96,6 +120,9 @@ class InteractionGenerationConfig {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (seed != null) 'seed': seed,
+    'temperature': ?temperature,
+    'top_p': ?topP,
+    'structured_speech_config': ?structuredSpeechConfig?.toJson(),
     if (stopSequences != null) 'stop_sequences': stopSequences,
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
     if (thinkingLevel != null)
@@ -116,6 +143,9 @@ class InteractionGenerationConfig {
   /// Creates a copy with replaced values.
   InteractionGenerationConfig copyWith({
     Object? seed = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+    Object? topP = unsetCopyWithValue,
+    Object? structuredSpeechConfig = unsetCopyWithValue,
     Object? stopSequences = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
     Object? thinkingLevel = unsetCopyWithValue,
@@ -128,6 +158,13 @@ class InteractionGenerationConfig {
   }) {
     return InteractionGenerationConfig(
       seed: seed == unsetCopyWithValue ? this.seed : seed as int?,
+      temperature: temperature == unsetCopyWithValue
+          ? this.temperature
+          : (temperature as num?)?.toDouble(),
+      topP: topP == unsetCopyWithValue ? this.topP : (topP as num?)?.toDouble(),
+      structuredSpeechConfig: structuredSpeechConfig == unsetCopyWithValue
+          ? this.structuredSpeechConfig
+          : structuredSpeechConfig as InteractionStructuredSpeechConfig?,
       stopSequences: stopSequences == unsetCopyWithValue
           ? this.stopSequences
           : stopSequences as List<String>?,
