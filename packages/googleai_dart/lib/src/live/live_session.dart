@@ -10,6 +10,7 @@ import '../models/content/content.dart';
 import '../models/live/messages/client/client_message.dart';
 import '../models/live/messages/server/server_message.dart';
 import '../models/tools/function_response.dart';
+import '../models/tools/tool.dart';
 import 'diagnostic_redaction.dart';
 
 /// A live streaming session with the Gemini Live API.
@@ -44,6 +45,7 @@ class LiveSession {
   final WebSocket _socket;
   final StreamController<BidiGenerateContentServerMessage> _messageController;
   final String Function(String, Set<String>)? _redactDiagnostic;
+  final bool _allowsContextUpdates;
   void Function(LiveSession)? _onClosed;
   StreamSubscription<WebSocketEvent>? _subscription;
   bool _isConnected = true;
@@ -64,8 +66,12 @@ class LiveSession {
   /// that older handle can lose messages sent after its acknowledged index.
   SessionResumptionUpdate? get lastResumableUpdate => _lastResumableUpdate;
 
-  LiveSession._(this._socket, this._onClosed, this._redactDiagnostic)
-    : _messageController = StreamController.broadcast();
+  LiveSession._(
+    this._socket,
+    this._onClosed,
+    this._redactDiagnostic,
+    this._allowsContextUpdates,
+  ) : _messageController = StreamController.broadcast();
 
   /// Creates a new [LiveSession] from an established WebSocket connection.
   factory LiveSession.fromWebSocket(WebSocket socket) =>
@@ -77,7 +83,10 @@ class LiveSession {
     WebSocket socket, {
     void Function(LiveSession)? onClosed,
     String Function(String, Set<String>)? redactDiagnostic,
-  }) => LiveSession._(socket, onClosed, redactDiagnostic).._startListening();
+    bool allowsContextUpdates = true,
+  }) =>
+      LiveSession._(socket, onClosed, redactDiagnostic, allowsContextUpdates)
+        .._startListening();
 
   void _startListening() {
     _subscription = _socket.events.listen(
@@ -182,6 +191,9 @@ class LiveSession {
     if (!_isConnected) {
       throw const LiveSessionClosedException();
     }
+    if (!_allowsContextUpdates && message is BidiGenerateContentContextUpdate) {
+      throw UnsupportedError('Live context updates require Vertex AI.');
+    }
     final json = jsonEncode(message.toJson());
     _socket.sendText(json);
   }
@@ -203,11 +215,24 @@ class LiveSession {
   }
 
   /// Sends conversation context/turns to the server.
-  void sendContent({required List<Content> turns, bool? turnComplete}) {
+  ///
+  /// Omit [turns] to send a turn-completion marker on its own.
+  void sendContent({List<Content>? turns, bool? turnComplete}) {
     send(
       BidiGenerateContentClientContent(
         turns: turns,
         turnComplete: turnComplete,
+      ),
+    );
+  }
+
+  /// Updates the system instruction, tools, or both on a supported Vertex
+  /// AI session. Pass an empty [tools] list to clear the current tools.
+  void sendContextUpdate({Content? systemInstruction, List<Tool>? tools}) {
+    send(
+      BidiGenerateContentContextUpdate(
+        systemInstruction: systemInstruction,
+        tools: tools,
       ),
     );
   }

@@ -160,6 +160,7 @@ class LiveClient {
       session = LiveSession.attach(
         socket,
         onClosed: _sessions.remove,
+        allowsContextUpdates: isVertex,
         redactDiagnostic: (message, handles) => _safeSocketMessage(
           message,
           uri,

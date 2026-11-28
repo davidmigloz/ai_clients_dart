@@ -47,6 +47,7 @@ class _Server {
     required bool reject,
     required Object? setupReply,
     this.onRealtimeInput,
+    this.onClientMessage,
   }) {
     http.listen((request) async {
       if (reject) {
@@ -63,6 +64,7 @@ class _Server {
       socket.listen((data) {
         final frame = jsonDecode(data as String) as Map<String, dynamic>;
         if (handshake.isCompleted) {
+          onClientMessage?.call(frame);
           final input = frame['realtimeInput'] as Map<String, dynamic>?;
           if (input != null) onRealtimeInput?.call(socket, input);
           return;
@@ -85,6 +87,7 @@ class _Server {
   }
 
   final void Function(WebSocket, Map<String, dynamic>)? onRealtimeInput;
+  final void Function(Map<String, dynamic>)? onClientMessage;
 
   String get baseUrl => 'http://127.0.0.1:${http.port}';
 
@@ -92,12 +95,14 @@ class _Server {
     bool reject = false,
     Object? setupReply = '{"setupComplete":{"sessionId":"loopback"}}',
     void Function(WebSocket, Map<String, dynamic>)? onRealtimeInput,
+    void Function(Map<String, dynamic>)? onClientMessage,
   }) async {
     final server = _Server(
       await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
       reject: reject,
       setupReply: setupReply,
       onRealtimeInput: onRealtimeInput,
+      onClientMessage: onClientMessage,
     );
     addTearDown(() => server.http.close(force: true));
     return server;
@@ -119,6 +124,82 @@ const _model = 'gemini-3.8-live';
 const _deadline = Duration(seconds: 4);
 
 void main() {
+  test(
+    'Vertex Live sends context-only turn completion and updates in order',
+    () async {
+      final frames = <Map<String, dynamic>>[];
+      final received = Completer<void>();
+      final server = await _Server.start(
+        onClientMessage: (frame) {
+          frames.add(frame);
+          if (frames.length == 2) received.complete();
+        },
+      );
+      final config = GoogleAIConfig.vertexAI(
+        projectId: 'P',
+        location: 'eu',
+        authProvider: const BearerTokenProvider('local-fixture'),
+      ).copyWith(baseUrl: server.baseUrl);
+      final session = await _createLive(
+        config,
+      ).connect(model: _model).timeout(_deadline);
+      session
+        ..sendContent(turnComplete: true)
+        ..sendContextUpdate(
+          systemInstruction: Content.text('Use concise answers.'),
+          tools: const [],
+        );
+      await received.future.timeout(_deadline);
+      expect(frames, [
+        {
+          'clientContent': {'turnComplete': true},
+        },
+        {
+          'contextUpdate': {
+            'systemInstruction': Content.text('Use concise answers.').toJson(),
+            'tools': {'tools': <Object>[]},
+          },
+        },
+      ]);
+    },
+  );
+
+  test('Developer Live rejects typed Vertex context updates', () async {
+    final next = Completer<Map<String, dynamic>>();
+    final server = await _Server.start(onClientMessage: next.complete);
+    final session = await _createLive(
+      GoogleAIConfig(baseUrl: server.baseUrl),
+    ).connect(model: _model).timeout(_deadline);
+    expect(
+      () => session.sendContextUpdate(tools: const []),
+      throwsUnsupportedError,
+    );
+    session.sendContent(turnComplete: true);
+    expect(await next.future.timeout(_deadline), {
+      'clientContent': {'turnComplete': true},
+    });
+  });
+
+  test('Developer Live sends a per-input video resolution', () async {
+    final next = Completer<Map<String, dynamic>>();
+    final server = await _Server.start(onClientMessage: next.complete);
+    final session = await _createLive(
+      GoogleAIConfig(baseUrl: server.baseUrl),
+    ).connect(model: _model).timeout(_deadline);
+    session.send(
+      const BidiGenerateContentRealtimeInput(
+        video: Blob(mimeType: 'image/jpeg', data: 'AQID'),
+        mediaResolution: MediaResolutionLevel.high,
+      ),
+    );
+    expect(await next.future.timeout(_deadline), {
+      'realtimeInput': {
+        'video': {'data': 'AQID', 'mimeType': 'image/jpeg'},
+        'mediaResolution': 'MEDIA_RESOLUTION_HIGH',
+      },
+    });
+  });
+
   test('Developer Live setup sends translation and request metadata', () async {
     const model = 'gemini-3.5-live-translate-preview';
     final server = await _Server.start();

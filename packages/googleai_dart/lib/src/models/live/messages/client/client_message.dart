@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../../../content/blob.dart';
 import '../../../content/content.dart';
+import '../../../content/media_resolution.dart';
 import '../../../safety/safety_setting.dart';
 import '../../../tools/function_response.dart';
 import '../../../tools/tool.dart';
@@ -20,6 +21,9 @@ import '../../config/session_resumption_config.dart';
 /// - `clientContent` for [BidiGenerateContentClientContent]
 /// - `realtimeInput` for [BidiGenerateContentRealtimeInput]
 /// - `toolResponse` for [BidiGenerateContentToolResponse]
+/// - `contextUpdate` for [BidiGenerateContentContextUpdate]
+///
+/// Unrecognized wrappers use [UnknownClientMessage].
 sealed class BidiGenerateContentClientMessage {
   /// Creates a message.
   const BidiGenerateContentClientMessage();
@@ -46,6 +50,11 @@ sealed class BidiGenerateContentClientMessage {
     if (json.containsKey('toolResponse')) {
       return BidiGenerateContentToolResponse.fromJson(
         json['toolResponse'] as Map<String, dynamic>,
+      );
+    }
+    if (json.containsKey('contextUpdate')) {
+      return BidiGenerateContentContextUpdate.fromJson(
+        json['contextUpdate'] as Map<String, dynamic>,
       );
     }
     // Return unknown message type instead of throwing to handle
@@ -229,8 +238,10 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
 /// Use this to send previous conversation turns or user context.
 class BidiGenerateContentClientContent
     extends BidiGenerateContentClientMessage {
+  final List<Content>? _turns;
+
   /// The conversation turns to send.
-  final List<Content> turns;
+  List<Content> get turns => _turns ?? const [];
 
   /// Whether this turn is complete.
   ///
@@ -238,16 +249,14 @@ class BidiGenerateContentClientContent
   final bool? turnComplete;
 
   /// Creates a [BidiGenerateContentClientContent].
-  const BidiGenerateContentClientContent({
-    required this.turns,
-    this.turnComplete,
-  });
+  const BidiGenerateContentClientContent({this._turns, this.turnComplete});
 
   /// Creates from JSON.
   factory BidiGenerateContentClientContent.fromJson(Map<String, dynamic> json) {
     return BidiGenerateContentClientContent(
-      turns: (json['turns'] as List<dynamic>)
-          .map((e) => Content.fromJson(e as Map<String, dynamic>))
+      turns: (json['turns'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .map(Content.fromJson)
           .toList(),
       turnComplete: json['turnComplete'] as bool?,
     );
@@ -256,7 +265,7 @@ class BidiGenerateContentClientContent
   @override
   Map<String, dynamic> toJson() => {
     'clientContent': {
-      'turns': turns.map((e) => e.toJson()).toList(),
+      if (_turns != null) 'turns': turns.map((e) => e.toJson()).toList(),
       if (turnComplete != null) 'turnComplete': turnComplete,
     },
   };
@@ -264,6 +273,47 @@ class BidiGenerateContentClientContent
   @override
   String toString() =>
       'BidiGenerateContentClientContent(turns: ${turns.length}, turnComplete: $turnComplete)';
+}
+
+/// Replaces parts of a Live session's context on supported Vertex AI models.
+class BidiGenerateContentContextUpdate
+    extends BidiGenerateContentClientMessage {
+  /// Replacement system instruction, when supplied.
+  final Content? systemInstruction;
+
+  /// Replacement tools. An empty list removes the current tools.
+  final List<Tool>? tools;
+
+  /// Creates a context update. Omitted fields retain their current values.
+  const BidiGenerateContentContextUpdate({this.systemInstruction, this.tools});
+
+  /// Creates from the inner context update object.
+  factory BidiGenerateContentContextUpdate.fromJson(Map<String, dynamic> json) {
+    final instruction = json['systemInstruction'] as Map<String, dynamic>?;
+    final tools = json['tools'] as Map<String, dynamic>?;
+    return BidiGenerateContentContextUpdate(
+      systemInstruction: instruction == null
+          ? null
+          : Content.fromJson(instruction),
+      tools: tools == null
+          ? null
+          : (tools['tools'] as List?)
+                    ?.cast<Map<String, dynamic>>()
+                    .map(Tool.fromJson)
+                    .toList() ??
+                const [],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'contextUpdate': {
+      if (systemInstruction != null)
+        'systemInstruction': systemInstruction!.toJson(),
+      if (tools != null)
+        'tools': {'tools': tools!.map((tool) => tool.toJson()).toList()},
+    },
+  };
 }
 
 /// Real-time input message for streaming audio, video, or text.
@@ -280,6 +330,13 @@ class BidiGenerateContentRealtimeInput
   /// Text input.
   final String? text;
 
+  /// Overrides the session's default media resolution for this input.
+  final MediaResolutionLevel? mediaResolution;
+
+  /// Legacy inlined media input. The service only processes the first item.
+  @Deprecated('Use audio, video, or text instead.')
+  final List<Blob>? mediaChunks;
+
   /// Signal that user activity has started (manual VAD).
   final bool? activityStart;
 
@@ -294,6 +351,8 @@ class BidiGenerateContentRealtimeInput
     this.audio,
     this.video,
     this.text,
+    this.mediaResolution,
+    @Deprecated('Use audio, video, or text instead.') this.mediaChunks,
     this.activityStart,
     this.activityEnd,
     this.audioStreamEnd,
@@ -326,6 +385,7 @@ class BidiGenerateContentRealtimeInput
 
   /// Creates from JSON.
   factory BidiGenerateContentRealtimeInput.fromJson(Map<String, dynamic> json) {
+    final mediaResolution = json['mediaResolution'] as String?;
     return BidiGenerateContentRealtimeInput(
       audio: json['audio'] != null
           ? Blob.fromJson(json['audio'] as Map<String, dynamic>)
@@ -334,6 +394,13 @@ class BidiGenerateContentRealtimeInput
           ? Blob.fromJson(json['video'] as Map<String, dynamic>)
           : null,
       text: json['text'] as String?,
+      mediaResolution: mediaResolution == null
+          ? null
+          : mediaResolutionLevelFromString(mediaResolution),
+      mediaChunks: (json['mediaChunks'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .map(Blob.fromJson)
+          .toList(),
       // Activity signals can be either boolean or empty objects
       activityStart: _parseActivitySignal(
         json['activityStart'] ?? json['activity_start'],
@@ -361,6 +428,10 @@ class BidiGenerateContentRealtimeInput
       if (audio != null) 'audio': audio!.toJson(),
       if (video != null) 'video': video!.toJson(),
       if (text != null) 'text': text,
+      if (mediaResolution != null)
+        'mediaResolution': mediaResolutionLevelToString(mediaResolution!),
+      if (mediaChunks != null)
+        'mediaChunks': mediaChunks!.map((chunk) => chunk.toJson()).toList(),
       // Activity signals are empty objects, not boolean values
       if (activityStart ?? false) 'activityStart': <String, dynamic>{},
       if (activityEnd ?? false) 'activityEnd': <String, dynamic>{},
@@ -374,6 +445,8 @@ class BidiGenerateContentRealtimeInput
     if (audio != null) parts.add('audio');
     if (video != null) parts.add('video');
     if (text != null) parts.add('text: $text');
+    if (mediaResolution != null) parts.add('mediaResolution: $mediaResolution');
+    if (mediaChunks != null) parts.add('mediaChunks: ${mediaChunks!.length}');
     if (activityStart ?? false) parts.add('activityStart');
     if (activityEnd ?? false) parts.add('activityEnd');
     if (audioStreamEnd ?? false) parts.add('audioStreamEnd');

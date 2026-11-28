@@ -1064,6 +1064,13 @@ model when setting `LiveGenerationConfig.translationConfig`.
 [Google Cloud model guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-live) ·
 [Developer Live thinking](https://aistudio.google.com/docs/live-api/thinking)
 
+For a supported Vertex AI session, `sendContextUpdate()` replaces the system
+instruction or tools during the session. Pass an empty tool list to clear the
+tools. Call `sendContent(turnComplete: true)` to finish a turn with the
+conversation already sent. On the Gemini Developer API, set
+`BidiGenerateContentRealtimeInput.mediaResolution` to override the default
+resolution for that input.
+
 `message.voiceActivity` exposes server-detected speech boundaries and their
 audio offsets. With session resumption enabled, inspect
 `session.lastResumableUpdate` for the most recent usable handle. Vertex AI
