@@ -31,6 +31,7 @@ class RequestContext {
 
   /// Whether the operation already supplied its own authentication.
   final bool skipAuthentication;
+
   /// Whether to omit the response body from diagnostic logs.
   final bool skipResponseBodyDiagnostics;
 

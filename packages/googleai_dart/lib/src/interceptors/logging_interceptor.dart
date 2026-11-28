@@ -119,3 +119,64 @@ class LoggingInterceptor implements Interceptor {
   ) {
     if (request is http.Request) {
       return copyBufferedRequest(request)..headers['X-Request-ID'] = requestId;
+    }
+
+    // For other request types, return as-is (can't modify)
+    return request;
+  }
+
+  /// Logs HTTP request.
+  void _logRequest(
+    http.BaseRequest request,
+    String requestId,
+    Redactor? scopedRedactor,
+  ) {
+    if (logger.level <= Level.INFO) {
+      final headers = redactor.redactMap(
+        scopedRedactor?.redactMap(request.headers) ?? request.headers,
+      );
+      final safeUrl = redactor.redactString(
+        (scopedRedactor?.redactUri(request.url) ?? request.url).toString(),
+      );
+      logger
+        ..info('REQUEST [$requestId] ${request.method} $safeUrl')
+        ..fine('Headers: $headers');
+    }
+  }
+
+  /// Logs HTTP response.
+  void _logResponse(
+    http.Response response,
+    String requestId,
+    int durationMs,
+    Redactor? scopedRedactor, {
+    required bool skipResponseBody,
+  }) {
+    if (logger.level <= Level.INFO) {
+      final headers = redactor.redactMap(
+        scopedRedactor?.redactMap(response.headers) ?? response.headers,
+      );
+      logger
+        ..info('RESPONSE [$requestId] ${response.statusCode} (${durationMs}ms)')
+        ..fine('Headers: $headers');
+
+      if (!skipResponseBody && logger.level <= Level.FINE) {
+        final text = readDiagnosticBody(response);
+        final body = redactor.truncate(
+          redactor.redactString(scopedRedactor?.redactBody(text) ?? text),
+          500,
+        );
+        logger.fine('Body: $body');
+      }
+    }
+  }
+
+  /// Logs error.
+  void _logError(Object error, String requestId, int durationMs) {
+    logger.severe(
+      'ERROR [$requestId] $error (${durationMs}ms)',
+      error,
+      error is Error ? error.stackTrace : null,
+    );
+  }
+}
