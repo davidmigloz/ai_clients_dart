@@ -161,6 +161,7 @@ class LiveClient {
         socket,
         onClosed: _sessions.remove,
         allowsContextUpdates: isVertex,
+        allowsRealtimeMediaResolution: !isVertex,
         redactDiagnostic: (message, handles) => _safeSocketMessage(
           message,
           uri,

@@ -52,10 +52,14 @@ sealed class BidiGenerateContentClientMessage {
         json['toolResponse'] as Map<String, dynamic>,
       );
     }
-    if (json.containsKey('contextUpdate')) {
-      return BidiGenerateContentContextUpdate.fromJson(
-        json['contextUpdate'] as Map<String, dynamic>,
-      );
+    if (json['contextUpdate'] case final Map<String, dynamic> update) {
+      try {
+        return BidiGenerateContentContextUpdate.fromJson(update);
+      } on FormatException {
+        return UnknownClientMessage(json);
+      } on TypeError {
+        return UnknownClientMessage(json);
+      }
     }
     // Return unknown message type instead of throwing to handle
     // future API additions gracefully
@@ -330,8 +334,8 @@ class BidiGenerateContentRealtimeInput
   /// Text input.
   final String? text;
 
-  /// Overrides the session's default media resolution for this input.
-  final MediaResolutionLevel? mediaResolution;
+  /// Overrides the session's default media resolution on the Developer API.
+  final MediaResolution? mediaResolution;
 
   /// Legacy inlined media input. The service only processes the first item.
   @Deprecated('Use audio, video, or text instead.')
@@ -385,7 +389,7 @@ class BidiGenerateContentRealtimeInput
 
   /// Creates from JSON.
   factory BidiGenerateContentRealtimeInput.fromJson(Map<String, dynamic> json) {
-    final mediaResolution = json['mediaResolution'] as String?;
+    final mediaResolution = json['mediaResolution'] as Map<String, dynamic>?;
     return BidiGenerateContentRealtimeInput(
       audio: json['audio'] != null
           ? Blob.fromJson(json['audio'] as Map<String, dynamic>)
@@ -396,7 +400,7 @@ class BidiGenerateContentRealtimeInput
       text: json['text'] as String?,
       mediaResolution: mediaResolution == null
           ? null
-          : mediaResolutionLevelFromString(mediaResolution),
+          : MediaResolution.fromJson(mediaResolution),
       mediaChunks: (json['mediaChunks'] as List?)
           ?.cast<Map<String, dynamic>>()
           .map(Blob.fromJson)
@@ -428,8 +432,7 @@ class BidiGenerateContentRealtimeInput
       if (audio != null) 'audio': audio!.toJson(),
       if (video != null) 'video': video!.toJson(),
       if (text != null) 'text': text,
-      if (mediaResolution != null)
-        'mediaResolution': mediaResolutionLevelToString(mediaResolution!),
+      if (mediaResolution != null) 'mediaResolution': mediaResolution!.toJson(),
       if (mediaChunks != null)
         'mediaChunks': mediaChunks!.map((chunk) => chunk.toJson()).toList(),
       // Activity signals are empty objects, not boolean values

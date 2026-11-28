@@ -46,6 +46,7 @@ class LiveSession {
   final StreamController<BidiGenerateContentServerMessage> _messageController;
   final String Function(String, Set<String>)? _redactDiagnostic;
   final bool _allowsContextUpdates;
+  final bool _allowsRealtimeMediaResolution;
   void Function(LiveSession)? _onClosed;
   StreamSubscription<WebSocketEvent>? _subscription;
   bool _isConnected = true;
@@ -71,6 +72,7 @@ class LiveSession {
     this._onClosed,
     this._redactDiagnostic,
     this._allowsContextUpdates,
+    this._allowsRealtimeMediaResolution,
   ) : _messageController = StreamController.broadcast();
 
   /// Creates a new [LiveSession] from an established WebSocket connection.
@@ -84,9 +86,14 @@ class LiveSession {
     void Function(LiveSession)? onClosed,
     String Function(String, Set<String>)? redactDiagnostic,
     bool allowsContextUpdates = true,
-  }) =>
-      LiveSession._(socket, onClosed, redactDiagnostic, allowsContextUpdates)
-        .._startListening();
+    bool allowsRealtimeMediaResolution = true,
+  }) => LiveSession._(
+    socket,
+    onClosed,
+    redactDiagnostic,
+    allowsContextUpdates,
+    allowsRealtimeMediaResolution,
+  ).._startListening();
 
   void _startListening() {
     _subscription = _socket.events.listen(
@@ -194,6 +201,13 @@ class LiveSession {
     if (!_allowsContextUpdates && message is BidiGenerateContentContextUpdate) {
       throw UnsupportedError('Live context updates require Vertex AI.');
     }
+    if (!_allowsRealtimeMediaResolution &&
+        message is BidiGenerateContentRealtimeInput &&
+        message.mediaResolution != null) {
+      throw UnsupportedError(
+        'Per-input Live media resolution requires the Gemini Developer API.',
+      );
+    }
     final json = jsonEncode(message.toJson());
     _socket.sendText(json);
   }
@@ -216,7 +230,9 @@ class LiveSession {
 
   /// Sends conversation context/turns to the server.
   ///
-  /// Omit [turns] to send a turn-completion marker on its own.
+  /// Omit [turns] to send a turn-completion marker on a model that accepts
+  /// client content. On Vertex AI Gemini 3.8 Live, use this method for
+  /// configured initial history and [sendText] for subsequent text.
   void sendContent({List<Content>? turns, bool? turnComplete}) {
     send(
       BidiGenerateContentClientContent(

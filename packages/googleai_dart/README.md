@@ -1066,10 +1066,16 @@ model when setting `LiveGenerationConfig.translationConfig`.
 
 For a supported Vertex AI session, `sendContextUpdate()` replaces the system
 instruction or tools during the session. Pass an empty tool list to clear the
-tools. Call `sendContent(turnComplete: true)` to finish a turn with the
-conversation already sent. On the Gemini Developer API, set
-`BidiGenerateContentRealtimeInput.mediaResolution` to override the default
-resolution for that input.
+tools. On models that accept client content, `sendContent(turnComplete: true)`
+can finish a turn with the conversation already sent. Use client content to
+seed configured initial history on Vertex AI Gemini 3.8 Live, then send
+new text with `sendText()`. On the Gemini Developer API, pass
+`MediaResolution(level: MediaResolutionLevel.high)` to
+`BidiGenerateContentRealtimeInput.mediaResolution` for an input override.
+`LiveGenerationConfig.mediaResolution` takes a `MediaResolutionLevel` for
+the session default.
+[Developer Live Bidi reference](https://aistudio.google.com/api-reference/live) ·
+[Vertex Live model guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-live)
 
 `message.voiceActivity` exposes server-detected speech boundaries and their
 audio offsets. With session resumption enabled, inspect

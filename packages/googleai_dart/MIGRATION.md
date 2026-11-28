@@ -302,6 +302,11 @@ Add `BidiGenerateContentContextUpdate` to exhaustive switches over the
 sealed `BidiGenerateContentClientMessage` hierarchy. A context update can
 replace tools or system instructions on supported Vertex AI sessions.
 
+On Gemini Developer API Live, per-input resolution uses a
+`MediaResolution(level: ...)` object. The session default in
+`LiveGenerationConfig.mediaResolution` takes a `MediaResolutionLevel` enum.
+Vertex AI Live uses the session default for media resolution.
+
 ```dart
 // Before
 String messageKind(BidiGenerateContentClientMessage message) => switch (message) {

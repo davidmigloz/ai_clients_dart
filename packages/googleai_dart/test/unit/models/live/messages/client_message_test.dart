@@ -70,14 +70,33 @@ void main() {
         'mediaChunks': [
           {'mimeType': 'image/jpeg', 'data': 'AQID'},
         ],
-        'mediaResolution': 'MEDIA_RESOLUTION_MEDIUM',
+        'mediaResolution': {'level': 'MEDIA_RESOLUTION_MEDIUM'},
       },
     };
     final message =
         BidiGenerateContentClientMessage.fromJson(wire)
             as BidiGenerateContentRealtimeInput;
-    expect(message.mediaResolution, MediaResolutionLevel.medium);
+    expect(message.mediaResolution?.level, MediaResolutionLevel.medium);
     expect(message.toJson(), wire);
+  });
+
+  test('retains type-invalid context updates as raw messages', () {
+    for (final value in [
+      'future context format',
+      {
+        'tools': [1],
+      },
+      {
+        'tools': {
+          'tools': [1],
+        },
+      },
+    ]) {
+      final wire = {'contextUpdate': value};
+      final message = BidiGenerateContentClientMessage.fromJson(wire);
+      expect(message, isA<UnknownClientMessage>());
+      expect(message.toJson(), wire);
+    }
   });
 
   group('BidiGenerateContentClientMessage', () {
