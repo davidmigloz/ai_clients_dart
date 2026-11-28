@@ -27,6 +27,52 @@ void main() {
     );
   });
 
+  test('keeps download status and omits unstructured error bytes', () async {
+    final responses = [
+      http.Response.bytes(
+        [0, 255, 1],
+        404,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      ),
+      http.Response('private workspace contents', 403),
+      http.Response(
+        '{"error":{"message":"Workspace missing"},"file":"private workspace contents"}',
+        404,
+        headers: {'content-type': 'application/json'},
+      ),
+    ].iterator;
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(),
+      httpClient: MockClient((_) async {
+        expect(responses.moveNext(), isTrue);
+        return responses.current;
+      }),
+    );
+    addTearDown(client.close);
+
+    for (final (status, message) in [
+      (404, 'HTTP 404 error'),
+      (403, 'HTTP 403 error'),
+      (404, 'Workspace missing'),
+    ]) {
+      await expectLater(
+        client.environments.files.download(environment: 'env'),
+        throwsA(
+          isA<ApiException>()
+              .having((error) => error.statusCode, 'status', status)
+              .having((error) => error.message, 'message', message)
+              .having(
+                (error) => error.responseMetadata?.bodyExcerpt,
+                'excerpt',
+                status == 404 && message == 'Workspace missing'
+                    ? '{"error":{"message":"Workspace missing"}}'
+                    : isEmpty,
+              ),
+        ),
+      );
+    }
+  });
+
   test('lists environments by compute lifecycle mode', () async {
     final client = GoogleAIClient(
       config: const GoogleAIConfig(
