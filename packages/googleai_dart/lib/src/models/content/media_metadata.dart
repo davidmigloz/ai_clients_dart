@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import 'media_wire_options.dart';
 
 /// Video interpretation approach for GenerateContent.
 ///
@@ -91,7 +92,7 @@ class AudioMetadata {
   factory AudioMetadata.fromJson(Map<String, dynamic> json) => AudioMetadata._(
     startOffset: json['startOffset'] as String?,
     endOffset: json['endOffset'] as String?,
-    wireExtensions: _mediaExtensions(json, const {'startOffset', 'endOffset'}),
+    wireExtensions: mediaExtensions(json, const {'startOffset', 'endOffset'}),
   );
 
   /// Converts to JSON.
@@ -149,7 +150,7 @@ class DocumentMetadata {
             ?.cast<String>()
             .map(DocumentContentLayer.fromJson)
             .toList(),
-        wireExtensions: _mediaExtensions(json, const {
+        wireExtensions: mediaExtensions(json, const {
           'startPage',
           'endPage',
           'contentLayers',
@@ -218,7 +219,7 @@ class SpreadsheetMetadata {
             ?.cast<String>()
             .map(SpreadsheetContentLayer.fromJson)
             .toList(),
-        wireExtensions: _mediaExtensions(json, const {
+        wireExtensions: mediaExtensions(json, const {
           'visibleCells',
           'sheetIndex',
           'contentLayers',
@@ -252,12 +253,3 @@ class SpreadsheetMetadata {
     wireExtensions: _wireExtensions,
   );
 }
-
-Map<String, dynamic> _mediaExtensions(
-  Map<String, dynamic> json,
-  Set<String> keys,
-) => {
-  for (final entry in json.entries)
-    if (!keys.contains(entry.key) || entry.value == null)
-      entry.key: entry.value,
-};

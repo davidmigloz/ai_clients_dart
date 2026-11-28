@@ -13,6 +13,7 @@ import 'blob.dart';
 import 'file_data.dart';
 import 'media_metadata.dart';
 import 'media_resolution.dart';
+import 'media_wire_options.dart';
 
 /// A single unit of content (text, media, function call, etc.).
 ///
@@ -334,6 +335,7 @@ sealed class Part {
     final collisions = additionalProperties.keys
         .where(
           (key) => switch (key) {
+            'videoMetadata' => videoMetadata != null,
             'mediaProcessing' => mediaProcessing != null,
             'audioMetadata' => audioMetadata != null,
             'documentMetadata' => documentMetadata != null,
@@ -468,28 +470,31 @@ class _PartCommonValues {
         : MediaResolution.fromJson(
             json['mediaResolution'] as Map<String, dynamic>,
           ),
-    videoMetadata: json['videoMetadata'] == null
-        ? null
-        : VideoMetadata.fromJson(json['videoMetadata'] as Map<String, dynamic>),
-    mediaProcessing: _decodeMediaOption(
+    videoMetadata: decodeMediaOption(
+      json,
+      'videoMetadata',
+      additionalProperties,
+      (value) => VideoMetadata.fromJson(value as Map<String, dynamic>),
+    ),
+    mediaProcessing: decodeMediaOption(
       json,
       'mediaProcessing',
       additionalProperties,
       (value) => MediaProcessing.fromJson(value as String),
     ),
-    audioMetadata: _decodeMediaOption(
+    audioMetadata: decodeMediaOption(
       json,
       'audioMetadata',
       additionalProperties,
       (value) => AudioMetadata.fromJson(value as Map<String, dynamic>),
     ),
-    documentMetadata: _decodeMediaOption(
+    documentMetadata: decodeMediaOption(
       json,
       'documentMetadata',
       additionalProperties,
       (value) => DocumentMetadata.fromJson(value as Map<String, dynamic>),
     ),
-    spreadsheetMetadata: _decodeMediaOption(
+    spreadsheetMetadata: decodeMediaOption(
       json,
       'spreadsheetMetadata',
       additionalProperties,
@@ -508,25 +513,6 @@ class _PartCommonValues {
   final DocumentMetadata? documentMetadata;
   final SpreadsheetMetadata? spreadsheetMetadata;
   final Map<String, dynamic> additionalProperties;
-}
-
-T? _decodeMediaOption<T>(
-  Map<String, dynamic> json,
-  String key,
-  Map<String, dynamic> additionalProperties,
-  T Function(Object value) decode,
-) {
-  if (!json.containsKey(key)) return null;
-  final value = json[key];
-  if (value != null) {
-    try {
-      return decode(value);
-    } on TypeError {
-      // Preserve newer wire shapes in the same raw form older clients used.
-    }
-  }
-  additionalProperties[key] = value;
-  return null;
 }
 
 /// Text content.

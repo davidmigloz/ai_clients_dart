@@ -1,3 +1,4 @@
+import '../content/media_wire_options.dart';
 import '../copy_with_sentinel.dart';
 
 /// Content to extract from a video.
@@ -47,10 +48,21 @@ class VideoMetadata {
     this.endOffset,
     this.fps,
     this.contentLayers,
-  });
+  }) : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const VideoMetadata._({
+    this.videoDuration,
+    this.startOffset,
+    this.endOffset,
+    this.fps,
+    this.contentLayers,
+    required Map<String, dynamic> wireExtensions,
+  }) : _wireExtensions = wireExtensions;
 
   /// Creates from JSON.
-  factory VideoMetadata.fromJson(Map<String, dynamic> json) => VideoMetadata(
+  factory VideoMetadata.fromJson(Map<String, dynamic> json) => VideoMetadata._(
     videoDuration: json['videoDuration'] as String?,
     startOffset: json['startOffset'] as String?,
     endOffset: json['endOffset'] as String?,
@@ -59,10 +71,18 @@ class VideoMetadata {
         ?.cast<String>()
         .map(VideoContentLayer.fromJson)
         .toList(),
+    wireExtensions: mediaExtensions(json, const {
+      'videoDuration',
+      'startOffset',
+      'endOffset',
+      'fps',
+      'contentLayers',
+    }),
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     if (videoDuration != null) 'videoDuration': videoDuration,
     if (startOffset != null) 'startOffset': startOffset,
     if (endOffset != null) 'endOffset': endOffset,
@@ -78,7 +98,7 @@ class VideoMetadata {
     Object? endOffset = unsetCopyWithValue,
     Object? fps = unsetCopyWithValue,
     Object? contentLayers = unsetCopyWithValue,
-  }) => VideoMetadata(
+  }) => VideoMetadata._(
     videoDuration: videoDuration == unsetCopyWithValue
         ? this.videoDuration
         : videoDuration as String?,
@@ -92,5 +112,6 @@ class VideoMetadata {
     contentLayers: contentLayers == unsetCopyWithValue
         ? this.contentLayers
         : contentLayers as List<VideoContentLayer>?,
+    wireExtensions: _wireExtensions,
   );
 }

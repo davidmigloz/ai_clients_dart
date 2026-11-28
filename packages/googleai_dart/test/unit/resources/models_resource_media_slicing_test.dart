@@ -254,6 +254,38 @@ void main() {
     },
   );
 
+  test(
+    'replays unrecognized wire options inside old function result parts',
+    () {
+      final wire = {
+        'functionResponse': {
+          'name': 'annotate',
+          'response': <String, dynamic>{},
+          'parts': [
+            {
+              'inlineData': {'data': 'YQ==', 'mimeType': 'audio/wav'},
+              'audioMetadata': {'startOffset': 2},
+              'videoMetadata': {'startOffset': null, 'futureOption': true},
+              'spreadsheetMetadata': null,
+            },
+          ],
+        },
+      };
+      final part = Part.fromJson(wire) as FunctionResponsePart;
+      final resultPart = part.functionResponse.parts!.single;
+      expect(resultPart.inlineData?.data, 'YQ==');
+      expect(resultPart.audioMetadata, isNull);
+      expect(part.toJson(), wire);
+      expect(resultPart.copyWith().toJson(), resultPart.toJson());
+      final updated = resultPart.copyWith(audioMetadata: null).toJson();
+      expect(updated, isNot(contains('audioMetadata')));
+      expect(updated['videoMetadata'], {
+        'startOffset': null,
+        'futureOption': true,
+      });
+    },
+  );
+
   test('preserves legacy raw media options and checks typed collisions', () {
     const part = InlineDataPart(
       Blob(mimeType: 'application/pdf', data: 'AQI='),

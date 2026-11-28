@@ -1,6 +1,7 @@
 import '../content/file_data.dart';
 import '../content/media_metadata.dart';
 import '../content/media_resolution.dart';
+import '../content/media_wire_options.dart';
 import '../copy_with_sentinel.dart';
 import '../files/video_metadata.dart';
 
@@ -122,48 +123,80 @@ class FunctionResponseInlinePart {
     this.audioMetadata,
     this.documentMetadata,
     this.spreadsheetMetadata,
-  });
+  }) : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const FunctionResponseInlinePart._({
+    this.inlineData,
+    this.fileData,
+    this.mediaResolution,
+    this.mediaProcessing,
+    this.videoMetadata,
+    this.audioMetadata,
+    this.documentMetadata,
+    this.spreadsheetMetadata,
+    required Map<String, dynamic> wireExtensions,
+  }) : _wireExtensions = wireExtensions;
 
   /// Creates from JSON.
-  factory FunctionResponseInlinePart.fromJson(
-    Map<String, dynamic> json,
-  ) => FunctionResponseInlinePart(
-    inlineData: json['inlineData'] == null
-        ? null
-        : FunctionResponseBlob.fromJson(
-            json['inlineData'] as Map<String, dynamic>,
-          ),
-    fileData: json['fileData'] == null
-        ? null
-        : FileData.fromJson(json['fileData'] as Map<String, dynamic>),
-    mediaResolution: json['mediaResolution'] == null
-        ? null
-        : MediaResolution.fromJson(
-            json['mediaResolution'] as Map<String, dynamic>,
-          ),
-    mediaProcessing: json['mediaProcessing'] == null
-        ? null
-        : MediaProcessing.fromJson(json['mediaProcessing'] as String),
-    videoMetadata: json['videoMetadata'] == null
-        ? null
-        : VideoMetadata.fromJson(json['videoMetadata'] as Map<String, dynamic>),
-    audioMetadata: json['audioMetadata'] == null
-        ? null
-        : AudioMetadata.fromJson(json['audioMetadata'] as Map<String, dynamic>),
-    documentMetadata: json['documentMetadata'] == null
-        ? null
-        : DocumentMetadata.fromJson(
-            json['documentMetadata'] as Map<String, dynamic>,
-          ),
-    spreadsheetMetadata: json['spreadsheetMetadata'] == null
-        ? null
-        : SpreadsheetMetadata.fromJson(
-            json['spreadsheetMetadata'] as Map<String, dynamic>,
-          ),
-  );
+  factory FunctionResponseInlinePart.fromJson(Map<String, dynamic> json) {
+    final wireExtensions = <String, dynamic>{};
+    return FunctionResponseInlinePart._(
+      inlineData: json['inlineData'] == null
+          ? null
+          : FunctionResponseBlob.fromJson(
+              json['inlineData'] as Map<String, dynamic>,
+            ),
+      fileData: decodeMediaOption(
+        json,
+        'fileData',
+        wireExtensions,
+        (value) => FileData.fromJson(value as Map<String, dynamic>),
+      ),
+      mediaResolution: decodeMediaOption(
+        json,
+        'mediaResolution',
+        wireExtensions,
+        (value) => MediaResolution.fromJson(value as Map<String, dynamic>),
+      ),
+      mediaProcessing: decodeMediaOption(
+        json,
+        'mediaProcessing',
+        wireExtensions,
+        (value) => MediaProcessing.fromJson(value as String),
+      ),
+      videoMetadata: decodeMediaOption(
+        json,
+        'videoMetadata',
+        wireExtensions,
+        (value) => VideoMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      audioMetadata: decodeMediaOption(
+        json,
+        'audioMetadata',
+        wireExtensions,
+        (value) => AudioMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      documentMetadata: decodeMediaOption(
+        json,
+        'documentMetadata',
+        wireExtensions,
+        (value) => DocumentMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      spreadsheetMetadata: decodeMediaOption(
+        json,
+        'spreadsheetMetadata',
+        wireExtensions,
+        (value) => SpreadsheetMetadata.fromJson(value as Map<String, dynamic>),
+      ),
+      wireExtensions: wireExtensions,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     if (inlineData != null) 'inlineData': inlineData!.toJson(),
     if (fileData != null) 'fileData': fileData!.toJson(),
     if (mediaResolution != null) 'mediaResolution': mediaResolution!.toJson(),
@@ -186,7 +219,7 @@ class FunctionResponseInlinePart {
     Object? audioMetadata = unsetCopyWithValue,
     Object? documentMetadata = unsetCopyWithValue,
     Object? spreadsheetMetadata = unsetCopyWithValue,
-  }) => FunctionResponseInlinePart(
+  }) => FunctionResponseInlinePart._(
     inlineData: inlineData == unsetCopyWithValue
         ? this.inlineData
         : inlineData as FunctionResponseBlob?,
@@ -211,6 +244,19 @@ class FunctionResponseInlinePart {
     spreadsheetMetadata: spreadsheetMetadata == unsetCopyWithValue
         ? this.spreadsheetMetadata
         : spreadsheetMetadata as SpreadsheetMetadata?,
+    wireExtensions: Map.of(_wireExtensions)
+      ..removeWhere(
+        (key, _) => switch (key) {
+          'fileData' => fileData != unsetCopyWithValue,
+          'mediaResolution' => mediaResolution != unsetCopyWithValue,
+          'mediaProcessing' => mediaProcessing != unsetCopyWithValue,
+          'videoMetadata' => videoMetadata != unsetCopyWithValue,
+          'audioMetadata' => audioMetadata != unsetCopyWithValue,
+          'documentMetadata' => documentMetadata != unsetCopyWithValue,
+          'spreadsheetMetadata' => spreadsheetMetadata != unsetCopyWithValue,
+          _ => false,
+        },
+      ),
   );
 }
 
