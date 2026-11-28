@@ -1,83 +1,38 @@
-// ignore_for_file: avoid_print
-/// Demonstrates generated files management for video outputs.
-library;
+import 'dart:io' as io;
 
 import 'package:googleai_dart/googleai_dart.dart';
 
-void main() {
-  final client = GoogleAIClient(
-    config: const GoogleAIConfig(authProvider: ApiKeyProvider('YOUR_API_KEY')),
-  );
+/// Downloads a generated Gemini file to a local path.
+Future<void> main(List<String> args) async {
+  if (args.length != 2 ||
+      !(args.first.startsWith('files/') ||
+          args.first.startsWith('generatedFiles/'))) {
+    io.stderr.writeln(
+      'Set GOOGLE_GENAI_API_KEY and run dart run '
+      'example/generated_files_example.dart <resource-name> <output-path>. '
+      'Use a files/{id} or generatedFiles/{id} name.',
+    );
+    return;
+  }
 
+  final name = args.first;
+  final client = GoogleAIClient.fromEnvironment(apiVersion: ApiVersion.v1beta);
   try {
-    print('🎬 Generated Files Example\n');
-    print('Generated files contain outputs from generation operations,');
-    print('such as videos from Veo or other media generation models.\n');
-
-    // Note: Generated files are created by long-running prediction operations
-    // such as video generation with Veo models.
-
-    print('1️⃣  Creating generated files...\n');
-
-    print('   Generated files are created when using video generation:');
-    print('   ```dart');
-    print('   final operation = await client.models.predictLongRunning(');
-    print('     model: "veo-3.1-lite-generate-preview",');
-    print('     instances: [');
-    print('       {"prompt": "A cat playing piano"},');
-    print('     ],');
-    print('   );');
-    print('');
-    print('   // Poll for completion');
-    print('   while (operation.done != true) {');
-    print('     await Future.delayed(Duration(seconds: 10));');
-    print('     // Check operation status...');
-    print('   }');
-    print('');
-    print('   // Access generated videos in the response');
-    print('   final response = operation.response;');
-    print('   ```');
-
-    print('\n2️⃣  Accessing generated files...\n');
-
-    print('   Generated files can be accessed from the operation response:');
-    print('   ```dart');
-    print('   if (operation.done == true && operation.response != null) {');
-    print(
-      '     final videoResponse = operation.response!.generateVideoResponse;',
-    );
-    print('     if (videoResponse?.generatedSamples != null) {');
-    print('       for (final media in videoResponse!.generatedSamples!) {');
-    print('         if (media.video?.uri != null) {');
-    print(r'           print("Video URI: ${media.video!.uri}");');
-    print('         }');
-    print('       }');
-    print('     }');
-    print('   }');
-    print('   ```');
-
-    print('\n3️⃣  Checking for RAI filtering...\n');
-
-    print('   Some generated content may be filtered:');
-    print('   ```dart');
-    print('   if (videoResponse?.raiMediaFilteredCount != null) {');
-    print(
-      r'     print("Filtered: ${videoResponse!.raiMediaFilteredCount} videos");',
-    );
-    print(r'     print("Reasons: ${videoResponse.raiMediaFilteredReasons}");');
-    print('   }');
-    print('   ```');
-
-    print('\n📝 Notes:');
-    print(
-      '   - Generated files are created by video/media generation operations',
-    );
-    print('   - Files are available for download via their URI');
-    print('   - Files have an expiration time and will be auto-deleted');
-    print('   - Use long-running operations to track generation progress');
-    print('   - See prediction_example.dart for video generation examples');
-  } catch (e) {
-    print('❌ Error: $e');
+    final List<int> bytes;
+    if (name.startsWith('generatedFiles/')) {
+      bytes = await client.generatedFiles.download(name: name);
+    } else {
+      final file = await client.files.get(name: name);
+      if (file.source != FileSource.generated && file.downloadUri == null) {
+        throw StateError(
+          'Choose an API-generated file available for download.',
+        );
+      }
+      bytes = await client.files.download(name: file.name);
+    }
+    final destination = io.File(args.last);
+    await destination.writeAsBytes(bytes);
+    io.stdout.writeln('Saved ${bytes.length} bytes to ${destination.path}.');
   } finally {
     client.close();
   }

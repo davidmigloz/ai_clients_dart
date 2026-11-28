@@ -142,7 +142,7 @@ class InterceptorChain {
                 correlationId: correlationId,
                 timestamp: DateTime.now(),
                 stage: stage,
-                reason: e,
+                reason: context.statusOnlyResponseDiagnostics ? null : e,
               );
             }
           } else {

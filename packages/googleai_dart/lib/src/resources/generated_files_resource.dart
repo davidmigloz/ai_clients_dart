@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../client/config.dart';
 import '../models/files/generated_file.dart';
 import '../models/files/list_generated_files_response.dart';
 import 'base_resource.dart';
+import 'media_download.dart';
 import 'operations_resource.dart';
 
 /// Resource for the Generated Files API.
@@ -56,8 +59,7 @@ class GeneratedFilesResource extends ResourceBase {
   ///
   /// The [name] is the resource name of the generated file (e.g., "generatedFiles/abc-123").
   ///
-  /// When calling this method via REST, only the metadata of the generated file is returned.
-  /// To retrieve the file content, use alt=media as a query parameter.
+  /// Use [download] to retrieve the file content.
   ///
   /// Returns a [GeneratedFile] with the file's metadata.
   Future<GeneratedFile> get({required String name}) async {
@@ -71,6 +73,29 @@ class GeneratedFilesResource extends ResourceBase {
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return GeneratedFile.fromJson(responseBody);
+  }
+
+  /// Downloads a Developer API `v1beta` generated file as raw bytes.
+  ///
+  /// Pass a bare ID or a `generatedFiles/{id}` name. Browser transports
+  /// require an endpoint that serves the bytes directly.
+  Future<Uint8List> download({
+    required String name,
+    Future<void>? abortTrigger,
+  }) async {
+    if (config.apiMode != ApiMode.googleAI ||
+        config.apiVersion != ApiVersion.v1beta) {
+      throw UnsupportedError(
+        'Generated file download requires the Gemini Developer API v1beta.',
+      );
+    }
+    final resource = mediaResourceName(this, 'generatedFiles', name);
+    final bytes = await downloadDeveloperMedia(
+      this,
+      '/{version}/$resource',
+      abortTrigger: abortTrigger,
+    );
+    return bytes;
   }
 
   /// Access operations for this generated file.

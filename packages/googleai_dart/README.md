@@ -929,6 +929,28 @@ supported MIME types, resolution and content layers.
 
 </details>
 
+### How do I download a generated file?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.files.download(name: 'files/{id}')` on the Gemini Developer API
+`v1` or `v1beta` for downloadable API-generated files. Find them with
+`client.files.get` or `list` by checking `source` and `downloadUri`.
+Uploaded and Cloud Storage-registered inputs use the Files API for prompting
+and metadata. Existing Developer API gateway configurations continue to use
+their configured API version.
+
+Use `client.generatedFiles.download(name: 'generatedFiles/{id}')` for the
+separate `v1beta` Generated Files collection. Both methods return bytes. The
+metadata `get` methods remain available. Browser transports require an
+endpoint or gateway that serves the bytes directly.
+
+[Runnable download example](example/generated_files_example.dart) ·
+[Files reference](https://aistudio.google.com/api-reference/files)
+
+</details>
+
 ### How do I configure a managed environment?
 
 <details>
@@ -1462,7 +1484,7 @@ See the [example/](example/) directory for complete examples:
 | [`generate_content.dart`](example/generate_content.dart) | Basic text generation |
 | [`generate_content_long_decode.dart`](example/generate_content_long_decode.dart) | Stream Gemini 4 output with automatic continuation |
 | [`generate_content_media_slicing.dart`](example/generate_content_media_slicing.dart) | GenerateContent PDF page selection |
-| [`generated_files_example.dart`](example/generated_files_example.dart) | Generated files for video outputs |
+| [`generated_files_example.dart`](example/generated_files_example.dart) | Download generated Files and Generated Files media |
 | [`genie_example.dart`](example/genie_example.dart) | Genie 4 world setup, JPEG frames, and WebSocket completion |
 | [`genie_webrtc_example.dart`](example/genie_webrtc_example.dart) | Genie 4 browser WebRTC and native playback |
 | [`google_maps_example.dart`](example/google_maps_example.dart) | Google Maps grounding |

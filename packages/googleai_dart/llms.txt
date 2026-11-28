@@ -56,7 +56,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [file_search_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_stores_example.dart) (~1k tokens): File search store management.
 - [generate_answer_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_answer_example.dart) (~1.3k tokens): Grounded question answering (RAG).
 - [voices_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/voices_example.dart): Create a prompted Gemini voice.
-- [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart) (~714 tokens): Generated files for video outputs.
+- [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart): Download generated Files and Generated Files media.
 - [google_maps_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_maps_example.dart) (~1.1k tokens): Google Maps grounding.
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/models_example.dart) (~397 tokens): List and inspect models.
 - [oauth_refresh_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/oauth_refresh_example.dart) (~1.7k tokens): OAuth token refresh during retries.
