@@ -111,27 +111,24 @@ void main() async {
               InlinedEmbedContentRequest(
                 request: EmbedContentRequest(
                   content: Content.text(
-                    'High-quality wireless headphones with noise cancellation.',
+                    'title: Headphones | text: Wireless noise-cancelling headphones.',
                   ),
-                  taskType: TaskType.retrievalDocument,
                 ),
                 metadata: {'product_id': 'prod1'},
               ),
               InlinedEmbedContentRequest(
                 request: EmbedContentRequest(
                   content: Content.text(
-                    'Ergonomic office chair with lumbar support and adjustable height.',
+                    'title: Office chair | text: Adjustable with lumbar support.',
                   ),
-                  taskType: TaskType.retrievalDocument,
                 ),
                 metadata: {'product_id': 'prod2'},
               ),
               InlinedEmbedContentRequest(
                 request: EmbedContentRequest(
                   content: Content.text(
-                    'Smart watch with heart rate monitor and GPS tracking.',
+                    'title: Smart watch | text: Heart rate monitor and GPS tracking.',
                   ),
-                  taskType: TaskType.retrievalDocument,
                 ),
                 metadata: {'product_id': 'prod3'},
               ),

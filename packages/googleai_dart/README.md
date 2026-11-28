@@ -762,8 +762,7 @@ Future<void> main() async {
     final response = await client.models.embedContent(
       model: 'gemini-embedding-2',
       request: EmbedContentRequest(
-        content: Content.text('Dart language'),
-        taskType: TaskType.retrievalDocument,
+        content: Content.text('title: Dart | text: Dart is a language for apps.'),
       ),
     );
 
@@ -774,7 +773,7 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/embeddings_example.dart)
+→ [Full example](example/embeddings_example.dart) · [Embedding task instructions](https://aistudio.google.com/docs/embeddings#task-types-embeddings-2)
 
 </details>
 
