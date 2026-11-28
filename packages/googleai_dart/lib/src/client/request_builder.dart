@@ -29,12 +29,15 @@ class RequestBuilder {
   /// configured version.
   /// Set [vertexProjectScoped] for endpoints such as Vertex Interactions,
   /// which use a project and location without a publisher.
+  /// Set [vertexPathIncludesProject] when the Vertex resource path already
+  /// contains its project and location.
   /// - For Google AI: `/{version}/models/{model}:generateContent`
   /// - For Vertex AI: `/{version}/projects/{projectId}/locations/{location}/publishers/google/models/{model}:generateContent`
   Uri buildUrl(
     String path, {
     ApiVersion? apiVersion,
     bool vertexProjectScoped = false,
+    bool vertexPathIncludesProject = false,
     EndpointConfig? endpointConfig,
     Map<String, dynamic>? queryParams,
   }) {
@@ -45,6 +48,7 @@ class RequestBuilder {
         path,
         apiVersion ?? config.apiVersion,
         vertexProjectScoped: vertexProjectScoped,
+        vertexPathIncludesProject: vertexPathIncludesProject,
       ),
     );
     final mergedParams = <String, dynamic>{
@@ -107,12 +111,13 @@ class RequestBuilder {
     String path,
     ApiVersion apiVersion, {
     required bool vertexProjectScoped,
+    required bool vertexPathIncludesProject,
   }) {
     // Replace {version} placeholder with configured version
     var transformedPath = path.replaceFirst('{version}', apiVersion.value);
 
     // For Vertex AI, transform the path to include project and location
-    if (config.apiMode == ApiMode.vertexAI) {
+    if (config.apiMode == ApiMode.vertexAI && !vertexPathIncludesProject) {
       // Pattern: /{version}/models/{model}:action
       // Becomes: /{version}/projects/{projectId}/locations/{location}/publishers/google/models/{model}:action
       final versionPattern = '/${apiVersion.value}/';

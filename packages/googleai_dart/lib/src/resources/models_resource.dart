@@ -655,6 +655,70 @@ class ModelsResource extends ResourceBase with StreamingResource {
     return PredictLongRunningOperation.fromJson(responseBody);
   }
 
+  /// Fetches a Vertex AI publisher model prediction operation.
+  ///
+  /// Pass the full [operationName] returned by [predictLongRunning]. Use a
+  /// Vertex AI client configured for the operation's region. Completed Veo
+  /// operations return their media in the response's `videos` list.
+  Future<PredictLongRunningOperation> fetchPredictOperation({
+    required String operationName,
+    Future<void>? abortTrigger,
+  }) async {
+    if (config.apiMode != ApiMode.vertexAI) {
+      throw UnsupportedError(
+        'Fetching publisher prediction operations requires Vertex AI.',
+      );
+    }
+    final segments = operationName.split('/');
+    final isPublisherOperation = switch (segments) {
+      [
+        'projects',
+        _,
+        'locations',
+        _,
+        'publishers',
+        _,
+        'models',
+        _,
+        'operations',
+        _,
+      ] =>
+        true,
+      _ => false,
+    };
+    if (!isPublisherOperation ||
+        segments.any(
+          (segment) => segment.isEmpty || segment == '.' || segment == '..',
+        )) {
+      throw ArgumentError(
+        'Expected a full Vertex AI publisher model operation name.',
+        'operationName',
+      );
+    }
+    final resource = segments
+        .take(segments.length - 2)
+        .map(Uri.encodeComponent)
+        .join('/');
+    final url = requestBuilder.buildUrl(
+      '/{version}/$resource:fetchPredictOperation',
+      vertexPathIncludesProject: true,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(
+        requestBuilder.buildHeaders(
+          additionalHeaders: const {'Content-Type': 'application/json'},
+        ),
+      )
+      ..body = jsonEncode({'operationName': operationName});
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    return PredictLongRunningOperation.fromJson(
+      jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>,
+    );
+  }
+
   /// Lists all available models.
   ///
   /// The [pageSize] parameter specifies the maximum number of models to return

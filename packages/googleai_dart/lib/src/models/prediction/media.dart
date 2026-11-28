@@ -36,27 +36,52 @@ class Video {
   /// Path to another storage (e.g., GCS URI).
   final String? uri;
 
+  /// Media type returned by Vertex AI.
+  final String? mimeType;
+
   /// Creates a [Video].
-  const Video({this.video, this.uri});
+  const Video({this.video, this.uri, this.mimeType});
 
   /// Creates a [Video] from JSON.
-  factory Video.fromJson(Map<String, dynamic> json) =>
-      Video(video: json['video'] as String?, uri: json['uri'] as String?);
+  factory Video.fromJson(Map<String, dynamic> json) => Video(
+    video: json['video'] as String?,
+    uri: json['uri'] as String?,
+    mimeType: json['mimeType'] as String?,
+  );
+
+  /// Creates a [Video] from a Vertex AI prediction result.
+  factory Video.fromVertexJson(Map<String, dynamic> json) => Video(
+    video: json['bytesBase64Encoded'] as String?,
+    uri: json['gcsUri'] as String?,
+    mimeType: json['mimeType'] as String?,
+  );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (video != null) 'video': video,
     if (uri != null) 'uri': uri,
+    'mimeType': ?mimeType,
+  };
+
+  /// Converts this video to the Vertex AI prediction result shape.
+  Map<String, dynamic> toVertexJson() => {
+    'bytesBase64Encoded': ?video,
+    'gcsUri': ?uri,
+    'mimeType': ?mimeType,
   };
 
   /// Creates a copy with replaced values.
   Video copyWith({
     Object? video = unsetCopyWithValue,
     Object? uri = unsetCopyWithValue,
+    Object? mimeType = unsetCopyWithValue,
   }) {
     return Video(
       video: video == unsetCopyWithValue ? this.video : video as String?,
       uri: uri == unsetCopyWithValue ? this.uri : uri as String?,
+      mimeType: mimeType == unsetCopyWithValue
+          ? this.mimeType
+          : mimeType as String?,
     );
   }
 }
