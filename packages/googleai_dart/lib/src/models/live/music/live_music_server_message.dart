@@ -95,7 +95,7 @@ class LiveMusicAudioChunk {
   /// Decoded audio bytes.
   final Uint8List? data;
 
-  /// Media type reported by the service.
+  /// Media type and any parameters reported by the service.
   final String? mimeType;
 
   /// The prompts and settings applied when generating this chunk.

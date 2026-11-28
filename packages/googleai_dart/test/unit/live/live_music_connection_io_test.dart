@@ -4,12 +4,16 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 const _model = 'lyria-realtime-exp';
 const _deadline = Duration(seconds: 4);
+const _credential = 'secret+music/key';
+const _lowerEncodedCredential = 'secret%2bmusic%2fkey';
+const _mixedEncodedCredential = 'secret%2Bmusic%2fkey';
 
 class _MusicServer {
   final HttpServer _server;
@@ -96,7 +100,7 @@ void main() {
               'audioChunks': [
                 {
                   'data': 'AAH+/w==',
-                  'mimeType': 'audio/pcm;rate=44100',
+                  'mimeType': 'audio/pcm;rate=48000',
                   'sourceMetadata': {
                     'clientContent': {
                       'weightedPrompts': [
@@ -165,7 +169,8 @@ void main() {
     final chunks = messages.first.serverContent!.audioChunks!;
     expect(chunks.first.data, [0, 1, 254, 255]);
     expect(chunks.last.data, [2, 3]);
-    expect(chunks.first.mimeType, 'audio/pcm;rate=44100');
+    expect(chunks.first.mimeType, 'audio/pcm;rate=48000');
+    expect(chunks.last.mimeType, 'audio/pcm;rate=44100');
     expect(chunks.first.sourceMetadata?.weightedPrompts?.single.text, 'Piano');
     expect(chunks.first.sourceMetadata?.musicGenerationConfig?.density, 0.5);
     expect(messages[1].filteredPrompt?.text, 'Blocked');
@@ -252,7 +257,7 @@ void main() {
         final music = _client(
           GoogleAIConfig(
             baseUrl: server.baseUrl,
-            authProvider: const ApiKeyProvider('secret-key'),
+            authProvider: const ApiKeyProvider(_credential),
           ),
         );
         final connecting = music.connect(model: _model);
@@ -269,10 +274,7 @@ void main() {
                 'message',
                 malformed
                     ? contains('Invalid')
-                    : allOf(
-                        contains('rejected'),
-                        isNot(contains('secret-key')),
-                      ),
+                    : 'rejected [redacted] [redacted] [redacted]',
               ),
             ),
             emitsDone,
@@ -281,7 +283,15 @@ void main() {
         if (malformed) {
           socket.add([0xff, 0xfe]);
         } else {
-          socket.add('{"error":{"code":400,"message":"rejected secret-key"}}');
+          socket.add(
+            jsonEncode({
+              'error': {
+                'code': 400,
+                'message':
+                    'rejected $_credential $_lowerEncodedCredential $_mixedEncodedCredential',
+              },
+            }),
+          );
         }
         await received.timeout(_deadline);
         expect(session.isConnected, isFalse);
@@ -294,7 +304,12 @@ void main() {
     'surfaces an abnormal close code and terminates the message stream',
     () async {
       final server = await _MusicServer.start();
-      final music = _client(GoogleAIConfig(baseUrl: server.baseUrl));
+      final music = _client(
+        GoogleAIConfig(
+          baseUrl: server.baseUrl,
+          authProvider: const ApiKeyProvider(_credential),
+        ),
+      );
       final connecting = music.connect(model: _model);
       await server.setup.future.timeout(_deadline);
       final socket = await server.socket.future;
@@ -304,16 +319,21 @@ void main() {
         session.messages,
         emitsInOrder([
           emitsError(
-            isA<LiveSessionClosedException>().having(
-              (error) => error.code,
-              'code',
-              1008,
-            ),
+            isA<LiveSessionClosedException>()
+                .having((error) => error.code, 'code', 1008)
+                .having(
+                  (error) => error.reason,
+                  'reason',
+                  'denied [redacted] [redacted] [redacted]',
+                ),
           ),
           emitsDone,
         ]),
       );
-      await socket.close(1008, 'denied');
+      await socket.close(
+        1008,
+        'denied $_credential $_lowerEncodedCredential $_mixedEncodedCredential',
+      );
       await received.timeout(_deadline);
       expect(session.isConnected, isFalse);
       await session.close();
@@ -334,6 +354,151 @@ void main() {
       expect(session.isConnected, isFalse);
       await music.close();
       await expectLater(music.connect(model: _model), throwsStateError);
+    },
+  );
+
+  for (final paused in [false, true]) {
+    test('limits audio and retains warnings and terminal errors with a '
+        '${paused ? 'paused' : 'missing'} listener', () async {
+      final server = await _MusicServer.start();
+      final music = _client(GoogleAIConfig(baseUrl: server.baseUrl));
+      final connecting = music.connect(model: _model);
+      await server.setup.future.timeout(_deadline);
+      final socket = await server.socket.future;
+      socket.add('{"setupComplete":{}}');
+      final session = await connecting;
+
+      final received = <LiveMusicServerMessage>[];
+      final errors = <Object>[];
+      final done = Completer<void>();
+      StreamSubscription<LiveMusicServerMessage> listen() => session.messages
+          .listen(received.add, onError: errors.add, onDone: done.complete);
+      var subscription = paused ? (listen()..pause()) : null;
+      socket.add('{"warning":"before"}');
+      for (var index = 0; index < 160; index++) {
+        socket.add(
+          jsonEncode({
+            'serverContent': {
+              'audioChunks': [
+                {
+                  'data': base64Encode([index]),
+                },
+              ],
+            },
+          }),
+        );
+      }
+      socket.add('{"warning":"after"}');
+      await socket.close(1008, 'ended');
+      await server.closed.future.timeout(_deadline);
+      expect(received, isEmpty);
+      if (subscription == null) {
+        subscription = listen();
+      } else {
+        subscription.resume();
+      }
+      await done.future.timeout(_deadline);
+      await subscription.cancel();
+      expect(received, hasLength(128));
+      expect(received.first.warning, 'before');
+      expect(received.last.warning, 'after');
+      expect(
+        received
+            .skip(1)
+            .take(126)
+            .map(
+              (message) =>
+                  message.serverContent?.audioChunks?.single.data?.single,
+            ),
+        List<int>.generate(126, (index) => index + 34),
+      );
+      expect(errors, [
+        isA<LiveSessionClosedException>().having(
+          (error) => error.code,
+          'code',
+          1008,
+        ),
+      ]);
+    });
+  }
+
+  test(
+    'bounds decoded PCM bytes and preserves a warning on an evicted frame',
+    () async {
+      final server = await _MusicServer.start();
+      final music = _client(GoogleAIConfig(baseUrl: server.baseUrl));
+      final connecting = music.connect(model: _model);
+      await server.setup.future.timeout(_deadline);
+      final socket = await server.socket.future;
+      socket.add('{"setupComplete":{}}');
+      final session = await connecting;
+
+      final data = Uint8List(2 * 1024 * 1024);
+      for (var index = 1; index <= 3; index++) {
+        data[0] = index;
+        socket.add(
+          jsonEncode({
+            'serverContent': {
+              'audioChunks': [
+                {'data': base64Encode(data)},
+              ],
+            },
+            if (index == 1) 'warning': 'retain metadata',
+          }),
+        );
+      }
+      await socket.close(1000);
+      await server.closed.future.timeout(_deadline);
+
+      final messages = await session.messages.toList().timeout(_deadline);
+      expect(messages, hasLength(3));
+      expect(messages.first.warning, 'retain metadata');
+      expect(messages.first.serverContent, isNull);
+      final chunks = messages
+          .skip(1)
+          .map((message) => message.serverContent!.audioChunks!.single.data!);
+      expect(chunks.map((bytes) => bytes.first), [2, 3]);
+      expect(chunks.map((bytes) => bytes.length), [data.length, data.length]);
+    },
+  );
+
+  test(
+    'closes with a backlog error when unread controls fill the queue',
+    () async {
+      final server = await _MusicServer.start();
+      final music = _client(GoogleAIConfig(baseUrl: server.baseUrl));
+      final connecting = music.connect(model: _model);
+      await server.setup.future.timeout(_deadline);
+      final socket = await server.socket.future;
+      socket.add('{"setupComplete":{}}');
+      final session = await connecting;
+
+      for (var index = 0; index <= 128; index++) {
+        socket.add(jsonEncode({'warning': 'warning $index'}));
+      }
+      await server.closed.future.timeout(_deadline);
+      expect(session.isConnected, isFalse);
+      await expectLater(
+        session.messages,
+        emitsInOrder([
+          for (var index = 0; index < 128; index++)
+            emits(
+              isA<LiveMusicServerMessage>().having(
+                (message) => message.warning,
+                'warning',
+                'warning $index',
+              ),
+            ),
+          emitsError(
+            isA<LiveSessionException>().having(
+              (error) => error.message,
+              'message',
+              contains('backlog'),
+            ),
+          ),
+          emitsDone,
+        ]),
+      ).timeout(_deadline);
     },
   );
 }

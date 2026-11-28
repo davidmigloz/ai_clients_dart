@@ -880,14 +880,20 @@ try {
 }
 ```
 
-The model streams 44.1 kHz, 16-bit stereo PCM. The client decodes the bytes and
-delivers them as chunks. Buffer and pace playback in your audio player.
+The Lyria RealTime audio specification lists 48 kHz, 16-bit stereo PCM.
+Configure your player from each chunk's `mimeType` when it reports the format
+or sample rate. The client decodes the bytes and delivers them in order.
+Buffer and pace playback in your audio player. The runnable example writes
+headerless PCM and prints the audio formats reported by the service.
 Send `pause()`, `stop()`, and `resetContext()` to control generation. Send the
 complete configuration when updating it and reset the context after changing
 tempo or scale. Canceling the message subscription closes the session.
+Slow listeners can lose unread audio when the queue fills. Queued warnings
+and terminal errors remain available when reading resumes. A full queue of
+control messages ends the stream with an error.
 
 [Runnable PCM example](example/live_music_example.dart) ·
-[Lyria RealTime guide](https://aistudio.google.com/docs/realtime-music-generation) ·
+[Lyria RealTime audio specifications](https://aistudio.google.com/docs/realtime-music-generation#audio-specs) ·
 [Live Music wire reference](https://aistudio.google.com/api-reference/live-music)
 
 </details>

@@ -1,4 +1,10 @@
-import 'dart:async' show Completer, StreamController, StreamSubscription, Timer;
+import 'dart:async'
+    show
+        Completer,
+        StreamController,
+        StreamSubscription,
+        Timer,
+        scheduleMicrotask;
 import 'dart:convert';
 
 import 'package:web_socket/web_socket.dart';
@@ -225,16 +231,24 @@ class LiveMusicClient {
 
   static String _redact(String message, Uri uri) {
     var safe = message.replaceAll(uri.toString(), '[redacted WebSocket URL]');
-    for (final value in uri.queryParametersAll.values.expand(
-      (values) => values,
-    )) {
-      if (value.isEmpty) continue;
-      for (final form in {
-        value,
+    final values =
+        uri.queryParametersAll.values
+            .expand((values) => values)
+            .where((value) => value.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort((first, second) => second.length.compareTo(first.length));
+    for (final value in values) {
+      safe = safe.replaceAll(value, '[redacted]');
+      for (final encoded in {
         Uri.encodeComponent(value),
         Uri.encodeQueryComponent(value),
       }) {
-        safe = safe.replaceAll(form, '[redacted]');
+        if (encoded == value) continue;
+        safe = safe.replaceAll(
+          RegExp(RegExp.escape(encoded), caseSensitive: false),
+          '[redacted]',
+        );
       }
     }
     return safe;

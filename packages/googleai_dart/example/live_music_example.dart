@@ -23,6 +23,7 @@ Future<void> main(List<String> args) async {
       ..play();
 
     final output = io.File(args.single).openWrite();
+    final formats = <String>{};
     var chunks = 0;
     try {
       await for (final message in session.messages.timeout(
@@ -34,6 +35,7 @@ Future<void> main(List<String> args) async {
                 const <LiveMusicAudioChunk>[]) {
           if (chunk.data case final bytes?) {
             output.add(bytes);
+            if (chunk.mimeType case final format?) formats.add(format);
             chunks++;
           }
         }
@@ -42,7 +44,10 @@ Future<void> main(List<String> args) async {
     } finally {
       await output.close();
     }
-    print('Saved $chunks chunks of 44.1 kHz, 16-bit stereo PCM.');
+    print('Saved $chunks audio chunks.');
+    if (formats.isNotEmpty) {
+      print('Reported audio formats ${formats.join(', ')}.');
+    }
   } finally {
     try {
       await music.close();
