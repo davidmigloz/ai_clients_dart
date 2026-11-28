@@ -11,6 +11,7 @@ import '../models/live/config/live_config.dart';
 import '../models/live/config/session_resumption_config.dart';
 import '../models/live/messages/client/client_message.dart';
 import '../models/live/messages/server/server_message.dart';
+import 'diagnostic_redaction.dart';
 import 'live_session.dart';
 import 'websocket_connector.dart' as ws;
 
@@ -50,7 +51,7 @@ class LiveClient {
   };
 
   final GoogleAIConfig _config;
-  final List<LiveSession> _sessions = [];
+  final Set<LiveSession> _sessions = {};
 
   /// Creates a [LiveClient].
   LiveClient({required this._config});
@@ -144,10 +145,20 @@ class LiveClient {
     }
     _log.fine('Connecting to Live API');
 
+    final resumptionHandle = liveConfig?.sessionResumption?.handle;
     final LiveSession session;
     try {
       final socket = await ws.connectWebSocket(uri, headers: headers);
-      session = LiveSession.fromWebSocket(socket);
+      session = LiveSession.attach(
+        socket,
+        onClosed: _sessions.remove,
+        redactDiagnostic: (message, handles) => _safeSocketMessage(
+          message,
+          uri,
+          credentials,
+          resumeHandles: {?resumptionHandle, ...handles},
+        ),
+      );
       _sessions.add(session);
     } on LiveConnectionException catch (error, stackTrace) {
       // Platform connectors supply static, credential-free guidance here.
@@ -161,7 +172,12 @@ class LiveClient {
     } catch (error, stackTrace) {
       final cause = error is WebSocketException
           ? WebSocketException(
-              _safeSocketMessage(error.message, uri, credentials),
+              _safeSocketMessage(
+                error.message,
+                uri,
+                credentials,
+                resumeHandles: {?resumptionHandle},
+              ),
             )
           : null;
       throw LiveConnectionException(
@@ -178,17 +194,17 @@ class LiveClient {
       await _setupSession(session, model, liveConfig);
       _log.fine('Live session established');
       return session;
-    } on LiveSessionSetupException {
-      // Clean up failed session and rethrow setup errors directly
-      await session.close();
-      _sessions.remove(session);
-      rethrow;
-    } on Exception catch (error, stackTrace) {
-      await session.close();
-      _sessions.remove(session);
+    } catch (error, stackTrace) {
+      try {
+        await session.close();
+      } catch (_) {
+        // The original setup failure carries the actionable error.
+      }
+      if (error is LiveSessionSetupException) rethrow;
       throw LiveSessionSetupException(
         message: 'Live session setup failed (${error.runtimeType}).',
         stackTrace: stackTrace,
+        cause: error is GoogleAIException ? error : null,
       );
     }
   }
@@ -207,13 +223,12 @@ class LiveClient {
     LiveConfig? liveConfig,
     String? accessToken,
   }) async {
-    final config =
-        liveConfig?.copyWith(
-          sessionResumption: SessionResumptionConfig.resume(resumptionToken),
-        ) ??
-        LiveConfig(
-          sessionResumption: SessionResumptionConfig.resume(resumptionToken),
-        );
+    final config = (liveConfig ?? const LiveConfig()).copyWith(
+      sessionResumption: SessionResumptionConfig.resume(
+        resumptionToken,
+        transparent: liveConfig?.sessionResumption?.transparent,
+      ),
+    );
 
     try {
       return await connect(
@@ -224,8 +239,13 @@ class LiveClient {
     } on LiveConnectionException catch (e) {
       throw LiveSessionResumptionException(
         message: 'Failed to resume session: ${e.message}',
-        handle: resumptionToken,
         cause: e.cause,
+      );
+    } on LiveSessionSetupException catch (e, stackTrace) {
+      throw LiveSessionResumptionException(
+        message: 'Failed to resume session: ${e.message}',
+        cause: e.cause ?? e,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -325,9 +345,10 @@ class LiveClient {
   static String _safeSocketMessage(
     String message,
     Uri uri,
-    AuthCredentials? credentials,
-  ) {
-    var safe = message.replaceAll(
+    AuthCredentials? credentials, {
+    Set<String> resumeHandles = const {},
+  }) {
+    final safe = message.replaceAll(
       uri.toString(),
       _diagnosticUri(uri).toString(),
     );
@@ -337,20 +358,11 @@ class LiveClient {
       EphemeralTokenCredentials(:final token) => token,
       _ => null,
     };
-    for (final value in {
+    return redactLiveDiagnosticValues(safe, {
       ...uri.queryParametersAll.values.expand((values) => values),
       ?credential,
-    }) {
-      if (value.isEmpty) continue;
-      for (final form in {
-        value,
-        Uri.encodeComponent(value),
-        Uri.encodeQueryComponent(value),
-      }) {
-        safe = safe.replaceAll(form, '[redacted]');
-      }
-    }
-    return safe;
+      ...resumeHandles,
+    });
   }
 
   Future<void> _setupSession(
@@ -359,8 +371,9 @@ class LiveClient {
     LiveConfig? liveConfig,
   ) async {
     // Build model path based on API mode
+    final isVertex = _config.apiMode == ApiMode.vertexAI;
     final String modelPath;
-    if (_config.apiMode == ApiMode.vertexAI) {
+    if (isVertex) {
       // Vertex AI: projects/{project}/locations/{location}/publishers/google/models/{model}
       if (model.startsWith('projects/')) {
         modelPath = model; // Already fully qualified
@@ -382,13 +395,16 @@ class LiveClient {
       modelPath = model.startsWith('models/') ? model : 'models/$model';
     }
 
+    final sessionResumption = liveConfig?.sessionResumption;
     final setup = BidiGenerateContentSetup(
       model: modelPath,
       generationConfig: liveConfig?.generationConfig,
       systemInstruction: liveConfig?.systemInstruction,
       tools: liveConfig?.tools,
       realtimeInputConfig: liveConfig?.realtimeInputConfig,
-      sessionResumption: liveConfig?.sessionResumption,
+      sessionResumption: isVertex || sessionResumption == null
+          ? sessionResumption
+          : SessionResumptionConfig(handle: sessionResumption.handle),
       contextWindowCompression: liveConfig?.contextWindowCompression,
       inputAudioTranscription: liveConfig?.inputAudioTranscription,
       outputAudioTranscription: liveConfig?.outputAudioTranscription,
@@ -398,6 +414,7 @@ class LiveClient {
 
     // Subscribe before sending setup so an immediate response cannot be lost.
     final completer = Completer<void>();
+    completer.future.ignore();
     final subscription = session.messages.listen(
       (message) {
         if (message is BidiGenerateContentSetupComplete) {
@@ -424,11 +441,16 @@ class LiveClient {
 
     try {
       session.send(setup);
+      const defaultTimeout = Duration(seconds: 30);
+      final timeout = _config.timeout < defaultTimeout
+          ? _config.timeout
+          : defaultTimeout;
       await completer.future.timeout(
-        const Duration(seconds: 30),
+        timeout,
         onTimeout: () {
-          throw const LiveSessionSetupException(
-            message: 'Setup timed out after 30 seconds',
+          throw LiveSessionSetupException(
+            message:
+                'Live session setup timed out after ${timeout.inMilliseconds} ms.',
           );
         },
       );
@@ -439,11 +461,7 @@ class LiveClient {
 
   /// Closes all active sessions and cleans up resources.
   Future<void> close() async {
-    for (final session in _sessions) {
-      if (session.isConnected) {
-        await session.close();
-      }
-    }
-    _sessions.clear();
+    final active = _sessions.toList(growable: false);
+    await Future.wait(active.map((session) => session.close()));
   }
 }

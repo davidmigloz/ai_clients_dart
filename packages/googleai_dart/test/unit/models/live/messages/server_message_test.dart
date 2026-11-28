@@ -11,6 +11,10 @@ void main() {
           {'modality': 'AUDIO', 'tokenCount': 3},
         ],
       };
+      const activity = {
+        'type': 'ACTIVITY_START',
+        'audioOffset': '0.001000001s',
+      };
       const cases = [
         (
           {
@@ -53,13 +57,22 @@ void main() {
         ({'futureKey': <String, dynamic>{}}, UnknownServerMessage),
       ];
       for (final (payload, type) in cases) {
-        final json = <String, dynamic>{...payload, 'usageMetadata': usage};
+        final json = <String, dynamic>{
+          ...payload,
+          'usageMetadata': usage,
+          'voiceActivity': activity,
+        };
         final message = BidiGenerateContentServerMessage.fromJson(json);
         expect(message.runtimeType, type);
         final parsedUsage = message.responseUsageMetadata;
         expect(parsedUsage?.counts.promptTokenCount, 11);
         expect(parsedUsage?.responseTokenCount, 3);
         expect(parsedUsage?.responseTokensDetails?.single.modality, 'AUDIO');
+        expect(
+          message.voiceActivity?.type,
+          LiveVoiceActivityType.activityStart,
+        );
+        expect(message.voiceActivity?.audioOffset, '0.001000001s');
         expect(message.toJson(), json);
       }
     });
@@ -225,6 +238,23 @@ void main() {
         expect(unknown.toString(), contains('UnknownServerMessage'));
         expect(unknown.toString(), contains('futureMessageType'));
       });
+    });
+  });
+
+  test('preserves a standalone voice activity and unknown future type', () {
+    const wire = {
+      'voiceActivity': {
+        'type': 'FUTURE_ACTIVITY',
+        'audioOffset': '12.700s',
+        'futureConfidence': 0.75,
+      },
+    };
+    final message = BidiGenerateContentServerMessage.fromJson(wire);
+    expect(message, isA<UnknownServerMessage>());
+    expect(message.voiceActivity?.type?.value, 'FUTURE_ACTIVITY');
+    expect(message.toJson(), wire);
+    expect(message.voiceActivity?.copyWith(type: null).toJson(), {
+      'audioOffset': '12.700s',
     });
   });
 
@@ -637,6 +667,28 @@ void main() {
   });
 
   group('SessionResumptionUpdate', () {
+    test('preserves a large int64 cursor without JS precision loss', () {
+      const cursor = '9007199254740993';
+      const wire = {
+        'sessionResumptionUpdate': {'lastConsumedClientMessageIndex': cursor},
+      };
+      final message =
+          BidiGenerateContentServerMessage.fromJson(wire)
+              as SessionResumptionUpdate;
+      expect(message.lastConsumedClientMessageIndex, cursor);
+      expect(message.toJson(), wire);
+    });
+
+    test('normalizes a legacy integer acknowledgment to protobuf JSON', () {
+      final message = SessionResumptionUpdate.fromJson({
+        'lastConsumedClientMessageIndex': 12,
+      });
+      expect(message.lastConsumedClientMessageIndex, '12');
+      expect(message.toJson(), {
+        'sessionResumptionUpdate': {'lastConsumedClientMessageIndex': '12'},
+      });
+    });
+
     test('serializes with sessionResumptionUpdate wrapper key', () {
       const update = SessionResumptionUpdate(
         newHandle: 'token-xyz',

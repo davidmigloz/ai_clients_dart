@@ -1,6 +1,8 @@
 import 'dart:async' show StreamController, StreamSubscription, unawaited;
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:web_socket/web_socket.dart';
 
 import '../errors/exceptions.dart';
@@ -8,6 +10,7 @@ import '../models/content/content.dart';
 import '../models/live/messages/client/client_message.dart';
 import '../models/live/messages/server/server_message.dart';
 import '../models/tools/function_response.dart';
+import 'diagnostic_redaction.dart';
 
 /// A live streaming session with the Gemini Live API.
 ///
@@ -40,8 +43,11 @@ import '../models/tools/function_response.dart';
 class LiveSession {
   final WebSocket _socket;
   final StreamController<BidiGenerateContentServerMessage> _messageController;
+  final String Function(String, Set<String>)? _redactDiagnostic;
+  void Function(LiveSession)? _onClosed;
   StreamSubscription<WebSocketEvent>? _subscription;
   bool _isConnected = true;
+  SessionResumptionUpdate? _lastResumableUpdate;
 
   /// Session ID returned by the server after setup.
   String? sessionId;
@@ -52,14 +58,26 @@ class LiveSession {
   /// Whether the session can be resumed.
   bool? resumable;
 
-  LiveSession._({required this._socket})
+  /// The most recent resumable checkpoint, if the server sent one.
+  ///
+  /// It may describe an earlier state while [resumable] is false. Reusing
+  /// that older handle can lose messages sent after its acknowledged index.
+  SessionResumptionUpdate? get lastResumableUpdate => _lastResumableUpdate;
+
+  LiveSession._(this._socket, this._onClosed, this._redactDiagnostic)
     : _messageController = StreamController.broadcast();
 
   /// Creates a new [LiveSession] from an established WebSocket connection.
-  factory LiveSession.fromWebSocket(WebSocket socket) {
-    final session = LiveSession._(socket: socket).._startListening();
-    return session;
-  }
+  factory LiveSession.fromWebSocket(WebSocket socket) =>
+      LiveSession.attach(socket);
+
+  /// Attaches a socket whose lifetime is tracked by `LiveClient`.
+  @internal
+  factory LiveSession.attach(
+    WebSocket socket, {
+    void Function(LiveSession)? onClosed,
+    String Function(String, Set<String>)? redactDiagnostic,
+  }) => LiveSession._(socket, onClosed, redactDiagnostic).._startListening();
 
   void _startListening() {
     _subscription = _socket.events.listen(
@@ -72,43 +90,53 @@ class LiveSession {
   void _handleEvent(WebSocketEvent event) {
     switch (event) {
       case TextDataReceived(:final text):
-        _parseAndEmitMessage(text);
+        _parseAndEmitMessage(text: text);
       case BinaryDataReceived(:final data):
-        // The Live API returns messages as binary WebSocket frames
-        // containing UTF-8 encoded JSON
-        final text = utf8.decode(data);
-        _parseAndEmitMessage(text);
+        _parseAndEmitMessage(bytes: data);
       case CloseReceived(:final code, :final reason):
-        _isConnected = false;
         if (!_messageController.isClosed) {
+          final handles = {?resumptionToken, ?_lastResumableUpdate?.newHandle};
           _messageController.addError(
-            LiveSessionClosedException(code: code, reason: reason),
+            LiveSessionClosedException(
+              code: code,
+              reason:
+                  _redactDiagnostic?.call(reason, handles) ??
+                  redactLiveDiagnosticValues(reason, handles),
+            ),
           );
-          unawaited(_messageController.close());
         }
+        _handleDone();
     }
   }
 
-  void _parseAndEmitMessage(String text) {
+  void _parseAndEmitMessage({String? text, Uint8List? bytes}) {
+    if (_messageController.isClosed) return;
     try {
-      final json = jsonDecode(text) as Map<String, dynamic>;
+      final json =
+          jsonDecode(text ?? utf8.decode(bytes!)) as Map<String, dynamic>;
       final message = BidiGenerateContentServerMessage.fromJson(json);
 
       // Track session state
       switch (message) {
         case BidiGenerateContentSetupComplete(:final sessionId):
           this.sessionId = sessionId;
-        case SessionResumptionUpdate(:final newHandle, :final resumable):
+        case final SessionResumptionUpdate update:
+          final newHandle = update.newHandle;
           resumptionToken = newHandle;
-          this.resumable = resumable;
+          resumable = update.resumable;
+          if (newHandle != null && newHandle.isNotEmpty && resumable != false) {
+            _lastResumableUpdate = update;
+          }
         default:
           break;
       }
 
       _messageController.add(message);
-    } on FormatException catch (e) {
+    } on FormatException {
       _messageController.addError(
-        LiveSessionException(message: 'Failed to parse message: $e'),
+        const LiveSessionException(
+          message: 'Failed to parse a Live server message.',
+        ),
       );
     } on TypeError {
       _messageController.addError(
@@ -123,8 +151,7 @@ class LiveSession {
     if (!_messageController.isClosed) {
       _messageController.addError(
         LiveSessionException(
-          message: 'WebSocket error: $error',
-          cause: error is Exception ? error : null,
+          message: 'Live WebSocket transport failed (${error.runtimeType}).',
         ),
       );
     }
@@ -132,6 +159,9 @@ class LiveSession {
 
   void _handleDone() {
     _isConnected = false;
+    final onClosed = _onClosed;
+    _onClosed = null;
+    onClosed?.call(this);
     if (!_messageController.isClosed) {
       unawaited(_messageController.close());
     }
@@ -220,26 +250,25 @@ class LiveSession {
   /// If session resumption is enabled, save the [resumptionToken] before
   /// closing to resume the session later.
   ///
+  /// A paused message subscription receives its done event when resumed.
+  ///
   /// This is idempotent and safe to call when the connection has already been
   /// closed (for example, when the server closed it first, or when [close] is
   /// called more than once).
   Future<void> close([int? code, String? reason]) async {
     _isConnected = false;
-    await _subscription?.cancel();
     try {
-      await _socket.close(code, reason);
-    } on WebSocketConnectionClosed {
-      // The underlying connection is already closed (the server closed it
-      // first, or close() was called more than once). Per the web_socket
-      // package contract, close() throws in that case; closing is idempotent
-      // here, so ignore it. Any other error (e.g. an invalid close code or a
-      // transport failure) propagates after the finally block runs.
-    } finally {
-      // Always tear down the message controller — even if close() throws an
-      // unexpected error — so listeners are never left hanging.
-      if (!_messageController.isClosed) {
-        await _messageController.close();
+      try {
+        await _subscription?.cancel();
+      } finally {
+        try {
+          await _socket.close(code, reason);
+        } on WebSocketConnectionClosed {
+          // A peer close or another caller may have closed the socket first.
+        }
       }
+    } finally {
+      _handleDone();
     }
   }
 }

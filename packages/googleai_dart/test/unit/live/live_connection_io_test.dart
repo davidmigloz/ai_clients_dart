@@ -38,9 +38,16 @@ class _Handshake {
 class _Server {
   final HttpServer http;
   final handshake = Completer<_Handshake>();
+  final peerSocket = Completer<WebSocket>();
+  final peerClosed = Completer<void>();
   int upgrades = 0;
 
-  _Server(this.http, {required bool reject, this.onRealtimeInput}) {
+  _Server(
+    this.http, {
+    required bool reject,
+    required Object? setupReply,
+    this.onRealtimeInput,
+  }) {
     http.listen((request) async {
       if (reject) {
         request.response.statusCode = HttpStatus.unauthorized;
@@ -52,6 +59,7 @@ class _Server {
       final authorization = request.headers.value('authorization');
       final apiKeyHeader = request.headers.value('x-goog-api-key');
       final socket = await WebSocketTransformer.upgrade(request);
+      peerSocket.complete(socket);
       socket.listen((data) {
         final frame = jsonDecode(data as String) as Map<String, dynamic>;
         if (handshake.isCompleted) {
@@ -67,8 +75,12 @@ class _Server {
             firstMessage: frame,
           ),
         );
-        socket.add(utf8.encode('{"setupComplete":{"sessionId":"loopback"}}'));
-      });
+        if (setupReply != null) {
+          socket.add(
+            setupReply is String ? utf8.encode(setupReply) : setupReply,
+          );
+        }
+      }, onDone: peerClosed.complete);
     });
   }
 
@@ -78,11 +90,13 @@ class _Server {
 
   static Future<_Server> start({
     bool reject = false,
+    Object? setupReply = '{"setupComplete":{"sessionId":"loopback"}}',
     void Function(WebSocket, Map<String, dynamic>)? onRealtimeInput,
   }) async {
     final server = _Server(
       await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
       reject: reject,
+      setupReply: setupReply,
       onRealtimeInput: onRealtimeInput,
     );
     addTearDown(() => server.http.close(force: true));
@@ -105,6 +119,342 @@ const _model = 'gemini-3.8-live';
 const _deadline = Duration(seconds: 4);
 
 void main() {
+  test('parses resumption and voice activity after malformed UTF-8', () async {
+    const checkpoint = '9007199254740993';
+    final server = await _Server.start(
+      onRealtimeInput: (socket, _) {
+        socket
+          ..add([0xff, 0xfe])
+          ..add(
+            jsonEncode({
+              'voiceActivity': {
+                'type': 'ACTIVITY_START',
+                'audioOffset': '1.250s',
+              },
+              'serverContent': {'waitingForInput': false},
+            }),
+          )
+          ..add(
+            jsonEncode({
+              'voiceActivity': {
+                'type': 'ACTIVITY_END',
+                'audioOffset': '1.820s',
+              },
+            }),
+          )
+          ..add(
+            jsonEncode({
+              'sessionResumptionUpdate': {
+                'newHandle': 'checkpoint-handle',
+                'resumable': true,
+                'lastConsumedClientMessageIndex': checkpoint,
+              },
+            }),
+          )
+          ..add(
+            '{"sessionResumptionUpdate":{"newHandle":"","resumable":false}}',
+          );
+      },
+    );
+    final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+    final session = await live.connect(model: _model).timeout(_deadline);
+    final messages = <BidiGenerateContentServerMessage>[];
+    final errors = <Object>[];
+    final received = Completer<void>();
+    final subscription = session.messages.listen((message) {
+      messages.add(message);
+      if (messages.length == 4) received.complete();
+    }, onError: errors.add);
+    addTearDown(subscription.cancel);
+    session.sendText('Start a fixture.');
+    await received.future.timeout(_deadline);
+    expect(errors, [isA<LiveSessionException>()]);
+    expect(messages[0], isA<BidiGenerateContentServerContent>());
+    expect(
+      messages[0].voiceActivity?.type,
+      LiveVoiceActivityType.activityStart,
+    );
+    expect(messages[0].voiceActivity?.audioOffset, '1.250s');
+    expect(messages[1], isA<UnknownServerMessage>());
+    expect(messages[1].voiceActivity?.type, LiveVoiceActivityType.activityEnd);
+    expect(
+      (messages[2] as SessionResumptionUpdate).lastConsumedClientMessageIndex,
+      checkpoint,
+    );
+    expect(session.resumptionToken, isEmpty);
+    expect(session.resumable, isFalse);
+    expect(session.lastResumableUpdate?.newHandle, 'checkpoint-handle');
+    expect(
+      session.lastResumableUpdate?.lastConsumedClientMessageIndex,
+      checkpoint,
+    );
+
+    subscription.pause();
+    await live.close().timeout(_deadline);
+    await server.peerClosed.future.timeout(_deadline);
+    expect(session.isConnected, isFalse);
+    subscription.resume();
+  });
+
+  test('Vertex resume preserves transparent resumption setup', () async {
+    final server = await _Server.start();
+    final config = GoogleAIConfig.vertexAI(
+      projectId: 'P',
+      location: 'eu',
+      authProvider: const BearerTokenProvider('local-fixture'),
+    ).copyWith(baseUrl: server.baseUrl);
+    await _createLive(config)
+        .resume(
+          model: _model,
+          resumptionToken: 'previous-checkpoint',
+          liveConfig: const LiveConfig(
+            sessionResumption: SessionResumptionConfig.enabled(
+              transparent: true,
+            ),
+          ),
+        )
+        .timeout(_deadline);
+    expect((await server.handshake.future).firstMessage, {
+      'setup': {
+        'model': 'projects/P/locations/eu/publishers/google/models/$_model',
+        'sessionResumption': {
+          'handle': 'previous-checkpoint',
+          'transparent': true,
+        },
+      },
+    });
+  });
+
+  test(
+    'Developer connect and resume leave transparent mode out of setup',
+    () async {
+      for (final resume in [false, true]) {
+        final server = await _Server.start();
+        final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+        const config = LiveConfig(
+          sessionResumption: SessionResumptionConfig(
+            handle: 'original-handle',
+            transparent: false,
+          ),
+        );
+        if (resume) {
+          await live
+              .resume(
+                model: _model,
+                resumptionToken: 'updated-handle',
+                liveConfig: config,
+              )
+              .timeout(_deadline);
+        } else {
+          await live
+              .connect(model: _model, liveConfig: config)
+              .timeout(_deadline);
+        }
+        expect((await server.handshake.future).firstMessage, {
+          'setup': {
+            'model': 'models/$_model',
+            'sessionResumption': {
+              'handle': resume ? 'updated-handle' : 'original-handle',
+            },
+          },
+        });
+        expect(config.sessionResumption?.toJson(), {
+          'handle': 'original-handle',
+          'transparent': false,
+        });
+      }
+    },
+  );
+
+  test(
+    'resume surfaces a typed setup rejection without exposing its handle',
+    () async {
+      const handle = 'resume+opaque/fixture';
+      const encodedHandle = 'resume%2bopaque%2ffixture';
+      final server = await _Server.start(setupReply: null);
+      final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+      final failed = expectLater(
+        live.resume(model: _model, resumptionToken: handle).timeout(_deadline),
+        throwsA(
+          isA<LiveSessionResumptionException>()
+              .having((error) => error.handle, 'handle', isNull)
+              .having(
+                (error) => error.cause,
+                'underlying rejection',
+                isA<LiveSessionClosedException>()
+                    .having((error) => error.code, 'close code', 1008)
+                    .having(
+                      (error) => error.reason,
+                      'close reason',
+                      'Invalid handle [redacted] ([redacted])',
+                    ),
+              ),
+        ),
+      );
+      expect((await server.handshake.future.timeout(_deadline)).firstMessage, {
+        'setup': {
+          'model': 'models/$_model',
+          'sessionResumption': {'handle': handle},
+        },
+      });
+      final socket = await server.peerSocket.future;
+      unawaited(socket.close(1008, 'Invalid handle $handle ($encodedHandle)'));
+      await failed;
+      await server.peerClosed.future.timeout(_deadline);
+    },
+  );
+
+  test(
+    'close diagnostics redact current and retained Live checkpoints',
+    () async {
+      const retained = 'retain+old/x';
+      const current = 'current+new/y';
+      final server = await _Server.start();
+      final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+      final session = await live.connect(model: _model).timeout(_deadline);
+      final checkpointSeen = Completer<void>();
+      final closed = Completer<LiveSessionClosedException>();
+      final subscription = session.messages.listen(
+        (message) {
+          if (message case SessionResumptionUpdate(newHandle: current)) {
+            checkpointSeen.complete();
+          }
+        },
+        onError: (Object error) =>
+            closed.complete(error as LiveSessionClosedException),
+      );
+      addTearDown(subscription.cancel);
+      final socket = await server.peerSocket.future;
+      socket
+        ..add(
+          jsonEncode({
+            'sessionResumptionUpdate': {
+              'newHandle': retained,
+              'resumable': true,
+            },
+          }),
+        )
+        ..add(
+          jsonEncode({
+            'sessionResumptionUpdate': {
+              'newHandle': current,
+              'resumable': false,
+            },
+          }),
+        );
+      await checkpointSeen.future.timeout(_deadline);
+      expect(session.resumptionToken, current);
+      expect(session.lastResumableUpdate?.newHandle, retained);
+      unawaited(
+        socket.close(
+          1008,
+          'Rejected $retained (retain%2bold%2fx) and $current (current%2bnew%2fy)',
+        ),
+      );
+      final error = await closed.future.timeout(_deadline);
+      expect(error.code, 1008);
+      expect(
+        error.reason,
+        'Rejected [redacted] ([redacted]) and [redacted] ([redacted])',
+      );
+    },
+  );
+
+  test('closes the socket after a malformed binary setup reply', () async {
+    final server = await _Server.start(setupReply: [0xff, 0xfe]);
+    final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+    await expectLater(
+      live.connect(model: _model).timeout(_deadline),
+      throwsA(
+        isA<LiveSessionSetupException>().having(
+          (error) => error.cause,
+          'parse failure',
+          isA<LiveSessionException>(),
+        ),
+      ),
+    );
+    await server.peerClosed.future.timeout(_deadline);
+  });
+
+  test('closes the socket if encoding a setup message throws', () async {
+    final server = await _Server.start();
+    final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+    const liveConfig = LiveConfig(
+      systemInstruction: Content(
+        parts: [
+          FunctionCallPart(
+            FunctionCall(name: 'fixture', args: {'badValue': Object()}),
+          ),
+        ],
+      ),
+    );
+    await expectLater(
+      live.connect(model: _model, liveConfig: liveConfig).timeout(_deadline),
+      throwsA(isA<LiveSessionSetupException>()),
+    );
+    await server.peerClosed.future.timeout(_deadline);
+    expect(server.handshake.isCompleted, isFalse);
+  });
+
+  test(
+    'uses a shorter configured setup deadline and closes the socket',
+    () async {
+      final server = await _Server.start(setupReply: null);
+      final live = _createLive(
+        GoogleAIConfig(
+          baseUrl: server.baseUrl,
+          timeout: const Duration(milliseconds: 100),
+        ),
+      );
+      final failed = expectLater(
+        live.connect(model: _model).timeout(_deadline),
+        throwsA(
+          isA<LiveSessionSetupException>().having(
+            (error) => error.message,
+            'message',
+            contains('timed out'),
+          ),
+        ),
+      );
+      await server.handshake.future.timeout(_deadline);
+      await failed;
+      await server.peerClosed.future.timeout(_deadline);
+    },
+  );
+
+  test('redacts encoded credentials in remote close reasons', () async {
+    const opaqueKey = 'loopback+close/fixture';
+    const encodedKey = 'loopback%2bclose%2ffixture';
+    final server = await _Server.start(
+      onRealtimeInput: (socket, _) {
+        unawaited(socket.close(1008, 'Forbidden ?key=$encodedKey'));
+      },
+    );
+    final live = _createLive(
+      GoogleAIConfig(
+        baseUrl: server.baseUrl,
+        authProvider: const ApiKeyProvider(opaqueKey),
+        defaultQueryParams: const {'tenant': 'loopback'},
+      ),
+    );
+    final session = await live.connect(model: _model).timeout(_deadline);
+    final failed = expectLater(
+      session.messages.first.timeout(_deadline),
+      throwsA(
+        isA<LiveSessionClosedException>()
+            .having((error) => error.code, 'close code', 1008)
+            .having(
+              (error) => error.reason,
+              'close reason',
+              'Forbidden ?key=[redacted]',
+            ),
+      ),
+    );
+    session.sendText('Trigger a local close.');
+    await failed;
+    expect(session.isConnected, isFalse);
+  });
+
   test(
     'Live session delivers top-level usage with and without content',
     () async {
