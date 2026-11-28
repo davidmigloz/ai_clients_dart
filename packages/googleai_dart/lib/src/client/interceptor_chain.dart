@@ -39,6 +39,8 @@ class InterceptorChain {
   ///
   /// [diagnosticRedactor] applies additional redaction to this operation.
   /// [skipResponseBodyDiagnostics] omits the response body from logging.
+  /// [statusOnlyResponseDiagnostics] omits response headers, bodies, and
+  /// error details while keeping the HTTP status and timing.
   ///
   /// Set [skipAuthentication] when the operation already supplied credentials.
   /// Returns the HTTP response after all interceptors have processed it.
@@ -49,6 +51,7 @@ class InterceptorChain {
     Redactor? diagnosticRedactor,
     bool skipAuthentication = false,
     bool skipResponseBodyDiagnostics = false,
+    bool statusOnlyResponseDiagnostics = false,
   }) {
     ensureNotClosed?.call();
 
@@ -59,6 +62,7 @@ class InterceptorChain {
       diagnosticRedactor: diagnosticRedactor,
       skipAuthentication: skipAuthentication,
       skipResponseBodyDiagnostics: skipResponseBodyDiagnostics,
+      statusOnlyResponseDiagnostics: statusOnlyResponseDiagnostics,
     );
 
     return _buildChain(0, checkActive)(context);

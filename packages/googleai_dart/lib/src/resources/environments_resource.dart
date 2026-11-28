@@ -105,7 +105,8 @@ class EnvironmentsResource extends ResourceBase {
   /// Creates a new [Environment].
   ///
   /// Returns the server-assigned [Environment.id]. Self-hosted creation also
-  /// returns a one-time [Environment.environmentKey].
+  /// returns a one-time [Environment.environmentKey]. Response diagnostics
+  /// contain the HTTP status and timing to keep that key private.
   /// The new configuration options require the Gemini Developer API
   /// with [ApiVersion.v1beta].
   Future<Environment> create({
@@ -123,14 +124,21 @@ class EnvironmentsResource extends ResourceBase {
     final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
     final httpRequest = http.Request('POST', url)
+      ..followRedirects = false
       ..headers.addAll(headers)
       ..body = jsonEncode(environment.toJson());
 
     final response = await interceptorChain.execute(
       httpRequest,
       diagnosticRedactor: _environmentDiagnostics,
-      skipResponseBodyDiagnostics: true,
+      statusOnlyResponseDiagnostics: true,
     );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Environment creation failed.',
+      );
+    }
     return _decodeEnvironmentResponse(response, Environment.fromJson);
   }
 

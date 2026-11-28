@@ -77,6 +77,7 @@ class LoggingInterceptor implements Interceptor {
         stopwatch.elapsedMilliseconds,
         context.diagnosticRedactor,
         skipResponseBody: context.skipResponseBodyDiagnostics,
+        statusOnly: context.statusOnlyResponseDiagnostics,
       );
 
       return response;
@@ -151,14 +152,17 @@ class LoggingInterceptor implements Interceptor {
     int durationMs,
     Redactor? scopedRedactor, {
     required bool skipResponseBody,
+    required bool statusOnly,
   }) {
     if (logger.level <= Level.INFO) {
+      logger.info(
+        'RESPONSE [$requestId] ${response.statusCode} (${durationMs}ms)',
+      );
+      if (statusOnly) return;
       final headers = redactor.redactMap(
         scopedRedactor?.redactMap(response.headers) ?? response.headers,
       );
-      logger
-        ..info('RESPONSE [$requestId] ${response.statusCode} (${durationMs}ms)')
-        ..fine('Headers: $headers');
+      logger.fine('Headers: $headers');
 
       if (!skipResponseBody && logger.level <= Level.FINE) {
         final text = readDiagnosticBody(response);

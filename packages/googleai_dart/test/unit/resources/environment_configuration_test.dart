@@ -30,10 +30,14 @@ GoogleAIClient _client(
   return client;
 }
 
-http.Response _jsonResponse(Object body) => http.Response(
+http.Response _jsonResponse(
+  Object body, {
+  int status = 200,
+  Map<String, String> headers = const {},
+}) => http.Response(
   jsonEncode(body),
-  200,
-  headers: const {'content-type': 'application/json'},
+  status,
+  headers: {'content-type': 'application/json', ...headers},
 );
 
 void main() {
@@ -102,13 +106,15 @@ void main() {
             'custom_config': customConfig,
             'system_instruction': 'Summarize reports in plain language.',
           });
-          return _jsonResponse({
-            ...metadata,
-            'status': 'active',
-            'environment_key': _environmentKey,
-            // A successful create does not log the body even if a proxy echoes it.
-            'unstructured_note': 'Provider diagnostic $_environmentKey',
-          });
+          return _jsonResponse(
+            {
+              ...metadata,
+              'status': 'active',
+              'environment_key': _environmentKey,
+              'unstructured_note': 'Provider diagnostic $_environmentKey',
+            },
+            headers: const {'x-provider-echo': _environmentKey},
+          );
         }
         expect(request.method, 'GET');
         final fixture = {...metadata, 'environment_key': _environmentKey};
@@ -292,4 +298,63 @@ void main() {
       );
     },
   );
+
+  test('omits provider-controlled diagnostics from creation errors', () async {
+    final previousLevel = Logger.root.level;
+    Logger.root.level = Level.FINE;
+    addTearDown(() => Logger.root.level = previousLevel);
+    final logs = <LogRecord>[];
+    final listener = Logger.root.onRecord.listen(logs.add);
+    addTearDown(listener.cancel);
+
+    final escaped = jsonEncode({
+      'environment_key': _environmentKey,
+    }).replaceAll('"', r'\"');
+    final client = _client(
+      (_) async => _jsonResponse(
+        {
+          'error': {
+            'message': 'Rejected $escaped',
+            'details': [
+              {
+                'environment_key': _environmentKey,
+                'echo': 'Provider echoed $_environmentKey',
+              },
+            ],
+          },
+        },
+        status: 400,
+        headers: const {'x-provider-echo': _environmentKey},
+      ),
+    );
+
+    await expectLater(
+      client.environments.create(
+        environment: const CreateEnvironmentRequest(
+          mode: EnvironmentMode.selfHosted,
+        ),
+      ),
+      throwsA(
+        isA<ApiException>()
+            .having((error) => error.statusCode, 'status', 400)
+            .having((error) => error.message, 'message', 'HTTP 400 error')
+            .having((error) => error.details, 'details', isEmpty)
+            .having(
+              (error) => error.responseMetadata?.headers,
+              'response headers',
+              isEmpty,
+            )
+            .having(
+              (error) => error.responseMetadata?.bodyExcerpt,
+              'body excerpt',
+              isEmpty,
+            ),
+      ),
+    );
+    expect(logs.any((log) => log.error is ApiException), isTrue);
+    expect(
+      logs.map((log) => '${log.message} ${log.error}'),
+      everyElement(isNot(contains(_environmentKey))),
+    );
+  });
 }

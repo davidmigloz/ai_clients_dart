@@ -35,6 +35,9 @@ class RequestContext {
   /// Whether to omit the response body from diagnostic logs.
   final bool skipResponseBodyDiagnostics;
 
+  /// Whether to use only status and timing from the response in diagnostics.
+  final bool statusOnlyResponseDiagnostics;
+
   /// Creates a [RequestContext].
   const RequestContext({
     required this.request,
@@ -44,6 +47,7 @@ class RequestContext {
     this.diagnosticRedactor,
     this.skipAuthentication = false,
     this.skipResponseBodyDiagnostics = false,
+    this.statusOnlyResponseDiagnostics = false,
   });
 
   /// Creates a copy with updated values.
@@ -61,6 +65,7 @@ class RequestContext {
       diagnosticRedactor: diagnosticRedactor,
       skipAuthentication: skipAuthentication,
       skipResponseBodyDiagnostics: skipResponseBodyDiagnostics,
+      statusOnlyResponseDiagnostics: statusOnlyResponseDiagnostics,
     );
   }
 }
