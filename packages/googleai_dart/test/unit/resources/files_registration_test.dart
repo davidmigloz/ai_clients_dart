@@ -176,6 +176,47 @@ void main() {
     },
   );
 
+  test('invalid UTF-8 remains safe with FINE response diagnostics', () async {
+    const token = 'fixture-secret-in-bytes';
+    final previous = Logger.root.level;
+    Logger.root.level = Level.FINE;
+    addTearDown(() => Logger.root.level = previous);
+    final logs = <LogRecord>[];
+    final listener = Logger.root.onRecord.listen(logs.add);
+    addTearDown(listener.cancel);
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(),
+      httpClient: MockClient(
+        (_) async => http.Response.bytes(
+          [...utf8.encode('<html>$token</html>'), 0xff],
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        ),
+      ),
+    );
+    addTearDown(client.close);
+    await expectLater(
+      client.files.register(
+        uris: ['gs://bucket/path'],
+        authProvider: const BearerTokenProvider(token),
+      ),
+      throwsA(
+        isA<FormatException>()
+            .having((error) => error.source, 'source', isNull)
+            .having(
+              (error) => error.toString(),
+              'rendering',
+              isNot(contains(token)),
+            ),
+      ),
+    );
+    expect(logs.any((log) => log.message.startsWith('Body:')), isTrue);
+    for (final log in logs) {
+      expect('${log.message} ${log.error}', isNot(contains(token)));
+      expect(log.error, isNot(isA<FormatException>()));
+    }
+  });
+
   test(
     'validates the backend, version, object URI, and OAuth before dispatch',
     () async {

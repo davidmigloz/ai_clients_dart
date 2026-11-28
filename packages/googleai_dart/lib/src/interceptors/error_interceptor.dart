@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
+import '../utils/diagnostic_body.dart';
 import '../utils/redactor.dart';
 import '../utils/request_id.dart';
 import 'interceptor.dart';
@@ -50,7 +51,7 @@ class ErrorInterceptor implements Interceptor {
     Duration latency,
   ) {
     final statusCode = response.statusCode;
-    final body = response.body;
+    final body = readDiagnosticBody(response);
     final scopedRedactor = context.diagnosticRedactor;
 
     // Try to parse error details from response body
