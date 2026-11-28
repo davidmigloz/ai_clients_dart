@@ -6,6 +6,7 @@ import '../models/batch/embed_content_batch.dart';
 import '../models/batch/generate_content_batch.dart';
 import '../models/batch/list_batches_response.dart';
 import 'base_resource.dart';
+import 'generate_content_validation.dart';
 
 /// Resource for the Batches API.
 ///
@@ -111,6 +112,7 @@ class BatchesResource extends ResourceBase {
     required GenerateContentBatch batch,
     String? updateMask,
   }) async {
+    validateBatchFunctionArguments(batch);
     final queryParams = <String, String>{'updateMask': ?updateMask};
 
     final url = requestBuilder.buildUrl(

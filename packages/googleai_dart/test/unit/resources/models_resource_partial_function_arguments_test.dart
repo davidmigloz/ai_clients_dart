@@ -46,7 +46,95 @@ GoogleAIConfig _vertex(ApiVersion version) => GoogleAIConfig.vertexAI(
   authProvider: const BearerTokenProvider('fixture'),
 ).copyWith(apiVersion: version);
 
+GenerateContentBatch _inlineBatch(GenerateContentRequest request) =>
+    GenerateContentBatch(
+      inputConfig: InputConfig(
+        requests: InlinedRequests(requests: [InlinedRequest(request: request)]),
+      ),
+    );
+
 void main() {
+  test(
+    'other typed generation routes reject the option without changing older calls',
+    () async {
+      final paths = <String>[];
+      final client = GoogleAIClient(
+        config: const GoogleAIConfig(),
+        httpClient: MockClient((request) async {
+          final body = jsonDecode(request.body);
+          expect(
+            jsonEncode(body),
+            isNot(contains('streamFunctionCallArguments')),
+          );
+          paths.add(request.url.path);
+          if (request.url.path.endsWith(':streamGenerateContent')) {
+            return http.Response(
+              'data: {"candidates": []}\n\n',
+              200,
+              headers: {'content-type': 'text/event-stream'},
+            );
+          }
+          return http.Response(
+            request.url.path.endsWith(':countTokens')
+                ? '{"totalTokens": 1}'
+                : '{}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      addTearDown(client.close);
+
+      final routes = <String, Future<Object?> Function(GenerateContentRequest)>{
+        '/v1beta/dynamic/fixture:generateContent': (request) => client.models
+            .dynamicGenerateContent(dynamicId: 'fixture', request: request),
+        '/v1beta/dynamic/fixture:streamGenerateContent': (request) => client
+            .models
+            .dynamicStreamGenerateContent(
+              dynamicId: 'fixture',
+              request: request,
+            )
+            .toList(),
+        '/v1beta/models/fixture:batchGenerateContent': (request) =>
+            client.models.batchGenerateContent(
+              model: 'fixture',
+              batch: _inlineBatch(request),
+            ),
+        '/v1beta/models/fixture:countTokens': (request) =>
+            client.models.countTokens(
+              model: 'fixture',
+              request: CountTokensRequest(generateContentRequest: request),
+            ),
+        '/v1beta/tunedModels/fixture:generateContent': (request) => client
+            .tunedModels
+            .generateContent(tunedModel: 'fixture', request: request),
+        '/v1beta/tunedModels/fixture:streamGenerateContent': (request) => client
+            .tunedModels
+            .streamGenerateContent(tunedModel: 'fixture', request: request)
+            .toList(),
+        '/v1beta/tunedModels/fixture:batchGenerateContent': (request) =>
+            client.tunedModels.batchGenerateContent(
+              tunedModel: 'fixture',
+              batch: _inlineBatch(request),
+            ),
+        '/v1beta/batches/fixture:updateGenerateContentBatch': (request) =>
+            client.batches.updateGenerateContentBatch(
+              name: 'batches/fixture',
+              batch: _inlineBatch(request),
+            ),
+      };
+      for (final send in routes.values) {
+        await expectLater(send(_request), throwsUnsupportedError);
+      }
+      expect(paths, isEmpty);
+      final legacy = _request.copyWith(toolConfig: null);
+      for (final send in routes.values) {
+        await send(legacy);
+      }
+      expect(paths, routes.keys.toList());
+    },
+  );
+
   for (final version in [ApiVersion.v1, ApiVersion.v1beta1]) {
     test(
       'streams partial function arguments on Vertex ${version.value}',

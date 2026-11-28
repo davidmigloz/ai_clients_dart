@@ -37,6 +37,7 @@ import '../models/safety/safety_rating.dart';
 import '../utils/redactor.dart';
 import 'base_resource.dart';
 import 'continuation_abort.dart';
+import 'generate_content_validation.dart';
 import 'operations_resource.dart';
 import 'streaming_resource.dart';
 
@@ -205,16 +206,10 @@ class ModelsResource extends ResourceBase with StreamingResource {
         toolConfig?['functionCallingConfig'] as Map<String, dynamic>?;
     final argumentsStreaming =
         callingConfig?['streamFunctionCallArguments'] as bool?;
-    if (argumentsStreaming != null &&
-        (config.apiMode != ApiMode.vertexAI ||
-            (config.apiVersion != ApiVersion.v1 &&
-                config.apiVersion != ApiVersion.v1beta1) ||
-            (argumentsStreaming && !stream))) {
-      throw UnsupportedError(
-        'Streaming function call arguments requires Vertex AI '
-        'streamGenerateContent on v1 or v1beta1.',
-      );
-    }
+    validateFunctionArgumentStreaming(
+      value: argumentsStreaming,
+      streamConfig: stream ? config : null,
+    );
     final operation = stream ? 'streamGenerateContent' : 'generateContent';
     final url = requestBuilder.buildUrl(
       '/{version}/models/$model:$operation',
@@ -243,6 +238,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required CountTokensRequest request,
     Future<void>? abortTrigger,
   }) async {
+    validateNonStreamingArguments(request.generateContentRequest);
     final url = requestBuilder.buildUrl('/{version}/models/$model:countTokens');
 
     final headers = requestBuilder.buildHeaders(
@@ -279,6 +275,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
   }) async {
+    validateNonStreamingArguments(request);
     final url = requestBuilder.buildUrl(
       '/{version}/dynamic/$dynamicId:generateContent',
     );
@@ -322,6 +319,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     Redactor? diagnosticRedactor;
     return streamRequest(
       createRequest: () {
+        validateNonStreamingArguments(request);
         // Build URL and headers
         final url = requestBuilder.buildUrl(
           '/{version}/dynamic/$dynamicId:streamGenerateContent',
@@ -826,6 +824,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required String model,
     required GenerateContentBatch batch,
   }) async {
+    validateBatchFunctionArguments(batch);
     // Auto-populate batch.model from method parameter if not set
     final effectiveBatch = batch.model == null
         ? batch.copyWith(model: 'models/$model')
