@@ -130,3 +130,22 @@ Interactions, set `interactionsApiVersion: ApiVersion.v1`. Developer preview
 features use `v1beta` where specified by Google.
 
 [Migration guide](../../MIGRATION.md) · [Alignment epic](https://github.com/davidmigloz/ai_clients_dart/issues/635)
+
+## Verification notes
+
+The OpenAPI manifests track the Developer REST surfaces separately. They retain
+explicit entries for compatibility types whose schemas are absent from the
+pinned contract. The WebSocket manifest records the Developer and Vertex Live
+wire alongside the public session types.
+
+- The core verifier's registration advisory comes from action discovery through
+  filenames. Public `FilesResource.register` is inherited from
+  `FilesResourceBase` and its offline fixture exercises the actual route.
+- Interactions sibling checks report distinct types for tool arguments,
+  results, media processing, and response-format selectors. Those fields
+  have separate shapes in the pinned unions.
+- Live debug summaries omit nested configuration details. The typed codecs and
+  public frame fixtures cover those wire fields.
+- Shared verification includes Anthropic, Chroma, Mistral, Ollama, OpenAI, and
+  Open Responses. Existing diagnostics outside Gemini are recorded separately
+  from the Gemini release checks.
