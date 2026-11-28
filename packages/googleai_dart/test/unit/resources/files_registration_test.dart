@@ -148,6 +148,35 @@ void main() {
   });
 
   test(
+    'malformed successful responses do not echo OAuth credentials',
+    () async {
+      const token = 'fixture-bearer';
+      final client = GoogleAIClient(
+        config: const GoogleAIConfig(),
+        httpClient: MockClient(
+          (_) async => http.Response('<html>$token</html>', 200),
+        ),
+      );
+      addTearDown(client.close);
+      await expectLater(
+        client.files.register(
+          uris: ['gs://bucket/path'],
+          authProvider: const BearerTokenProvider(token),
+        ),
+        throwsA(
+          isA<FormatException>()
+              .having((error) => error.source, 'source', isNull)
+              .having(
+                (error) => error.toString(),
+                'rendering',
+                isNot(contains(token)),
+              ),
+        ),
+      );
+    },
+  );
+
+  test(
     'validates the backend, version, object URI, and OAuth before dispatch',
     () async {
       final transport = MockClient((_) async => fail('Unexpected request'));

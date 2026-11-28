@@ -113,9 +113,16 @@ abstract class FilesResourceBase extends ResourceBase {
         redactionList: const ['authorization'],
       ),
     );
-    return RegisterFilesResponse.fromJson(
-      jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>,
-    );
+    try {
+      return RegisterFilesResponse.fromJson(
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>,
+      );
+    } on FormatException {
+      // The original exception can include the response body or an echoed token.
+    } on TypeError {
+      // A successful response can still have a malformed payload.
+    }
+    throw const FormatException('Invalid Gemini Files registration response.');
   }
 
   static bool _isStorageObjectUri(String value) {
