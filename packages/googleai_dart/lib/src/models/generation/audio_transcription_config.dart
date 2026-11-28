@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import 'audio_transcription_mode.dart';
 
 /// Configuration for main-spec speech transcription (ASR) output.
 ///
@@ -33,6 +34,12 @@ class GenerationAudioTranscriptionConfig {
   /// Whether to include word-level timestamps in the transcription.
   final bool? wordTimestamp;
 
+  /// How to process the transcript. Verbatim is the server default.
+  final AudioTranscriptionConfigMode? mode;
+
+  /// Text to edit by voice with a SMART-capable transcription model.
+  final String? sourceText;
+
   /// Creates a [GenerationAudioTranscriptionConfig].
   const GenerationAudioTranscriptionConfig({
     @Deprecated('Use customVocabulary instead.') this.adaptationPhrases,
@@ -46,6 +53,8 @@ class GenerationAudioTranscriptionConfig {
     this.languageCodes,
     @Deprecated('Use languageCodes instead.') this.languageHints,
     this.wordTimestamp,
+    this.mode,
+    this.sourceText,
   });
 
   /// Creates a [GenerationAudioTranscriptionConfig] from JSON.
@@ -63,6 +72,10 @@ class GenerationAudioTranscriptionConfig {
         ? LanguageHints.fromJson(json['languageHints'] as Map<String, dynamic>)
         : null,
     wordTimestamp: json['wordTimestamp'] as bool?,
+    mode: json['mode'] == null
+        ? null
+        : AudioTranscriptionConfigMode.fromJson(json['mode'] as String),
+    sourceText: json['sourceText'] as String?,
   );
 
   /// Converts to JSON.
@@ -74,6 +87,8 @@ class GenerationAudioTranscriptionConfig {
     if (languageCodes != null) 'languageCodes': languageCodes,
     if (languageHints != null) 'languageHints': languageHints!.toJson(),
     if (wordTimestamp != null) 'wordTimestamp': wordTimestamp,
+    if (mode != null) 'mode': mode!.toJson(),
+    if (sourceText != null) 'sourceText': sourceText,
   };
 
   /// Creates a copy with replaced values.
@@ -85,6 +100,8 @@ class GenerationAudioTranscriptionConfig {
     Object? languageCodes = unsetCopyWithValue,
     Object? languageHints = unsetCopyWithValue,
     Object? wordTimestamp = unsetCopyWithValue,
+    Object? mode = unsetCopyWithValue,
+    Object? sourceText = unsetCopyWithValue,
   }) {
     return GenerationAudioTranscriptionConfig(
       adaptationPhrases: adaptationPhrases == unsetCopyWithValue
@@ -108,6 +125,12 @@ class GenerationAudioTranscriptionConfig {
       wordTimestamp: wordTimestamp == unsetCopyWithValue
           ? this.wordTimestamp
           : wordTimestamp as bool?,
+      mode: mode == unsetCopyWithValue
+          ? this.mode
+          : mode as AudioTranscriptionConfigMode?,
+      sourceText: sourceText == unsetCopyWithValue
+          ? this.sourceText
+          : sourceText as String?,
     );
   }
 

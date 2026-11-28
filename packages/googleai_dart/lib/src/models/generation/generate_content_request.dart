@@ -26,6 +26,12 @@ class GenerateContentRequest {
   /// Generation configuration.
   final GenerationConfig? generationConfig;
 
+  /// User-defined request metadata.
+  ///
+  /// Available in the Gemini Developer API `v1beta` discovery contract and
+  /// Vertex AI. Keys and values follow Google Cloud label requirements.
+  final Map<String, String>? labels;
+
   /// Cached content name.
   final String? cachedContent;
 
@@ -55,6 +61,7 @@ class GenerateContentRequest {
     this.systemInstruction,
     this.generationConfig,
     this.cachedContent,
+    this.labels,
     this.store,
     this.serviceTier,
     this.continuationToken,
@@ -90,6 +97,7 @@ class GenerateContentRequest {
               )
             : null,
         cachedContent: json['cachedContent'] as String?,
+        labels: (json['labels'] as Map?)?.cast<String, String>(),
         store: json['store'] as bool?,
         serviceTier: json['serviceTier'] != null
             ? serviceTierFromString(json['serviceTier'] as String)
@@ -109,6 +117,7 @@ class GenerateContentRequest {
     if (generationConfig != null)
       'generationConfig': generationConfig!.toJson(),
     if (cachedContent != null) 'cachedContent': cachedContent,
+    if (labels != null) 'labels': labels,
     if (store != null) 'store': store,
     if (serviceTier != null) 'serviceTier': serviceTierToString(serviceTier!),
     if (continuationToken != null) 'continuationToken': continuationToken,
@@ -123,6 +132,7 @@ class GenerateContentRequest {
     Object? systemInstruction = unsetCopyWithValue,
     Object? generationConfig = unsetCopyWithValue,
     Object? cachedContent = unsetCopyWithValue,
+    Object? labels = unsetCopyWithValue,
     Object? store = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
     Object? continuationToken = unsetCopyWithValue,
@@ -147,6 +157,9 @@ class GenerateContentRequest {
       cachedContent: cachedContent == unsetCopyWithValue
           ? this.cachedContent
           : cachedContent as String?,
+      labels: labels == unsetCopyWithValue
+          ? this.labels
+          : labels as Map<String, String>?,
       store: store == unsetCopyWithValue ? this.store : store as bool?,
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
