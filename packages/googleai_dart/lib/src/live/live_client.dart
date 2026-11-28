@@ -50,8 +50,13 @@ class LiveClient {
     'access_token',
   };
 
+  static const _connectionCancelled = LiveConnectionException(
+    message: 'The Live client closed before the session was established.',
+  );
+
   final GoogleAIConfig _config;
   final Set<LiveSession> _sessions = {};
+  final Set<Completer<LiveSession>> _pendingConnections = {};
 
   /// Creates a [LiveClient].
   LiveClient({required this._config});
@@ -98,6 +103,24 @@ class LiveClient {
     LiveConfig? liveConfig,
     String? accessToken,
   }) async {
+    final cancellation = Completer<LiveSession>();
+    _pendingConnections.add(cancellation);
+    try {
+      return await Future.any([
+        cancellation.future,
+        _connect(model, liveConfig, accessToken, cancellation),
+      ]);
+    } finally {
+      _pendingConnections.remove(cancellation);
+    }
+  }
+
+  Future<LiveSession> _connect(
+    String model,
+    LiveConfig? liveConfig,
+    String? accessToken,
+    Completer<LiveSession> cancellation,
+  ) async {
     final isVertex = _config.apiMode == ApiMode.vertexAI;
     if (!isVertex && liveConfig?.explicitVadSignal != null) {
       throw UnsupportedError('Explicit Live VAD signaling requires Vertex AI.');
@@ -108,6 +131,7 @@ class LiveClient {
       throw UnsupportedError('Live safety blocking methods require Vertex AI.');
     }
     final credentials = await _getCredentials(accessToken);
+    if (cancellation.isCompleted) throw _connectionCancelled;
     if (isVertex && credentials is EphemeralTokenCredentials) {
       throw const LiveConnectionException(
         message: 'Ephemeral Live tokens require the Gemini Developer API.',
@@ -157,6 +181,14 @@ class LiveClient {
     final LiveSession session;
     try {
       final socket = await ws.connectWebSocket(uri, headers: headers);
+      if (cancellation.isCompleted) {
+        try {
+          await socket.close();
+        } catch (_) {
+          // The caller already received the cancellation error.
+        }
+        throw _connectionCancelled;
+      }
       session = LiveSession.attach(
         socket,
         onClosed: _sessions.remove,
@@ -200,6 +232,7 @@ class LiveClient {
     // Phase 2: Setup session (separate try block to surface setup errors)
     try {
       await _setupSession(session, model, liveConfig);
+      if (cancellation.isCompleted) throw _connectionCancelled;
       _log.fine('Live session established');
       return session;
     } catch (error, stackTrace) {
@@ -470,8 +503,16 @@ class LiveClient {
     }
   }
 
-  /// Closes all active sessions and cleans up resources.
+  /// Closes all active sessions and cancels pending connection attempts.
+  ///
+  /// Pending [connect] calls fail with a [LiveConnectionException]. A socket
+  /// that upgrades after cancellation is closed without starting a session.
+  /// You can call [connect] again after closing.
   Future<void> close() async {
+    for (final cancellation in _pendingConnections) {
+      cancellation.completeError(_connectionCancelled);
+    }
+    _pendingConnections.clear();
     final active = _sessions.toList(growable: false);
     await Future.wait(active.map((session) => session.close()));
   }

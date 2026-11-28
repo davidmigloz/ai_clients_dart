@@ -1,10 +1,37 @@
 @TestOn('browser')
 library;
 
+import 'dart:async';
+
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
+class _PendingProvider implements AuthProvider {
+  final credentials = Completer<AuthCredentials>();
+
+  @override
+  Future<AuthCredentials> getCredentials() => credentials.future;
+}
+
 void main() {
+  test('closing Live cancels the pending browser credential lookup', () async {
+    final provider = _PendingProvider();
+    final client = GoogleAIClient(
+      config: GoogleAIConfig(authProvider: provider),
+    );
+    final live = client.createLiveClient();
+    addTearDown(client.close);
+
+    final connection = expectLater(
+      live.connect(model: 'gemini-3.8-live'),
+      throwsA(isA<LiveConnectionException>()),
+    );
+    await live.close();
+    await connection;
+    provider.credentials.completeError(StateError('late credential failure'));
+    await Future<void>.delayed(Duration.zero);
+  });
+
   test(
     'rejects Vertex OAuth headers before a browser network attempt',
     () async {
