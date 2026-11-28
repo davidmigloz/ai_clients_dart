@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 
+import 'package:meta/meta.dart';
 import 'package:web/web.dart' as web;
 
 import 'genie_webrtc_peer.dart';
@@ -14,6 +15,12 @@ GenieWebRtcPeer createWebRtcPeer() {
   }
 }
 
+/// Creates a browser adapter for a caller-owned test peer.
+@visibleForTesting
+BrowserGenieWebRtcPeer browserPeerForTesting(
+  web.RTCPeerConnection connection,
+) => BrowserGenieWebRtcPeer._(connection, null);
+
 /// A Genie peer backed by the browser's native WebRTC and media APIs.
 ///
 /// The optional [mediaElement] receives the combined remote audio/video
@@ -21,7 +28,7 @@ GenieWebRtcPeer createWebRtcPeer() {
 class BrowserGenieWebRtcPeer implements GenieWebRtcPeer {
   final web.RTCPeerConnection _peer;
   final web.HTMLMediaElement? _mediaElement;
-  _BrowserDataChannel? _channel;
+  _BrowserDataChannels? _channel;
   bool _closed = false;
 
   /// Remote audio and video delivered by WebRTC.
@@ -29,9 +36,14 @@ class BrowserGenieWebRtcPeer implements GenieWebRtcPeer {
 
   /// Creates a browser peer. Supply a video element to display the world.
   BrowserGenieWebRtcPeer({
-    this._mediaElement,
+    web.HTMLMediaElement? mediaElement,
     web.RTCConfiguration? configuration,
-  }) : _peer = web.RTCPeerConnection(configuration ?? web.RTCConfiguration()) {
+  }) : this._(
+         web.RTCPeerConnection(configuration ?? web.RTCConfiguration()),
+         mediaElement,
+       );
+
+  BrowserGenieWebRtcPeer._(this._peer, this._mediaElement) {
     _peer
       ..ontrack = ((web.RTCTrackEvent event) {
         remoteMediaStream.addTrack(event.track);
@@ -42,6 +54,9 @@ class BrowserGenieWebRtcPeer implements GenieWebRtcPeer {
       }).toJS
       ..oniceconnectionstatechange = ((web.Event _) {
         _onPeerState(_peer.iceConnectionState);
+      }).toJS
+      ..ondatachannel = ((web.RTCDataChannelEvent event) {
+        _channel?.attachIncoming(event.channel);
       }).toJS;
   }
 
@@ -62,10 +77,8 @@ class BrowserGenieWebRtcPeer implements GenieWebRtcPeer {
     if (_channel != null) {
       throw StateError('The Genie peer already has a channel.');
     }
-    return _channel = _BrowserDataChannel(
-      _peer.createDataChannel(label),
-      _peer,
-    );
+    return _channel = _BrowserDataChannels(_peer, label)
+      ..attach(_peer.createDataChannel(label));
   }
 
   @override
@@ -119,7 +132,8 @@ class BrowserGenieWebRtcPeer implements GenieWebRtcPeer {
     _peer
       ..ontrack = null
       ..onconnectionstatechange = null
-      ..oniceconnectionstatechange = null;
+      ..oniceconnectionstatechange = null
+      ..ondatachannel = null;
     try {
       _channel?.close();
     } finally {
@@ -132,18 +146,29 @@ class BrowserGenieWebRtcPeer implements GenieWebRtcPeer {
   }
 }
 
-class _BrowserDataChannel implements GenieWebRtcDataChannel {
-  final web.RTCDataChannel _channel;
+class _BrowserDataChannels implements GenieWebRtcDataChannel {
   final web.RTCPeerConnection _peer;
+  final String _label;
   final _opened = Completer<void>();
   final _messages = StreamController<Object>();
+  final _channels = <web.RTCDataChannel>{};
+  web.RTCDataChannel? _active;
 
-  _BrowserDataChannel(this._channel, this._peer) {
+  _BrowserDataChannels(this._peer, this._label) {
     _opened.future.ignore();
-    _channel
+  }
+
+  void attachIncoming(web.RTCDataChannel channel) {
+    if (channel.label.isEmpty || channel.label == _label) attach(channel);
+  }
+
+  void attach(web.RTCDataChannel channel) {
+    if (_messages.isClosed || !_channels.add(channel)) return;
+    channel
       ..binaryType = 'arraybuffer'
-      ..onopen = ((web.Event _) => _markOpen()).toJS
+      ..onopen = ((web.Event _) => _markOpen(channel)).toJS
       ..onmessage = ((web.MessageEvent event) {
+        if (_messages.isClosed) return;
         final data = event.data;
         if (data.typeofEquals('string')) {
           _messages.add((data! as JSString).toDart);
@@ -151,13 +176,24 @@ class _BrowserDataChannel implements GenieWebRtcDataChannel {
           _messages.add((data! as JSArrayBuffer).toDart.asUint8List());
         }
       }).toJS
-      ..onerror = ((web.Event _) => fail()).toJS
-      ..onclose = ((web.Event _) => _finish()).toJS;
-    if (_channel.readyState == 'open') _markOpen();
+      ..onerror = ((web.Event _) => _remove(channel, failed: true)).toJS
+      ..onclose = ((web.Event _) => _remove(channel, failed: false)).toJS;
+    if (_isOpen(channel)) _markOpen(channel);
   }
 
-  void _markOpen() {
+  void _markOpen(web.RTCDataChannel channel) {
+    if (_messages.isClosed) return;
+    _active = channel;
     if (!_opened.isCompleted) _opened.complete();
+  }
+
+  static bool _isOpen(web.RTCDataChannel channel) =>
+      channel.readyState == 'open';
+
+  web.RTCDataChannel? get _openChannel {
+    final current = _active;
+    if (current != null && _isOpen(current)) return current;
+    return _channels.where(_isOpen).firstOrNull;
   }
 
   @override
@@ -173,22 +209,43 @@ class _BrowserDataChannel implements GenieWebRtcDataChannel {
   }
 
   @override
-  void sendText(String message) => _channel.send(message.toJS);
+  void sendText(String message) {
+    final channel = _openChannel;
+    if (channel == null) {
+      throw StateError('The Genie WebRTC data channel is closed.');
+    }
+    channel.send(message.toJS);
+  }
 
   @override
   Future<void> flush() async {
     final elapsed = Stopwatch()..start();
-    while (_channel.readyState == 'open' &&
-        _channel.bufferedAmount > 0 &&
+    while (_channels.any(
+          (channel) => _isOpen(channel) && channel.bufferedAmount > 0,
+        ) &&
         elapsed.elapsed < const Duration(milliseconds: 500)) {
       await Future<void>.delayed(const Duration(milliseconds: 10));
     }
-    if (_channel.readyState == 'open') {
+    if (_openChannel != null) {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
   }
 
   void fail() => _finish(StateError('The browser WebRTC data channel failed.'));
+
+  void _remove(web.RTCDataChannel channel, {required bool failed}) {
+    _channels.remove(channel);
+    if (channel == _active) _active = null;
+    _closeChannel(channel);
+    _active = _openChannel;
+    // During setup, an incoming channel may still arrive after the offered
+    // channel closes. Let the peer fault or handshake timeout end that wait.
+    if (_active == null && _opened.isCompleted && !_messages.isClosed) {
+      _finish(
+        failed ? StateError('The browser WebRTC data channel failed.') : null,
+      );
+    }
+  }
 
   void _finish([Object? error]) {
     if (!_opened.isCompleted) {
@@ -196,20 +253,28 @@ class _BrowserDataChannel implements GenieWebRtcDataChannel {
         error ?? StateError('The WebRTC data channel closed before opening.'),
       );
     }
-    if (!_messages.isClosed) {
-      _channel.onmessage = null;
-      if (error != null) _messages.addError(error);
-      unawaited(_messages.close());
+    if (_messages.isClosed) return;
+    if (error != null) _messages.addError(error);
+    unawaited(_messages.close());
+  }
+
+  static void _closeChannel(web.RTCDataChannel channel) {
+    channel
+      ..onopen = null
+      ..onmessage = null
+      ..onerror = null
+      ..onclose = null;
+    try {
+      channel.close();
+    } catch (_) {
+      // A closed channel no longer has any active callbacks.
     }
   }
 
   void close() {
-    _channel
-      ..onopen = null
-      ..onmessage = null
-      ..onerror = null
-      ..onclose = null
-      ..close();
+    _channels.forEach(_closeChannel);
+    _channels.clear();
+    _active = null;
     _finish();
   }
 }

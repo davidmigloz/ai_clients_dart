@@ -251,7 +251,7 @@ class GenieResource extends ResourceBase {
         interactionId,
         credential,
         offer,
-        abort.future,
+        abort,
       );
       ensureActive();
       await rtcPeer.setAnswer(answer);
@@ -293,7 +293,7 @@ class GenieResource extends ResourceBase {
     String id,
     String credential,
     String offer,
-    Future<void> abortTrigger,
+    Completer<void> abort,
   ) async {
     final url = requestBuilder.buildUrl(
       '/{version}/interactions/${Uri.encodeComponent(id)}:webrtc',
@@ -311,7 +311,7 @@ class GenieResource extends ResourceBase {
     // Scoped signaling auth takes precedence over every inherited credential.
     // The browser CORS allowlist does not include the WebSocket API revision.
     final request =
-        http.AbortableRequest('POST', uri, abortTrigger: abortTrigger)
+        http.AbortableRequest('POST', uri, abortTrigger: abort.future)
           ..followRedirects = false
           ..headers.addAll({
             for (final entry in config.defaultHeaders.entries)
@@ -330,6 +330,10 @@ class GenieResource extends ResourceBase {
 
     // Send directly to avoid another credential injection or SDP diagnostics.
     final response = await httpClient.send(request);
+    if (abort.isCompleted) {
+      response.stream.listen(null).cancel().ignore();
+      throw _webRtcTimedOut;
+    }
     if (response.statusCode < 200 || response.statusCode >= 300) {
       await response.stream.listen(null).cancel();
       throw GenieConnectionException(
@@ -338,15 +342,25 @@ class GenieResource extends ResourceBase {
         httpStatus: response.statusCode,
       );
     }
+    final chunks = StreamIterator(utf8.decoder.bind(response.stream));
+    // A custom HTTP client may ignore Abortable after returning headers.
+    // Release our reader even when the response body never completes.
+    abort.future.then((_) => chunks.cancel()).ignore();
     try {
-      final body = await response.stream.bytesToString();
-      if (jsonDecode(body) case {
+      final body = StringBuffer();
+      while (await chunks.moveNext()) {
+        body.write(chunks.current);
+      }
+      if (abort.isCompleted) throw _webRtcTimedOut;
+      if (jsonDecode(body.toString()) case {
         'answer_sdp': final String answer,
       } when answer.trim().isNotEmpty) {
         return answer;
       }
     } on FormatException {
       // The response may contain credential or connection information.
+    } finally {
+      await chunks.cancel();
     }
     throw const GenieConnectionException(
       message:

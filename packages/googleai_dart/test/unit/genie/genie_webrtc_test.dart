@@ -93,6 +93,27 @@ class _PendingSignaling extends http.BaseClient {
   }
 }
 
+class _StalledAnswer extends http.BaseClient {
+  _StalledAnswer({required this.lateHeaders});
+
+  final bool lateHeaders;
+  final requestStarted = Completer<void>();
+  final headersReady = Completer<void>();
+  final bodyListening = Completer<void>();
+  final bodyCanceled = Completer<void>();
+  late final body = StreamController<List<int>>(
+    onListen: bodyListening.complete,
+    onCancel: bodyCanceled.complete,
+  );
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    requestStarted.complete();
+    if (lateHeaders) await headersReady.future;
+    return http.StreamedResponse(body.stream, 200);
+  }
+}
+
 http.Response _answer(String sdp) =>
     http.Response(jsonEncode({'answer_sdp': sdp}), 200);
 
@@ -312,6 +333,44 @@ void main() {
     await peer.closed.future.timeout(_deadline);
     expect(peer.calls, isNot(contains(startsWith('answer:'))));
   });
+
+  for (final lateHeaders in [false, true]) {
+    test(
+      'cancels a stalled signaling body with ${lateHeaders ? 'late' : 'early'} headers',
+      () async {
+        final transport = _StalledAnswer(lateHeaders: lateHeaders);
+        addTearDown(() {
+          transport.body.close().ignore();
+        });
+        final peer = _Peer();
+        final failed = expectLater(
+          _genie(transport).connectWebRtc(
+            'int_stalled_answer',
+            authToken: _token,
+            peer: peer,
+            timeout: const Duration(milliseconds: 100),
+          ),
+          throwsA(
+            isA<GenieConnectionException>().having(
+              (error) => error.message,
+              'message',
+              contains('Timed out'),
+            ),
+          ),
+        );
+        await transport.requestStarted.future.timeout(_deadline);
+        if (!lateHeaders) {
+          await transport.bodyListening.future.timeout(_deadline);
+        }
+        await failed;
+        if (lateHeaders) transport.headersReady.complete();
+        await transport.bodyCanceled.future.timeout(_deadline);
+        await peer.closed.future.timeout(_deadline);
+        expect(transport.body.hasListener, isFalse);
+        expect(peer.calls, isNot(contains(startsWith('answer:'))));
+      },
+    );
+  }
 
   test(
     'times out and releases a peer whose control channel never opens',
