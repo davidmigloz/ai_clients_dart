@@ -24,6 +24,7 @@ import '../resources/interactions_resource.dart';
 import '../resources/models_resource.dart';
 import '../resources/triggers_resource.dart';
 import '../resources/tuned_models_resource.dart';
+import '../resources/voices_resource.dart';
 import '../resources/webhooks_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
@@ -142,6 +143,9 @@ class GoogleAIClient {
   ///
   /// Available on the Gemini Developer API with [ApiVersion.v1beta].
   late final DecisionsResource decisions;
+
+  /// Custom voice management for Gemini Developer API v1beta.
+  late final VoicesResource voices;
 
   /// Resource for agents API (experimental).
   ///
@@ -292,6 +296,13 @@ class GoogleAIClient {
     );
 
     decisions = DecisionsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    voices = VoicesResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

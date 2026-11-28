@@ -89,6 +89,7 @@ mixin StreamingResource on ResourceBase {
     required http.Request Function() createRequest,
     required T Function(Map<String, dynamic>) fromJson,
     Future<void>? abortTrigger,
+    Redactor? Function()? resolveDiagnosticRedactor,
   }) {
     final requestAbort = Completer<void>();
     StreamSubscription<List<int>>? bodySubscription;
@@ -97,6 +98,7 @@ mixin StreamingResource on ResourceBase {
     late StreamController<T> controller;
     var stopped = false;
     var requestId = generateRequestId();
+    Redactor? diagnosticRedactor;
 
     void stop({bool abort = true}) {
       if (stopped) return;
@@ -111,7 +113,12 @@ mixin StreamingResource on ResourceBase {
 
     void finish([Object? error, StackTrace? stackTrace]) {
       if (stopped) return;
-      if (error != null) controller.addError(error, stackTrace);
+      if (error != null) {
+        controller.addError(
+          _safeStreamError(error, diagnosticRedactor),
+          stackTrace,
+        );
+      }
       stop(abort: error != null);
       unawaited(controller.close());
     }
@@ -120,6 +127,7 @@ mixin StreamingResource on ResourceBase {
       try {
         ensureNotClosed?.call();
         final request = createRequest();
+        diagnosticRedactor = resolveDiagnosticRedactor?.call();
         requestId = request.headers['X-Request-ID'] ?? requestId;
         final prepared = await prepareStreamingRequest(request);
         if (stopped) return;
@@ -157,6 +165,7 @@ mixin StreamingResource on ResourceBase {
                       headers: response.headers,
                       request: response.request,
                     ),
+                    redactor: diagnosticRedactor ?? Redactor.continuationTokens,
                   ),
                 );
               } catch (error, trace) {
@@ -206,7 +215,10 @@ mixin StreamingResource on ResourceBase {
         if (controller.isPaused) eventSubscription?.pause();
       } catch (error, trace) {
         if (!stopped) {
-          _logStreamError(error, requestId);
+          _logStreamError(
+            _safeStreamError(error, diagnosticRedactor),
+            requestId,
+          );
           finish(error, trace);
         }
       }
@@ -413,7 +425,10 @@ mixin StreamingResource on ResourceBase {
   }
 
   /// Maps HTTP errors for streaming (mirrors ErrorInterceptor logic).
-  GoogleAIException mapHttpErrorForStreaming(http.Response response) {
+  GoogleAIException mapHttpErrorForStreaming(
+    http.Response response, {
+    Redactor redactor = Redactor.continuationTokens,
+  }) {
     final statusCode = response.statusCode;
     final body = response.body;
 
@@ -421,9 +436,7 @@ mixin StreamingResource on ResourceBase {
     final details = <Object>[];
 
     try {
-      final errorDetails = Redactor.continuationTokens.redactJson(
-        jsonDecode(body),
-      );
+      final errorDetails = redactor.redactJson(jsonDecode(body));
       if (errorDetails is Map<String, dynamic>) {
         final error = errorDetails['error'] as Map<String, dynamic>?;
         message = error?['message']?.toString() ?? message;
@@ -439,7 +452,7 @@ mixin StreamingResource on ResourceBase {
         message = body;
       }
     }
-    message = Redactor.continuationTokens.redactString(message);
+    message = redactor.redactString(message);
 
     if (statusCode == 401) {
       return AuthenticationException(message: message, details: details);
@@ -470,6 +483,18 @@ mixin StreamingResource on ResourceBase {
     );
   }
 
+  Object _safeStreamError(Object error, Redactor? redactor) {
+    if (redactor == null) return error;
+    if (error is FormatException) {
+      return FormatException('Invalid streaming response.', null, error.offset);
+    }
+    final description = error.toString();
+    final safeDescription = redactor.redactString(description);
+    return safeDescription == description
+        ? error
+        : StreamException(message: safeDescription);
+  }
+
   /// Logs streaming errors.
   void _logStreamError(Object error, String requestId) {
     if (config.logLevel.value <= Level.SEVERE.value) {
@@ -486,9 +511,10 @@ mixin StreamingResource on ResourceBase {
   Never throwInlineStreamError(
     Map<String, dynamic> json,
     String? sseEvent,
-    Object? error,
-  ) {
-    final safeError = Redactor.continuationTokens.redactJson(error);
+    Object? error, {
+    Redactor redactor = Redactor.continuationTokens,
+  }) {
+    final safeError = redactor.redactJson(error);
     String message;
     if (safeError is Map<String, dynamic>) {
       message =
@@ -502,7 +528,7 @@ mixin StreamingResource on ResourceBase {
       message = 'Unknown stream error';
     }
 
-    final safeMessage = Redactor.continuationTokens.redactString(message);
+    final safeMessage = redactor.redactString(message);
     Logger('GoogleAI.HTTP').warning('Inline stream error: $safeMessage');
 
     final cleanJson = Map<String, dynamic>.from(json)
@@ -510,9 +536,7 @@ mixin StreamingResource on ResourceBase {
       ..remove('_rawData');
     throw StreamException(
       message: safeMessage,
-      partialData: jsonEncode(
-        Redactor.continuationTokens.redactJson(cleanJson),
-      ),
+      partialData: jsonEncode(redactor.redactJson(cleanJson)),
     );
   }
 }

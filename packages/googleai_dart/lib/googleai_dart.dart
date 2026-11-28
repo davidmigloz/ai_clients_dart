@@ -290,12 +290,15 @@ export 'src/models/tools/tool_config.dart';
 export 'src/models/tools/tool_response.dart';
 export 'src/models/tools/tool_type.dart';
 export 'src/models/tools/url_context.dart';
+// Models - Voices API
+export 'src/models/voices/voice.dart';
 // Models - Webhooks API (Experimental)
 export 'src/models/webhooks/webhooks.dart';
 export 'src/resources/credentials_resource.dart';
 export 'src/resources/decisions_resource.dart';
 export 'src/resources/environments_resource.dart' show EnvironmentFilesResource;
 export 'src/resources/genie_resource.dart';
+export 'src/resources/voices_resource.dart';
 // Utilities
 export 'src/utils/lro_poller.dart';
 export 'src/utils/paginator.dart';

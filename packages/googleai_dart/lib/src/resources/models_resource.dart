@@ -6,6 +6,7 @@ import '../client/config.dart';
 import '../errors/exceptions.dart';
 import '../models/batch/embed_content_batch.dart';
 import '../models/batch/generate_content_batch.dart';
+import '../models/common/voice_config.dart';
 import '../models/content/part.dart';
 import '../models/embeddings/batch_embed_contents_request.dart';
 import '../models/embeddings/batch_embed_contents_response.dart';
@@ -25,6 +26,7 @@ import '../models/prediction/predict_long_running_operation.dart';
 import '../models/prediction/predict_long_running_request.dart';
 import '../models/prediction/predict_request.dart';
 import '../models/prediction/predict_response.dart';
+import '../utils/redactor.dart';
 import 'base_resource.dart';
 import 'operations_resource.dart';
 import 'streaming_resource.dart';
@@ -70,13 +72,14 @@ class ModelsResource extends ResourceBase with StreamingResource {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
 
+    final diagnosticRedactor = _voiceKeyRedactor(request);
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
+      diagnosticRedactor: diagnosticRedactor,
     );
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return GenerateContentResponse.fromJson(responseBody);
+    return _decodeGeneratedContent(response, diagnosticRedactor);
   }
 
   /// Generates content using streaming.
@@ -99,6 +102,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
   }) {
+    Redactor? diagnosticRedactor;
     return streamRequest(
       createRequest: () {
         // Build URL and headers (uses endpoint config precedence)
@@ -115,14 +119,21 @@ class ModelsResource extends ResourceBase with StreamingResource {
         final httpRequest = http.Request('POST', url)
           ..headers.addAll(headers)
           ..body = jsonEncode(request.toJson());
+        diagnosticRedactor = _voiceKeyRedactor(request);
         return httpRequest;
       },
       abortTrigger: abortTrigger,
+      resolveDiagnosticRedactor: () => diagnosticRedactor,
       fromJson: (json) {
         final sseEvent = json['_event'] as String?;
         final error = json['error'];
         if (sseEvent == 'error' || error != null) {
-          throwInlineStreamError(json, sseEvent, error);
+          throwInlineStreamError(
+            json,
+            sseEvent,
+            error,
+            redactor: diagnosticRedactor ?? Redactor.continuationTokens,
+          );
         }
         return GenerateContentResponse.fromJson(json);
       },
@@ -191,13 +202,14 @@ class ModelsResource extends ResourceBase with StreamingResource {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
 
+    final diagnosticRedactor = _voiceKeyRedactor(request);
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
+      diagnosticRedactor: diagnosticRedactor,
     );
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return GenerateContentResponse.fromJson(responseBody);
+    return _decodeGeneratedContent(response, diagnosticRedactor);
   }
 
   /// Generates streaming content using a dynamic model ID.
@@ -217,6 +229,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
   }) {
+    Redactor? diagnosticRedactor;
     return streamRequest(
       createRequest: () {
         // Build URL and headers
@@ -233,17 +246,63 @@ class ModelsResource extends ResourceBase with StreamingResource {
         final httpRequest = http.Request('POST', url)
           ..headers.addAll(headers)
           ..body = jsonEncode(request.toJson());
+        diagnosticRedactor = _voiceKeyRedactor(request);
         return httpRequest;
       },
       abortTrigger: abortTrigger,
+      resolveDiagnosticRedactor: () => diagnosticRedactor,
       fromJson: (json) {
         final sseEvent = json['_event'] as String?;
         final error = json['error'];
         if (sseEvent == 'error' || error != null) {
-          throwInlineStreamError(json, sseEvent, error);
+          throwInlineStreamError(
+            json,
+            sseEvent,
+            error,
+            redactor: diagnosticRedactor ?? Redactor.continuationTokens,
+          );
         }
         return GenerateContentResponse.fromJson(json);
       },
+    );
+  }
+
+  GenerateContentResponse _decodeGeneratedContent(
+    http.Response response,
+    Redactor? diagnosticRedactor,
+  ) {
+    try {
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      return GenerateContentResponse.fromJson(json);
+    } on FormatException catch (error) {
+      if (diagnosticRedactor == null) rethrow;
+      throw FormatException(
+        'Invalid GenerateContent response.',
+        null,
+        error.offset,
+      );
+    } on TypeError {
+      if (diagnosticRedactor == null) rethrow;
+      throw const FormatException('Invalid GenerateContent response.');
+    }
+  }
+
+  Redactor? _voiceKeyRedactor(GenerateContentRequest request) {
+    final speech = request.generationConfig?.speechConfig;
+    final voices = [
+      speech?.voiceConfig?.voice,
+      for (final speaker
+          in speech?.multiSpeakerVoiceConfig?.speakerVoiceConfigs ??
+              const <SpeakerVoiceConfig>[])
+        speaker.voiceConfig?.voice,
+    ];
+    final keys = voices.whereType<String>().where(
+      (voice) => voice.startsWith('voicekey_'),
+    );
+    if (keys.isEmpty) return null;
+    return Redactor.forSecrets(
+      secrets: keys,
+      redactionList: Redactor.continuationTokenFields,
     );
   }
 

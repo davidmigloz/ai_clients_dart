@@ -1058,6 +1058,43 @@ control messages ends the stream with an error.
 
 </details>
 
+### How do I design or manage Gemini voices?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.voices` with the Gemini Developer API `v1beta`. A designed voice
+has a reusable ID and can return preview audio. Set
+`PromptedVoice.baseVoice` to remix a prebuilt or stored designed voice on a
+paid project.
+
+```dart
+final created = await client.voices.create(
+  store: true,
+  voice: const Voice(
+    type: VoiceType.prompted,
+    model: 'gemini-3.8-flash-tts',
+    prompted: PromptedVoice(input: 'A warm, deliberate fictional narrator.'),
+  ),
+);
+final speech = SpeechConfig(voiceConfig: VoiceConfig(voice: created.id));
+```
+
+Use `voices.list` for catalog and stored voices, and `voices.get` or
+`voices.delete` for stored custom voices. Supported synthesis models include
+Gemini 3.8 Flash TTS and Gemini 3.8 Flash-Lite TTS.
+
+Voice replication uses the same adult speaker's source and consent recordings
+and requires a paid Gemini API project. Set `store` explicitly to select
+stored IDs or expiring client-managed replication keys.
+
+[Full example](example/voices_example.dart) ·
+[Voice design](https://aistudio.google.com/docs/voice-design) ·
+[Voice remixing](https://aistudio.google.com/docs/voice-remixing) ·
+[Voice replication and consent](https://aistudio.google.com/docs/voice-replication)
+
+</details>
+
 ### How do I transcribe live audio?
 
 <details>
@@ -1259,6 +1296,7 @@ See the [example/](example/) directory for complete examples:
 | [`url_context_example.dart`](example/url_context_example.dart) | URL content fetching and analysis |
 | [`vertex_ai_example.dart`](example/vertex_ai_example.dart) | Vertex AI GenerateContent |
 | [`vertex_interactions_example.dart`](example/vertex_interactions_example.dart) | Vertex AI Interactions with OAuth and project routing |
+| [`voices_example.dart`](example/voices_example.dart) | Create a prompted voice with Gemini Developer API |
 | [`webhooks_example.dart`](example/webhooks_example.dart) | Webhook subscriptions for interaction events |
 
 ## API Coverage
@@ -1269,6 +1307,7 @@ See the [example/](example/) directory for complete examples:
 | Tuned Models | ✅ Full |
 | Files | ✅ Full |
 | Generated Files | ✅ Full |
+| Voices | Gemini Developer API `v1beta` |
 | Decisions | Gemini Developer API `v1beta`, `gemini-decision-1` |
 | Cached Contents | ✅ Full |
 | Batches | ✅ Full |
