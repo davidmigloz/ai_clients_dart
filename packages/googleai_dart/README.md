@@ -596,6 +596,11 @@ Future<void> main() async {
 
 → [Full example](example/tts_example.dart)
 
+On supported Gemini Developer API `v1beta` models, set
+`TextPart.speechMetadata` to supply per-part speaker and style instructions.
+If the response includes audio transcription, read it from
+`Part.audioTranscription`, including any speaker labels and word timing.
+
 </details>
 
 ### How do I use tool calling?

@@ -80,6 +80,7 @@ export 'src/models/content/logprobs_result.dart';
 export 'src/models/content/media_metadata.dart';
 export 'src/models/content/media_resolution.dart';
 export 'src/models/content/part.dart';
+export 'src/models/content/speech_metadata.dart';
 // Models - Corpus API
 export 'src/models/corpus/corpus.dart';
 export 'src/models/corpus/document.dart';
