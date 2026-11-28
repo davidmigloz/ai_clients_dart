@@ -134,6 +134,58 @@ http.Response _interactionResponse(List<Map<String, Object>> steps) =>
     );
 
 void main() {
+  test('preserves unrecognized static options in multimodal tool results', () {
+    final wire = {
+      'type': 'document',
+      'uri': 'https://example.test/forecast.xlsx',
+      'resolution': 'future_high',
+      'processing': {
+        'type': 'static',
+        'future_option': true,
+        'spreadsheet_options': {
+          'visible_cells': 'A1:E10',
+          'sheet_index': 2,
+          'future_cell_mode': 'merged',
+          'content_layers': ['formulas', 'future_layer'],
+        },
+      },
+    };
+    final decoded =
+        FunctionResultSubcontent.fromJson(wire)
+            as FunctionResultSubcontentDocument;
+    expect(decoded.content.resolution, isNull);
+    expect(decoded.content.processing?.spreadsheetOptions?.sheetIndex, 2);
+    expect(decoded.toJson(), wire);
+    expect(decoded.content.copyWith().toJson(), wire);
+    expect(
+      decoded.content
+          .copyWith(resolution: InteractionMediaResolution.medium)
+          .toJson()['resolution'],
+      'medium',
+    );
+    expect(
+      decoded.content.copyWith(resolution: null).toJson(),
+      isNot(contains('resolution')),
+    );
+  });
+
+  test('preserves new members in static audio and video processing', () {
+    final validVideo = {
+      'type': 'static',
+      'fps': 2.5,
+      'end_offset': null,
+      'future_setting': false,
+    };
+    final video = InteractionVideoProcessing.fromJson(validVideo);
+    expect(video.fps, 2.5);
+    expect(video.toJson(), validVideo);
+
+    final futureAudio = {'type': 'static', 'start_offset': 3};
+    final audio = InteractionAudioProcessing.fromJson(futureAudio);
+    expect(audio.startOffset, isNull);
+    expect(audio.toJson(), futureAudio);
+  });
+
   test(
     'sends and reads exact media selectors in an Interactions prompt',
     () async {

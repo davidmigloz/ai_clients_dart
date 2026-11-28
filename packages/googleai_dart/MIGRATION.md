@@ -324,16 +324,22 @@ unknown variant. Add cases for these types to exhaustive switches.
 
 ```dart
 // Before
-final types = output.items.whereType<FunctionResultSubcontentImage>();
+String kind(FunctionResultSubcontent item) => switch (item) {
+  FunctionResultSubcontentText() => 'text',
+  FunctionResultSubcontentImage() => 'image',
+  FunctionResultSubcontentFunction() => 'function',
+};
 
 // After
-final media = output.items.where((item) => switch (item) {
-  FunctionResultSubcontentImage() ||
-  FunctionResultSubcontentAudio() ||
-  FunctionResultSubcontentDocument() ||
-  FunctionResultSubcontentVideo() => true,
-  _ => false,
-});
+String kind(FunctionResultSubcontent item) => switch (item) {
+  FunctionResultSubcontentText() => 'text',
+  FunctionResultSubcontentImage() => 'image',
+  FunctionResultSubcontentAudio() => 'audio',
+  FunctionResultSubcontentDocument() => 'document',
+  FunctionResultSubcontentVideo() => 'video',
+  FunctionResultSubcontentFunction() => 'function',
+  UnknownFunctionResultSubcontent() => 'unknown',
+};
 ```
 
 ---

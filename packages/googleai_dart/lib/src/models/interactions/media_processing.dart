@@ -1,3 +1,5 @@
+import '../content/media_wire_options.dart';
+
 /// A layer to extract from video during static media processing.
 extension type const InteractionVideoLayer(String value) {
   /// Sampled video frames.
@@ -47,22 +49,37 @@ final class InteractionPageProcessingOptions {
     this.startPage,
     this.endPage,
     this.contentLayers,
+  }) : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const InteractionPageProcessingOptions._({
+    this.startPage,
+    this.endPage,
+    this.contentLayers,
+    required this._wireExtensions,
   });
 
   /// Creates processing options from their wire representation.
   factory InteractionPageProcessingOptions.fromJson(
     Map<String, dynamic> json,
-  ) => InteractionPageProcessingOptions(
+  ) => InteractionPageProcessingOptions._(
     startPage: json['start_page'] as int?,
     endPage: json['end_page'] as int?,
     contentLayers: (json['content_layers'] as List<dynamic>?)
         ?.cast<String>()
         .map(InteractionPageLayer.new)
         .toList(),
+    wireExtensions: mediaExtensions(json, const {
+      'start_page',
+      'end_page',
+      'content_layers',
+    }),
   );
 
   /// Converts the options to their wire representation.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     'start_page': ?startPage,
     'end_page': ?endPage,
     if (contentLayers != null)
@@ -86,22 +103,37 @@ final class InteractionSpreadsheetProcessingOptions {
     this.visibleCells,
     this.sheetIndex,
     this.contentLayers,
+  }) : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const InteractionSpreadsheetProcessingOptions._({
+    this.visibleCells,
+    this.sheetIndex,
+    this.contentLayers,
+    required this._wireExtensions,
   });
 
   /// Creates processing options from their wire representation.
   factory InteractionSpreadsheetProcessingOptions.fromJson(
     Map<String, dynamic> json,
-  ) => InteractionSpreadsheetProcessingOptions(
+  ) => InteractionSpreadsheetProcessingOptions._(
     visibleCells: json['visible_cells'] as String?,
     sheetIndex: json['sheet_index'] as int?,
     contentLayers: (json['content_layers'] as List<dynamic>?)
         ?.cast<String>()
         .map(InteractionSpreadsheetLayer.new)
         .toList(),
+    wireExtensions: mediaExtensions(json, const {
+      'visible_cells',
+      'sheet_index',
+      'content_layers',
+    }),
   );
 
   /// Converts the options to their wire representation.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     'visible_cells': ?visibleCells,
     'sheet_index': ?sheetIndex,
     if (contentLayers != null)
@@ -112,6 +144,7 @@ final class InteractionSpreadsheetProcessingOptions {
 /// Controls audio understanding for an Interactions audio content block.
 final class InteractionAudioProcessing {
   final Object? _wireValue;
+  final Map<String, dynamic> _wireExtensions;
 
   /// Optional clip start, expressed in seconds with an `s` suffix.
   final String? startOffset;
@@ -124,28 +157,52 @@ final class InteractionAudioProcessing {
 
   /// Processes the selected audio interval.
   const InteractionAudioProcessing.clip({this.startOffset, this.endOffset})
-    : _wireValue = null;
+    : _wireValue = null,
+      _wireExtensions = const {};
+
+  const InteractionAudioProcessing._typed({
+    this.startOffset,
+    this.endOffset,
+    required this._wireExtensions,
+  }) : _wireValue = null;
 
   const InteractionAudioProcessing._wire(this._wireValue)
-    : startOffset = null,
+    : _wireExtensions = const {},
+      startOffset = null,
       endOffset = null;
 
   /// Parses the shorthand or object form and retains future wire variants.
-  factory InteractionAudioProcessing.fromJson(Object json) => switch (json) {
-    final Map<String, dynamic> options when options['type'] == 'static' =>
-      InteractionAudioProcessing.clip(
-        startOffset: options['start_offset'] as String?,
-        endOffset: options['end_offset'] as String?,
-      ),
-    String() ||
-    Map<String, dynamic>() => InteractionAudioProcessing._wire(json),
-    _ => throw const FormatException('Invalid Interactions audio processing'),
-  };
+  factory InteractionAudioProcessing.fromJson(Object json) {
+    try {
+      return switch (json) {
+        final Map<String, dynamic> options when options['type'] == 'static' =>
+          InteractionAudioProcessing._typed(
+            startOffset: options['start_offset'] as String?,
+            endOffset: options['end_offset'] as String?,
+            wireExtensions: mediaExtensions(options, const {
+              'type',
+              'start_offset',
+              'end_offset',
+            }),
+          ),
+        String() ||
+        Map<String, dynamic>() => InteractionAudioProcessing._wire(json),
+        _ => throw const FormatException(
+          'Invalid Interactions audio processing',
+        ),
+      };
+    } on TypeError {
+      if (json is Map<String, dynamic>)
+        return InteractionAudioProcessing._wire(json);
+      rethrow;
+    }
+  }
 
   /// Converts the selector to its wire representation.
   Object toJson() =>
       _wireValue ??
       {
+        ..._wireExtensions,
         'type': 'static',
         'start_offset': ?startOffset,
         'end_offset': ?endOffset,
@@ -155,6 +212,7 @@ final class InteractionAudioProcessing {
 /// Controls video understanding for an Interactions video content block.
 final class InteractionVideoProcessing {
   final Object? _wireValue;
+  final Map<String, dynamic> _wireExtensions;
 
   /// Optional clip start, expressed in seconds with an `s` suffix.
   final String? startOffset;
@@ -180,35 +238,63 @@ final class InteractionVideoProcessing {
     this.endOffset,
     this.fps,
     this.contentLayers,
+  }) : _wireValue = null,
+       _wireExtensions = const {};
+
+  const InteractionVideoProcessing._typed({
+    this.startOffset,
+    this.endOffset,
+    this.fps,
+    this.contentLayers,
+    required this._wireExtensions,
   }) : _wireValue = null;
 
   const InteractionVideoProcessing._wire(this._wireValue)
-    : startOffset = null,
+    : _wireExtensions = const {},
+      startOffset = null,
       endOffset = null,
       fps = null,
       contentLayers = null;
 
   /// Parses the shorthand or object form and retains future wire variants.
-  factory InteractionVideoProcessing.fromJson(Object json) => switch (json) {
-    final Map<String, dynamic> options when options['type'] == 'static' =>
-      InteractionVideoProcessing.clip(
-        startOffset: options['start_offset'] as String?,
-        endOffset: options['end_offset'] as String?,
-        fps: (options['fps'] as num?)?.toDouble(),
-        contentLayers: (options['content_layers'] as List<dynamic>?)
-            ?.cast<String>()
-            .map(InteractionVideoLayer.new)
-            .toList(),
-      ),
-    String() ||
-    Map<String, dynamic>() => InteractionVideoProcessing._wire(json),
-    _ => throw const FormatException('Invalid Interactions video processing'),
-  };
+  factory InteractionVideoProcessing.fromJson(Object json) {
+    try {
+      return switch (json) {
+        final Map<String, dynamic> options when options['type'] == 'static' =>
+          InteractionVideoProcessing._typed(
+            startOffset: options['start_offset'] as String?,
+            endOffset: options['end_offset'] as String?,
+            fps: (options['fps'] as num?)?.toDouble(),
+            contentLayers: (options['content_layers'] as List<dynamic>?)
+                ?.cast<String>()
+                .map(InteractionVideoLayer.new)
+                .toList(),
+            wireExtensions: mediaExtensions(options, const {
+              'type',
+              'start_offset',
+              'end_offset',
+              'fps',
+              'content_layers',
+            }),
+          ),
+        String() ||
+        Map<String, dynamic>() => InteractionVideoProcessing._wire(json),
+        _ => throw const FormatException(
+          'Invalid Interactions video processing',
+        ),
+      };
+    } on TypeError {
+      if (json is Map<String, dynamic>)
+        return InteractionVideoProcessing._wire(json);
+      rethrow;
+    }
+  }
 
   /// Converts the selector to its wire representation.
   Object toJson() =>
       _wireValue ??
       {
+        ..._wireExtensions,
         'type': 'static',
         'start_offset': ?startOffset,
         'end_offset': ?endOffset,
@@ -221,6 +307,7 @@ final class InteractionVideoProcessing {
 /// Controls document processing for an Interactions document content block.
 final class InteractionDocumentProcessing {
   final Object? _wireValue;
+  final Map<String, dynamic> _wireExtensions;
 
   /// Page processing for PDFs, documents and presentations.
   final InteractionPageProcessingOptions? pageOptions;
@@ -235,42 +322,60 @@ final class InteractionDocumentProcessing {
   const InteractionDocumentProcessing.select({
     this.pageOptions,
     this.spreadsheetOptions,
+  }) : _wireValue = null,
+       _wireExtensions = const {};
+
+  const InteractionDocumentProcessing._typed({
+    this.pageOptions,
+    this.spreadsheetOptions,
+    required this._wireExtensions,
   }) : _wireValue = null;
 
   const InteractionDocumentProcessing._wire(this._wireValue)
-    : pageOptions = null,
+    : _wireExtensions = const {},
+      pageOptions = null,
       spreadsheetOptions = null;
 
   /// Parses the shorthand or object form and retains future wire variants.
-  factory InteractionDocumentProcessing.fromJson(Object json) => switch (json) {
-    final Map<String, dynamic> options when options['type'] == 'static' =>
-      InteractionDocumentProcessing.select(
-        pageOptions: switch (options['page_options']) {
-          final Map<String, dynamic> page =>
-            InteractionPageProcessingOptions.fromJson(page),
-          null => null,
-          _ => throw const FormatException('Invalid page processing options'),
-        },
-        spreadsheetOptions: switch (options['spreadsheet_options']) {
-          final Map<String, dynamic> sheet =>
-            InteractionSpreadsheetProcessingOptions.fromJson(sheet),
-          null => null,
-          _ => throw const FormatException(
-            'Invalid spreadsheet processing options',
+  factory InteractionDocumentProcessing.fromJson(Object json) {
+    try {
+      return switch (json) {
+        final Map<String, dynamic> options when options['type'] == 'static' =>
+          InteractionDocumentProcessing._typed(
+            pageOptions: options['page_options'] == null
+                ? null
+                : InteractionPageProcessingOptions.fromJson(
+                    options['page_options'] as Map<String, dynamic>,
+                  ),
+            spreadsheetOptions: options['spreadsheet_options'] == null
+                ? null
+                : InteractionSpreadsheetProcessingOptions.fromJson(
+                    options['spreadsheet_options'] as Map<String, dynamic>,
+                  ),
+            wireExtensions: mediaExtensions(options, const {
+              'type',
+              'page_options',
+              'spreadsheet_options',
+            }),
           ),
-        },
-      ),
-    String() ||
-    Map<String, dynamic>() => InteractionDocumentProcessing._wire(json),
-    _ => throw const FormatException(
-      'Invalid Interactions document processing',
-    ),
-  };
+        String() ||
+        Map<String, dynamic>() => InteractionDocumentProcessing._wire(json),
+        _ => throw const FormatException(
+          'Invalid Interactions document processing',
+        ),
+      };
+    } on TypeError {
+      if (json is Map<String, dynamic>)
+        return InteractionDocumentProcessing._wire(json);
+      rethrow;
+    }
+  }
 
   /// Converts the selector to its wire representation.
   Object toJson() =>
       _wireValue ??
       {
+        ..._wireExtensions,
         'type': 'static',
         'page_options': ?pageOptions?.toJson(),
         'spreadsheet_options': ?spreadsheetOptions?.toJson(),
