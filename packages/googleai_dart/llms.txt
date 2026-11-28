@@ -35,6 +35,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [genie_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/genie_example.dart): Genie 4 creation, live JPEG frames, and completion.
 - [register_cloud_storage_files.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/register_cloud_storage_files.dart): Register Cloud Storage files with Gemini Files and OAuth.
 - [genie_webrtc_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/genie_webrtc_example.dart): Browser WebRTC signaling and native media playback for Genie 4.
+- [live_avatar_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_avatar_example.dart): Configure prebuilt Live avatar video on Vertex AI v1.
 - [live_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_example.dart) (~1.2k tokens): Live API WebSocket sessions.
 - [live_music_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_music_example.dart): Experimental Lyria RealTime music over Gemini Developer API v1beta and raw PCM output.
 - [live_transcription_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_transcription_example.dart) (~590 tokens): Gemini Live Transcribe with PCM audio, interim captions, and finalized text.

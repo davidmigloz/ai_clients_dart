@@ -132,6 +132,9 @@ class LiveClient {
             false)) {
       throw UnsupportedError('Live safety blocking methods require Vertex AI.');
     }
+    if (!isVertex && liveConfig?.avatarConfig != null) {
+      throw UnsupportedError('Prebuilt Live avatars require Vertex AI.');
+    }
     final credentials = await _getCredentials(accessToken);
     if (cancellation.isCompleted) throw _connectionCancelled;
     if (isVertex && credentials is EphemeralTokenCredentials) {
@@ -462,6 +465,7 @@ class LiveClient {
       labels: liveConfig?.labels,
       safetySettings: liveConfig?.safetySettings,
       explicitVadSignal: liveConfig?.explicitVadSignal,
+      avatarConfig: liveConfig?.avatarConfig,
     );
 
     // Subscribe before sending setup so an immediate response cannot be lost.

@@ -1187,6 +1187,37 @@ stored IDs or expiring client-managed replication keys.
 
 </details>
 
+### How do I stream video from a prebuilt Live avatar?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `gemini-3.8-live` on a supported Vertex AI region with API version `v1`
+and native WebSocket OAuth. Select `ResponseModality.video` and configure an
+avatar and voice.
+
+```dart
+final session = await liveClient.connect(
+  model: 'gemini-3.8-live',
+  liveConfig: LiveConfig(
+    avatarConfig: const LiveAvatarConfig(avatarName: 'Ben'),
+    generationConfig: LiveGenerationConfig(
+      responseModalities: const [ResponseModality.video],
+      speechConfig: SpeechConfig.withVoice(LiveVoices.puck),
+    ),
+  ),
+);
+```
+
+Video arrives as `InlineDataPart` values with the `video/mp4` MIME type in
+the server's model turn. Reference-image avatars are restricted to select
+Google Cloud customers.
+
+[Runnable example](example/live_avatar_example.dart) ·
+[Google Cloud Live avatars](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/configure-live-avatars)
+
+</details>
+
 ### How do I transcribe live audio?
 
 <details>
@@ -1386,6 +1417,7 @@ See the [example/](example/) directory for complete examples:
 | [`interactions_media_slicing.dart`](example/interactions_media_slicing.dart) | Select pages and layers for Interactions media |
 | [`interactions_example.dart`](example/interactions_example.dart) | Stable Interactions, streaming, state and function calls |
 | [`interactions_long_decode.dart`](example/interactions_long_decode.dart) | Opt-in automatic continuation on Gemini 4 |
+| [`live_avatar_example.dart`](example/live_avatar_example.dart) | Prebuilt Live avatar video on Vertex AI v1 |
 | [`live_example.dart`](example/live_example.dart) | Live API WebSocket sessions |
 | [`live_music_example.dart`](example/live_music_example.dart) | Lyria RealTime prompts, playback controls, and PCM output |
 | [`live_transcription_example.dart`](example/live_transcription_example.dart) | Stream PCM audio and read interim and finalized transcripts |

@@ -6,6 +6,7 @@ import '../../tools/tool.dart';
 import 'audio_transcription_config.dart';
 import 'context_window_compression_config.dart';
 import 'history_config.dart';
+import 'live_avatar_config.dart';
 import 'live_generation_config.dart';
 import 'proactivity_config.dart';
 import 'realtime_input_config.dart';
@@ -55,6 +56,9 @@ class LiveConfig {
   /// Enables explicit VAD signaling on a supported Vertex AI model.
   final bool? explicitVadSignal;
 
+  /// Prebuilt avatar configuration for a supported Vertex AI Live model.
+  final LiveAvatarConfig? avatarConfig;
+
   /// Creates a [LiveConfig].
   const LiveConfig({
     this.generationConfig,
@@ -70,6 +74,7 @@ class LiveConfig {
     this.labels,
     this.safetySettings,
     this.explicitVadSignal,
+    this.avatarConfig,
   });
 
   /// Creates a basic audio configuration.
@@ -178,6 +183,11 @@ class LiveConfig {
           .map(SafetySetting.fromJson)
           .toList(),
       explicitVadSignal: json['explicitVadSignal'] as bool?,
+      avatarConfig: json['avatarConfig'] != null
+          ? LiveAvatarConfig.fromJson(
+              json['avatarConfig'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -206,6 +216,7 @@ class LiveConfig {
           .map((setting) => setting.toJson())
           .toList(),
     if (explicitVadSignal != null) 'explicitVadSignal': explicitVadSignal,
+    if (avatarConfig != null) 'avatarConfig': avatarConfig!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
@@ -223,6 +234,7 @@ class LiveConfig {
     Object? labels = unsetCopyWithValue,
     Object? safetySettings = unsetCopyWithValue,
     Object? explicitVadSignal = unsetCopyWithValue,
+    Object? avatarConfig = unsetCopyWithValue,
   }) {
     return LiveConfig(
       generationConfig: generationConfig ?? this.generationConfig,
@@ -247,6 +259,9 @@ class LiveConfig {
       explicitVadSignal: explicitVadSignal == unsetCopyWithValue
           ? this.explicitVadSignal
           : explicitVadSignal as bool?,
+      avatarConfig: avatarConfig == unsetCopyWithValue
+          ? this.avatarConfig
+          : avatarConfig as LiveAvatarConfig?,
     );
   }
 
@@ -254,5 +269,5 @@ class LiveConfig {
   String toString() =>
       'LiveConfig(generationConfig: $generationConfig, '
       'labelCount: ${labels?.length}, safetySettingCount: ${safetySettings?.length}, '
-      'explicitVadSignal: $explicitVadSignal)';
+      'explicitVadSignal: $explicitVadSignal, avatarConfig: $avatarConfig)';
 }

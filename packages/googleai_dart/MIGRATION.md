@@ -542,6 +542,32 @@ PATCH /v1beta/webhooks/hook-id?update_mask=name
 
 ---
 
+## Handling the Live video response modality
+
+`ResponseModality.video` maps to `VIDEO` for Vertex AI Live avatars. Add a
+case if you exhaustively switch on `ResponseModality`.
+
+```dart
+// Before
+String label(ResponseModality modality) => switch (modality) {
+  ResponseModality.unspecified => 'Unspecified',
+  ResponseModality.text => 'Text',
+  ResponseModality.image => 'Image',
+  ResponseModality.audio => 'Audio',
+};
+
+// After
+String label(ResponseModality modality) => switch (modality) {
+  ResponseModality.unspecified => 'Unspecified',
+  ResponseModality.text => 'Text',
+  ResponseModality.image => 'Image',
+  ResponseModality.audio => 'Audio',
+  ResponseModality.video => 'Video',
+};
+```
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

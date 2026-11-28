@@ -27,6 +27,44 @@ void main() {
     });
   });
 
+  test(
+    'prebuilt avatar setup round trips without changing numeric bitrates',
+    () {
+      const fields = {
+        'avatarName': 'Ben',
+        'audioBitrateBps': 64000,
+        'videoBitrateBps': 500000,
+      };
+      const wire = {
+        'generationConfig': {
+          'responseModalities': ['VIDEO'],
+        },
+        'avatarConfig': fields,
+      };
+      final config = LiveConfig.fromJson(wire);
+      expect(config.generationConfig?.responseModalities, [
+        ResponseModality.video,
+      ]);
+      expect(config.avatarConfig?.toJson(), fields);
+      expect(config.copyWith().toJson(), wire);
+      expect(
+        config
+            .copyWith(avatarConfig: null)
+            .toJson()
+            .containsKey('avatarConfig'),
+        isFalse,
+      );
+      expect(config.avatarConfig?.copyWith(audioBitrateBps: null).toJson(), {
+        'avatarName': 'Ben',
+        'videoBitrateBps': 500000,
+      });
+      final setup = {
+        'setup': {'model': 'models/fixture', ...wire},
+      };
+      expect(BidiGenerateContentClientMessage.fromJson(setup).toJson(), setup);
+    },
+  );
+
   group('LiveConfig', () {
     test('round-trips setup options and accepts protobuf int64 strings', () {
       const json = {

@@ -220,6 +220,102 @@ void main() {
     },
   );
 
+  test(
+    'Vertex v1 requests a prebuilt Live avatar and receives MP4 data',
+    () async {
+      final server = await _Server.start(
+        onRealtimeInput: (socket, input) {
+          expect(input, {'text': 'Hello'});
+          socket.add(
+            jsonEncode({
+              'serverContent': {
+                'modelTurn': {
+                  'role': 'model',
+                  'parts': [
+                    {
+                      'inlineData': {'mimeType': 'video/mp4', 'data': 'AQID'},
+                    },
+                  ],
+                },
+              },
+            }),
+          );
+        },
+      );
+      final config = GoogleAIConfig.vertexAI(
+        projectId: 'P',
+        location: 'us-central1',
+        authProvider: const BearerTokenProvider('local-fixture'),
+      ).copyWith(baseUrl: server.baseUrl, apiVersion: ApiVersion.v1);
+      final session = await _createLive(config)
+          .connect(
+            model: _model,
+            liveConfig: LiveConfig(
+              avatarConfig: const LiveAvatarConfig(avatarName: 'Ben'),
+              generationConfig: LiveGenerationConfig(
+                responseModalities: const [ResponseModality.video],
+                speechConfig: SpeechConfig.withVoice(LiveVoices.puck),
+              ),
+            ),
+          )
+          .timeout(_deadline);
+
+      final handshake = await server.handshake.future.timeout(_deadline);
+      expect(
+        handshake.uri.path,
+        '/ws/google.cloud.aiplatform.v1.LlmBidiService/BidiGenerateContent',
+      );
+      expect(handshake.authorization, 'Bearer local-fixture');
+      expect(handshake.firstMessage, {
+        'setup': {
+          'model':
+              'projects/P/locations/us-central1/publishers/google/models/$_model',
+          'generationConfig': {
+            'responseModalities': ['VIDEO'],
+            'speechConfig': {
+              'voiceConfig': {
+                'prebuiltVoiceConfig': {'voiceName': 'Puck'},
+              },
+            },
+          },
+          'avatarConfig': {'avatarName': 'Ben'},
+        },
+      });
+      final response = session.messages.firstWhere(
+        (message) => message is BidiGenerateContentServerContent,
+      );
+      session.send(const BidiGenerateContentRealtimeInput(text: 'Hello'));
+      final content =
+          await response.timeout(_deadline) as BidiGenerateContentServerContent;
+      final part = content.modelTurn!.parts.single;
+      final blob = (part as InlineDataPart).inlineData;
+      expect(blob.mimeType, 'video/mp4');
+      expect(blob.toBytes(), [1, 2, 3]);
+    },
+  );
+
+  test(
+    'Developer Live rejects a prebuilt avatar before auth or upgrade',
+    () async {
+      final auth = _CountingProvider(const ApiKeyCredentials('local-fixture'));
+      final server = await _Server.start();
+      final live = _createLive(
+        GoogleAIConfig(baseUrl: server.baseUrl, authProvider: auth),
+      );
+      await expectLater(
+        live.connect(
+          model: _model,
+          liveConfig: const LiveConfig(
+            avatarConfig: LiveAvatarConfig(avatarName: 'Ben'),
+          ),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(auth.calls, 0);
+      expect(server.upgrades, 0);
+    },
+  );
+
   test('Developer Live sends a per-input video resolution', () async {
     final next = Completer<Map<String, dynamic>>();
     final server = await _Server.start(onClientMessage: next.complete);

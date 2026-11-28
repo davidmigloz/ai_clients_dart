@@ -11,6 +11,9 @@ enum ResponseModality {
 
   /// Audio modality.
   audio,
+
+  /// Video modality, for example for a Vertex AI Live avatar.
+  video,
 }
 
 /// Converts a string to a [ResponseModality] enum value.
@@ -19,6 +22,7 @@ ResponseModality responseModalityFromString(String? value) {
     'TEXT' => ResponseModality.text,
     'IMAGE' => ResponseModality.image,
     'AUDIO' => ResponseModality.audio,
+    'VIDEO' => ResponseModality.video,
     _ => ResponseModality.unspecified,
   };
 }
@@ -29,6 +33,7 @@ String responseModalityToString(ResponseModality modality) {
     ResponseModality.text => 'TEXT',
     ResponseModality.image => 'IMAGE',
     ResponseModality.audio => 'AUDIO',
+    ResponseModality.video => 'VIDEO',
     ResponseModality.unspecified => 'MODALITY_UNSPECIFIED',
   };
 }
