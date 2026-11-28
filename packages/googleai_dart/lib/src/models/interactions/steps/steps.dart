@@ -1,4 +1,5 @@
 import '../../batch/status.dart';
+import '../../content/media_wire_options.dart';
 import '../../copy_with_sentinel.dart';
 import '../content/content.dart';
 import '../interaction_review_snippet.dart';
@@ -19,6 +20,8 @@ part 'google_search_result_step.dart';
 part 'mcp_server_tool_call_step.dart';
 part 'mcp_server_tool_result_step.dart';
 part 'model_output_step.dart';
+part 'processing_call_step.dart';
+part 'processing_result_step.dart';
 part 'thought_step.dart';
 part 'tool_search_call_step.dart';
 part 'tool_search_result_step.dart';
@@ -73,6 +76,14 @@ sealed class InteractionStep {
       'file_search_result' => FileSearchResultStep.fromJson(json),
       'mcp_server_tool_call' => McpServerToolCallStep.fromJson(json),
       'mcp_server_tool_result' => McpServerToolResultStep.fromJson(json),
+      'processing_call'
+          when json['id'] is String &&
+              (json['signature'] == null || json['signature'] is String) =>
+        ProcessingCallStep.fromJson(json),
+      'processing_result'
+          when json['call_id'] is String &&
+              (json['signature'] == null || json['signature'] is String) =>
+        ProcessingResultStep.fromJson(json),
       'tool_search_call' => ToolSearchCallStep.fromJson(json, partial: partial),
       'tool_search_result' => ToolSearchResultStep.fromJson(json),
       _ => UnknownStep.fromJson(json),

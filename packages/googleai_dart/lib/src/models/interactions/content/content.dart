@@ -1,3 +1,4 @@
+import '../../content/media_wire_options.dart';
 import '../../copy_with_sentinel.dart';
 import '../interaction_review_snippet.dart';
 import '../media_processing.dart';
@@ -7,6 +8,7 @@ part 'annotation.dart';
 part 'audio_content.dart';
 part 'document_content.dart';
 part 'image_content.dart';
+part 'speech_annotation.dart';
 part 'text_content.dart';
 part 'video_content.dart';
 
