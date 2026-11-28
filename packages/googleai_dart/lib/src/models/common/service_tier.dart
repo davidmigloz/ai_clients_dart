@@ -11,6 +11,9 @@ enum ServiceTier {
 
   /// Priority service tier.
   priority,
+
+  /// Deferred execution on global Vertex AI Interactions.
+  deferred,
 }
 
 /// Parses a [ServiceTier] from its string representation.
@@ -22,6 +25,7 @@ ServiceTier serviceTierFromString(String? value) {
     'standard' => ServiceTier.standard,
     'flex' => ServiceTier.flex,
     'priority' => ServiceTier.priority,
+    'deferred' => ServiceTier.deferred,
     _ => ServiceTier.unspecified,
   };
 }
@@ -33,5 +37,6 @@ String serviceTierToString(ServiceTier value) {
     ServiceTier.standard => 'standard',
     ServiceTier.flex => 'flex',
     ServiceTier.priority => 'priority',
+    ServiceTier.deferred => 'deferred',
   };
 }

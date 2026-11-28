@@ -51,6 +51,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [tuned_models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_models_example.dart) (~952 tokens): Tuned model workflows.
 - [url_context_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/url_context_example.dart) (~926 tokens): URL content fetching and analysis.
 - [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/vertex_ai_example.dart) (~1.3k tokens): Vertex AI configuration.
+- [vertex_interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/vertex_interactions_example.dart): Vertex AI Interactions with OAuth and project routing.
 
 ## Optional
 

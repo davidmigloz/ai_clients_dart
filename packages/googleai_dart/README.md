@@ -337,11 +337,28 @@ budget above the tokens already used. On Vertex AI, select
 <summary><b>Show configuration</b></summary>
 
 Configure your Google Cloud project, location, and OAuth credentials with
-`GoogleAIConfig.vertexAI(...)`, then call `client.models.generateContent(...)`.
-`us` and `eu` select their dedicated multi-region endpoints. Check the model's
-availability in your selected location.
+`GoogleAIConfig.vertexAI(...)`. Use `client.interactions.create(...)` for
+stateful model calls and `client.interactions.list(...)` to page through
+stored interaction IDs. Use `client.models.generateContent(...)` for the
+GenerateContent API. Vertex Interactions documents `global`, `us`, and `eu`
+availability. `us` and `eu` select dedicated multi-region endpoints.
+
+For asynchronous model calls on the Deferred tier, use global Interactions
+`v1` with `ServiceTier.deferred`, `background: true`, and `store: true`.
+Start the call with `create(...)`. Poll with `get(...)` while the call is
+queued. Once it reports `InteractionStatus.inProgress`, you can attach with
+`resumeStream(...)`. Use `cancel(...)` to stop a queued or running call.
+
+Cloud API keys can use `ApiKeyProvider(..., placement: AuthPlacement.header)`
+with the documented project and location. The client also follows the pinned
+SDK's projectless express route when both the project and location are omitted
+and the Cloud base URL and API mode are configured explicitly. Listing uses
+the project-scoped API.
 [Vertex AI configuration](#configuration) ·
-[Full example](example/vertex_ai_example.dart)
+[Interactions example](example/vertex_interactions_example.dart) ·
+[GenerateContent example](example/vertex_ai_example.dart) ·
+[Cloud Interactions developer guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/interactions/developer-guide) ·
+[Deferred tier and supported models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deferred-tier)
 
 </details>
 
@@ -767,7 +784,8 @@ See the [example/](example/) directory for complete examples:
 | [`tuned_model_generation_example.dart`](example/tuned_model_generation_example.dart) | Generate content with tuned models |
 | [`tuned_models_example.dart`](example/tuned_models_example.dart) | Tuned model workflows |
 | [`url_context_example.dart`](example/url_context_example.dart) | URL content fetching and analysis |
-| [`vertex_ai_example.dart`](example/vertex_ai_example.dart) | Vertex AI configuration |
+| [`vertex_ai_example.dart`](example/vertex_ai_example.dart) | Vertex AI GenerateContent |
+| [`vertex_interactions_example.dart`](example/vertex_interactions_example.dart) | Vertex AI Interactions with OAuth and project routing |
 | [`webhooks_example.dart`](example/webhooks_example.dart) | Webhook subscriptions for interaction events |
 
 ## API Coverage
@@ -783,7 +801,7 @@ See the [example/](example/) directory for complete examples:
 | Batches | ✅ Full |
 | Corpora | ✅ Full |
 | File Search Stores | ✅ Full |
-| Interactions | Developer REST `v1` and `v1beta` for model interactions. Managed agents require `v1beta`. |
+| Interactions | Developer REST `v1` and `v1beta`, and Vertex AI project routes. Developer managed agents require `v1beta`. |
 | Agents (Experimental) | ✅ Full |
 | Webhooks (Experimental) | ✅ Full |
 | Auth Tokens | ✅ Full |

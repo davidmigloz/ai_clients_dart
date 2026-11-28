@@ -175,6 +175,55 @@ final after = GoogleAIConfig.vertexAI(
 
 ---
 
+## Updating Vertex AI Interactions
+
+Vertex Interactions now uses the project/location route documented by Cloud.
+If a custom gateway rewrote the old Interactions URL, update its path mapping
+from:
+
+```text
+/v1/projects/{project}/locations/{location}/publishers/google/interactions
+```
+
+to:
+
+```text
+/v1/projects/{project}/locations/{location}/interactions
+```
+
+The `ServiceTier.deferred` enum member represents the global Vertex AI
+Interactions Deferred tier. Add a case for it in exhaustive switches.
+Add `InteractionStatus.queued` to status switches and poll until the call
+starts before attaching an SSE stream.
+
+```dart
+// Before
+switch (tier) {
+  case ServiceTier.standard:
+  case ServiceTier.unspecified:
+    return 'standard';
+  case ServiceTier.flex:
+    return 'flex';
+  case ServiceTier.priority:
+    return 'priority';
+}
+
+// After
+switch (tier) {
+  case ServiceTier.standard:
+  case ServiceTier.unspecified:
+    return 'standard';
+  case ServiceTier.flex:
+    return 'flex';
+  case ServiceTier.priority:
+    return 'priority';
+  case ServiceTier.deferred:
+    return 'deferred';
+}
+```
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

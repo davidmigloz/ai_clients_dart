@@ -14,6 +14,7 @@ import '../models/interactions/generation_config.dart';
 import '../models/interactions/interaction.dart';
 import '../models/interactions/interaction_input.dart';
 import '../models/interactions/interaction_status.dart';
+import '../models/interactions/list_interactions_response.dart';
 import '../models/interactions/response_formats/response_formats.dart';
 import '../models/interactions/response_modality.dart';
 import '../models/interactions/safety_setting.dart';
@@ -54,6 +55,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       requestBuilder.buildUrl(
         '/{version}/interactions$path',
         apiVersion: _apiVersion,
+        vertexProjectScoped: true,
         queryParams: queryParams,
       );
 
@@ -186,6 +188,35 @@ class InteractionsResource extends ResourceBase with StreamingResource {
         );
         return http.Request('GET', url)..headers.addAll(_buildHeaders());
       });
+
+  /// Lists stored interactions in a Vertex AI project and location.
+  ///
+  /// The server defaults to 10 interactions per page and accepts up to 500.
+  /// Use [ListInteractionsResponse.nextPageToken] for the next request.
+  Future<ListInteractionsResponse> list({
+    int? pageSize,
+    String? pageToken,
+  }) async {
+    if (config.apiMode != ApiMode.vertexAI ||
+        config.projectId == null ||
+        config.location == null) {
+      throw UnsupportedError(
+        'Listing interactions requires a Vertex AI project and location.',
+      );
+    }
+    final url = _buildUrl(
+      '',
+      queryParams: {
+        if (pageSize != null) 'page_size': '$pageSize',
+        'page_token': ?pageToken,
+      },
+    );
+    final request = http.Request('GET', url)..headers.addAll(_buildHeaders());
+    final response = await interceptorChain.execute(request);
+    return ListInteractionsResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
 
   /// Cancels an in-progress background interaction.
   ///
@@ -385,6 +416,20 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     Map<String, dynamic> body, {
     bool stream = false,
   }) {
+    if (body['service_tier'] == serviceTierToString(ServiceTier.deferred) &&
+        (config.apiMode != ApiMode.vertexAI ||
+            config.location != 'global' ||
+            _apiVersion != ApiVersion.v1 ||
+            stream ||
+            body['model'] == null ||
+            body['background'] != true ||
+            body['store'] != true)) {
+      throw ArgumentError(
+        'The Deferred tier requires a nonstreaming Vertex AI Interactions '
+        'v1 model request in global with '
+        'background: true, and store: true.',
+      );
+    }
     final url = _buildUrl(
       '',
       queryParams: stream && _apiVersion == ApiVersion.v1beta

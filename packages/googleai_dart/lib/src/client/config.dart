@@ -198,7 +198,9 @@ class GoogleAIConfig {
   /// Creates a config for Vertex AI.
   ///
   /// Requires [projectId] and [location] for GCP integration.
-  /// Authentication must use OAuth 2.0 with service account credentials.
+  /// Use an OAuth bearer token for project authentication. Cloud
+  /// Interactions also supports a Cloud API key in the `x-goog-api-key`
+  /// header. See https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/interactions/developer-guide.
   /// Choose [ApiVersion.v1beta1] for Vertex AI preview features that require it.
   ///
   /// The [location] determines the API endpoint:
