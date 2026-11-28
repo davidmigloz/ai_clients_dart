@@ -42,7 +42,8 @@ class LiveGenerationConfig {
 
   /// Whether a supported model adapts its responses to the user's tone.
   ///
-  /// The Gemini Developer API documents this for Gemini 2.5 Flash Live.
+  /// Use with supported Gemini 2.5 Flash Live models. Omit for Vertex AI
+  /// Gemini 3.8 Live, which enables affective dialogue by default.
   final bool? enableAffectiveDialog;
 
   /// Target language and echo settings on Live Translate models.
@@ -120,7 +121,13 @@ class LiveGenerationConfig {
           : null,
       maxOutputTokens: json['maxOutputTokens'] as int?,
       topP: json['topP'] != null ? (json['topP'] as num).toDouble() : null,
-      topK: json['topK'] as int?,
+      topK: switch (json['topK']) {
+        null => null,
+        final int value => value,
+        final num value when value.isFinite && value == value.toInt() =>
+          value.toInt(),
+        _ => throw const FormatException('Expected an integer for Live topK.'),
+      },
       mediaResolution: mediaResolution == null
           ? null
           : mediaResolutionLevelFromString(mediaResolution),

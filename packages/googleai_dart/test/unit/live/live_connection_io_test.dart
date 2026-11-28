@@ -186,15 +186,17 @@ void main() {
           liveConfig: const LiveConfig(
             labels: {'deployment': 'fixture'},
             explicitVadSignal: true,
+            safetySettings: [
+              SafetySetting(
+                category: HarmCategory.hateSpeech,
+                threshold: HarmBlockThreshold.blockOnlyHigh,
+                method: HarmBlockMethod.severity,
+              ),
+            ],
             generationConfig: LiveGenerationConfig(
               mediaResolution: MediaResolutionLevel.low,
               seed: 0,
               thinkingConfig: ThinkingConfig(thinkingLevel: ThinkingLevel.low),
-              enableAffectiveDialog: true,
-            ),
-            proactivity: ProactivityConfig(
-              proactiveAudio: true,
-              proactiveVideo: true,
             ),
           ),
         )
@@ -204,15 +206,71 @@ void main() {
         'model': 'projects/P/locations/eu/publishers/google/models/$_model',
         'labels': {'deployment': 'fixture'},
         'explicitVadSignal': true,
+        'safetySettings': [
+          {
+            'category': 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold': 'BLOCK_ONLY_HIGH',
+            'method': 'SEVERITY',
+          },
+        ],
         'generationConfig': {
           'mediaResolution': 'MEDIA_RESOLUTION_LOW',
           'seed': 0,
           'thinkingConfig': {'thinkingLevel': 'LOW'},
-          'enableAffectiveDialog': true,
         },
-        'proactivity': {'proactiveAudio': true, 'proactiveVideo': true},
       },
     });
+  });
+
+  test('Vertex 2.5 Live setup preserves legacy audio flags', () async {
+    const model = 'gemini-live-2.5-flash-native-audio';
+    final server = await _Server.start();
+    final config = GoogleAIConfig.vertexAI(
+      projectId: 'P',
+      location: 'eu',
+      authProvider: const BearerTokenProvider('local-fixture'),
+    ).copyWith(baseUrl: server.baseUrl);
+    await _createLive(config)
+        .connect(
+          model: model,
+          liveConfig: const LiveConfig(
+            generationConfig: LiveGenerationConfig(enableAffectiveDialog: true),
+            proactivity: ProactivityConfig(proactiveAudio: true),
+          ),
+        )
+        .timeout(_deadline);
+    expect((await server.handshake.future).firstMessage, {
+      'setup': {
+        'model': 'projects/P/locations/eu/publishers/google/models/$model',
+        'generationConfig': {'enableAffectiveDialog': true},
+        'proactivity': {'proactiveAudio': true},
+      },
+    });
+  });
+
+  test('Developer Live rejects a Vertex safety method before auth', () async {
+    final server = await _Server.start();
+    final provider = _CountingProvider(const ApiKeyCredentials('fixture'));
+    final live = _createLive(
+      GoogleAIConfig(baseUrl: server.baseUrl, authProvider: provider),
+    );
+    await expectLater(
+      live.connect(
+        model: _model,
+        liveConfig: const LiveConfig(
+          safetySettings: [
+            SafetySetting(
+              category: HarmCategory.hateSpeech,
+              threshold: HarmBlockThreshold.blockOnlyHigh,
+              method: HarmBlockMethod.probability,
+            ),
+          ],
+        ),
+      ),
+      throwsUnsupportedError,
+    );
+    expect(provider.calls, 0);
+    expect(server.upgrades, 0);
   });
 
   test(

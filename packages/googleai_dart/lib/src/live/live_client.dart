@@ -102,6 +102,11 @@ class LiveClient {
     if (!isVertex && liveConfig?.explicitVadSignal != null) {
       throw UnsupportedError('Explicit Live VAD signaling requires Vertex AI.');
     }
+    if (!isVertex &&
+        (liveConfig?.safetySettings?.any((setting) => setting.method != null) ??
+            false)) {
+      throw UnsupportedError('Live safety blocking methods require Vertex AI.');
+    }
     final credentials = await _getCredentials(accessToken);
     if (isVertex && credentials is EphemeralTokenCredentials) {
       throw const LiveConnectionException(

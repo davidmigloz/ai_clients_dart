@@ -2,7 +2,9 @@ import '../../copy_with_sentinel.dart';
 
 /// Configuration for proactive Live responses.
 ///
-/// Allows the model to proactively generate audio without explicit prompts.
+/// Allows a supported model to generate audio without explicit prompts.
+/// Omit this configuration for Vertex AI Gemini 3.8 Live, which enables
+/// proactive audio by default.
 class ProactivityConfig {
   /// Whether proactive audio is enabled.
   ///

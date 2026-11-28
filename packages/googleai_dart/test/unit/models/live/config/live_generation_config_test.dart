@@ -2,6 +2,16 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('reads integral numeric topK and rejects nonintegral values', () {
+    final config = LiveGenerationConfig.fromJson({'topK': 40.0});
+    expect(config.topK, 40);
+    expect(config.toJson(), {'topK': 40});
+    expect(
+      () => LiveGenerationConfig.fromJson({'topK': 40.5}),
+      throwsFormatException,
+    );
+  });
+
   group('LiveGenerationConfig', () {
     test('round-trips the supported Live generation settings', () {
       const json = {
