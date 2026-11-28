@@ -230,6 +230,98 @@ void main() {
     },
   );
 
+  test(
+    'preserves credential references and both disabled network shapes',
+    () async {
+      const credentialsNetwork = EnvironmentNetworkAllowlist(
+        allowlist: [
+          AllowlistEntry(
+            domain: 'api.example.com',
+            credential: 'service-egress',
+            transform: [
+              {'X-Tenant': 'fixture'},
+            ],
+          ),
+          AllowlistEntry(domain: 'status.example.com'),
+        ],
+      );
+      const credentialWire = {
+        'allowlist': [
+          {
+            'domain': 'api.example.com',
+            'credential': 'service-egress',
+            'transform': [
+              {'X-Tenant': 'fixture'},
+            ],
+          },
+          {'domain': 'status.example.com'},
+        ],
+      };
+      final paths = <String>[];
+      final bodies = <Map<String, dynamic>>[];
+      final client = _client((request) async {
+        expect(request.method, 'POST');
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        paths.add(request.url.path);
+        bodies.add(body);
+        return switch (request.url.path) {
+          '/v1beta/environments' => _jsonResponse({'id': 'env_new', ...body}),
+          '/v1beta/agents' => _jsonResponse({'id': 'agent_new', ...body}),
+          '/v1beta/interactions' => _jsonResponse({
+            'id': 'int_new',
+            'status': 'completed',
+            'environment': body['environment'],
+          }),
+          _ => fail('Unexpected environment request'),
+        };
+      });
+
+      for (final (network, wire) in const [
+        (credentialsNetwork, credentialWire),
+        (EnvironmentNetworkDisabled(), 'disabled'),
+        (EnvironmentNetworkDisabled.allowlist(), {'allowlist': 'disabled'}),
+      ]) {
+        final environment = await client.environments.create(
+          environment: CreateEnvironmentRequest(network: network),
+        );
+        expect(environment.network?.toJson(), wire);
+        final inline = EnvironmentConfigOrId.config(
+          EnvironmentConfig(network: network),
+        );
+        final agent = await client.agents.create(
+          agent: Agent(baseAgent: _agent, baseEnvironment: inline),
+        );
+        final interaction = await client.interactions.createWithAgent(
+          agent: _agent,
+          environment: inline,
+        );
+        final inlineWire = {'type': 'remote', 'network': wire};
+        expect(agent.baseEnvironment?.toJson(), inlineWire);
+        expect(interaction.environment?.toJson(), inlineWire);
+        expect(bodies, [
+          {'network': wire},
+          {'base_agent': _agent, 'base_environment': inlineWire},
+          {'agent': _agent, 'environment': inlineWire},
+        ]);
+        expect(paths, [
+          '/v1beta/environments',
+          '/v1beta/agents',
+          '/v1beta/interactions',
+        ]);
+        bodies.clear();
+        paths.clear();
+      }
+      final entry = AllowlistEntry.fromJson(const {
+        'domain': 'api.example.com',
+        'credential': 'service-egress',
+      });
+      expect(entry.copyWith().credential, 'service-egress');
+      expect(entry.copyWith(credential: null).toJson(), {
+        'domain': 'api.example.com',
+      });
+    },
+  );
+
   test('preserves complete env strings and nested wire forms', () {
     const inline = {
       'type': 'remote',
