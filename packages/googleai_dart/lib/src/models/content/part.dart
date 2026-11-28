@@ -187,6 +187,7 @@ sealed class Part {
       additionalProperties: additionalProperties,
     );
     if (dataKeys.isEmpty) {
+      if (common.additionalProperties.isNotEmpty) return UnknownPart(json);
       return MetadataPart(
         thought: common.thought,
         thoughtSignature: common.thoughtSignature,
@@ -197,7 +198,6 @@ sealed class Part {
         audioMetadata: common.audioMetadata,
         documentMetadata: common.documentMetadata,
         spreadsheetMetadata: common.spreadsheetMetadata,
-        additionalProperties: common.additionalProperties,
       );
     }
 
