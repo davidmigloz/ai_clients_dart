@@ -10,6 +10,7 @@ import '../../models/common/register_files_request.dart';
 import '../../models/common/register_files_response.dart';
 import '../../utils/redactor.dart';
 import '../base_resource.dart';
+import '../media_download.dart';
 
 /// Shared Files API behavior for the IO, web, and stub resources.
 abstract class FilesResourceBase extends ResourceBase {
@@ -41,6 +42,33 @@ abstract class FilesResourceBase extends ResourceBase {
         'See: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/send-multimodal-prompts',
       );
     }
+  }
+
+  /// Downloads a generated Gemini file by its ID or `files/{id}` name.
+  ///
+  /// Use `get` or `list` to find API-generated files with a download URI.
+  /// Uploaded and Cloud Storage-registered inputs are available for prompting
+  /// and metadata. This operation is available on Developer API `v1` and
+  /// `v1beta`.
+  ///
+  /// Browser transports require an endpoint that serves the bytes directly
+  /// because browsers cannot expose a signed redirect's location to the SDK.
+  Future<List<int>> download({
+    required String name,
+    Future<void>? abortTrigger,
+  }) async {
+    validateGoogleAIOnly();
+    if (config.apiVersion != ApiVersion.v1 &&
+        config.apiVersion != ApiVersion.v1beta) {
+      throw UnsupportedError('File download requires v1 or v1beta.');
+    }
+    final resource = mediaResourceName(this, 'files', name);
+    final bytes = await downloadDeveloperMedia(
+      this,
+      '/{version}/$resource:download',
+      abortTrigger: abortTrigger,
+    );
+    return bytes;
   }
 
   /// Registers existing Google Cloud Storage objects with the Gemini Files API.

@@ -243,28 +243,6 @@ class FilesResource extends FilesResourceBase {
     await interceptorChain.execute(httpRequest);
   }
 
-  /// Downloads the content of a file.
-  ///
-  /// The [name] is the resource name of the file to download (e.g., "files/abc123").
-  ///
-  /// Returns the file content as a list of bytes.
-  ///
-  /// **Note:** Files are automatically deleted after 48 hours.
-  Future<List<int>> download({required String name}) async {
-    validateGoogleAIOnly();
-
-    final url = requestBuilder.buildUrl('/{version}/$name:download');
-
-    final headers = requestBuilder.buildHeaders();
-
-    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
-
-    final response = await interceptorChain.execute(httpRequest);
-
-    // Return the raw bytes
-    return response.bodyBytes;
-  }
-
   /// Maps HTTP errors for streaming (mirrors ErrorInterceptor logic).
   GoogleAIException _mapHttpErrorForStreaming(http.Response response) {
     final statusCode = response.statusCode;
