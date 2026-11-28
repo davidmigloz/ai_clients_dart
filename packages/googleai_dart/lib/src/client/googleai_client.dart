@@ -13,6 +13,7 @@ import '../resources/auth_tokens_resource.dart';
 import '../resources/batches_resource.dart';
 import '../resources/cached_contents_resource.dart';
 import '../resources/corpora_resource.dart';
+import '../resources/credentials_resource.dart';
 import '../resources/decisions_resource.dart';
 import '../resources/environments_resource.dart';
 import '../resources/file_search_stores/file_search_stores_resource.dart';
@@ -159,6 +160,11 @@ class GoogleAIClient {
   /// This is an experimental API and is subject to change.
   late final EnvironmentsResource environments;
 
+  /// Server-managed credentials for Gemini managed agents.
+  ///
+  /// Available on the Gemini Developer API with [ApiVersion.v1beta].
+  late final CredentialsResource credentials;
+
   /// Resource for triggers API (experimental).
   ///
   /// The Triggers API manages scheduled triggers that run agent interactions
@@ -301,6 +307,14 @@ class GoogleAIClient {
     );
 
     environments = EnvironmentsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    credentials = CredentialsResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
+import '../utils/redactor.dart';
 import '../utils/request_id.dart';
 import 'retry_wrapper.dart';
 
@@ -35,11 +36,15 @@ class InterceptorChain {
   ///
   /// [checkActive] can prevent an attempt from starting after asynchronous
   /// preparation and prevent reading a response that arrived after cancellation.
+  ///
+  /// [diagnosticRedactor] applies additional redaction to this operation.
+  ///
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
     void Function()? checkActive,
+    Redactor? diagnosticRedactor,
   }) {
     ensureNotClosed?.call();
 
@@ -47,6 +52,7 @@ class InterceptorChain {
       request: request,
       metadata: {},
       abortTrigger: abortTrigger,
+      diagnosticRedactor: diagnosticRedactor,
     );
 
     return _buildChain(0, checkActive)(context);

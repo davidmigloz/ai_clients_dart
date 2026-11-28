@@ -594,6 +594,33 @@ if (response.answers?['late_delivery'] case NoulAnswer(:final noul)) {
 
 </details>
 
+### How do I manage credentials for agents?
+
+<details>
+<summary><b>Show example</b></summary>
+
+The Gemini Developer API `v1beta` Credentials API stores environment variables,
+HTTP bearer tokens, and OAuth2 credentials for managed agents. Create or update
+a credential with its secret value. Responses contain only its metadata.
+
+```dart
+final credential = await client.credentials.create(
+  credential: HttpBearerConfig(id: 'deployment-token', token: token),
+);
+await client.credentials.update(
+  credential.id,
+  credential: HttpBearerUpdateConfig(token: replacementToken),
+  updateMask: 'token',
+);
+```
+
+Use the returned ID to reference the credential from a managed environment.
+Use `get` and `list` for metadata and `delete` to remove a stored credential.
+[Full example](example/credentials_example.dart) ·
+[Gemini managed-agent credentials](https://aistudio.google.com/docs/agent-credentials)
+
+</details>
+
 ### How do I create embeddings?
 
 <details>
@@ -755,6 +782,7 @@ See the [example/](example/) directory for complete examples:
 | [`caching_example.dart`](example/caching_example.dart) | Context caching API usage |
 | [`complete_api_example.dart`](example/complete_api_example.dart) | Complete API coverage demo |
 | [`corpora_example.dart`](example/corpora_example.dart) | Corpus management for semantic retrieval |
+| [`credentials_example.dart`](example/credentials_example.dart) | Store a managed-agent credential and inspect its metadata |
 | [`decisions_example.dart`](example/decisions_example.dart) | Gemini Decision 1 question and answer types |
 | [`documents_example.dart`](example/documents_example.dart) | Document management within corpora |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
@@ -802,6 +830,7 @@ See the [example/](example/) directory for complete examples:
 | Corpora | ✅ Full |
 | File Search Stores | ✅ Full |
 | Interactions | Developer REST `v1` and `v1beta`, and Vertex AI project routes. Developer managed agents require `v1beta`. |
+| Credentials | Gemini Developer REST `v1beta` |
 | Agents (Experimental) | ✅ Full |
 | Webhooks (Experimental) | ✅ Full |
 | Auth Tokens | ✅ Full |

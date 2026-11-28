@@ -57,7 +57,7 @@ class LoggingInterceptor implements Interceptor {
     );
 
     // Log request
-    _logRequest(updatedRequest, requestId);
+    _logRequest(updatedRequest, requestId, context.diagnosticRedactor);
 
     try {
       // Execute request
@@ -65,7 +65,12 @@ class LoggingInterceptor implements Interceptor {
       stopwatch.stop();
 
       // Log response
-      _logResponse(response, requestId, stopwatch.elapsedMilliseconds);
+      _logResponse(
+        response,
+        requestId,
+        stopwatch.elapsedMilliseconds,
+        context.diagnosticRedactor,
+      );
 
       return response;
     } on AbortedException catch (e) {
@@ -118,10 +123,18 @@ class LoggingInterceptor implements Interceptor {
   }
 
   /// Logs HTTP request.
-  void _logRequest(http.BaseRequest request, String requestId) {
+  void _logRequest(
+    http.BaseRequest request,
+    String requestId,
+    Redactor? scopedRedactor,
+  ) {
     if (logger.level <= Level.INFO) {
-      final headers = redactor.redactMap(request.headers);
-      final safeUrl = redactor.redactString(request.url.toString());
+      final headers = redactor.redactMap(
+        scopedRedactor?.redactMap(request.headers) ?? request.headers,
+      );
+      final safeUrl = redactor.redactString(
+        (scopedRedactor?.redactUri(request.url) ?? request.url).toString(),
+      );
       logger
         ..info('REQUEST [$requestId] ${request.method} $safeUrl')
         ..fine('Headers: $headers');
@@ -129,16 +142,25 @@ class LoggingInterceptor implements Interceptor {
   }
 
   /// Logs HTTP response.
-  void _logResponse(http.Response response, String requestId, int durationMs) {
+  void _logResponse(
+    http.Response response,
+    String requestId,
+    int durationMs,
+    Redactor? scopedRedactor,
+  ) {
     if (logger.level <= Level.INFO) {
-      final headers = redactor.redactMap(response.headers);
+      final headers = redactor.redactMap(
+        scopedRedactor?.redactMap(response.headers) ?? response.headers,
+      );
       logger
         ..info('RESPONSE [$requestId] ${response.statusCode} (${durationMs}ms)')
         ..fine('Headers: $headers');
 
       if (logger.level <= Level.FINE) {
         final body = redactor.truncate(
-          redactor.redactString(response.body),
+          redactor.redactString(
+            scopedRedactor?.redactBody(response.body) ?? response.body,
+          ),
           500,
         );
         logger.fine('Body: $body');

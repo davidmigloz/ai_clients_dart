@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// Utility for redacting sensitive data from logs.
 class Redactor {
   /// JSON and diagnostic field names for opaque continuation tokens.
@@ -14,12 +16,16 @@ class Redactor {
   /// Fields to redact (case-insensitive).
   final List<String> redactionList;
 
+  /// Exact sensitive values to remove from diagnostic text.
+  final List<String> sensitiveValues;
+
   /// Replacement text for redacted values.
   final String replacement;
 
   /// Creates a [Redactor].
   const Redactor({
     required this.redactionList,
+    this.sensitiveValues = const [],
     this.replacement = '***REDACTED***',
   });
 
@@ -34,11 +40,37 @@ class Redactor {
       if (lowercaseFields.contains(entry.key.toLowerCase())) {
         redacted[entry.key] = replacement;
       } else {
-        redacted[entry.key] = entry.value;
+        redacted[entry.key] = _redactValues(entry.value);
       }
     }
 
     return redacted;
+  }
+
+  /// Redacts data in a diagnostic URI without changing its scheme or host.
+  Uri redactUri(Uri uri) {
+    final fields = redactionList.map((field) => field.toLowerCase()).toSet();
+    return uri.replace(
+      userInfo: _redactValues(uri.userInfo),
+      pathSegments: uri.pathSegments.map(_redactValues),
+      queryParameters: {
+        for (final entry in uri.queryParametersAll.entries)
+          entry.key: fields.contains(entry.key.toLowerCase())
+              ? replacement
+              : entry.value.map(_redactValues).toList(),
+      },
+    );
+  }
+
+  /// Redacts JSON response bodies and falls back to plain text redaction.
+  String redactBody(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      final redacted = redactJson(decoded);
+      return identical(decoded, redacted) ? body : jsonEncode(redacted);
+    } on FormatException {
+      return redactString(body);
+    }
   }
 
   /// Redacts matching keys and labeled strings anywhere in a JSON value.
@@ -118,6 +150,14 @@ class Redactor {
       );
     }
 
+    return _redactValues(result);
+  }
+
+  String _redactValues(String input) {
+    var result = input;
+    for (final value in sensitiveValues) {
+      if (value.isNotEmpty) result = result.replaceAll(value, replacement);
+    }
     return result;
   }
 

@@ -34,6 +34,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [caching_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/caching_example.dart) (~1.2k tokens): Context caching API usage.
 - [complete_api_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/complete_api_example.dart) (~1k tokens): Complete API coverage demo.
 - [corpora_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/corpora_example.dart) (~908 tokens): Corpus management for semantic retrieval.
+- [credentials_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/credentials_example.dart): Managed-agent credentials and metadata on Gemini Developer API v1beta.
 - [decisions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/decisions_example.dart): Gemini Decision 1 with binary, choice and rubric answer types.
 - [documents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/documents_example.dart) (~889 tokens): Document management within corpora.
 - [file_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_example.dart) (~1.6k tokens): File search with semantic retrieval.

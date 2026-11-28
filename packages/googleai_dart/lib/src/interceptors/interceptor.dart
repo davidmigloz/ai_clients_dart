@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 
+import '../utils/redactor.dart';
+
 /// Context for an HTTP request/response.
 class RequestContext {
   /// HTTP request.
@@ -14,12 +16,16 @@ class RequestContext {
   /// Optional abort trigger for this request.
   final Future<void>? abortTrigger;
 
+  /// Redaction for diagnostics specific to the operation.
+  final Redactor? diagnosticRedactor;
+
   /// Creates a [RequestContext].
   const RequestContext({
     required this.request,
     this.response,
     this.metadata = const {},
     this.abortTrigger,
+    this.diagnosticRedactor,
   });
 
   /// Creates a copy with updated values.
@@ -34,6 +40,7 @@ class RequestContext {
       response: response ?? this.response,
       metadata: metadata ?? this.metadata,
       abortTrigger: abortTrigger ?? this.abortTrigger,
+      diagnosticRedactor: diagnosticRedactor,
     );
   }
 }
