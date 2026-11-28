@@ -243,8 +243,15 @@ void main() {
             location: 'eu',
             apiVersion: apiVersion,
             authProvider: provider,
-            defaultQueryParams: {'access_token': 'should-not-be-sent'},
-          ).copyWith(baseUrl: '${server.baseUrl}/proxy'),
+            defaultQueryParams: {
+              'access_token': 'old-access-token',
+              'api-key': 'old-config-key',
+              'regionHint': 'eu',
+            },
+          ).copyWith(
+            baseUrl:
+                '${server.baseUrl}/proxy?key=old-url-key&X-Goog-Api-Key=old',
+          ),
         );
 
         await live.connect(model: configuredModel).timeout(_deadline);
@@ -254,7 +261,7 @@ void main() {
           handshake.uri.path,
           '/proxy/ws/google.cloud.aiplatform.$wireVersion.LlmBidiService/BidiGenerateContent',
         );
-        expect(handshake.uri.queryParameters, isEmpty);
+        expect(handshake.uri.queryParameters, {'regionHint': 'eu'});
         expect(handshake.authorization, 'Bearer adc-fixture-token');
         expect(handshake.apiKeyHeader, isNull);
         expect(handshake.firstMessage, {
@@ -263,6 +270,32 @@ void main() {
       },
     );
   }
+
+  test('Vertex rejects API-key credentials before opening a socket', () async {
+    final server = await _Server.start();
+    final provider = _CountingProvider(
+      const ApiKeyCredentials('developer-key'),
+    );
+    final live = _createLive(
+      GoogleAIConfig.vertexAI(
+        projectId: 'P',
+        authProvider: provider,
+      ).copyWith(baseUrl: server.baseUrl),
+    );
+
+    await expectLater(
+      live.connect(model: _model).timeout(_deadline),
+      throwsA(
+        isA<LiveConnectionException>().having(
+          (error) => error.message,
+          'message',
+          contains('requires OAuth credentials'),
+        ),
+      ),
+    );
+    expect(provider.calls, 1);
+    expect(server.upgrades, 0);
+  });
 
   test(
     'Vertex does not use an explicit Developer API ephemeral token',

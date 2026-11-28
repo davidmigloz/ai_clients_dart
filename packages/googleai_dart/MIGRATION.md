@@ -116,6 +116,24 @@ If you route Vertex AI Live through a gateway, update its WebSocket route from
 beta service, substitute `v1beta1`. Read the project and location from the
 fully qualified `setup.model` instead of expecting the client to append them
 as query parameters. Configure the gateway with `GoogleAIConfig.copyWith(baseUrl: ...)`.
+
+For project-scoped Vertex AI, replace `ApiKeyProvider(key)` with an OAuth
+`AuthProvider` that returns `BearerTokenCredentials`. If your gateway adds its
+own authentication, pass `const NoAuthProvider()`:
+
+```dart
+// Before
+final before = GoogleAIConfig.vertexAI(
+  projectId: projectId,
+  authProvider: ApiKeyProvider(key),
+);
+
+// After
+final after = GoogleAIConfig.vertexAI(
+  projectId: projectId,
+  authProvider: BearerTokenProvider(accessToken),
+);
+```
 [Vertex AI Live session guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session)
 
 ---

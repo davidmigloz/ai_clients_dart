@@ -41,6 +41,13 @@ import 'websocket_connector.dart' as ws;
 /// ```
 class LiveClient {
   static final _log = Logger('LiveClient');
+  static const _credentialQueryKeys = {
+    'key',
+    'api_key',
+    'api-key',
+    'x-goog-api-key',
+    'access_token',
+  };
 
   final GoogleAIConfig _config;
   final List<LiveSession> _sessions = [];
@@ -56,7 +63,8 @@ class LiveClient {
   /// When provided, this token takes precedence over configured credentials
   /// and uses the Gemini Developer API's constrained `v1beta` endpoint.
   /// Alternatively, configure an `EphemeralTokenProvider`. Browsers require
-  /// query-parameter placement. Vertex AI Live uses native OAuth headers.
+  /// query-parameter placement. Project-scoped Vertex AI Live uses native
+  /// OAuth headers. Custom gateways can instead supply their own credentials.
   ///
   /// Returns a [LiveSession] for bidirectional streaming.
   ///
@@ -94,6 +102,12 @@ class LiveClient {
     if (isVertex && credentials is EphemeralTokenCredentials) {
       throw const LiveConnectionException(
         message: 'Ephemeral Live tokens require the Gemini Developer API.',
+      );
+    }
+
+    if (isVertex && credentials is ApiKeyCredentials) {
+      throw const LiveConnectionException(
+        message: 'Project-scoped Vertex AI Live requires OAuth credentials.',
       );
     }
 
@@ -274,7 +288,7 @@ class LiveClient {
       endpoint =
           '/ws/google.cloud.aiplatform.$version.LlmBidiService/BidiGenerateContent';
       queryParams.removeWhere(
-        (name, _) => name.toLowerCase() == 'access_token',
+        (name, _) => _credentialQueryKeys.contains(name.toLowerCase()),
       );
     } else {
       final accessToken =
@@ -287,15 +301,8 @@ class LiveClient {
       endpoint =
           '/ws/google.ai.generativelanguage.$version.GenerativeService.$method';
       if (constrained) {
-        const credentialKeys = {
-          'key',
-          'api_key',
-          'api-key',
-          'x-goog-api-key',
-          'access_token',
-        };
         queryParams.removeWhere(
-          (name, _) => credentialKeys.contains(name.toLowerCase()),
+          (name, _) => _credentialQueryKeys.contains(name.toLowerCase()),
         );
         if (!useEphemeralHeader && accessToken != null) {
           queryParams['access_token'] = accessToken;
