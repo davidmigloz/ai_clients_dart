@@ -856,7 +856,11 @@ completion status is available on the terminal event and causes
 `detach()` closes the local socket, discards unread events, and can leave
 server-side generation billing. Sessions cannot resume. Keep consuming events
 during an active session to retain media. The client drops older unread media
-once the backlog reaches 512 events or 16 MiB of encoded media.
+once the backlog reaches 512 events or 16 MiB of encoded media. If control
+events fill the backlog, the client drops surplus events in a batch that
+contains a terminal event. Otherwise it attempts to cancel generation and
+reports a stream error. Cancelling your receive subscription alone leaves the
+interaction running.
 
 For browsers, create the interaction and mint a scoped credential with
 `await genie.createAuthToken(interaction.id)` on your backend. Pass the

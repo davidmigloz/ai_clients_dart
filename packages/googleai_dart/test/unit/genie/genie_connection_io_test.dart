@@ -418,6 +418,79 @@ void main() {
   }
 
   test(
+    'retains terminal acknowledgement after a control-only overflow',
+    () async {
+      final fixture = await _LoopbackGenie.start();
+      final session = await fixture.resource().connect(
+        'int_control',
+        timeout: _socketTimeout,
+      );
+      addTearDown(session.detach);
+      expect(await fixture.nextFrame(), {
+        'event_type': 'interaction.connect',
+        'id': 'int_control',
+      });
+      final completed = session.complete();
+      expect(await fixture.nextFrame(), {'event_type': 'interaction.complete'});
+      await fixture.send({
+        'events': [
+          for (var index = 0; index < 513; index++)
+            {'event_type': 'test.control', 'index': index},
+          {
+            'event_type': 'interaction.completed',
+            'status': {'code': 0},
+          },
+        ],
+      });
+      await completed.timeout(_socketTimeout);
+      final events = await session.receive().toList().timeout(_socketTimeout);
+      expect(events, hasLength(513));
+      expect(
+        events.whereType<GenieUnknownEvent>().map((e) => e.rawJson['index']),
+        List.generate(512, (i) => i),
+      );
+      expect(
+        events.last,
+        isA<GenieTerminalEvent>().having((e) => e.status?.code, 'code', 0),
+      );
+      expect(await fixture.frames.moveNext().timeout(_socketTimeout), isFalse);
+    },
+  );
+
+  test(
+    'attempts cancellation after a control-only overflow without a terminal event',
+    () async {
+      final fixture = await _LoopbackGenie.start();
+      final session = await fixture.resource().connect(
+        'int_overflow',
+        timeout: _socketTimeout,
+      );
+      addTearDown(session.detach);
+      expect(await fixture.nextFrame(), {
+        'event_type': 'interaction.connect',
+        'id': 'int_overflow',
+      });
+      await fixture.send({
+        'events': [
+          for (var index = 0; index < 513; index++)
+            {'event_type': 'test.control', 'index': index},
+        ],
+      });
+      expect(await fixture.nextFrame(), {'event_type': 'interaction.cancel'});
+      await expectLater(
+        session.receive().skip(512),
+        emitsError(
+          isA<GenieConnectionException>().having(
+            (e) => e.message,
+            'message',
+            contains('backlog'),
+          ),
+        ),
+      );
+    },
+  );
+
+  test(
     'changing receiver does not change the connection and cancel aborts generation',
     () async {
       final fixture = await _LoopbackGenie.start();

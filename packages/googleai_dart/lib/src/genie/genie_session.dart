@@ -123,6 +123,9 @@ class GenieSession {
   /// Cancelling a subscription leaves the remote interaction running.
   /// Slow or absent receivers may lose their oldest unread media at a backlog
   /// of 512 events or 16 MiB of encoded media. Control events stay ordered.
+  /// If control events alone overflow the backlog, surplus events are dropped
+  /// when the batch ends the interaction. Otherwise the client attempts to
+  /// cancel generation and reports a [GenieConnectionException].
   Stream<GenieServerEvent> receive() {
     late final StreamController<GenieServerEvent> receiver;
     receiver = StreamController<GenieServerEvent>(
@@ -265,6 +268,7 @@ class GenieSession {
       {'events': final List<dynamic> batch} => batch,
       _ => [decoded],
     };
+    var controlOverflow = false;
     for (final raw in events) {
       final json = raw as Map<String, dynamic>;
       final event = GenieServerEvent.fromJson({
@@ -278,8 +282,20 @@ class GenieSession {
         _finish(_SessionState.terminal);
         return;
       }
-      _enqueue(event);
-      if (!_canRead) return;
+      if (!_enqueue(event)) controlOverflow = true;
+    }
+    if (controlOverflow) {
+      try {
+        _socket.sendText('{"event_type":"interaction.cancel"}');
+      } catch (_) {
+        // The socket may have disconnected before it could cancel.
+      }
+      _fail(
+        const GenieConnectionException(
+          message: 'The Genie receiver backlog exceeded its event limit.',
+        ),
+      );
+      return;
     }
     _scheduleDrain();
   }
@@ -294,33 +310,21 @@ class GenieSession {
     _ => 0,
   };
 
-  void _enqueue(GenieServerEvent event) {
+  bool _enqueue(GenieServerEvent event) {
     final mediaLength = _mediaLength(event);
-    if (mediaLength > _maxPendingMediaLength) return;
+    if (mediaLength > _maxPendingMediaLength) return true;
     while (_pending.length >= _maxPendingEvents ||
         _pendingMediaLength + mediaLength > _maxPendingMediaLength) {
       final oldestMedia = _pending
           .where((event) => _mediaLength(event) != 0)
           .firstOrNull;
-      if (oldestMedia == null) {
-        if (mediaLength != 0) return;
-        try {
-          _socket.sendText('{"event_type":"interaction.cancel"}');
-        } catch (_) {
-          // The socket may have disconnected before it could cancel.
-        }
-        _fail(
-          const GenieConnectionException(
-            message: 'The Genie receiver backlog exceeded its event limit.',
-          ),
-        );
-        return;
-      }
+      if (oldestMedia == null) return mediaLength != 0;
       _pending.remove(oldestMedia);
       _pendingMediaLength -= _mediaLength(oldestMedia);
     }
     _pending.addLast(event);
     _pendingMediaLength += mediaLength;
+    return true;
   }
 
   String _redactText(String text) {
