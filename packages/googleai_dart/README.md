@@ -863,6 +863,51 @@ configuration and check option availability for your model and endpoint.
 
 </details>
 
+### How do I generate an interactive world with Genie 4?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Genie 4 uses a dedicated Interactions WebSocket on the paid-tier Gemini
+Developer API `v1beta`. The model is generally available and Google's live
+Interactions SDK surface is experimental. Create an interaction, connect, and
+send one `GenieWorldSetup` with a prompt, a 16:9 reference image, or both.
+
+```dart
+final genie = client.interactions.genie;
+final interaction = await genie.create();
+final session = await genie.connect(interaction.id);
+session.send(const GenieWorldSetup(prompt: 'A harbor at sunrise.'));
+session.send(const GenieUserAction(action: GenieAction.keyClick, key: GenieKey.w));
+```
+
+Read `session.receive()` for typed events. `GenieStepEvent.mediaBytes` decodes
+24 fps JPEG frames and 48 kHz signed 16-bit little-endian stereo PCM. Call
+`await session.complete()` to request completion and wait for the server's
+terminal event, or `await session.cancel()` to abort generation. A nonzero
+completion status is available on the terminal event and causes
+`complete()` to throw `GenieConnectionException`.
+`detach()` closes the local socket, discards unread events, and can leave
+server-side generation billing. Sessions cannot resume. Keep consuming events
+during an active session to retain media. The client drops older unread media
+once the backlog reaches 512 events or 16 MiB of encoded media. If control
+events fill the backlog, the client drops surplus events in a batch that
+contains a terminal event. Otherwise it attempts to cancel generation and
+reports a stream error. Cancelling your receive subscription alone leaves the
+interaction running.
+
+For browsers, create the interaction and mint a scoped credential with
+`await genie.createAuthToken(interaction.id)` on your backend. Pass the
+returned `authToken` to `connect(interaction.id, authToken: ...)` in the browser.
+Native clients can also authenticate with a paid-tier Gemini API key. The Dart
+client supports WebSocket media delivery. WebRTC signaling is tracked separately.
+
+[Full example](example/genie_example.dart) ·
+[Genie 4 guide](https://aistudio.google.com/docs/genie) ·
+[WebRTC tracking issue](https://github.com/davidmigloz/ai_clients_dart/issues/644)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -931,6 +976,7 @@ See the [example/](example/) directory for complete examples:
 | [`generate_content.dart`](example/generate_content.dart) | Basic text generation |
 | [`generate_content_media_slicing.dart`](example/generate_content_media_slicing.dart) | GenerateContent PDF page selection |
 | [`generated_files_example.dart`](example/generated_files_example.dart) | Generated files for video outputs |
+| [`genie_example.dart`](example/genie_example.dart) | Genie 4 world setup, JPEG frames, and WebSocket completion |
 | [`google_maps_example.dart`](example/google_maps_example.dart) | Google Maps grounding |
 | [`google_search_example.dart`](example/google_search_example.dart) | Grounding with Google Search |
 | [`image_generation_example.dart`](example/image_generation_example.dart) | Image generation |
@@ -973,6 +1019,7 @@ See the [example/](example/) directory for complete examples:
 | Webhooks (Experimental) | ✅ Full |
 | Auth Tokens | ✅ Full |
 | Live API (WebSocket) | ✅ Full |
+| Genie 4 | Paid-tier Gemini Developer API `v1beta` WebSocket |
 
 ## Official Documentation
 

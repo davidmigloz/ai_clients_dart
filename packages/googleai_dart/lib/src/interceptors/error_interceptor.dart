@@ -60,10 +60,12 @@ class ErrorInterceptor implements Interceptor {
 
     try {
       final decoded = jsonDecode(body);
-      final continuationSafe = Redactor.continuationTokens.redactJson(decoded);
+      final interactionSafe = Redactor.interactionCredentials.redactJson(
+        decoded,
+      );
       final errorDetails = scopedRedactor == null
-          ? continuationSafe
-          : scopedRedactor.redactJson(continuationSafe);
+          ? interactionSafe
+          : scopedRedactor.redactJson(interactionSafe);
       if (!identical(decoded, errorDetails)) {
         excerptSource = jsonEncode(errorDetails);
       }
@@ -83,7 +85,7 @@ class ErrorInterceptor implements Interceptor {
         message = body.isNotEmpty ? body : message;
       }
     }
-    message = Redactor.continuationTokens.redactString(message);
+    message = Redactor.interactionCredentials.redactString(message);
     if (scopedRedactor != null) message = scopedRedactor.redactString(message);
 
     // Extract request metadata from context
@@ -104,6 +106,7 @@ class ErrorInterceptor implements Interceptor {
         'x-goog-api-key',
         'token',
         ...Redactor.continuationTokenFields,
+        ...Redactor.interactionAuthTokenFields,
       ],
     );
     final redactedHeaders = redactor.redactMap(context.request.headers);

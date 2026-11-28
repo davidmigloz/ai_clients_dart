@@ -62,6 +62,21 @@ The `GoogleAIConfig.vertexAI` default remains `ApiVersion.v1`.
 
 ---
 
+## Handling Genie WebSocket failures
+
+Exhaustive switches over the sealed `GoogleAIException` hierarchy can add
+`GenieConnectionException()` to handle connection failures after upgrading.
+The new variant covers the Genie WebSocket upgrade, transport failures, and
+invalid protocol frames. Genie HTTP errors continue to use `ApiException`.
+For example:
+
+```dart
+case GenieConnectionException(:final message):
+  print('Genie connection failed: $message');
+```
+
+---
+
 ## Handling Interactions continuation status
 
 Add `InteractionStatus.requiresContinuation` to exhaustive switches over
