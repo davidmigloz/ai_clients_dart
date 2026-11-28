@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Live Music WebSocket fixture</title>
+    <link rel="x-dart-test" href="live_music_connection_web_test.dart">
+    <script src="packages/test/dart.js"></script>
+    <script>
+      const nativeWebSocket = window.WebSocket;
+      let state;
+
+      window.installLiveMusicSocketFixture = () => {
+        state = {url: null, frames: [], closes: 0};
+        window.WebSocket = class extends EventTarget {
+          static OPEN = 1;
+
+          constructor(url) {
+            super();
+            state.url = url;
+            this.readyState = 1;
+          }
+
+          send(data) {
+            const frame = JSON.parse(data);
+            state.frames.push(frame);
+            if (frame.setup) {
+              this.dispatchEvent(new MessageEvent("message", {
+                data: JSON.stringify({setupComplete: {}}),
+              }));
+            }
+            if (frame.playbackControl === "PLAY") {
+              const audio = {serverContent: {audioChunks: [{data: "AP8="}]}};
+              this.dispatchEvent(new MessageEvent("message", {
+                data: new TextEncoder().encode(JSON.stringify(audio)).buffer,
+              }));
+            }
+          }
+
+          close() {
+            state.closes += 1;
+            this.readyState = 3;
+            this.dispatchEvent(new CloseEvent("close", {code: 1000}));
+          }
+        };
+      };
+      window.restoreLiveMusicSocketFixture = () => {
+        window.WebSocket = nativeWebSocket;
+      };
+      window.liveMusicSocketFixtureState = () => JSON.stringify(state);
+    </script>
+  </head>
+</html>

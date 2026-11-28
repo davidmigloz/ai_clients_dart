@@ -886,6 +886,56 @@ expects the user to continue.
 
 </details>
 
+### How do I generate and steer live music?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use the experimental `lyria-realtime-exp` model on the Gemini Developer API
+`v1beta`. Live Music uses its own WebSocket session. Direct connections use a
+Gemini API key in the query on native and web targets. Use a server-side
+gateway to keep the key out of a web app. Vertex AI and Gemini Live ephemeral
+tokens are unavailable for this endpoint.
+
+```dart
+final music = client.createLiveMusicClient();
+try {
+  final session = await music.connect(model: 'lyria-realtime-exp');
+  session
+    ..setWeightedPrompts(const [
+      LiveMusicWeightedPrompt(text: 'Minimal piano and brushes', weight: 1),
+    ])
+    ..setMusicGenerationConfig(const LiveMusicGenerationConfig(bpm: 90))
+    ..play();
+
+  final first = await session.messages.firstWhere(
+    (message) => message.serverContent?.audioChunks?.isNotEmpty == true,
+  );
+  final chunks = first.serverContent!.audioChunks!;
+  // Buffer or write each chunk's decoded data for playback.
+} finally {
+  await music.close();
+}
+```
+
+The Lyria RealTime audio specification lists 48 kHz, 16-bit stereo PCM.
+Configure your player from each chunk's `mimeType` when it reports the format
+or sample rate. The client decodes the bytes and delivers them in order.
+Buffer and pace playback in your audio player. The runnable example writes
+headerless PCM and prints the audio formats reported by the service.
+Send `pause()`, `stop()`, and `resetContext()` to control generation. Send the
+complete configuration when updating it and reset the context after changing
+tempo or scale. Canceling the message subscription closes the session.
+Slow listeners can lose unread audio when the queue fills. Queued warnings
+and terminal errors remain available when reading resumes. A full queue of
+control messages ends the stream with an error.
+
+[Runnable PCM example](example/live_music_example.dart) ·
+[Lyria RealTime audio specifications](https://aistudio.google.com/docs/realtime-music-generation#audio-specs) ·
+[Live Music wire reference](https://aistudio.google.com/api-reference/live-music)
+
+</details>
+
 ### How do I transcribe live audio?
 
 <details>
@@ -1069,6 +1119,7 @@ See the [example/](example/) directory for complete examples:
 | [`interactions_example.dart`](example/interactions_example.dart) | Stable Interactions, streaming, state and function calls |
 | [`interactions_long_decode.dart`](example/interactions_long_decode.dart) | Opt-in automatic continuation on Gemini 4 |
 | [`live_example.dart`](example/live_example.dart) | Live API WebSocket sessions |
+| [`live_music_example.dart`](example/live_music_example.dart) | Lyria RealTime prompts, playback controls, and PCM output |
 | [`live_transcription_example.dart`](example/live_transcription_example.dart) | Stream PCM audio and read interim and finalized transcripts |
 | [`models_example.dart`](example/models_example.dart) | List and inspect models |
 | [`oauth_refresh_example.dart`](example/oauth_refresh_example.dart) | OAuth token refresh during retries |
