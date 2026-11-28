@@ -281,6 +281,9 @@ class ModelsResource extends ResourceBase with StreamingResource {
         null,
         error.offset,
       );
+    } on TypeError {
+      if (diagnosticRedactor == null) rethrow;
+      throw const FormatException('Invalid GenerateContent response.');
     }
   }
 

@@ -183,6 +183,9 @@ void main() {
           if (calls == 4) {
             return http.Response('invalid response for $voiceKey', 200);
           }
+          if (calls == 5) {
+            return http.Response(jsonEncode(voiceKey), 200);
+          }
           return http.Response(body, 400);
         }),
       );
@@ -245,22 +248,24 @@ void main() {
           ),
         ),
       );
-      await expectLater(
-        client.models.generateContent(
-          model: 'gemini-3.8-flash-tts',
-          request: request,
-        ),
-        throwsA(
-          isA<FormatException>()
-              .having((error) => error.source, 'source', isNull)
-              .having(
-                (error) => error.toString(),
-                'description',
-                isNot(contains(voiceKey)),
-              ),
-        ),
-      );
-      expect(calls, 4);
+      for (var attempt = 0; attempt < 2; attempt++) {
+        await expectLater(
+          client.models.generateContent(
+            model: 'gemini-3.8-flash-tts',
+            request: request,
+          ),
+          throwsA(
+            isA<FormatException>()
+                .having((error) => error.source, 'source', isNull)
+                .having(
+                  (error) => error.toString(),
+                  'description',
+                  isNot(contains(voiceKey)),
+                ),
+          ),
+        );
+      }
+      expect(calls, 5);
       expect(logs.where((log) => log.level == Level.FINE), isNotEmpty);
       for (final log in logs) {
         expect('${log.message}${log.error}', isNot(contains(voiceKey)));
