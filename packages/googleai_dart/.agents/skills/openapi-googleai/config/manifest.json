@@ -129,7 +129,8 @@
       "files:register": "FilesResource inherits register from files/files_resource_base.dart. The endpoint-action scanner checks resource filenames; public route fixtures verify the delegated register path.",
       "environments:create": "Custom-verb alias of the environments resource (path /v1beta/environments:create); duplicates POST /v1beta/environments. Aliased to environments (EnvironmentsResource), which implements the REST-shaped family per the interactions spec.",
       "environments:list": "Custom-verb alias of the environments resource (path /v1beta/environments:list); duplicates GET /v1beta/environments. Same handling as environments:create.",
-      "upload": "EnvironmentFilesResource.upload uses the resumable media path of EnvironmentsResource."
+      "upload": "EnvironmentFilesResource.upload uses the resumable media path of EnvironmentsResource.",
+      "files": "The shared FilesResourceBase applies the download wire option across IO, web, and stub. The action scanner verifies resource filenames."
     },
     "expected_properties": {},
     "excluded_properties": {
@@ -2690,6 +2691,164 @@
         "acknowledged"
       ],
       "note": "The public wire codec is covered by unit tests. This immutable Dart type has no copyWith method."
+    },
+    "main:AudioMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioMetadata",
+      "file": "lib/src/models/content/media_metadata.dart",
+      "schema": "AudioMetadata"
+    },
+    "main:DocumentMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DocumentMetadata",
+      "file": "lib/src/models/content/media_metadata.dart",
+      "schema": "DocumentMetadata"
+    },
+    "main:SpreadsheetMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpreadsheetMetadata",
+      "file": "lib/src/models/content/media_metadata.dart",
+      "schema": "SpreadsheetMetadata"
+    },
+    "main:SpeechMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechMetadata",
+      "file": "lib/src/models/content/speech_metadata.dart",
+      "schema": "SpeechMetadata"
+    },
+    "main:VideoMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VideoMetadata",
+      "file": "lib/src/models/files/video_metadata.dart",
+      "schema": "VideoMetadata"
+    },
+    "main:FunctionResponseBlob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionResponseBlob",
+      "file": "lib/src/models/tools/function_response.dart",
+      "schema": "FunctionResponseBlob"
+    },
+    "main:FunctionResponseFileData": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileData",
+      "file": "lib/src/models/content/file_data.dart",
+      "schema": "FunctionResponseFileData"
+    },
+    "main:FunctionResponsePart": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionResponseInlinePart",
+      "file": "lib/src/models/tools/function_response.dart",
+      "schema": "FunctionResponsePart"
+    },
+    "main:PredictRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PredictRequest",
+      "file": "lib/src/models/prediction/predict_request.dart",
+      "schema": "PredictRequest"
+    },
+    "main:PredictLongRunningRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PredictLongRunningRequest",
+      "file": "lib/src/models/prediction/predict_long_running_request.dart",
+      "schema": "PredictLongRunningRequest"
+    },
+    "main:SpeechConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechConfig",
+      "file": "lib/src/models/common/speech_config.dart",
+      "schema": "SpeechConfig"
+    },
+    "main:VoiceConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceConfig",
+      "file": "lib/src/models/common/voice_config.dart",
+      "schema": "VoiceConfig"
+    },
+    "main:WordInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTranscriptionWord",
+      "file": "lib/src/models/content/speech_metadata.dart",
+      "schema": "WordInfo"
+    },
+    "main:AudioTranscription": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTranscription",
+      "file": "lib/src/models/content/speech_metadata.dart",
+      "schema": "AudioTranscription",
+      "note": "The public Developer transcription guide shows metadata-only response Parts. A public fixture verifies decoding diarization and word timing when aggregate text is absent.",
+      "excluded_properties": [
+        "text"
+      ]
+    },
+    "main:BidiGenerateContentSetup": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "BidiGenerateContentSetup",
+      "file": "lib/src/models/live/messages/client/client_message.dart",
+      "note": "Wire verification uses the WebSocket contract and public offline fixtures."
+    },
+    "main:ProactivityConfig": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ProactivityConfig",
+      "file": "lib/src/models/live/config/proactivity_config.dart",
+      "note": "Wire verification uses the WebSocket contract and public offline fixtures."
+    },
+    "main:RealtimeInputConfig": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "RealtimeInputConfig",
+      "file": "lib/src/models/live/config/realtime_input_config.dart",
+      "note": "Wire verification uses the WebSocket contract and public offline fixtures."
+    },
+    "main:EnvVar": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EnvVar",
+      "file": "lib/src/models/interactions/environments/environment_variables.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:EnvironmentFile": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EnvironmentFile",
+      "file": "lib/src/models/interactions/environments/environment_file.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:GetEnvironmentFilesResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "GetEnvironmentFilesResponse",
+      "file": "lib/src/models/interactions/environments/get_environment_files_response.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:UploadEnvironmentFileRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EnvironmentFilesResource",
+      "file": "lib/src/resources/environment_files_resource.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:UploadEnvironmentFileResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "GetEnvironmentFilesResponse",
+      "file": "lib/src/models/interactions/environments/get_environment_files_response.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
     }
   }
 }

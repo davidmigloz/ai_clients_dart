@@ -138,9 +138,9 @@ explicit entries for compatibility types whose schemas are absent from the
 pinned contract. The WebSocket manifest records the Developer and Vertex Live
 wire alongside the public session types.
 
-- The core verifier's registration advisory comes from action discovery through
-  filenames. Public `FilesResource.register` is inherited from
-  `FilesResourceBase` and its offline fixture exercises the actual route.
+- The core registration and download advisories come from action discovery
+  through filenames. `FilesResource` inherits both operations from
+  `FilesResourceBase`. Public fixtures exercise each route.
 - Interactions sibling checks report distinct types for tool arguments,
   results, media processing, and response-format selectors. Those fields
   have separate shapes in the pinned unions.
