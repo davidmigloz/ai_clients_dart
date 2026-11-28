@@ -1094,6 +1094,17 @@ the session default.
 [Developer Live Bidi reference](https://aistudio.google.com/api-reference/live) ·
 [Vertex Live model guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-live)
 
+Use `FunctionDeclarationBehavior.nonBlocking` for asynchronous tools on
+supported Developer API Live models such as `gemini-3.8-live`.
+`gemini-3.8-live-extended-thinking` requires asynchronous tool calling.
+Vertex AI Gemini 3.8 Live runs tools asynchronously by default and supports
+`FunctionDeclarationBehavior.blocking` for calls that should pause generation.
+Return the server's function call ID and set `FunctionResponse.scheduling`
+to control when the model presents a non-blocking tool result. On Vertex AI
+Live, combine incremental tool results into a single `FunctionResponse`.
+[Developer Live tools](https://aistudio.google.com/docs/live-api/tools#async-function-calling) ·
+[Vertex Live tools](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/asynchronous-function-calling)
+
 `message.voiceActivity` exposes server-detected speech boundaries and their
 audio offsets. With session resumption enabled, inspect
 `session.lastResumableUpdate` for the most recent usable handle. Vertex AI

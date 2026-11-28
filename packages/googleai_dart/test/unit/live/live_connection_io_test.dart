@@ -1297,6 +1297,65 @@ void main() {
     );
   }
 
+  for (final isVertex in [false, true]) {
+    test(
+      'Live setup sends the function behavior on ${isVertex ? 'Vertex' : 'Developer'}',
+      () async {
+        final server = await _Server.start();
+        final config = isVertex
+            ? GoogleAIConfig.vertexAI(
+                projectId: 'P',
+                location: 'us-central1',
+                authProvider: const BearerTokenProvider('local-fixture'),
+              ).copyWith(baseUrl: server.baseUrl)
+            : GoogleAIConfig(baseUrl: server.baseUrl);
+        final behavior = isVertex
+            ? FunctionDeclarationBehavior.blocking
+            : FunctionDeclarationBehavior.nonBlocking;
+        await _createLive(config)
+            .connect(
+              model: _model,
+              liveConfig: LiveConfig(
+                tools: [
+                  Tool(
+                    functionDeclarations: [
+                      FunctionDeclaration(
+                        name: 'turn_on_the_lights',
+                        description: 'Turns on the lights.',
+                        behavior: behavior,
+                      ),
+                      const FunctionDeclaration(
+                        name: 'turn_off_the_lights',
+                        description: 'Turns off the lights.',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+            .timeout(_deadline);
+        final setup =
+            (await server.handshake.future).firstMessage['setup']
+                as Map<String, dynamic>;
+        expect(setup['tools'], [
+          {
+            'functionDeclarations': [
+              {
+                'name': 'turn_on_the_lights',
+                'description': 'Turns on the lights.',
+                'behavior': isVertex ? 'BLOCKING' : 'NON_BLOCKING',
+              },
+              {
+                'name': 'turn_off_the_lights',
+                'description': 'Turns off the lights.',
+              },
+            ],
+          },
+        ]);
+      },
+    );
+  }
+
   test('Vertex rejects API-key credentials before opening a socket', () async {
     final server = await _Server.start();
     final provider = _CountingProvider(

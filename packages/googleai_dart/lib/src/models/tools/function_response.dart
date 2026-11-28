@@ -278,7 +278,9 @@ class FunctionResponse {
   /// Ordered parts that constitute the function response.
   final List<FunctionResponseInlinePart>? parts;
 
-  /// Signals that function call continues as a generator.
+  /// Signals that the function call will produce more results.
+  ///
+  /// Vertex AI Live expects a single complete response for each call.
   final bool? willContinue;
 
   /// Specifies how the response should be scheduled in the conversation.
