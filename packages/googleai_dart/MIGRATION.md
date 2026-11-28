@@ -279,6 +279,28 @@ String resultKind(FunctionResultSubcontent item) => switch (item) {
 
 ---
 
+## GenerateContent media metadata
+
+Parsed `Part` values now expose `mediaProcessing`, `audioMetadata`,
+`documentMetadata`, and `spreadsheetMetadata` as typed properties. Read those
+properties if you previously looked them up in `additionalProperties`.
+
+```dart
+// Before
+final metadata = part.additionalProperties['documentMetadata']
+    as Map<String, dynamic>?;
+final page = metadata?['startPage'] as int?;
+
+// After
+final page = part.documentMetadata?.startPage;
+```
+
+Existing requests that pass only raw media options through
+`additionalProperties` can still be sent. Set one representation per option
+when creating or copying a part.
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

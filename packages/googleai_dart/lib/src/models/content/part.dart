@@ -11,6 +11,7 @@ import '../tools/tool_response.dart';
 import '../tools/tool_type.dart';
 import 'blob.dart';
 import 'file_data.dart';
+import 'media_metadata.dart';
 import 'media_resolution.dart';
 
 /// A single unit of content (text, media, function call, etc.).
@@ -26,6 +27,10 @@ sealed class Part {
     this.partMetadata,
     this.mediaResolution,
     this.videoMetadata,
+    this.mediaProcessing,
+    this.audioMetadata,
+    this.documentMetadata,
+    this.spreadsheetMetadata,
     this.additionalProperties = const {},
   });
 
@@ -44,10 +49,23 @@ sealed class Part {
   /// Video metadata associated with this part.
   final VideoMetadata? videoMetadata;
 
+  /// Video interpretation approach. This is a Gemini Developer API option.
+  final MediaProcessing? mediaProcessing;
+
+  /// Audio clipping options for inline bytes or a referenced file.
+  final AudioMetadata? audioMetadata;
+
+  /// Page range and extraction options for a document.
+  final DocumentMetadata? documentMetadata;
+
+  /// Sheet, cells, and extraction options for a spreadsheet.
+  final SpreadsheetMetadata? spreadsheetMetadata;
+
   /// Unrecognized non-reserved fields retained for forward compatibility.
   ///
   /// Reserved Part keys are rejected by [toJson] so they cannot overwrite a
-  /// typed data or metadata field.
+  /// typed data or metadata field. Raw media options from earlier versions
+  /// remain accepted while their typed counterparts are unset.
   final Map<String, dynamic> additionalProperties;
 
   /// Creates a text part.
@@ -175,6 +193,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
       );
     }
 
@@ -186,6 +208,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'inlineData' => InlineDataPart(
@@ -195,6 +221,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'fileData' => FileDataPart(
@@ -204,6 +234,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'functionCall' => FunctionCallPart(
@@ -213,6 +247,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'functionResponse' => FunctionResponsePart(
@@ -224,6 +262,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'executableCode' => ExecutableCodePart(
@@ -233,6 +275,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'codeExecutionResult' => CodeExecutionResultPart(
@@ -244,6 +290,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'toolCall' => ToolCallPart(
@@ -253,6 +303,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       'toolResponse' => ToolResponsePart(
@@ -262,6 +316,10 @@ sealed class Part {
         partMetadata: common.partMetadata,
         mediaResolution: common.mediaResolution,
         videoMetadata: common.videoMetadata,
+        mediaProcessing: common.mediaProcessing,
+        audioMetadata: common.audioMetadata,
+        documentMetadata: common.documentMetadata,
+        spreadsheetMetadata: common.spreadsheetMetadata,
         additionalProperties: common.additionalProperties,
       ),
       final key => throw StateError('Unhandled Part data key: $key'),
@@ -273,7 +331,15 @@ sealed class Part {
 
   Map<String, dynamic> _commonFieldsToJson() {
     final collisions = additionalProperties.keys
-        .where(_partReservedKeys.contains)
+        .where(
+          (key) => switch (key) {
+            'mediaProcessing' => mediaProcessing != null,
+            'audioMetadata' => audioMetadata != null,
+            'documentMetadata' => documentMetadata != null,
+            'spreadsheetMetadata' => spreadsheetMetadata != null,
+            _ => _partReservedKeys.contains(key),
+          },
+        )
         .toList(growable: false);
     if (collisions.isNotEmpty) {
       throw ArgumentError.value(
@@ -290,6 +356,12 @@ sealed class Part {
       if (partMetadata != null) 'partMetadata': partMetadata,
       if (mediaResolution != null) 'mediaResolution': mediaResolution!.toJson(),
       if (videoMetadata != null) 'videoMetadata': videoMetadata!.toJson(),
+      if (mediaProcessing != null) 'mediaProcessing': mediaProcessing!.toJson(),
+      if (audioMetadata != null) 'audioMetadata': audioMetadata!.toJson(),
+      if (documentMetadata != null)
+        'documentMetadata': documentMetadata!.toJson(),
+      if (spreadsheetMetadata != null)
+        'spreadsheetMetadata': spreadsheetMetadata!.toJson(),
     };
   }
 
@@ -304,6 +376,10 @@ sealed class Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) => _PartCommonValues(
     thought: thought == unsetCopyWithValue ? this.thought : thought as bool?,
@@ -319,6 +395,18 @@ sealed class Part {
     videoMetadata: videoMetadata == unsetCopyWithValue
         ? this.videoMetadata
         : videoMetadata as VideoMetadata?,
+    mediaProcessing: mediaProcessing == unsetCopyWithValue
+        ? this.mediaProcessing
+        : mediaProcessing as MediaProcessing?,
+    audioMetadata: audioMetadata == unsetCopyWithValue
+        ? this.audioMetadata
+        : audioMetadata as AudioMetadata?,
+    documentMetadata: documentMetadata == unsetCopyWithValue
+        ? this.documentMetadata
+        : documentMetadata as DocumentMetadata?,
+    spreadsheetMetadata: spreadsheetMetadata == unsetCopyWithValue
+        ? this.spreadsheetMetadata
+        : spreadsheetMetadata as SpreadsheetMetadata?,
     additionalProperties: additionalProperties == unsetCopyWithValue
         ? this.additionalProperties
         : additionalProperties! as Map<String, dynamic>,
@@ -343,6 +431,10 @@ const _partCommonKeys = <String>{
   'partMetadata',
   'mediaResolution',
   'videoMetadata',
+  'mediaProcessing',
+  'audioMetadata',
+  'documentMetadata',
+  'spreadsheetMetadata',
 };
 
 const _partReservedKeys = <String>{..._partDataKeys, ..._partCommonKeys};
@@ -354,6 +446,10 @@ class _PartCommonValues {
     this.partMetadata,
     this.mediaResolution,
     this.videoMetadata,
+    this.mediaProcessing,
+    this.audioMetadata,
+    this.documentMetadata,
+    this.spreadsheetMetadata,
     this.additionalProperties = const {},
   });
 
@@ -374,6 +470,22 @@ class _PartCommonValues {
     videoMetadata: json['videoMetadata'] == null
         ? null
         : VideoMetadata.fromJson(json['videoMetadata'] as Map<String, dynamic>),
+    mediaProcessing: json['mediaProcessing'] == null
+        ? null
+        : MediaProcessing.fromJson(json['mediaProcessing'] as String),
+    audioMetadata: json['audioMetadata'] == null
+        ? null
+        : AudioMetadata.fromJson(json['audioMetadata'] as Map<String, dynamic>),
+    documentMetadata: json['documentMetadata'] == null
+        ? null
+        : DocumentMetadata.fromJson(
+            json['documentMetadata'] as Map<String, dynamic>,
+          ),
+    spreadsheetMetadata: json['spreadsheetMetadata'] == null
+        ? null
+        : SpreadsheetMetadata.fromJson(
+            json['spreadsheetMetadata'] as Map<String, dynamic>,
+          ),
     additionalProperties: additionalProperties,
   );
 
@@ -382,6 +494,10 @@ class _PartCommonValues {
   final Map<String, dynamic>? partMetadata;
   final MediaResolution? mediaResolution;
   final VideoMetadata? videoMetadata;
+  final MediaProcessing? mediaProcessing;
+  final AudioMetadata? audioMetadata;
+  final DocumentMetadata? documentMetadata;
+  final SpreadsheetMetadata? spreadsheetMetadata;
   final Map<String, dynamic> additionalProperties;
 }
 
@@ -398,6 +514,10 @@ class TextPart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -412,6 +532,10 @@ class TextPart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -420,6 +544,10 @@ class TextPart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return TextPart(
@@ -429,6 +557,10 @@ class TextPart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -447,6 +579,10 @@ class InlineDataPart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -462,6 +598,10 @@ class InlineDataPart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -470,6 +610,10 @@ class InlineDataPart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return InlineDataPart(
@@ -479,6 +623,10 @@ class InlineDataPart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -497,6 +645,10 @@ class FileDataPart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -511,6 +663,10 @@ class FileDataPart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -519,6 +675,10 @@ class FileDataPart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return FileDataPart(
@@ -528,6 +688,10 @@ class FileDataPart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -546,6 +710,10 @@ class FunctionCallPart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -561,6 +729,10 @@ class FunctionCallPart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -569,6 +741,10 @@ class FunctionCallPart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return FunctionCallPart(
@@ -580,6 +756,10 @@ class FunctionCallPart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -598,6 +778,10 @@ class FunctionResponsePart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -613,6 +797,10 @@ class FunctionResponsePart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -621,6 +809,10 @@ class FunctionResponsePart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return FunctionResponsePart(
@@ -632,6 +824,10 @@ class FunctionResponsePart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -650,6 +846,10 @@ class ExecutableCodePart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -665,6 +865,10 @@ class ExecutableCodePart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -673,6 +877,10 @@ class ExecutableCodePart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return ExecutableCodePart(
@@ -684,6 +892,10 @@ class ExecutableCodePart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -702,6 +914,10 @@ class CodeExecutionResultPart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -717,6 +933,10 @@ class CodeExecutionResultPart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -725,6 +945,10 @@ class CodeExecutionResultPart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return CodeExecutionResultPart(
@@ -736,6 +960,10 @@ class CodeExecutionResultPart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -750,6 +978,10 @@ class MetadataPart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
   });
 
   @override
@@ -762,6 +994,10 @@ class MetadataPart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
       thought: thought,
@@ -769,6 +1005,10 @@ class MetadataPart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
     );
     return MetadataPart(
       thought: common.thought,
@@ -776,6 +1016,10 @@ class MetadataPart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
     );
   }
 }
@@ -889,6 +1133,10 @@ class ToolCallPart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -903,6 +1151,10 @@ class ToolCallPart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -911,6 +1163,10 @@ class ToolCallPart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return ToolCallPart(
@@ -920,6 +1176,10 @@ class ToolCallPart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }
@@ -938,6 +1198,10 @@ class ToolResponsePart extends Part {
     super.partMetadata,
     super.mediaResolution,
     super.videoMetadata,
+    super.mediaProcessing,
+    super.audioMetadata,
+    super.documentMetadata,
+    super.spreadsheetMetadata,
     super.additionalProperties,
   });
 
@@ -953,6 +1217,10 @@ class ToolResponsePart extends Part {
     Object? partMetadata = unsetCopyWithValue,
     Object? mediaResolution = unsetCopyWithValue,
     Object? videoMetadata = unsetCopyWithValue,
+    Object? mediaProcessing = unsetCopyWithValue,
+    Object? audioMetadata = unsetCopyWithValue,
+    Object? documentMetadata = unsetCopyWithValue,
+    Object? spreadsheetMetadata = unsetCopyWithValue,
     Object? additionalProperties = unsetCopyWithValue,
   }) {
     final common = _copyCommon(
@@ -961,6 +1229,10 @@ class ToolResponsePart extends Part {
       partMetadata: partMetadata,
       mediaResolution: mediaResolution,
       videoMetadata: videoMetadata,
+      mediaProcessing: mediaProcessing,
+      audioMetadata: audioMetadata,
+      documentMetadata: documentMetadata,
+      spreadsheetMetadata: spreadsheetMetadata,
       additionalProperties: additionalProperties,
     );
     return ToolResponsePart(
@@ -972,6 +1244,10 @@ class ToolResponsePart extends Part {
       partMetadata: common.partMetadata,
       mediaResolution: common.mediaResolution,
       videoMetadata: common.videoMetadata,
+      mediaProcessing: common.mediaProcessing,
+      audioMetadata: common.audioMetadata,
+      documentMetadata: common.documentMetadata,
+      spreadsheetMetadata: common.spreadsheetMetadata,
       additionalProperties: common.additionalProperties,
     );
   }

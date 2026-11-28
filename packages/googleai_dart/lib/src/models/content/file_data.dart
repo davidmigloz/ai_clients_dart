@@ -8,25 +8,31 @@ class FileData {
   /// MIME type (optional hint).
   final String? mimeType;
 
+  /// Display name on API surfaces that accept media labels.
+  final String? displayName;
+
   /// Creates a [FileData].
-  const FileData({required this.fileUri, this.mimeType});
+  const FileData({required this.fileUri, this.mimeType, this.displayName});
 
   /// Creates a [FileData] from JSON.
   factory FileData.fromJson(Map<String, dynamic> json) => FileData(
     fileUri: json['fileUri'] as String,
     mimeType: json['mimeType'] as String?,
+    displayName: json['displayName'] as String?,
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'fileUri': fileUri,
     if (mimeType != null) 'mimeType': mimeType,
+    if (displayName != null) 'displayName': displayName,
   };
 
   /// Creates a copy with replaced values.
   FileData copyWith({
     Object? fileUri = unsetCopyWithValue,
     Object? mimeType = unsetCopyWithValue,
+    Object? displayName = unsetCopyWithValue,
   }) {
     return FileData(
       fileUri: fileUri == unsetCopyWithValue
@@ -35,6 +41,9 @@ class FileData {
       mimeType: mimeType == unsetCopyWithValue
           ? this.mimeType
           : mimeType as String?,
+      displayName: displayName == unsetCopyWithValue
+          ? this.displayName
+          : displayName as String?,
     );
   }
 }
