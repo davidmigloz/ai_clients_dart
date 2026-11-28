@@ -1,5 +1,3 @@
-import 'dart:async'
-    show Completer, StreamController, StreamSubscription, Timer, unawaited;
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -22,8 +20,8 @@ import '../models/interactions/steps/steps.dart';
 import '../models/interactions/tools/tools.dart';
 import '../models/interactions/usage.dart';
 import '../models/interactions/webhook_config.dart';
-import '../utils/request_id.dart';
 import 'base_resource.dart';
+import 'continuation_abort.dart';
 import 'genie_resource.dart';
 import 'streaming_resource.dart';
 

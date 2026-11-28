@@ -98,7 +98,6 @@ mixin StreamingResource on ResourceBase {
     late StreamController<T> controller;
     var stopped = false;
     var requestId = generateRequestId();
-    Redactor? diagnosticRedactor;
 
     void stop({bool abort = true}) {
       if (stopped) return;
@@ -115,7 +114,7 @@ mixin StreamingResource on ResourceBase {
       if (stopped) return;
       if (error != null) {
         controller.addError(
-          _safeStreamError(error, diagnosticRedactor),
+          _safeStreamError(error, resolveDiagnosticRedactor?.call()),
           stackTrace,
         );
       }
@@ -127,7 +126,6 @@ mixin StreamingResource on ResourceBase {
       try {
         ensureNotClosed?.call();
         final request = createRequest();
-        diagnosticRedactor = resolveDiagnosticRedactor?.call();
         requestId = request.headers['X-Request-ID'] ?? requestId;
         final prepared = await prepareStreamingRequest(request);
         if (stopped) return;
@@ -165,7 +163,9 @@ mixin StreamingResource on ResourceBase {
                       headers: response.headers,
                       request: response.request,
                     ),
-                    redactor: diagnosticRedactor ?? Redactor.continuationTokens,
+                    redactor:
+                        resolveDiagnosticRedactor?.call() ??
+                        Redactor.continuationTokens,
                   ),
                 );
               } catch (error, trace) {
@@ -216,7 +216,7 @@ mixin StreamingResource on ResourceBase {
       } catch (error, trace) {
         if (!stopped) {
           _logStreamError(
-            _safeStreamError(error, diagnosticRedactor),
+            _safeStreamError(error, resolveDiagnosticRedactor?.call()),
             requestId,
           );
           finish(error, trace);
@@ -490,9 +490,17 @@ mixin StreamingResource on ResourceBase {
     }
     final description = error.toString();
     final safeDescription = redactor.redactString(description);
-    return safeDescription == description
-        ? error
-        : StreamException(message: safeDescription);
+    if (safeDescription == description) return error;
+    // Keep a source-free transport cause so callers can distinguish network
+    // failures and explicit transport aborts without exposing the original URI.
+    final cause = switch (error) {
+      http.RequestAbortedException() => http.RequestAbortedException(),
+      http.ClientException(:final message) => http.ClientException(
+        redactor.redactString(message),
+      ),
+      _ => null,
+    };
+    return StreamException(message: safeDescription, cause: cause);
   }
 
   /// Logs streaming errors.

@@ -26,6 +26,7 @@ class Redactor {
 
   /// Exact sensitive values to remove from diagnostic keys and text.
   final List<String> sensitiveValues;
+  final List<Pattern>? _sensitivePatterns;
 
   /// Replacement text for redacted values.
   final String replacement;
@@ -35,39 +36,64 @@ class Redactor {
     required this.redactionList,
     this.sensitiveValues = const [],
     this.replacement = '***REDACTED***',
-  });
+  }) : _sensitivePatterns = null;
+
+  const Redactor._({
+    required this.redactionList,
+    required this.sensitiveValues,
+    required List<Pattern> this._sensitivePatterns,
+  }) : replacement = '***REDACTED***';
 
   /// Redacts the raw and commonly encoded forms of operation-specific secrets.
   factory Redactor.forSecrets({
     required Iterable<String> secrets,
     List<String> redactionList = const [],
   }) {
-    final variants = {
+    final literals = {
       for (final secret in secrets)
-        if (secret.isNotEmpty) ..._diagnosticVariants(secret),
-    }.toList()..sort((a, b) => b.length.compareTo(a.length));
-    return Redactor(redactionList: redactionList, sensitiveValues: variants);
+        if (secret.isNotEmpty) ..._literalVariants(secret),
+    };
+    final encoded = {
+      for (final value in literals) ...{
+        Uri.encodeComponent(value),
+        Uri.encodeQueryComponent(value),
+      },
+    };
+    final variants = {...literals, ...encoded}.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    return Redactor._(
+      redactionList: redactionList,
+      sensitiveValues: variants,
+      sensitivePatterns: [
+        for (final value in variants)
+          if (encoded.contains(value) && _percentEscape.hasMatch(value))
+            _encodedSecretPattern(value)
+          else
+            value,
+      ],
+    );
   }
 
   static final _percentEscape = RegExp(r'%[0-9A-Fa-f]{2}');
 
-  static Iterable<String> _diagnosticVariants(String secret) sync* {
+  static Iterable<String> _literalVariants(String secret) sync* {
     // Provider messages can contain a JSON response as a string value.
     final json = jsonEncode(secret);
-    final escaped = json.substring(1, json.length - 1);
-    for (final value in {secret, escaped}) {
-      yield value;
-      for (final encoded in {
-        Uri.encodeComponent(value),
-        Uri.encodeQueryComponent(value),
-      }) {
-        yield encoded;
-        yield encoded.replaceAllMapped(
-          _percentEscape,
-          (match) => match[0]!.toLowerCase(),
-        );
-      }
-    }
+    yield secret;
+    yield json.substring(1, json.length - 1);
+  }
+
+  static RegExp _encodedSecretPattern(String value) => RegExp(
+    RegExp.escape(value).replaceAllMapped(_percentEscape, (match) {
+      final pair = match[0]!;
+      return '%${_hexDigitPattern(pair[1])}${_hexDigitPattern(pair[2])}';
+    }),
+  );
+
+  static String _hexDigitPattern(String digit) {
+    final upper = digit.toUpperCase();
+    final lower = digit.toLowerCase();
+    return upper == lower ? digit : '[$upper$lower]';
   }
 
   /// Redacts sensitive fields from a map.
@@ -206,8 +232,8 @@ class Redactor {
 
   String _redactValues(String input) {
     var result = input;
-    for (final value in sensitiveValues) {
-      if (value.isNotEmpty) result = result.replaceAll(value, replacement);
+    for (final pattern in _sensitivePatterns ?? sensitiveValues) {
+      if (pattern != '') result = result.replaceAll(pattern, replacement);
     }
     return result;
   }

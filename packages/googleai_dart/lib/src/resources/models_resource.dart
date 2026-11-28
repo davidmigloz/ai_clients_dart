@@ -6,7 +6,10 @@ import '../client/config.dart';
 import '../errors/exceptions.dart';
 import '../models/batch/embed_content_batch.dart';
 import '../models/batch/generate_content_batch.dart';
-import '../models/common/voice_config.dart';
+import '../models/content/candidate.dart';
+import '../models/content/citation_metadata.dart';
+import '../models/content/content.dart';
+import '../models/content/logprobs_result.dart';
 import '../models/content/part.dart';
 import '../models/embeddings/batch_embed_contents_request.dart';
 import '../models/embeddings/batch_embed_contents_response.dart';
@@ -20,16 +23,24 @@ import '../models/generation/generate_answer_request.dart';
 import '../models/generation/generate_answer_response.dart';
 import '../models/generation/generate_content_request.dart';
 import '../models/generation/generate_content_response.dart';
+import '../models/metadata/finish_reason.dart';
+import '../models/metadata/grounding_metadata.dart';
+import '../models/metadata/modality_token_count.dart';
+import '../models/metadata/usage_metadata.dart';
 import '../models/models/list_models_response.dart';
 import '../models/models/model.dart';
 import '../models/prediction/predict_long_running_operation.dart';
 import '../models/prediction/predict_long_running_request.dart';
 import '../models/prediction/predict_request.dart';
 import '../models/prediction/predict_response.dart';
+import '../models/safety/safety_rating.dart';
 import '../utils/redactor.dart';
 import 'base_resource.dart';
+import 'continuation_abort.dart';
 import 'operations_resource.dart';
 import 'streaming_resource.dart';
+
+part 'generate_content_continuation.dart';
 
 /// Resource for the Models API.
 ///
@@ -47,80 +58,116 @@ class ModelsResource extends ResourceBase with StreamingResource {
 
   /// Generates content using the specified model.
   ///
-  /// The [model] parameter specifies which model to use (e.g., "gemini-pro").
-  /// The [request] contains the conversation history and generation config.
-  /// The optional [abortTrigger] allows canceling the request before completion.
-  ///
-  /// Returns a [GenerateContentResponse] containing the model's response.
+  /// The [request] contains conversation history and generation config.
+  /// Set [automaticContinuation] to follow long-decode checkpoints on a
+  /// supported model. The response combines candidate parts and usage across
+  /// hops. The configured timeout and [abortTrigger] cover the entire call.
   ///
   /// Throws [AbortedException] if the request is aborted via [abortTrigger].
   Future<GenerateContentResponse> generateContent({
     required String model,
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
-  }) async {
-    final url = requestBuilder.buildUrl(
-      '/{version}/models/$model:generateContent',
-      // No endpoint-specific config needed for basic generation
-    );
-
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
-
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final diagnosticRedactor = _voiceKeyRedactor(request);
-    final response = await interceptorChain.execute(
-      httpRequest,
+    bool automaticContinuation = false,
+  }) {
+    if (automaticContinuation) {
+      return _continueGenerateContent(
+        request,
+        (body, checkpoints, abort) => _sendGenerateContent(
+          model,
+          () => body,
+          abortTrigger: abort.future,
+          checkActive: abort.check,
+          knownCheckpoints: checkpoints,
+        ),
+        timeout: config.timeout,
+        abortTrigger: abortTrigger,
+      );
+    }
+    return _sendGenerateContent(
+      model,
+      request.toJson,
       abortTrigger: abortTrigger,
+    );
+  }
+
+  Future<GenerateContentResponse> _sendGenerateContent(
+    String model,
+    Map<String, dynamic> Function() buildBody, {
+    Future<void>? abortTrigger,
+    void Function()? checkActive,
+    Iterable<String>? knownCheckpoints,
+  }) async {
+    final body = buildBody();
+    final diagnosticRedactor = _generationDiagnosticRedactor(
+      body,
+      knownCheckpoints,
+    );
+    final response = await interceptorChain.execute(
+      _generateContentHttpRequest(model, body, stream: false),
+      abortTrigger: abortTrigger,
+      checkActive: checkActive,
       diagnosticRedactor: diagnosticRedactor,
     );
-
     return _decodeGeneratedContent(response, diagnosticRedactor);
   }
 
-  /// Generates content using streaming.
+  /// Streams content using the specified model.
   ///
-  /// The [model] parameter specifies which model to use.
-  /// The [request] contains the conversation history and generation config.
-  /// The optional [abortTrigger] allows canceling the stream.
+  /// Set [automaticContinuation] to follow safe long-decode checkpoints.
+  /// Reported usage includes completed hops and the current hop's running
+  /// totals. The configured timeout and [abortTrigger] cover the entire
+  /// automatically continued stream. Cancelling the subscription stops
+  /// any pending requests.
   ///
-  /// Returns a stream of [GenerateContentResponse] chunks.
-  ///
-  /// If [abortTrigger] completes while streaming, the stream will emit
-  /// an [AbortedException] error and close immediately.
-  ///
-  /// Note: Streaming applies auth and logging interceptors manually since
-  /// StreamedResponse cannot go through the full interceptor chain.
-  /// This is an **intentional and spec-compliant design** per spec.md line 60-63.
-  /// Streaming responses are consumed incrementally, making full chain impossible.
+  /// If [abortTrigger] completes while streaming, the stream emits an
+  /// [AbortedException] and closes.
   Stream<GenerateContentResponse> streamGenerateContent({
     required String model,
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
+    bool automaticContinuation = false,
   }) {
+    if (automaticContinuation) {
+      return continuationStream(
+        operation: _generateContentContinuationName,
+        timeout: config.timeout,
+        abortTrigger: abortTrigger,
+        run: (abort) => _continueGenerateContentStream(
+          request,
+          (body, checkpoints, trigger) => _streamGenerateContent(
+            model,
+            () => body,
+            abortTrigger: trigger,
+            knownCheckpoints: checkpoints,
+          ),
+          abort,
+        ),
+      );
+    }
+    return _streamGenerateContent(
+      model,
+      request.toJson,
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  Stream<GenerateContentResponse> _streamGenerateContent(
+    String model,
+    Map<String, dynamic> Function() buildBody, {
+    Future<void>? abortTrigger,
+    Set<String>? knownCheckpoints,
+  }) {
+    late Map<String, dynamic> body;
     Redactor? diagnosticRedactor;
     return streamRequest(
       createRequest: () {
-        // Build URL and headers (uses endpoint config precedence)
-        final url = requestBuilder.buildUrl(
-          '/{version}/models/$model:streamGenerateContent',
-          queryParams: {'alt': 'sse'},
+        body = buildBody();
+        diagnosticRedactor = _generationDiagnosticRedactor(
+          body,
+          knownCheckpoints,
         );
-
-        final headers = requestBuilder.buildHeaders(
-          additionalHeaders: {'Content-Type': 'application/json'},
-        );
-
-        // Create request
-        final httpRequest = http.Request('POST', url)
-          ..headers.addAll(headers)
-          ..body = jsonEncode(request.toJson());
-        diagnosticRedactor = _voiceKeyRedactor(request);
-        return httpRequest;
+        return _generateContentHttpRequest(model, body, stream: true);
       },
       abortTrigger: abortTrigger,
       resolveDiagnosticRedactor: () => diagnosticRedactor,
@@ -135,9 +182,36 @@ class ModelsResource extends ResourceBase with StreamingResource {
             redactor: diagnosticRedactor ?? Redactor.continuationTokens,
           );
         }
-        return GenerateContentResponse.fromJson(json);
+        final response = GenerateContentResponse.fromJson(json);
+        if (knownCheckpoints != null &&
+            _captureGenerationTokens(response, knownCheckpoints)) {
+          diagnosticRedactor = _generationDiagnosticRedactor(
+            body,
+            knownCheckpoints,
+          );
+        }
+        return response;
       },
     );
+  }
+
+  http.Request _generateContentHttpRequest(
+    String model,
+    Map<String, dynamic> body, {
+    required bool stream,
+  }) {
+    final operation = stream ? 'streamGenerateContent' : 'generateContent';
+    final url = requestBuilder.buildUrl(
+      '/{version}/models/$model:$operation',
+      queryParams: stream ? const {'alt': 'sse'} : null,
+    );
+    return http.Request('POST', url)
+      ..headers.addAll(
+        requestBuilder.buildHeaders(
+          additionalHeaders: const {'Content-Type': 'application/json'},
+        ),
+      )
+      ..body = jsonEncode(body);
   }
 
   /// Counts tokens in the provided content.
@@ -198,11 +272,12 @@ class ModelsResource extends ResourceBase with StreamingResource {
       additionalHeaders: {'Content-Type': 'application/json'},
     );
 
+    final body = request.toJson();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(body);
 
-    final diagnosticRedactor = _voiceKeyRedactor(request);
+    final diagnosticRedactor = _generationDiagnosticRedactor(body, null);
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
@@ -243,10 +318,11 @@ class ModelsResource extends ResourceBase with StreamingResource {
         );
 
         // Create request
+        final body = request.toJson();
         final httpRequest = http.Request('POST', url)
           ..headers.addAll(headers)
-          ..body = jsonEncode(request.toJson());
-        diagnosticRedactor = _voiceKeyRedactor(request);
+          ..body = jsonEncode(body);
+        diagnosticRedactor = _generationDiagnosticRedactor(body, null);
         return httpRequest;
       },
       abortTrigger: abortTrigger,
@@ -287,19 +363,43 @@ class ModelsResource extends ResourceBase with StreamingResource {
     }
   }
 
-  Redactor? _voiceKeyRedactor(GenerateContentRequest request) {
-    final speech = request.generationConfig?.speechConfig;
-    final voices = [
-      speech?.voiceConfig?.voice,
-      for (final speaker
-          in speech?.multiSpeakerVoiceConfig?.speakerVoiceConfigs ??
-              const <SpeakerVoiceConfig>[])
-        speaker.voiceConfig?.voice,
-    ];
-    final keys = voices.whereType<String>().where(
-      (voice) => voice.startsWith('voicekey_'),
-    );
-    if (keys.isEmpty) return null;
+  Redactor? _generationDiagnosticRedactor(
+    Map<String, dynamic> body,
+    Iterable<String>? knownCheckpoints,
+  ) {
+    final keys = {
+      ...?knownCheckpoints,
+      ?_generationToken(body['continuationToken'] as String?),
+    };
+    // Derive the scope from the same serialized request, including saved
+    // content on later hops and pending edits before a stream is listened to.
+    void addVoiceKey(Object? config) {
+      if (config case {
+        'voice': final String key,
+      } when key.startsWith('voicekey_')) {
+        keys.add(key);
+      }
+    }
+
+    if (body case {
+      'generationConfig': {'speechConfig': final Map<String, dynamic> speech},
+    }) {
+      addVoiceKey(speech['voiceConfig']);
+      if (speech case {
+        'multiSpeakerVoiceConfig': {
+          'speakerVoiceConfigs': final List<Object?> speakers,
+        },
+      }) {
+        for (final speaker in speakers) {
+          if (speaker case {'voiceConfig': final Object? config}) {
+            addVoiceKey(config);
+          }
+        }
+      }
+    }
+    if (keys.isEmpty) {
+      return knownCheckpoints == null ? null : Redactor.continuationTokens;
+    }
     return Redactor.forSecrets(
       secrets: keys,
       redactionList: Redactor.continuationTokenFields,

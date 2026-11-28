@@ -362,20 +362,28 @@ Future<void> main() async {
 
 → [Full example](example/generate_content.dart)
 
-For long decode on supported Gemini 4 models, use `streamGenerateContent` and
-set `GenerationConfig.maxOutputTokens` above 65,536. Gemini 4 Neon and Hydrogen
-also support unary long decode. An initial direct unary request to Gemini 4
-Carbon or Argon with a limit above 32,768 can return HTTP 400.
+For long decode on supported Gemini 4 models, select the Gemini Developer API
+`v1beta` or Vertex AI `v1beta1`. Set `GenerationConfig.maxOutputTokens` above
+65,536 and pass `automaticContinuation: true` to `streamGenerateContent`.
+Gemini 4 Neon and Hydrogen also support unary long decode through
+`generateContent`. An initial direct unary request to Gemini 4 Carbon or
+Argon with a limit above 32,768 can return HTTP 400.
 
-When a candidate has `FinishReason.continuation` and a token, start the next
-hop with the original request and
+Automatic continuation uses the same timeout and abort trigger across hops.
+The unary result merges candidate output and usage. In a stream, consume text
+as it arrives and use the latest reported usage across hops. If the connection
+drops after emitting output beyond the latest checkpoint, the stream surfaces
+the error so the application can decide how to recover.
+
+With the default manual flow, when a candidate has `FinishReason.continuation`
+and a token, start the next hop with the original request and
 `copyWith(continuationToken: candidate.continuationToken)`. Keep the original
 inputs and total token budget across hops. On a stream, a checkpoint token
 can arrive before a finish reason. Keep output since the last checkpoint
 pending so you can discard it if the stream drops and resume from that
 checkpoint. To resume after `FinishReason.maxTokens` with a token, raise the
-budget above the tokens already used. On Vertex AI, select
-`ApiVersion.v1beta1`.
+budget above the tokens already used.
+[Streaming long decode example](example/generate_content_long_decode.dart) ·
 [Gemini Developer API long decode](https://aistudio.google.com/docs/long-decode?generate-content=true) ·
 [Vertex AI inference reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/inference)
 
@@ -1354,6 +1362,7 @@ See the [example/](example/) directory for complete examples:
 | [`function_calling_example.dart`](example/function_calling_example.dart) | Tool calling |
 | [`generate_answer_example.dart`](example/generate_answer_example.dart) | Grounded question answering (RAG) |
 | [`generate_content.dart`](example/generate_content.dart) | Basic text generation |
+| [`generate_content_long_decode.dart`](example/generate_content_long_decode.dart) | Stream Gemini 4 output with automatic continuation |
 | [`generate_content_media_slicing.dart`](example/generate_content_media_slicing.dart) | GenerateContent PDF page selection |
 | [`generated_files_example.dart`](example/generated_files_example.dart) | Generated files for video outputs |
 | [`genie_example.dart`](example/genie_example.dart) | Genie 4 world setup, JPEG frames, and WebSocket completion |
