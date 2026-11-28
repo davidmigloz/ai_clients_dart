@@ -347,6 +347,30 @@ switch (tier) {
 
 ---
 
+## Reading Interactions code execution and video tasks
+
+Add `CodeExecutionLanguage.bash` and `InteractionVideoConfigTask.extend` to
+exhaustive switches over those enums.
+
+Existing code can still read `CodeExecutionResultStep.result` for a text result.
+
+```dart
+final text = step.result;
+```
+
+When the server returns structured output, read the content blocks first.
+
+```dart
+final content = step.resultContent;
+if (content != null) {
+  for (final part in content) {
+    print(part.toJson());
+  }
+} else {
+  print(step.result);
+}
+```
+
 ## Handling Interactions speech annotations and media processing events
 
 Update exhaustive switches on `Annotation`, `InteractionStep`, and

@@ -78,6 +78,9 @@ class CodeExecutionCallStep extends InteractionStep {
 enum CodeExecutionLanguage {
   /// Python >= 3.10, with numpy and simpy available.
   python,
+
+  /// Bash shell.
+  bash,
 }
 
 /// Converts a JSON string to a [CodeExecutionLanguage], or `null` if
@@ -85,6 +88,7 @@ enum CodeExecutionLanguage {
 CodeExecutionLanguage? codeExecutionLanguageFromString(String? value) {
   return switch (value) {
     'python' => CodeExecutionLanguage.python,
+    'bash' => CodeExecutionLanguage.bash,
     _ => null,
   };
 }
@@ -93,6 +97,7 @@ CodeExecutionLanguage? codeExecutionLanguageFromString(String? value) {
 String codeExecutionLanguageToString(CodeExecutionLanguage value) {
   return switch (value) {
     CodeExecutionLanguage.python => 'python',
+    CodeExecutionLanguage.bash => 'bash',
   };
 }
 

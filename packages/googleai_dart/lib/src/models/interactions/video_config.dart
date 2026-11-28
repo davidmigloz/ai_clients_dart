@@ -15,6 +15,9 @@ enum InteractionVideoConfigTask {
 
   /// Modifies an existing input video.
   edit,
+
+  /// Extends an existing input video.
+  extend,
 }
 
 /// Converts a string to an [InteractionVideoConfigTask], or `null` if
@@ -27,6 +30,7 @@ InteractionVideoConfigTask? interactionVideoConfigTaskFromString(
     'image_to_video' => InteractionVideoConfigTask.imageToVideo,
     'reference_to_video' => InteractionVideoConfigTask.referenceToVideo,
     'edit' => InteractionVideoConfigTask.edit,
+    'extend' => InteractionVideoConfigTask.extend,
     _ => null,
   };
 }
@@ -38,6 +42,7 @@ String interactionVideoConfigTaskToString(InteractionVideoConfigTask task) {
     InteractionVideoConfigTask.imageToVideo => 'image_to_video',
     InteractionVideoConfigTask.referenceToVideo => 'reference_to_video',
     InteractionVideoConfigTask.edit => 'edit',
+    InteractionVideoConfigTask.extend => 'extend',
   };
 }
 
