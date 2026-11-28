@@ -3,7 +3,7 @@
 ///
 /// This example shows how to:
 /// - Generate speech with a prebuilt voice
-/// - Control delivery with audio tags (e.g. `[whispers]`, `[excited]`)
+/// - Control delivery with speech metadata and inline audio tags such as `<sigh>`
 /// - Produce multi-speaker dialogue with distinct voices per speaker
 /// - Save the returned audio as a WAV file
 ///
@@ -51,15 +51,13 @@ void main() async {
 
     // Example 2: Expressive control with audio tags.
     //
-    // Audio tags in square brackets steer pacing, tone, and delivery. Tags
-    // must be separated by text or punctuation — never place two tags
-    // adjacent. Tags are English-only but work inside prompts in any language.
+    // Inline vocalization tags mark moments in the performance.
     print('\n=== Audio tags ===\n');
 
     const prompt =
-        '[cautious] The shadow crept slowly across the silent room. '
-        '[whispers] The secret document had to be hidden here. '
-        '[short pause] But where?';
+        'The shadow crept slowly across the silent room. '
+        '<breath> The secret document had to be hidden here. '
+        '<short pause> But where?';
 
     final tagged = await client.models.generateContent(
       model: _model,

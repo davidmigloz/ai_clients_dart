@@ -83,9 +83,7 @@ void main() {
           },
         });
         return _response({
-          'text': 'Welcome.',
           'audioTranscription': {
-            'text': 'Welcome.',
             'speakerLabel': 'spk_1',
             'words': [
               {'word': 'Welcome.', 'startOffset': '0s', 'endOffset': '0.4s'},
@@ -114,12 +112,15 @@ void main() {
       ),
     );
     final part = response.candidates!.single.content!.parts.single;
-    expect(part.audioTranscription?.text, 'Welcome.');
+    expect(part, isA<MetadataPart>());
+    expect(part.audioTranscription?.text, isNull);
     expect(part.audioTranscription?.speakerLabel, 'spk_1');
+    expect(part.audioTranscription?.words?.single.word, 'Welcome.');
     expect(part.audioTranscription?.words?.single.endOffset, '0.4s');
-    expect((part as TextPart).copyWith(audioTranscription: null).toJson(), {
-      'text': 'Welcome.',
-    });
+    expect(
+      (part as MetadataPart).copyWith(audioTranscription: null).toJson(),
+      isEmpty,
+    );
   });
 
   test('preserves unknown nested and unavailable typed speech metadata', () {
@@ -134,7 +135,7 @@ void main() {
     };
     final part = Part.fromJson(future) as TextPart;
     expect(part.speechMetadata?.speaker, 'Narrator');
-    expect(part.audioTranscription, isNull);
+    expect(part.audioTranscription?.toJson(), {'futureReplacement': true});
     expect(part.copyWith().toJson(), future);
     expect(part.speechMetadata?.copyWith(speaker: 'Speaker').toJson(), {
       'speaker': 'Speaker',

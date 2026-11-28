@@ -113,8 +113,8 @@ class AudioTranscriptionWord {
 
 /// Transcript returned for a GenerateContent audio part.
 class AudioTranscription {
-  /// Transcript of the audio segment.
-  final String text;
+  /// Full transcript when the model includes it alongside timed words.
+  final String? text;
 
   /// Speaker label when diarization is available.
   final String? speakerLabel;
@@ -123,7 +123,7 @@ class AudioTranscription {
   final List<AudioTranscriptionWord>? words;
 
   /// Creates a [AudioTranscription].
-  const AudioTranscription({required this.text, this.speakerLabel, this.words})
+  const AudioTranscription({this.text, this.speakerLabel, this.words})
     : _wireExtensions = const {};
 
   final Map<String, dynamic> _wireExtensions;
@@ -138,7 +138,7 @@ class AudioTranscription {
   /// Creates from JSON.
   factory AudioTranscription.fromJson(Map<String, dynamic> json) =>
       AudioTranscription._(
-        text: json['text'] as String,
+        text: json['text'] as String?,
         speakerLabel: json['speakerLabel'] as String?,
         words: (json['words'] as List?)
             ?.map(
@@ -156,7 +156,7 @@ class AudioTranscription {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     ..._wireExtensions,
-    'text': text,
+    'text': ?text,
     'speakerLabel': ?speakerLabel,
     'words': ?words?.map((word) => word.toJson()).toList(),
   };
@@ -167,7 +167,7 @@ class AudioTranscription {
     Object? speakerLabel = unsetCopyWithValue,
     Object? words = unsetCopyWithValue,
   }) => AudioTranscription._(
-    text: text == unsetCopyWithValue ? this.text : text! as String,
+    text: text == unsetCopyWithValue ? this.text : text as String?,
     speakerLabel: speakerLabel == unsetCopyWithValue
         ? this.speakerLabel
         : speakerLabel as String?,
