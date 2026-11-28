@@ -100,6 +100,42 @@ Dart create calls submit one hop by default. Set
 Google's Python and JavaScript SDKs enable that behavior by default.
 [Interactions long-decode guide](https://aistudio.google.com/docs/long-decode)
 
+Exhaustive switches over `GoogleAIException` also need a case for
+`InteractionContinuationInterruptedException`. It carries a continuation token
+when a later hop fails and the server already supplied a checkpoint.
+
+```dart
+// Before
+String describeFailure(GoogleAIException error) => switch (error) {
+  ApiException() ||
+  ValidationException() ||
+  TimeoutException() ||
+  AbortedException() ||
+  StreamException() ||
+  LiveSessionClosedException() ||
+  LiveSessionSetupException() ||
+  LiveSessionException() ||
+  LiveSessionResumptionException() ||
+  LiveConnectionException() => error.message,
+};
+
+// After
+String describeFailure(GoogleAIException error) => switch (error) {
+  InteractionContinuationInterruptedException(:final partialInteraction) =>
+    partialInteraction?.outputText ?? 'Resume from the last checkpoint.',
+  ApiException() ||
+  ValidationException() ||
+  TimeoutException() ||
+  AbortedException() ||
+  StreamException() ||
+  LiveSessionClosedException() ||
+  LiveSessionSetupException() ||
+  LiveSessionException() ||
+  LiveSessionResumptionException() ||
+  LiveConnectionException() => error.message,
+};
+```
+
 ---
 
 ## Migrating from v12.x to v13.0.0

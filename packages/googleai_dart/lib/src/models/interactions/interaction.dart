@@ -25,6 +25,9 @@ class Interaction {
   /// The status of the interaction.
   final InteractionStatus status;
 
+  /// The original wire status when this client does not recognize it.
+  final String? unrecognizedStatus;
+
   /// The name of the model used for generating the interaction.
   final String? model;
 
@@ -114,6 +117,7 @@ class Interaction {
   const Interaction({
     required this.id,
     required this.status,
+    this.unrecognizedStatus,
     this.model,
     this.agent,
     this.created,
@@ -144,6 +148,11 @@ class Interaction {
   factory Interaction.fromJson(Map<String, dynamic> json) => Interaction(
     id: json['id'] as String,
     status: InteractionStatus.fromString(json['status'] as String?),
+    unrecognizedStatus: switch (json['status'] as String?) {
+      final String value when InteractionStatus.tryFromString(value) == null =>
+        value,
+      _ => null,
+    },
     model: json['model'] as String?,
     agent: json['agent'] as String?,
     created: json['created'] != null
@@ -165,7 +174,8 @@ class Interaction {
     previousInteractionId: json['previous_interaction_id'] as String?,
     continuationToken: json['continuation_token'] as String?,
     continuationIds: (json['continuation_ids'] as List<dynamic>?)
-        ?.cast<String>(),
+        ?.map((id) => id as String)
+        .toList(),
     systemInstruction: json['system_instruction'] as String?,
     tools: (json['tools'] as List<dynamic>?)
         ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
@@ -208,7 +218,7 @@ class Interaction {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
-    'status': status.toJson(),
+    'status': unrecognizedStatus ?? status.toJson(),
     if (model != null) 'model': model,
     if (agent != null) 'agent': agent,
     if (created != null) 'created': created!.toIso8601String(),
@@ -246,6 +256,7 @@ class Interaction {
   Interaction copyWith({
     Object? id = unsetCopyWithValue,
     Object? status = unsetCopyWithValue,
+    Object? unrecognizedStatus = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
     Object? created = unsetCopyWithValue,
@@ -276,6 +287,9 @@ class Interaction {
       status: status == unsetCopyWithValue
           ? this.status
           : status! as InteractionStatus,
+      unrecognizedStatus: unrecognizedStatus == unsetCopyWithValue
+          ? (status == unsetCopyWithValue ? this.unrecognizedStatus : null)
+          : unrecognizedStatus as String?,
       model: model == unsetCopyWithValue ? this.model : model as String?,
       agent: agent == unsetCopyWithValue ? this.agent : agent as String?,
       created: created == unsetCopyWithValue

@@ -25,7 +25,11 @@ enum InteractionStatus {
   requiresContinuation;
 
   /// Creates an [InteractionStatus] from a JSON string.
-  static InteractionStatus fromString(String? value) {
+  static InteractionStatus fromString(String? value) =>
+      tryFromString(value) ?? InteractionStatus.inProgress;
+
+  /// Creates an [InteractionStatus] from a recognized JSON string.
+  static InteractionStatus? tryFromString(String? value) {
     return switch (value) {
       'in_progress' => InteractionStatus.inProgress,
       'requires_action' => InteractionStatus.requiresAction,
@@ -35,7 +39,7 @@ enum InteractionStatus {
       'incomplete' => InteractionStatus.incomplete,
       'budget_exceeded' => InteractionStatus.budgetExceeded,
       'requires_continuation' => InteractionStatus.requiresContinuation,
-      _ => InteractionStatus.inProgress,
+      _ => null,
     };
   }
 

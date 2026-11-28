@@ -328,7 +328,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       return http.Request('GET', url)..headers.addAll(_buildHeaders(sse: true));
     },
     abortTrigger: abortTrigger,
-    fromJson: InteractionEvent.fromJson,
+    fromJson: _decodeInteractionEvent,
   );
 
   Map<String, dynamic> _buildCreateBody({
@@ -399,13 +399,17 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   Future<Interaction> _sendInteractionRequest(
     http.Request Function() buildRequest, {
     Future<void>? abortTrigger,
+    void Function()? checkActive,
   }) async {
     final response = await interceptorChain.execute(
       buildRequest(),
       abortTrigger: abortTrigger,
+      checkActive: checkActive,
     );
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    return Interaction.fromJson(body);
+    return _decodeInteractionResponse(() {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      return Interaction.fromJson(body);
+    });
   }
 
   Future<Interaction> _sendCreate(
@@ -418,7 +422,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
         buildBody,
         (body, abort) => _sendInteractionRequest(
           () => _buildCreateRequest(body),
-          abortTrigger: abort,
+          abortTrigger: abort.future,
+          checkActive: abort.check,
         ),
         timeout: config.timeout,
         abortTrigger: abortTrigger,
@@ -452,6 +457,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   }) => streamRequest(
     createRequest: () => _buildCreateRequest(buildBody(), stream: true),
     abortTrigger: abortTrigger,
-    fromJson: InteractionEvent.fromJson,
+    fromJson: _decodeInteractionEvent,
   );
 }

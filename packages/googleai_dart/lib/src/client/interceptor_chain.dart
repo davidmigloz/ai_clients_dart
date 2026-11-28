@@ -32,10 +32,13 @@ class InterceptorChain {
   ///
   /// The optional [abortTrigger] allows canceling the request before completion.
   ///
+  /// [checkActive] can prevent an attempt from starting after asynchronous
+  /// preparation and prevent reading a response that arrived after cancellation.
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
+    void Function()? checkActive,
   }) {
     ensureNotClosed?.call();
 
@@ -45,11 +48,11 @@ class InterceptorChain {
       abortTrigger: abortTrigger,
     );
 
-    return _buildChain(0)(context);
+    return _buildChain(0, checkActive)(context);
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index) {
+  InterceptorNext _buildChain(int index, void Function()? checkActive) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
@@ -78,8 +81,19 @@ class InterceptorChain {
           return originalRequest;
         }
 
+        Future<http.Response> readResponse(http.StreamedResponse response) {
+          try {
+            checkActive?.call();
+          } catch (_) {
+            response.stream.listen(null).cancel().ignore();
+            rethrow;
+          }
+          return http.Response.fromStream(response);
+        }
+
         // Transport execution function
         Future<http.Response> executeTransport() async {
+          checkActive?.call();
           final requestToSend = createRequest();
           if (context.abortTrigger != null) {
             // Wrap request to enable http client's native abort support
@@ -95,7 +109,7 @@ class InterceptorChain {
               final streamedResponse = await httpClient.send(abortableRequest);
               // If we get here, request was sent successfully
               stage = AbortionStage.duringResponse;
-              return await http.Response.fromStream(streamedResponse);
+              return await readResponse(streamedResponse);
             } on http.RequestAbortedException catch (e) {
               // Convert http package's abort exception to our AbortedException
               final correlationId =
@@ -113,7 +127,7 @@ class InterceptorChain {
           } else {
             // No abort trigger - normal execution
             final streamedResponse = await httpClient.send(requestToSend);
-            return http.Response.fromStream(streamedResponse);
+            return readResponse(streamedResponse);
           }
         }
 
@@ -142,7 +156,7 @@ class InterceptorChain {
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
-      final next = _buildChain(index + 1);
+      final next = _buildChain(index + 1, checkActive);
 
       return interceptor.intercept(context, next);
     };

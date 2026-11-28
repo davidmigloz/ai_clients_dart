@@ -4,6 +4,17 @@ const _maxReconnectsWithoutProgress = 3;
 
 typedef _ContinuationCheckpoint = ({String token, String? ownerId});
 
+T _decodeInteractionResponse<T>(T Function() decode) {
+  try {
+    return decode();
+  } on TypeError {
+    throw const FormatException('Invalid Interactions response field type');
+  }
+}
+
+InteractionEvent _decodeInteractionEvent(Map<String, dynamic> json) =>
+    _decodeInteractionResponse(() => InteractionEvent.fromJson(json));
+
 String? _nonEmpty(String? value) =>
     value == null || value.isEmpty ? null : value;
 
@@ -20,7 +31,7 @@ Map<String, dynamic> _continuationBody(
 
 Future<Interaction> _continueInteraction(
   Map<String, dynamic> Function() buildBody,
-  Future<Interaction> Function(Map<String, dynamic>, Future<void>) send, {
+  Future<Interaction> Function(Map<String, dynamic>, _ContinuationAbort) send, {
   required Duration timeout,
   Future<void>? abortTrigger,
 }) async {
@@ -39,11 +50,13 @@ Future<Interaction> _continueInteraction(
       final checkpoint = next;
       try {
         abort.check();
-        final hop = await send(
-          checkpoint == null
-              ? original
-              : _continuationBody(original, checkpoint),
-          abort.future,
+        final hop = await abort.race(
+          send(
+            checkpoint == null
+                ? original
+                : _continuationBody(original, checkpoint),
+            abort,
+          ),
         );
         hops.add(hop);
       } on Exception catch (error, trace) {
@@ -161,6 +174,17 @@ Stream<InteractionEvent> _runInteractionStream(
           hop.isResumable &&
           checkpoint != null &&
           (!stored || checkpoint.ownerId != null || token == initialToken);
+      if (failure == null &&
+          canResume &&
+          !hop.completed &&
+          hop.outputAfterCheckpoint) {
+        failure = (
+          const StreamException(
+            message: 'The interaction stream ended before the hop completed.',
+          ),
+          StackTrace.current,
+        );
+      }
       final freshToken = token != null && token != next?.token;
       final canRetry =
           canResume &&
@@ -245,31 +269,42 @@ class _InteractionStreamHop {
   String? interactionId;
   bool outputAfterCheckpoint = false;
   bool failed = false;
+  bool completed = false;
+  bool statusUnrecognized = false;
 
   _InteractionStreamHop(this.checkpoint, {required this.stored});
 
   bool get isResumable =>
       !failed &&
-      (status == null ||
-          status == InteractionStatus.inProgress ||
-          status == InteractionStatus.requiresContinuation);
+      !statusUnrecognized &&
+      (status == InteractionStatus.requiresContinuation ||
+          (!completed &&
+              (status == null || status == InteractionStatus.inProgress)));
 
   void observe(InteractionEvent event, Set<String> ids) {
+    if (completed && event is! ErrorEvent) return;
     switch (event) {
       case InteractionCreatedEvent(:final interaction):
         status = interaction.status;
+        statusUnrecognized = interaction.unrecognizedStatus != null;
         _recordId(interaction.id, ids);
         _recordToken(interaction.continuationToken);
       case InteractionStatusUpdateEvent(
         :final interactionId,
         :final status,
+        :final unrecognizedStatus,
         :final continuationToken,
       ):
         _recordId(interactionId, ids);
-        this.status = status ?? this.status;
+        if (status != null || unrecognizedStatus != null) {
+          this.status = status;
+          statusUnrecognized = unrecognizedStatus != null;
+        }
         _recordToken(continuationToken);
       case InteractionCompletedEvent(:final interaction):
+        completed = true;
         status = interaction.status;
+        statusUnrecognized = interaction.unrecognizedStatus != null;
         _recordId(interaction.id, ids);
         // A terminal snapshot is authoritative even if it omits the token.
         if (_nonEmpty(interaction.continuationToken) == null) checkpoint = null;
@@ -335,6 +370,16 @@ class _ContinuationAbort {
   }
 
   Future<void> get future => _abort.future;
+
+  Future<T> race<T>(Future<T> response) async {
+    // Future.any handles a late response error even if cancellation wins.
+    final value = await Future.any<T>([
+      response,
+      future.then<T>((_) => throw _failure!),
+    ]);
+    check();
+    return value;
+  }
 
   void check() {
     if (_elapsed.elapsed >= timeout) _timeOut();

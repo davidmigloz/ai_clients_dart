@@ -1,4 +1,4 @@
-import 'dart:async' show Completer;
+import 'dart:async' show Completer, StreamController;
 import 'dart:convert';
 
 import 'package:googleai_dart/googleai_dart.dart';
@@ -83,11 +83,30 @@ http.StreamedResponse _stream(
   200,
 );
 
-GoogleAIClient _client(http.Client transport, {Duration? timeout}) {
+http.StreamedResponse _jsonResponse(Map<String, dynamic> body) =>
+    http.StreamedResponse(Stream.value(utf8.encode(jsonEncode(body))), 200);
+
+class _PendingCredentials implements AuthProvider {
+  final requested = Completer<void>();
+  final credentials = Completer<AuthCredentials>();
+
+  @override
+  Future<AuthCredentials> getCredentials() {
+    requested.complete();
+    return credentials.future;
+  }
+}
+
+GoogleAIClient _client(
+  http.Client transport, {
+  Duration? timeout,
+  AuthProvider? authProvider,
+}) {
   final client = GoogleAIClient(
     config: GoogleAIConfig(
       interactionsApiVersion: ApiVersion.v1,
       timeout: timeout ?? const Duration(minutes: 2),
+      authProvider: authProvider,
     ),
     httpClient: transport,
   );
@@ -384,6 +403,177 @@ void main() {
     },
   );
 
+  test('abort settles even while the first unary send ignores it', () async {
+    var requests = 0;
+    final pendingSend = Completer<http.StreamedResponse>();
+    final sent = Completer<http.Abortable>();
+    final abort = Completer<void>();
+    final client = _client(
+      MockClient.streaming((request, _) {
+        requests++;
+        sent.complete(request as http.Abortable);
+        return pendingSend.future;
+      }),
+    );
+    final result = client.interactions.create(
+      model: _model,
+      automaticContinuation: true,
+      abortTrigger: abort.future,
+    );
+    final aborted = expectLater(
+      result.timeout(const Duration(seconds: 1)),
+      throwsA(isA<AbortedException>()),
+    );
+    final transport = await sent.future;
+    abort.complete();
+    await transport.abortTrigger!;
+    await aborted;
+
+    pendingSend.complete(_jsonResponse(_hop('late-completed')));
+    await Future<void>.delayed(Duration.zero);
+    expect(requests, 1);
+  });
+
+  test('deadline settles while a later unary send ignores abort', () async {
+    var requests = 0;
+    final pendingSend = Completer<http.StreamedResponse>();
+    final sent = Completer<http.Abortable>();
+    final client = _client(
+      MockClient.streaming((request, _) async {
+        requests++;
+        if (requests == 1) {
+          return _jsonResponse(
+            _hop(
+              'first',
+              status: 'requires_continuation',
+              token: 'next',
+              steps: [_output('Partial output')],
+            ),
+          );
+        }
+        sent.complete(request as http.Abortable);
+        return pendingSend.future;
+      }),
+      timeout: const Duration(milliseconds: 300),
+    );
+    final result = client.interactions.create(
+      model: _model,
+      automaticContinuation: true,
+    );
+    final deadline = expectLater(
+      result.timeout(const Duration(seconds: 2)),
+      throwsA(
+        isA<InteractionContinuationInterruptedException>()
+            .having((error) => error.cause, 'cause', isA<TimeoutException>())
+            .having(
+              (error) => error.partialInteraction?.outputText,
+              'partial output',
+              'Partial output',
+            )
+            .having((error) => error.continuationToken, 'token', 'next'),
+      ),
+    );
+    final transport = await sent.future;
+    await deadline;
+    await transport.abortTrigger!;
+
+    pendingSend.completeError(http.ClientException('Late transport error'));
+    await Future<void>.delayed(Duration.zero);
+    expect(requests, 2);
+  });
+
+  test('a late terminal response body cannot undo a unary abort', () async {
+    var requests = 0;
+    final abort = Completer<void>();
+    final bodyStarted = Completer<void>();
+    final body = StreamController<List<int>>(onListen: bodyStarted.complete);
+    final client = _client(
+      MockClient.streaming((_, _) async {
+        requests++;
+        return http.StreamedResponse(body.stream, 200);
+      }),
+    );
+    final result = client.interactions.create(
+      model: _model,
+      automaticContinuation: true,
+      abortTrigger: abort.future,
+    );
+    final aborted = expectLater(
+      result.timeout(const Duration(seconds: 1)),
+      throwsA(isA<AbortedException>()),
+    );
+    await bodyStarted.future;
+    abort.complete();
+    await aborted;
+    body.add(utf8.encode(jsonEncode(_hop('late-completed'))));
+    await body.close();
+    expect(requests, 1);
+  });
+
+  test(
+    'credentials resolving after a unary deadline cannot start transport',
+    () async {
+      final provider = _PendingCredentials();
+      var requests = 0;
+      final client = _client(
+        MockClient((_) async {
+          requests++;
+          return http.Response(jsonEncode(_hop('unexpected')), 200);
+        }),
+        authProvider: provider,
+        timeout: const Duration(milliseconds: 300),
+      );
+      final result = client.interactions.create(
+        model: _model,
+        automaticContinuation: true,
+      );
+      final deadline = expectLater(
+        result.timeout(const Duration(seconds: 2)),
+        throwsA(isA<TimeoutException>()),
+      );
+      await provider.requested.future;
+      await deadline;
+
+      provider.credentials.complete(const NoAuthCredentials());
+      await Future<void>.delayed(Duration.zero);
+      expect(requests, 0);
+    },
+  );
+
+  test(
+    'malformed later unary response retains the partial interaction',
+    () async {
+      var requests = 0;
+      final client = _client(
+        MockClient((_) async {
+          requests++;
+          final body = requests == 1
+              ? _hop(
+                  'first',
+                  status: 'requires_continuation',
+                  token: 'next',
+                  steps: [_output('Partial')],
+                )
+              : {'id': 17, 'status': 'completed'};
+          return http.Response(jsonEncode(body), 200);
+        }),
+      );
+      await expectLater(
+        client.interactions.create(model: _model, automaticContinuation: true),
+        throwsA(
+          isA<InteractionContinuationInterruptedException>()
+              .having((error) => error.cause, 'cause', isA<FormatException>())
+              .having(
+                (error) => error.partialInteraction?.outputText,
+                'partial output',
+                'Partial',
+              ),
+        ),
+      );
+      expect(requests, 2);
+    },
+  );
+
   test(
     'continues SSE and retries a dropped seed with the same token owner',
     () async {
@@ -512,6 +702,91 @@ void main() {
       'First',
       ' second',
     ]);
+  });
+
+  test(
+    'malformed SSE checkpoint payload retains the earlier safe token',
+    () async {
+      var requests = 0;
+      final client = _client(
+        MockClient.streaming((_, _) async {
+          requests++;
+          return _stream([
+            _created('first'),
+            _checkpoint('first', 'safe-token'),
+            {..._checkpoint('first', 'malformed-token'), 'usage': false},
+          ]);
+        }),
+      );
+      await expectLater(
+        client.interactions
+            .createStream(model: _model, automaticContinuation: true)
+            .drain<void>(),
+        throwsA(
+          isA<InteractionContinuationInterruptedException>()
+              .having((error) => error.cause, 'cause', isA<FormatException>())
+              .having(
+                (error) => error.continuationToken,
+                'safe token',
+                'safe-token',
+              ),
+        ),
+      );
+      expect(requests, 1);
+    },
+  );
+
+  for (final status in ['queued', 'paused_by_policy']) {
+    test('records $status without automatically resuming decode', () async {
+      var requests = 0;
+      final client = _client(
+        MockClient.streaming((_, _) async {
+          requests++;
+          return _stream([
+            _created('first'),
+            {..._checkpoint('first', 'token'), 'status': status},
+          ]);
+        }),
+      );
+      final events = await client.interactions
+          .createStream(model: _model, automaticContinuation: true)
+          .toList();
+      final update = events.last as InteractionStatusUpdateEvent;
+      expect(update.unrecognizedStatus, status);
+      expect(update.toJson()['status'], status);
+      expect(requests, 1);
+    });
+  }
+
+  test('EOF after output beyond a checkpoint is an interruption', () async {
+    var requests = 0;
+    final client = _client(
+      MockClient.streaming((_, _) async {
+        requests++;
+        return _stream([
+          _created('first'),
+          _checkpoint('first', 'safe-token'),
+          _delta('Output after checkpoint'),
+        ]);
+      }),
+    );
+    final events = <InteractionEvent>[];
+    await expectLater(
+      client.interactions
+          .createStream(model: _model, automaticContinuation: true)
+          .forEach(events.add),
+      throwsA(
+        isA<InteractionContinuationInterruptedException>()
+            .having((error) => error.cause, 'cause', isA<StreamException>())
+            .having(
+              (error) => error.continuationToken,
+              'safe token',
+              'safe-token',
+            ),
+      ),
+    );
+    expect(events.whereType<StepDeltaEvent>(), hasLength(1));
+    expect(requests, 1);
   });
 
   test('a terminal snapshot clears a previous SSE checkpoint', () async {
