@@ -16,6 +16,9 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [interactions_media_slicing.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_media_slicing.dart): Process selected Interactions document pages and layers.
 - [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart) (~1.2k tokens): Stable Interactions, streaming, state and function calls.
 - [interactions_long_decode.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_long_decode.dart): Opt-in automatic continuation for foreground Gemini 4 interactions.
+- [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/agents_example.dart): Create and reuse a managed agent on Gemini Developer API v1beta.
+- [triggers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/triggers_example.dart): Schedule managed-agent interactions, run a trigger, and inspect executions.
+- [webhooks_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/webhooks_example.dart): Subscribe to Gemini webhook events and verify static signatures.
 - [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart) (~194 tokens): Basic text generation.
 - [generate_content_media_slicing.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content_media_slicing.dart): GenerateContent PDF page selection.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart) (~224 tokens): Streaming responses.

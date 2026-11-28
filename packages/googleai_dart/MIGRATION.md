@@ -421,6 +421,28 @@ String kind(FunctionResultSubcontent item) => switch (item) {
 
 ---
 
+## Updating managed-agent IDs and webhook gateway queries
+
+Use `antigravity-preview-09-2026` in place of
+`antigravity-preview-05-2026` and `deep-research-preview-04-2026` in place of
+`deep-research-pro-preview-12-2025` for Gemini Developer API requests.
+[Managed-agent deprecations](https://aistudio.google.com/docs/deprecations#managed-agents-deprecated-agents)
+
+If a custom gateway rewrites webhook query parameters, update its mapping to
+use the published snake-case names.
+
+```text
+Before
+GET /v1beta/webhooks?pageSize=10&pageToken=next
+PATCH /v1beta/webhooks/hook-id?updateMask=name
+
+After
+GET /v1beta/webhooks?page_size=10&page_token=next
+PATCH /v1beta/webhooks/hook-id?update_mask=name
+```
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

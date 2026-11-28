@@ -19,12 +19,13 @@ Future<void> main() async {
   final client = GoogleAIClient.fromEnvironment();
 
   try {
-    // 1. Create a trigger that runs a model interaction every hour.
+    // 1. Create a trigger that runs an agent interaction every hour.
     final trigger = await client.triggers.create(
       trigger: const TriggerCreateParams(
-        interaction: CreateModelInteractionParams(
-          model: 'gemini-3.5-flash',
+        interaction: CreateAgentInteractionParams(
+          agent: 'antigravity-preview-09-2026',
           input: InteractionInput.text("Summarize today's AI news."),
+          environment: EnvironmentConfigOrId.id('remote'),
         ),
         schedule: '0 * * * *',
         timeZone: 'UTC',
@@ -46,16 +47,16 @@ Future<void> main() async {
     final fetched = await client.triggers.get(trigger.id);
     print('Fetched trigger next run: ${fetched.nextRunTime}');
 
-    // 4. Pause the trigger.
+    // 4. Run the trigger immediately, outside its cron schedule.
+    final execution = await client.triggers.run(triggerId: trigger.id);
+    print('Ran execution: ${execution.id} (${execution.status})');
+
+    // 5. Pause the trigger.
     final paused = await client.triggers.update(
       id: trigger.id,
       update: const TriggerUpdate(status: TriggerStatus.paused),
     );
     print('Trigger status: ${paused.status}');
-
-    // 5. Run the trigger immediately, regardless of its schedule.
-    final execution = await client.triggers.run(triggerId: trigger.id);
-    print('Ran execution: ${execution.id} (${execution.status})');
 
     // 6. List the trigger's execution history.
     final executions = await client.triggers.listExecutions(

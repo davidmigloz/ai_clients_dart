@@ -34,4 +34,12 @@ abstract class ResourceBase {
     required this.requestBuilder,
     this.ensureNotClosed,
   });
+
+  /// Encodes an opaque ID in one path segment.
+  String encodeResourceId(String id, {String name = 'id'}) {
+    if (id.isEmpty || id == '.' || id == '..') {
+      throw ArgumentError.value(id, name, 'Expected a resource ID.');
+    }
+    return Uri.encodeComponent(id);
+  }
 }

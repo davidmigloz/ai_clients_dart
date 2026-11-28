@@ -43,8 +43,12 @@ class AgentsResource extends ResourceBase {
   /// Creates a new [Agent].
   ///
   /// Returns the created agent with its server-assigned [Agent.id] populated.
-  Future<Agent> create({required Agent agent}) async {
-    final url = requestBuilder.buildUrl('/{version}/agents');
+  /// Use [parent] to specify a scope like `projects/my-project/locations/global`.
+  Future<Agent> create({required Agent agent, String? parent}) async {
+    final url = requestBuilder.buildUrl(
+      '/{version}/agents',
+      queryParams: {'parent': ?parent},
+    );
 
     final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
@@ -54,7 +58,8 @@ class AgentsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final responseBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     return Agent.fromJson(responseBody);
   }
 
@@ -84,13 +89,16 @@ class AgentsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final responseBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     return ListAgentsResponse.fromJson(responseBody);
   }
 
   /// Gets a specific agent by [id].
   Future<Agent> get(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/agents/$id');
+    final url = requestBuilder.buildUrl(
+      '/{version}/agents/${encodeResourceId(id)}',
+    );
 
     final headers = _buildHeaders();
 
@@ -98,13 +106,16 @@ class AgentsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final responseBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     return Agent.fromJson(responseBody);
   }
 
   /// Deletes an agent by [id].
   Future<void> delete(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/agents/$id');
+    final url = requestBuilder.buildUrl(
+      '/{version}/agents/${encodeResourceId(id)}',
+    );
 
     final headers = _buildHeaders();
 

@@ -769,6 +769,42 @@ Use `get` and `list` for metadata and `delete` to remove a stored credential.
 
 </details>
 
+### How do I schedule a managed agent?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use the Gemini Developer API `v1beta` with a supported agent such as
+`antigravity-preview-09-2026` or the ID returned by `client.agents.create`.
+If your project requires a parent scope when creating an agent, pass
+`parent: 'projects/my-project/locations/global'`.
+
+```dart
+final trigger = await client.triggers.create(
+  trigger: const TriggerCreateParams(
+    interaction: CreateAgentInteractionParams(
+      agent: 'antigravity-preview-09-2026',
+      input: InteractionInput.text('Summarize the latest project notes.'),
+      environment: EnvironmentConfigOrId.id('remote'),
+    ),
+    schedule: '0 9 * * 1',
+    timeZone: 'UTC',
+  ),
+);
+final execution = await client.triggers.run(triggerId: trigger.id);
+print(execution.interactionId);
+```
+
+Use `listExecutions(filter: ...)` to inspect matching runs. Use
+`TriggerUpdate(status: TriggerStatus.paused)` with `update` to pause a
+schedule. Pass `updateMask` when a gateway expects the REST update envelope.
+
+[Agent setup example](example/agents_example.dart) ·
+[Trigger example](example/triggers_example.dart) ·
+[Triggers reference](https://aistudio.google.com/api-reference/triggers)
+
+</details>
+
 ### How do I create embeddings?
 
 <details>
@@ -1193,6 +1229,7 @@ See the [example/](example/) directory for complete examples:
 | [`prediction_example.dart`](example/prediction_example.dart) | Video generation with Veo model |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_retrieval_example.dart`](example/tool_retrieval_example.dart) | Client-side tool retrieval on Gemini Developer API `v1beta` |
+| [`triggers_example.dart`](example/triggers_example.dart) | Schedule and run managed agents on the Gemini Developer API `v1beta` |
 | [`tts_example.dart`](example/tts_example.dart) | Text-to-speech with Gemini TTS models |
 | [`tuned_model_generation_example.dart`](example/tuned_model_generation_example.dart) | Generate content with tuned models |
 | [`tuned_models_example.dart`](example/tuned_models_example.dart) | Tuned model workflows |
