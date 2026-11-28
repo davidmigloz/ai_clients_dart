@@ -381,6 +381,63 @@ switch (tier) {
 
 ---
 
+## Reading Interactions code execution and video tasks
+
+Add `CodeExecutionLanguage.bash` to exhaustive language switches.
+
+```dart
+// Before
+String languageName(CodeExecutionLanguage value) => switch (value) {
+  CodeExecutionLanguage.python => 'Python',
+};
+
+// After
+String languageName(CodeExecutionLanguage value) => switch (value) {
+  CodeExecutionLanguage.python => 'Python',
+  CodeExecutionLanguage.bash => 'Bash',
+};
+```
+
+Update exhaustive video-task switches as well. An existing task grouping can
+share the edit handler with the new extend case.
+
+```dart
+// Before
+bool usesExistingVideo(InteractionVideoConfigTask value) => switch (value) {
+  InteractionVideoConfigTask.textToVideo ||
+  InteractionVideoConfigTask.imageToVideo ||
+  InteractionVideoConfigTask.referenceToVideo => false,
+  InteractionVideoConfigTask.edit => true,
+};
+
+// After
+bool usesExistingVideo(InteractionVideoConfigTask value) => switch (value) {
+  InteractionVideoConfigTask.textToVideo ||
+  InteractionVideoConfigTask.imageToVideo ||
+  InteractionVideoConfigTask.referenceToVideo => false,
+  InteractionVideoConfigTask.edit || InteractionVideoConfigTask.extend => true,
+};
+```
+
+Existing code can still read `CodeExecutionResultStep.result` for a text result.
+
+```dart
+final text = step.result;
+```
+
+When the server returns structured output, read the content blocks first.
+
+```dart
+final content = step.resultContent;
+if (content != null) {
+  for (final part in content) {
+    print(part.toJson());
+  }
+} else {
+  print(step.result);
+}
+```
+
 ## Handling Interactions speech annotations and media processing events
 
 Update exhaustive switches on `Annotation`, `InteractionStep`, and

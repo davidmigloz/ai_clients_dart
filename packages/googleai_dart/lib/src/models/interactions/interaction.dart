@@ -2,6 +2,7 @@ import '../common/service_tier.dart';
 import '../copy_with_sentinel.dart';
 import 'agent_config.dart';
 import 'environments/environments.dart';
+import 'events/events.dart';
 import 'generation_config.dart';
 import 'interaction_input.dart';
 import 'interaction_status.dart';
@@ -51,6 +52,12 @@ class Interaction {
 
   /// Statistics on the interaction request's token usage.
   final InteractionUsage? usage;
+
+  /// Diagnostic faults recorded by the server.
+  final List<InteractionError>? errors;
+
+  /// Maximum total tokens for an agent run, as an exact int64 decimal string.
+  final String? maxTotalTokens;
 
   /// The object type of the interaction. Always 'interaction'.
   final String object;
@@ -125,6 +132,8 @@ class Interaction {
     this.input,
     this.steps,
     this.usage,
+    this.errors,
+    this.maxTotalTokens,
     this.object = 'interaction',
     this.previousInteractionId,
     this.continuationToken,
@@ -170,6 +179,16 @@ class Interaction {
     usage: json['usage'] != null
         ? InteractionUsage.fromJson(json['usage'] as Map<String, dynamic>)
         : null,
+    errors: (json['errors'] as List<dynamic>?)
+        ?.map(
+          (error) => InteractionError.fromJson(error as Map<String, dynamic>),
+        )
+        .toList(),
+    maxTotalTokens: switch (json['max_total_tokens']) {
+      final String value => value,
+      final int value => value.toString(),
+      _ => null,
+    },
     object: json['object'] as String? ?? 'interaction',
     previousInteractionId: json['previous_interaction_id'] as String?,
     continuationToken: json['continuation_token'] as String?,
@@ -226,6 +245,9 @@ class Interaction {
     if (input != null) 'input': input!.toJson(),
     if (steps != null) 'steps': steps!.map((e) => e.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),
+    if (errors != null)
+      'errors': errors!.map((error) => error.toJson()).toList(),
+    'max_total_tokens': ?maxTotalTokens,
     'object': object,
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
@@ -264,6 +286,8 @@ class Interaction {
     Object? input = unsetCopyWithValue,
     Object? steps = unsetCopyWithValue,
     Object? usage = unsetCopyWithValue,
+    Object? errors = unsetCopyWithValue,
+    Object? maxTotalTokens = unsetCopyWithValue,
     Object? object = unsetCopyWithValue,
     Object? previousInteractionId = unsetCopyWithValue,
     Object? continuationToken = unsetCopyWithValue,
@@ -307,6 +331,12 @@ class Interaction {
       usage: usage == unsetCopyWithValue
           ? this.usage
           : usage as InteractionUsage?,
+      errors: errors == unsetCopyWithValue
+          ? this.errors
+          : errors as List<InteractionError>?,
+      maxTotalTokens: maxTotalTokens == unsetCopyWithValue
+          ? this.maxTotalTokens
+          : maxTotalTokens as String?,
       object: object == unsetCopyWithValue ? this.object : object! as String,
       previousInteractionId: previousInteractionId == unsetCopyWithValue
           ? this.previousInteractionId
