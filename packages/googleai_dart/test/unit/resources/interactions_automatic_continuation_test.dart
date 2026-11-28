@@ -486,7 +486,11 @@ void main() {
     var requests = 0;
     final abort = Completer<void>();
     final bodyStarted = Completer<void>();
-    final body = StreamController<List<int>>(onListen: bodyStarted.complete);
+    final bodyCancelled = Completer<void>();
+    final body = StreamController<List<int>>(
+      onListen: bodyStarted.complete,
+      onCancel: bodyCancelled.complete,
+    );
     final client = _client(
       MockClient.streaming((_, _) async {
         requests++;
@@ -505,9 +509,35 @@ void main() {
     await bodyStarted.future;
     abort.complete();
     await aborted;
+    await bodyCancelled.future.timeout(const Duration(seconds: 1));
+    expect(body.hasListener, isFalse);
     body.add(utf8.encode(jsonEncode(_hop('late-completed'))));
     await body.close();
     expect(requests, 1);
+  });
+
+  test('a unary deadline cancels an idle response-body subscription', () async {
+    final bodyStarted = Completer<void>();
+    final bodyCancelled = Completer<void>();
+    final body = StreamController<List<int>>(
+      onListen: bodyStarted.complete,
+      onCancel: bodyCancelled.complete,
+    );
+    final client = _client(
+      MockClient.streaming(
+        (_, _) async => http.StreamedResponse(body.stream, 200),
+      ),
+      timeout: const Duration(milliseconds: 300),
+    );
+    final deadline = expectLater(
+      client.interactions.create(model: _model, automaticContinuation: true),
+      throwsA(isA<TimeoutException>()),
+    );
+    await bodyStarted.future;
+    await deadline;
+    await bodyCancelled.future.timeout(const Duration(seconds: 1));
+    expect(body.hasListener, isFalse);
+    await body.close();
   });
 
   test(
@@ -787,6 +817,52 @@ void main() {
     );
     expect(events.whereType<StepDeltaEvent>(), hasLength(1));
     expect(requests, 1);
+  });
+
+  test(
+    'drops late output after a terminal SSE snapshot before resuming',
+    () async {
+      var requests = 0;
+      final client = _client(
+        MockClient.streaming((_, _) async {
+          requests++;
+          return requests == 1
+              ? _stream([_completed('first', token: 'next'), _delta('Once')])
+              : _stream([_delta('Once'), _completed('next-hop')]);
+        }),
+      );
+      final events = await client.interactions
+          .createStream(model: _model, automaticContinuation: true)
+          .toList();
+      expect(requests, 2);
+      expect(
+        events.whereType<StepDeltaEvent>().map(
+          (event) => (event.delta as TextDelta).text,
+        ),
+        ['Once'],
+      );
+    },
+  );
+
+  test('keeps an error received after a terminal SSE snapshot', () async {
+    var requests = 0;
+    final client = _client(
+      MockClient.streaming((_, _) async {
+        requests++;
+        return _stream([
+          _completed('first', token: 'next'),
+          {
+            'event_type': 'error',
+            'error': {'code': 'server_fault', 'message': 'Late error'},
+          },
+        ]);
+      }),
+    );
+    final events = await client.interactions
+        .createStream(model: _model, automaticContinuation: true)
+        .toList();
+    expect(requests, 1);
+    expect(events.whereType<ErrorEvent>().single.error?.message, 'Late error');
   });
 
   test('a terminal snapshot clears a previous SSE checkpoint', () async {

@@ -154,6 +154,9 @@ Stream<InteractionEvent> _runInteractionStream(
           next == null ? original : _continuationBody(original, next),
           abort.future,
         )) {
+          // Frames after an authoritative completion cannot add to this hop.
+          // Keep a terminal error visible and let it block another request.
+          if (hop.completed && event is! ErrorEvent) continue;
           hop.observe(event, ids);
           yield event;
         }
@@ -282,7 +285,6 @@ class _InteractionStreamHop {
               (status == null || status == InteractionStatus.inProgress)));
 
   void observe(InteractionEvent event, Set<String> ids) {
-    if (completed && event is! ErrorEvent) return;
     switch (event) {
       case InteractionCreatedEvent(:final interaction):
         status = interaction.status;

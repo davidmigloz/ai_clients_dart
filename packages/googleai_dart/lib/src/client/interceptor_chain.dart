@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
@@ -88,7 +89,11 @@ class InterceptorChain {
             response.stream.listen(null).cancel().ignore();
             rethrow;
           }
-          return http.Response.fromStream(response);
+          final abort = context.abortTrigger;
+          if (checkActive == null || abort == null) {
+            return http.Response.fromStream(response);
+          }
+          return _readAbortableResponse(response, abort, checkActive);
         }
 
         // Transport execution function
@@ -161,6 +166,51 @@ class InterceptorChain {
       return interceptor.intercept(context, next);
     };
   }
+}
+
+Future<http.Response> _readAbortableResponse(
+  http.StreamedResponse response,
+  Future<void> abortTrigger,
+  void Function() checkActive,
+) {
+  final result = Completer<http.Response>();
+  final body = BytesBuilder();
+  final subscription = response.stream.listen(
+    body.add,
+    onError: result.completeError,
+    onDone: () {
+      try {
+        checkActive();
+        result.complete(
+          http.Response.bytes(
+            body.takeBytes(),
+            response.statusCode,
+            request: response.request,
+            headers: response.headers,
+            isRedirect: response.isRedirect,
+            persistentConnection: response.persistentConnection,
+            reasonPhrase: response.reasonPhrase,
+          ),
+        );
+      } catch (error, trace) {
+        result.completeError(error, trace);
+      }
+    },
+    cancelOnError: true,
+  );
+  unawaited(
+    abortTrigger.then((_) {
+      if (result.isCompleted) return;
+      try {
+        checkActive();
+      } catch (error, trace) {
+        // A custom HTTP client can ignore Abortable; release our own reader too.
+        subscription.cancel().ignore();
+        result.completeError(error, trace);
+      }
+    }, onError: (Object _, StackTrace _) {}),
+  );
+  return result.future;
 }
 
 /// Wrapper to make a BaseRequest abortable by implementing Abortable mixin.
