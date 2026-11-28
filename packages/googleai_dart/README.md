@@ -716,7 +716,8 @@ if (response.answers?['late_delivery'] case NoulAnswer(:final noul)) {
 <summary><b>Show options</b></summary>
 
 Use `InteractionGenerationConfig.structuredSpeechConfig` to select speakers
-and set text normalization for supported TTS models. For example:
+and set text normalization for supported TTS models on Gemini Developer API
+`v1beta`. For example:
 
 ```dart
 const generation = InteractionGenerationConfig(
@@ -727,14 +728,14 @@ const generation = InteractionGenerationConfig(
 );
 ```
 
-Use `TranscriptionConfig.mode` to select SMART editing or verbatim
-transcription. For generated video, set
+On the same beta surface, use `TranscriptionConfig.mode` to select SMART
+editing or verbatim transcription. For generated video, set
 `InteractionVideoResponseFormat.resolution` to a resolution supported by
 the selected model. Sampling controls `temperature` and `topP` are
 deprecated upstream and available only where the model supports them.
 
 [Speech generation](https://aistudio.google.com/docs/speech-generation) ·
-[Video generation](https://aistudio.google.com/docs/video-generation)
+[Video output resolution](https://aistudio.google.com/docs/omni#output-resolution)
 
 </details>
 

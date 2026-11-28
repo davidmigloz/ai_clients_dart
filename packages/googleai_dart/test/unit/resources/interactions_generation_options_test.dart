@@ -6,54 +6,52 @@ import 'package:http/testing.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test(
-    'sends structured speech and sampler options through stable Interactions',
-    () async {
-      final client = GoogleAIClient(
-        config: const GoogleAIConfig(interactionsApiVersion: ApiVersion.v1),
-        httpClient: MockClient((request) async {
-          expect(request.url.path, '/v1/interactions');
-          expect(
-            jsonDecode(request.body),
-            containsPair('generation_config', {
-              'structured_speech_config': {
-                'speakers': [
-                  {'speaker': 'Narrator', 'voice': 'Puck', 'language': 'en-US'},
-                ],
-                'text_normalization': 'enabled',
-              },
-              'temperature': 0.8,
-              'top_p': 0.95,
-            }),
-          );
-          return http.Response(
-            '{"id":"speech","status":"completed","steps":[]}',
-            200,
-          );
-        }),
-      );
-      addTearDown(client.close);
-      final response = await client.interactions.create(
-        model: 'gemini-3.8-flash-tts',
-        input: const InteractionInput.text('Narrator: It was a sunny day.'),
-        generationConfig: const InteractionGenerationConfig(
-          structuredSpeechConfig: InteractionStructuredSpeechConfig.speakers(
-            speakers: [
-              InteractionSpeechConfig(
-                speaker: 'Narrator',
-                voice: 'Puck',
-                language: 'en-US',
-              ),
-            ],
-            textNormalization: InteractionTextNormalization.enabled,
-          ),
-          temperature: 0.8,
-          topP: 0.95,
+  test('sends structured speech through beta Interactions', () async {
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(interactionsApiVersion: ApiVersion.v1beta),
+      httpClient: MockClient((request) async {
+        expect(request.url.path, '/v1beta/interactions');
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['response_format'], {'type': 'audio'});
+        expect(
+          body,
+          containsPair('generation_config', {
+            'structured_speech_config': {
+              'speakers': [
+                {'speaker': 'Narrator', 'voice': 'Puck', 'language': 'en-US'},
+              ],
+              'text_normalization': 'enabled',
+            },
+          }),
+        );
+        return http.Response(
+          '{"id":"speech","status":"completed","steps":[]}',
+          200,
+        );
+      }),
+    );
+    addTearDown(client.close);
+    final response = await client.interactions.create(
+      model: 'gemini-3.8-flash-tts',
+      input: const InteractionInput.text('Narrator: It was a sunny day.'),
+      responseFormat: const InteractionResponseFormatConfig.single(
+        InteractionAudioResponseFormat(),
+      ),
+      generationConfig: const InteractionGenerationConfig(
+        structuredSpeechConfig: InteractionStructuredSpeechConfig.speakers(
+          speakers: [
+            InteractionSpeechConfig(
+              speaker: 'Narrator',
+              voice: 'Puck',
+              language: 'en-US',
+            ),
+          ],
+          textNormalization: InteractionTextNormalization.enabled,
         ),
-      );
-      expect(response.id, 'speech');
-    },
-  );
+      ),
+    );
+    expect(response.id, 'speech');
+  });
 
   test(
     'sends SMART transcription and video resolution in their own payloads',
@@ -107,6 +105,25 @@ void main() {
       expect(calls, 2);
     },
   );
+
+  test('round-trips both forms under the earlier SDK speech field', () {
+    final speakers = [
+      {'speaker': 'Narrator', 'voice': 'Puck'},
+    ];
+    final object = {'speakers': speakers, 'text_normalization': 'auto'};
+    final arrayConfig = InteractionGenerationConfig.fromJson({
+      'speech_config': speakers,
+    });
+    expect(arrayConfig.speechConfig?.single.speaker, 'Narrator');
+    expect(arrayConfig.toJson(), {'speech_config': speakers});
+
+    final objectConfig = InteractionGenerationConfig.fromJson({
+      'speech_config': object,
+    });
+    expect(objectConfig.speechConfig, isNull);
+    expect(objectConfig.speechConfigObject?.speakers?.single.voice, 'Puck');
+    expect(objectConfig.copyWith().toJson(), {'speech_config': object});
+  });
 
   test('round-trips array speech, compact and future transcription modes', () {
     final wire = {

@@ -38,8 +38,13 @@ class InteractionGenerationConfig {
   /// The maximum number of tokens to include in the response.
   final int? maxOutputTokens;
 
-  /// Configuration for speech interaction.
+  /// Array-form speech settings under the existing beta wire field.
   final List<InteractionSpeechConfig>? speechConfig;
+
+  /// Object-form settings under the existing beta `speech_config` field.
+  ///
+  /// When supplied, this replaces the array form [speechConfig] in JSON.
+  final InteractionSpeakerConfig? speechConfigObject;
 
   /// Speaker configuration and text normalization for speech generation.
   final InteractionStructuredSpeechConfig? structuredSpeechConfig;
@@ -65,6 +70,7 @@ class InteractionGenerationConfig {
     this.thinkingSummaries,
     this.maxOutputTokens,
     this.speechConfig,
+    this.speechConfigObject,
     this.imageConfig,
     this.videoConfig,
     this.transcriptionConfig,
@@ -95,11 +101,19 @@ class InteractionGenerationConfig {
           )
         : null,
     maxOutputTokens: json['max_output_tokens'] as int?,
-    speechConfig: (json['speech_config'] as List<dynamic>?)
-        ?.map(
-          (e) => InteractionSpeechConfig.fromJson(e as Map<String, dynamic>),
-        )
-        .toList(),
+    speechConfig: switch (json['speech_config']) {
+      final List<dynamic> entries => [
+        for (final entry in entries)
+          InteractionSpeechConfig.fromJson(entry as Map<String, dynamic>),
+      ],
+      _ => null,
+    },
+    speechConfigObject: switch (json['speech_config']) {
+      final Map<String, dynamic> object => InteractionSpeakerConfig.fromJson(
+        object,
+      ),
+      _ => null,
+    },
     imageConfig: json['image_config'] != null
         ? InteractionImageConfig.fromJson(
             json['image_config'] as Map<String, dynamic>,
@@ -132,7 +146,9 @@ class InteractionGenerationConfig {
         thinkingSummaries!,
       ),
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens,
-    if (speechConfig != null)
+    if (speechConfigObject != null)
+      'speech_config': speechConfigObject!.toJson()
+    else if (speechConfig != null)
       'speech_config': speechConfig!.map((e) => e.toJson()).toList(),
     if (imageConfig != null) 'image_config': imageConfig!.toJson(),
     if (videoConfig != null) 'video_config': videoConfig!.toJson(),
@@ -152,6 +168,7 @@ class InteractionGenerationConfig {
     Object? thinkingSummaries = unsetCopyWithValue,
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? speechConfig = unsetCopyWithValue,
+    Object? speechConfigObject = unsetCopyWithValue,
     Object? imageConfig = unsetCopyWithValue,
     Object? videoConfig = unsetCopyWithValue,
     Object? transcriptionConfig = unsetCopyWithValue,
@@ -183,6 +200,9 @@ class InteractionGenerationConfig {
       speechConfig: speechConfig == unsetCopyWithValue
           ? this.speechConfig
           : speechConfig as List<InteractionSpeechConfig>?,
+      speechConfigObject: speechConfigObject == unsetCopyWithValue
+          ? this.speechConfigObject
+          : speechConfigObject as InteractionSpeakerConfig?,
       imageConfig: imageConfig == unsetCopyWithValue
           ? this.imageConfig
           : imageConfig as InteractionImageConfig?,
