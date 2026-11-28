@@ -2510,7 +2510,11 @@
       "schema": "Environment",
       "kind": "object",
       "dart_class": "Environment",
-      "file": "lib/src/models/interactions/environments/environment.dart"
+      "file": "lib/src/models/interactions/environments/environment.dart",
+      "excluded_properties": [
+        "environment_key"
+      ],
+      "note": "The one-time environment key is available on create and omitted from serialization and metadata reads."
     },
     "interactions:CreateEnvironmentRequest": {
       "spec": "interactions",

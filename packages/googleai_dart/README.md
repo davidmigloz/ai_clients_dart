@@ -279,56 +279,6 @@ Select `ApiVersion.v1beta` for the managed-agent variants
 
 </details>
 
-### How do I load tools on demand?
-
-<details>
-<summary><b>Show example</b></summary>
-
-Tool retrieval is in Preview on supported Gemini models on the Gemini
-Developer API `v1beta`. For server-side retrieval, declare `ToolSearchTool`
-and defer selected `FunctionTool` or `McpServerTool` schemas.
-
-```dart
-const tools = [
-  ToolSearchTool(),
-  FunctionTool(
-    name: 'lookup_inventory',
-    description: 'Returns available inventory for a product SKU.',
-    deferLoading: true,
-    parameters: {
-      'type': 'object',
-      'properties': {'sku': {'type': 'string'}},
-      'required': ['sku'],
-    },
-  ),
-];
-
-final client = GoogleAIClient.fromEnvironment(
-  interactionsApiVersion: ApiVersion.v1beta,
-);
-try {
-  final interaction = await client.interactions.create(
-    model: 'gemini-4-hydrogen',
-    tools: tools,
-    input: const InteractionInput.text('Check stock for SKU A123.'),
-  );
-  for (final call in interaction.functionCallSteps) {
-    print('${call.name}: ${call.arguments}');
-  }
-} finally {
-  client.close();
-}
-```
-
-Send the tools array on each turn. When using `store: false`, replay the
-returned steps in order and preserve their signatures. For client-side
-retrieval, declare `ToolSearchExecution.client` and return the matching
-function definitions in `FunctionResultSubcontentFunction` items.
-[Client-side example](example/tool_retrieval_example.dart) ·
-[Tool retrieval guide](https://aistudio.google.com/docs/tool-retrieval)
-
-</details>
-
 ### How do I generate text with Gemini?
 
 <details>
@@ -395,97 +345,6 @@ including SMART mode and source text where available.
 
 </details>
 
-### How do I select files, pages, or clips in GenerateContent?
-
-<details>
-<summary><b>Show example</b></summary>
-
-Set metadata on the same `InlineDataPart` or `FileDataPart` that carries the
-media. Document page ranges and spreadsheet sheet numbers start at 1. Audio
-and video offsets use protobuf duration strings such as `1.25s`.
-
-```dart
-final excerpt = InlineDataPart(
-  Blob.fromBytes('application/pdf', pdfBytes),
-  documentMetadata: const DocumentMetadata(
-    startPage: 2,
-    endPage: 4,
-    contentLayers: [DocumentContentLayer.pageText],
-  ),
-);
-```
-
-Use `SpreadsheetMetadata` to select a sheet, A1 cell range, and data, formulas
-or images. For media returned by a function, use the same metadata on a
-`FunctionResponseInlinePart` with `inlineData` or `fileData`. Video
-`MediaProcessing.static` and `MediaProcessing.agentic` select how to inspect
-video. The pinned Cloud SDKs reject explicit video processing modes in
-function results. Supported media and selection options depend on the model
-and backend.
-
-[Full example](example/generate_content_media_slicing.dart) ·
-[Document processing](https://aistudio.google.com/docs/document-processing#customize-document-processing) ·
-[Function result media](https://aistudio.google.com/docs/function-calling#file-inspection-options)
-
-</details>
-
-### How do I register files already in Google Cloud Storage?
-
-<details>
-<summary><b>Show example</b></summary>
-
-Use the Gemini Developer Files API with an OAuth provider. Enable the Gemini
-API, then give its service agent read access to the target Cloud Storage
-objects. Use a quota project if your OAuth setup requires one.
-
-```dart
-final result = await client.files.register(
-  uris: ['gs://my-bucket/report.pdf'],
-  authProvider: BearerTokenProvider(accessToken),
-  quotaProjectId: quotaProjectId,
-);
-final uri = result.files?.firstOrNull?.uri;
-```
-
-Registration is available on the Developer `v1` and `v1beta` routes. Pass the
-returned file URI when generating content. Vertex AI uses the Cloud Storage
-URI directly. Browser requests require a compatible CORS endpoint.
-[Full example](example/register_cloud_storage_files.dart) ·
-[Cloud Storage registration guide](https://aistudio.google.com/docs/file-input-methods#registration)
-
-</details>
-
-### How do I use Vertex AI?
-
-<details>
-<summary><b>Show configuration</b></summary>
-
-Configure your Google Cloud project, location, and OAuth credentials with
-`GoogleAIConfig.vertexAI(...)`. Use `client.interactions.create(...)` for
-stateful model calls and `client.interactions.list(...)` to page through
-stored interaction IDs. Use `client.models.generateContent(...)` for the
-GenerateContent API. Vertex Interactions documents `global`, `us`, and `eu`
-availability. `us` and `eu` select dedicated multi-region endpoints.
-
-For asynchronous model calls on the Deferred tier, use global Interactions
-`v1` with `ServiceTier.deferred`, `background: true`, and `store: true`.
-Start the call with `create(...)`. Poll with `get(...)` while the call is
-queued. Once it reports `InteractionStatus.inProgress`, you can attach with
-`resumeStream(...)`. Use `cancel(...)` to stop a queued or running call.
-
-Cloud API keys can use `ApiKeyProvider(..., placement: AuthPlacement.header)`
-with the documented project and location. The client also follows the pinned
-SDK's projectless express route when both the project and location are omitted
-and the Cloud base URL and API mode are configured explicitly. Listing uses
-the project-scoped API.
-[Vertex AI configuration](#configuration) ·
-[Interactions example](example/vertex_interactions_example.dart) ·
-[GenerateContent example](example/vertex_ai_example.dart) ·
-[Cloud Interactions developer guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/interactions/developer-guide) ·
-[Deferred tier and supported models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deferred-tier)
-
-</details>
-
 ### How do I stream Gemini output?
 
 <details>
@@ -520,6 +379,239 @@ Future<void> main() async {
 ```
 
 → [Full example](example/streaming_example.dart)
+
+</details>
+
+### How do I use Vertex AI?
+
+<details>
+<summary><b>Show configuration</b></summary>
+
+Configure your Google Cloud project, location, and OAuth credentials with
+`GoogleAIConfig.vertexAI(...)`. Use `client.interactions.create(...)` for
+stateful model calls and `client.interactions.list(...)` to page through
+stored interaction IDs. Use `client.models.generateContent(...)` for the
+GenerateContent API. Vertex Interactions documents `global`, `us`, and `eu`
+availability. `us` and `eu` select dedicated multi-region endpoints.
+
+For asynchronous model calls on the Deferred tier, use global Interactions
+`v1` with `ServiceTier.deferred`, `background: true`, and `store: true`.
+Start the call with `create(...)`. Poll with `get(...)` while the call is
+queued. Once it reports `InteractionStatus.inProgress`, you can attach with
+`resumeStream(...)`. Use `cancel(...)` to stop a queued or running call.
+
+Cloud API keys can use `ApiKeyProvider(..., placement: AuthPlacement.header)`
+with the documented project and location. The client also follows the pinned
+SDK's projectless express route when both the project and location are omitted
+and the Cloud base URL and API mode are configured explicitly. Listing uses
+the project-scoped API.
+[Vertex AI configuration](#configuration) ·
+[Interactions example](example/vertex_interactions_example.dart) ·
+[GenerateContent example](example/vertex_ai_example.dart) ·
+[Cloud Interactions developer guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/interactions/developer-guide) ·
+[Deferred tier and supported models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deferred-tier)
+
+</details>
+
+### How do I use tool calling?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Gemini tool calling uses typed `FunctionDeclaration` definitions inside `Tool` objects. This keeps the tool schema local to the request and easy to share across Dart services.
+
+```dart
+import 'package:googleai_dart/googleai_dart.dart';
+
+Future<void> main() async {
+  final client = GoogleAIClient.fromEnvironment();
+
+  try {
+    final response = await client.models.generateContent(
+      model: 'gemini-3.5-flash',
+      request: GenerateContentRequest(
+        contents: [Content.text('What is the weather in Madrid?')],
+        tools: [
+          Tool(
+            functionDeclarations: [
+              FunctionDeclaration(
+                name: 'get_weather',
+                description: 'Get current weather',
+                parameters: Schema(
+                  type: SchemaType.object,
+                  properties: {
+                    'location': Schema(type: SchemaType.string),
+                  },
+                  required: ['location'],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    print(response.text);
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/function_calling_example.dart)
+
+</details>
+
+### How do I upload files for prompts?
+
+<details>
+<summary><b>Show example</b></summary>
+
+The Google AI Files API is useful for large prompts and multimodal workflows. For Vertex AI, use Cloud Storage URIs instead of this resource.
+
+```dart
+import 'package:googleai_dart/googleai_dart.dart';
+
+Future<void> main() async {
+  final client = GoogleAIClient.fromEnvironment();
+
+  try {
+    final file = await client.files.upload(
+      filePath: '/path/to/image.jpg',
+      mimeType: 'image/jpeg',
+      displayName: 'Sample image',
+    );
+
+    print(file.uri);
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/files_example.dart)
+
+</details>
+
+### How do I process selected parts of a file?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Set `processing` on Interactions document, audio, or video content.
+Select one-based pages or worksheet indexes, A1 cell ranges, or time
+intervals. Video options can also select frames, audio, or transcripts.
+The same content blocks work in typed function result subcontent.
+
+```dart
+final selection = DocumentContent(
+  uri: uploadedFile.uri,
+  mimeType: 'application/pdf',
+  processing: const InteractionDocumentProcessing.select(
+    pageOptions: InteractionPageProcessingOptions(
+      startPage: 2,
+      endPage: 4,
+      contentLayers: [InteractionPageLayer.text],
+    ),
+  ),
+);
+```
+
+This example uses stable Gemini Developer Interactions. Check the guide for
+supported MIME types, resolution and content layers.
+[Runnable example](example/interactions_media_slicing.dart) ·
+[Document processing](https://aistudio.google.com/docs/document-processing#customize-document-processing) ·
+[Video processing](https://aistudio.google.com/docs/video-understanding#customize-video-processing) ·
+[Function result files](https://aistudio.google.com/docs/function-calling#file-inspection-options)
+
+</details>
+
+### How do I download a generated file?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.files.download(name: 'files/{id}')` on the Gemini Developer API
+`v1` or `v1beta` for downloadable API-generated files. Find them with
+`client.files.get` or `list` by checking `source` and `downloadUri`.
+Uploaded and Cloud Storage-registered inputs use the Files API for prompting
+and metadata. Existing Developer API gateway configurations continue to use
+their configured API version.
+
+Use `client.generatedFiles.download(name: 'generatedFiles/{id}')` for the
+separate `v1beta` Generated Files collection. Both methods return bytes. The
+metadata `get` methods remain available. Browser transports require an
+endpoint or gateway that serves the bytes directly.
+
+[Runnable download example](example/generated_files_example.dart) ·
+[Files reference](https://aistudio.google.com/api-reference/files)
+
+</details>
+
+### How do I select files, pages, or clips in GenerateContent?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Set metadata on the same `InlineDataPart` or `FileDataPart` that carries the
+media. Document page ranges and spreadsheet sheet numbers start at 1. Audio
+and video offsets use protobuf duration strings such as `1.25s`.
+
+```dart
+final excerpt = InlineDataPart(
+  Blob.fromBytes('application/pdf', pdfBytes),
+  documentMetadata: const DocumentMetadata(
+    startPage: 2,
+    endPage: 4,
+    contentLayers: [DocumentContentLayer.pageText],
+  ),
+);
+```
+
+Use `SpreadsheetMetadata` to select a sheet, A1 cell range, and data, formulas
+or images. For media returned by a function, use the same metadata on a
+`FunctionResponseInlinePart` with `inlineData` or `fileData`. Video
+`MediaProcessing.static` and `MediaProcessing.agentic` select how to inspect
+video. The pinned Cloud SDKs reject explicit video processing modes in
+function results. Supported media and selection options depend on the model
+and backend.
+
+[Full example](example/generate_content_media_slicing.dart) ·
+[Document processing](https://aistudio.google.com/docs/document-processing#customize-document-processing) ·
+[Function result media](https://aistudio.google.com/docs/function-calling#file-inspection-options)
+
+</details>
+
+### How do I ground responses with Google data?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Grounding tools let Gemini call Google Search, URL Context, Maps, or File Search without leaving the same client surface. Use these when you need fresher answers or source-aware responses in Dart and Flutter apps.
+
+```dart
+import 'package:googleai_dart/googleai_dart.dart';
+
+Future<void> main() async {
+  final client = GoogleAIClient.fromEnvironment();
+
+  try {
+    final response = await client.models.generateContent(
+      model: 'gemini-3.5-flash',
+      request: GenerateContentRequest(
+        contents: [Content.text('What are the latest Dart language updates?')],
+        tools: [Tool(googleSearch: GoogleSearch())],
+      ),
+    );
+
+    print(response.text);
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/google_search_example.dart)
 
 </details>
 
@@ -625,61 +717,41 @@ result from `Part.audioTranscription`.
 
 </details>
 
-### How do I use tool calling?
+### How do I configure speech, transcription, or video output?
 
 <details>
-<summary><b>Show example</b></summary>
+<summary><b>Show options</b></summary>
 
-Gemini tool calling uses typed `FunctionDeclaration` definitions inside `Tool` objects. This keeps the tool schema local to the request and easy to share across Dart services.
+Use `InteractionGenerationConfig.structuredSpeechConfig` to select speakers
+and set text normalization for supported TTS models on Gemini Developer API
+`v1beta`. For example:
 
 ```dart
-import 'package:googleai_dart/googleai_dart.dart';
-
-Future<void> main() async {
-  final client = GoogleAIClient.fromEnvironment();
-
-  try {
-    final response = await client.models.generateContent(
-      model: 'gemini-3.5-flash',
-      request: GenerateContentRequest(
-        contents: [Content.text('What is the weather in Madrid?')],
-        tools: [
-          Tool(
-            functionDeclarations: [
-              FunctionDeclaration(
-                name: 'get_weather',
-                description: 'Get current weather',
-                parameters: Schema(
-                  type: SchemaType.object,
-                  properties: {
-                    'location': Schema(type: SchemaType.string),
-                  },
-                  required: ['location'],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-    print(response.text);
-  } finally {
-    client.close();
-  }
-}
+const generation = InteractionGenerationConfig(
+  structuredSpeechConfig: InteractionStructuredSpeechConfig.speakers(
+    speakers: [InteractionSpeechConfig(speaker: 'Narrator', voice: 'Puck')],
+    textNormalization: InteractionTextNormalization.enabled,
+  ),
+);
 ```
 
-→ [Full example](example/function_calling_example.dart)
+On the same beta surface, use `TranscriptionConfig.mode` to select SMART
+editing or verbatim transcription. For generated video, set
+`InteractionVideoResponseFormat.resolution` to a resolution supported by
+the selected model. Sampling controls `temperature` and `topP` are
+deprecated upstream and available only where the model supports them.
+
+[Speech generation](https://aistudio.google.com/docs/speech-generation) ·
+[Video output resolution](https://aistudio.google.com/docs/omni#output-resolution)
 
 </details>
 
-### How do I ground responses with Google data?
+### How do I create embeddings?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Grounding tools let Gemini call Google Search, URL Context, Maps, or File Search without leaving the same client surface. Use these when you need fresher answers or source-aware responses in Dart and Flutter apps.
+Embeddings are a first-class resource and support multimodal models. This makes retrieval and semantic search pipelines straightforward to build in pure Dart.
 
 ```dart
 import 'package:googleai_dart/googleai_dart.dart';
@@ -688,22 +760,98 @@ Future<void> main() async {
   final client = GoogleAIClient.fromEnvironment();
 
   try {
-    final response = await client.models.generateContent(
-      model: 'gemini-3.5-flash',
-      request: GenerateContentRequest(
-        contents: [Content.text('What are the latest Dart language updates?')],
-        tools: [Tool(googleSearch: GoogleSearch())],
+    final response = await client.models.embedContent(
+      model: 'gemini-embedding-2-preview',
+      request: EmbedContentRequest(
+        content: Content.text('Dart language'),
+        taskType: TaskType.retrievalDocument,
       ),
     );
 
-    print(response.text);
+    print(response.embedding.values.length);
   } finally {
     client.close();
   }
 }
 ```
 
-→ [Full example](example/google_search_example.dart)
+→ [Full example](example/embeddings_example.dart)
+
+</details>
+
+### How do I load tools on demand?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Tool retrieval is in Preview on supported Gemini models on the Gemini
+Developer API `v1beta`. For server-side retrieval, declare `ToolSearchTool`
+and defer selected `FunctionTool` or `McpServerTool` schemas.
+
+```dart
+const tools = [
+  ToolSearchTool(),
+  FunctionTool(
+    name: 'lookup_inventory',
+    description: 'Returns available inventory for a product SKU.',
+    deferLoading: true,
+    parameters: {
+      'type': 'object',
+      'properties': {'sku': {'type': 'string'}},
+      'required': ['sku'],
+    },
+  ),
+];
+
+final client = GoogleAIClient.fromEnvironment(
+  interactionsApiVersion: ApiVersion.v1beta,
+);
+try {
+  final interaction = await client.interactions.create(
+    model: 'gemini-4-hydrogen',
+    tools: tools,
+    input: const InteractionInput.text('Check stock for SKU A123.'),
+  );
+  for (final call in interaction.functionCallSteps) {
+    print('${call.name}: ${call.arguments}');
+  }
+} finally {
+  client.close();
+}
+```
+
+Send the tools array on each turn. When using `store: false`, replay the
+returned steps in order and preserve their signatures. For client-side
+retrieval, declare `ToolSearchExecution.client` and return the matching
+function definitions in `FunctionResultSubcontentFunction` items.
+[Client-side example](example/tool_retrieval_example.dart) ·
+[Tool retrieval guide](https://aistudio.google.com/docs/tool-retrieval)
+
+</details>
+
+### How do I register files already in Google Cloud Storage?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use the Gemini Developer Files API with an OAuth provider. Enable the Gemini
+API, then give its service agent read access to the target Cloud Storage
+objects. Use a quota project if your OAuth setup requires one.
+
+```dart
+final result = await client.files.register(
+  uris: ['gs://my-bucket/report.pdf'],
+  authProvider: BearerTokenProvider(accessToken),
+  quotaProjectId: quotaProjectId,
+);
+final uri = result.files?.firstOrNull?.uri;
+```
+
+Registration is available on the Developer `v1` and `v1beta` routes. Pass the
+returned file URI when generating content. Vertex AI uses the Cloud Storage
+URI directly. Browser requests require a compatible CORS endpoint.
+[Full example](example/register_cloud_storage_files.dart) ·
+[Cloud Storage registration guide](https://aistudio.google.com/docs/file-input-methods#registration)
 
 </details>
 
@@ -734,65 +882,6 @@ if (response.answers?['late_delivery'] case NoulAnswer(:final noul)) {
 
 [Full example](example/decisions_example.dart) ·
 [Decisions API guide](https://aistudio.google.com/docs/decisions-api)
-
-</details>
-
-### How do I configure speech, transcription, or video output?
-
-<details>
-<summary><b>Show options</b></summary>
-
-Use `InteractionGenerationConfig.structuredSpeechConfig` to select speakers
-and set text normalization for supported TTS models on Gemini Developer API
-`v1beta`. For example:
-
-```dart
-const generation = InteractionGenerationConfig(
-  structuredSpeechConfig: InteractionStructuredSpeechConfig.speakers(
-    speakers: [InteractionSpeechConfig(speaker: 'Narrator', voice: 'Puck')],
-    textNormalization: InteractionTextNormalization.enabled,
-  ),
-);
-```
-
-On the same beta surface, use `TranscriptionConfig.mode` to select SMART
-editing or verbatim transcription. For generated video, set
-`InteractionVideoResponseFormat.resolution` to a resolution supported by
-the selected model. Sampling controls `temperature` and `topP` are
-deprecated upstream and available only where the model supports them.
-
-[Speech generation](https://aistudio.google.com/docs/speech-generation) ·
-[Video output resolution](https://aistudio.google.com/docs/omni#output-resolution)
-
-</details>
-
-### How do I manage credentials for agents?
-
-<details>
-<summary><b>Show example</b></summary>
-
-The Gemini Developer API `v1beta` Credentials API stores environment variables,
-HTTP bearer tokens, and OAuth2 credentials for managed agents. Create or update
-a credential with its secret value. Responses contain only its metadata.
-
-```dart
-final credential = await client.credentials.create(
-  credential: HttpBearerConfig(id: 'deployment-token', token: token),
-);
-await client.credentials.update(
-  credential.id,
-  credential: HttpBearerUpdateConfig(token: replacementToken),
-  updateMask: 'token',
-);
-```
-
-Set an ID for a readable reference, or omit `id` when creating a credential to
-let the server generate a UUID. The managed-agent guide documents generated IDs
-even though the API reference lists `id` as required on create. Use the returned
-ID to reference the credential from a managed environment.
-Use `get` and `list` for metadata and `delete` to remove a stored credential.
-[Full example](example/credentials_example.dart) ·
-[Generated IDs for managed-agent credentials](https://aistudio.google.com/docs/agent-credentials#generated-ids)
 
 </details>
 
@@ -832,122 +921,33 @@ schedule. Pass `updateMask` when a gateway expects the REST update envelope.
 
 </details>
 
-### How do I create embeddings?
+### How do I manage credentials for agents?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Embeddings are a first-class resource and support multimodal models. This makes retrieval and semantic search pipelines straightforward to build in pure Dart.
+The Gemini Developer API `v1beta` Credentials API stores environment variables,
+HTTP bearer tokens, and OAuth2 credentials for managed agents. Create or update
+a credential with its secret value. Responses contain only its metadata.
 
 ```dart
-import 'package:googleai_dart/googleai_dart.dart';
-
-Future<void> main() async {
-  final client = GoogleAIClient.fromEnvironment();
-
-  try {
-    final response = await client.models.embedContent(
-      model: 'gemini-embedding-2-preview',
-      request: EmbedContentRequest(
-        content: Content.text('Dart language'),
-        taskType: TaskType.retrievalDocument,
-      ),
-    );
-
-    print(response.embedding.values.length);
-  } finally {
-    client.close();
-  }
-}
-```
-
-→ [Full example](example/embeddings_example.dart)
-
-</details>
-
-### How do I upload files for prompts?
-
-<details>
-<summary><b>Show example</b></summary>
-
-The Google AI Files API is useful for large prompts and multimodal workflows. For Vertex AI, use Cloud Storage URIs instead of this resource.
-
-```dart
-import 'package:googleai_dart/googleai_dart.dart';
-
-Future<void> main() async {
-  final client = GoogleAIClient.fromEnvironment();
-
-  try {
-    final file = await client.files.upload(
-      filePath: '/path/to/image.jpg',
-      mimeType: 'image/jpeg',
-      displayName: 'Sample image',
-    );
-
-    print(file.uri);
-  } finally {
-    client.close();
-  }
-}
-```
-
-→ [Full example](example/files_example.dart)
-
-</details>
-
-### How do I process selected parts of a file?
-
-<details>
-<summary><b>Show example</b></summary>
-
-Set `processing` on Interactions document, audio, or video content.
-Select one-based pages or worksheet indexes, A1 cell ranges, or time
-intervals. Video options can also select frames, audio, or transcripts.
-The same content blocks work in typed function result subcontent.
-
-```dart
-final selection = DocumentContent(
-  uri: uploadedFile.uri,
-  mimeType: 'application/pdf',
-  processing: const InteractionDocumentProcessing.select(
-    pageOptions: InteractionPageProcessingOptions(
-      startPage: 2,
-      endPage: 4,
-      contentLayers: [InteractionPageLayer.text],
-    ),
-  ),
+final credential = await client.credentials.create(
+  credential: HttpBearerConfig(id: 'deployment-token', token: token),
+);
+await client.credentials.update(
+  credential.id,
+  credential: HttpBearerUpdateConfig(token: replacementToken),
+  updateMask: 'token',
 );
 ```
 
-This example uses stable Gemini Developer Interactions. Check the guide for
-supported MIME types, resolution and content layers.
-[Runnable example](example/interactions_media_slicing.dart) ·
-[Document processing](https://aistudio.google.com/docs/document-processing#customize-document-processing) ·
-[Video processing](https://aistudio.google.com/docs/video-understanding#customize-video-processing) ·
-[Function result files](https://aistudio.google.com/docs/function-calling#file-inspection-options)
-
-</details>
-
-### How do I download a generated file?
-
-<details>
-<summary><b>Show example</b></summary>
-
-Use `client.files.download(name: 'files/{id}')` on the Gemini Developer API
-`v1` or `v1beta` for downloadable API-generated files. Find them with
-`client.files.get` or `list` by checking `source` and `downloadUri`.
-Uploaded and Cloud Storage-registered inputs use the Files API for prompting
-and metadata. Existing Developer API gateway configurations continue to use
-their configured API version.
-
-Use `client.generatedFiles.download(name: 'generatedFiles/{id}')` for the
-separate `v1beta` Generated Files collection. Both methods return bytes. The
-metadata `get` methods remain available. Browser transports require an
-endpoint or gateway that serves the bytes directly.
-
-[Runnable download example](example/generated_files_example.dart) ·
-[Files reference](https://aistudio.google.com/api-reference/files)
+Set an ID for a readable reference, or omit `id` when creating a credential to
+let the server generate a UUID. The managed-agent guide documents generated IDs
+even though the API reference lists `id` as required on create. Use the returned
+ID to reference the credential from a managed environment.
+Use `get` and `list` for metadata and `delete` to remove a stored credential.
+[Full example](example/credentials_example.dart) ·
+[Generated IDs for managed-agent credentials](https://aistudio.google.com/docs/agent-credentials#generated-ids)
 
 </details>
 
@@ -1171,6 +1171,71 @@ checkpoint with missing input.
 
 </details>
 
+### How do I transcribe live audio?
+
+<details>
+<summary><b>Set up live transcription and read interim and final text</b></summary>
+
+Use `gemini-3.5-transcribe-live` with a text response on the Gemini Developer
+API `v1beta` Live endpoint. Send 16 kHz, 16-bit mono PCM audio with
+`session.sendAudio()` and listen to `session.messages` before sending audio.
+
+```dart
+final session = await liveClient.connect(
+  model: 'gemini-3.5-transcribe-live',
+  liveConfig: LiveConfig(
+    generationConfig: LiveGenerationConfig.textOnly(),
+    inputAudioTranscription: const AudioTranscriptionConfig(
+      languageCodes: ['en-US'],
+      customVocabulary: ['Gemini'],
+    ),
+    realtimeInputConfig: const RealtimeInputConfig(
+      interimTranscriptTimestampEnabled: true,
+    ),
+  ),
+);
+```
+
+Read `BidiGenerateContentServerContent.interimInputTranscription` for
+provisional captions. Append each `inputTranscription.text` segment in the
+default verbatim mode. With `AudioTranscriptionConfigMode.smart`, replace your
+document with each finalized result and treat omitted text as an empty
+document. Use `sourceText` to provide an initial document for voice editing.
+Omit or pass an empty `languageCodes` list to detect the language automatically.
+
+Automatic activity detection can flush audio with
+`session.signalAudioStreamEnd()`. To control turn boundaries yourself, use
+`RealtimeInputConfig.manual()` and call `signalActivityStart()` and
+`signalActivityEnd()` around each audio turn.
+
+Gemini 3.5 Transcribe Live reports utterance offsets. For word-level timing and
+speaker diarization, use file transcription. Vertex AI lists the Live model in
+the `global`, `us`, and `eu` locations. Connect with the Vertex OAuth
+configuration and check option availability for your model and endpoint.
+
+[Live transcription example](example/live_transcription_example.dart) ·
+[Gemini Developer API Live transcription guide](https://aistudio.google.com/docs/live-api/live-transcribe) ·
+[Vertex AI model availability](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-transcribe#regional-availability)
+
+</details>
+
+### How do I run a Veo video prediction?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Call `client.models.predictLongRunning` with a regional Vertex AI client and a
+supported Veo model. Set `labels` to include request metadata such as an
+anonymized `safety_identifier`. Pass the returned operation name to
+`client.models.fetchPredictOperation` on the same regional client.
+When the operation is done, read the completed media from `response.videos`.
+
+[Runnable Veo example](example/prediction_example.dart) ·
+[Veo request labels](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/abuse-monitoring#pass_an_end-user_safety_identifier_in_api_calls) ·
+[Check operation status](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/video/generate-videos-from-text)
+
+</details>
+
 ### How do I generate and steer live music?
 
 <details>
@@ -1292,71 +1357,6 @@ Reference-image avatars are restricted to select Google Cloud customers.
 
 </details>
 
-### How do I transcribe live audio?
-
-<details>
-<summary><b>Set up live transcription and read interim and final text</b></summary>
-
-Use `gemini-3.5-transcribe-live` with a text response on the Gemini Developer
-API `v1beta` Live endpoint. Send 16 kHz, 16-bit mono PCM audio with
-`session.sendAudio()` and listen to `session.messages` before sending audio.
-
-```dart
-final session = await liveClient.connect(
-  model: 'gemini-3.5-transcribe-live',
-  liveConfig: LiveConfig(
-    generationConfig: LiveGenerationConfig.textOnly(),
-    inputAudioTranscription: const AudioTranscriptionConfig(
-      languageCodes: ['en-US'],
-      customVocabulary: ['Gemini'],
-    ),
-    realtimeInputConfig: const RealtimeInputConfig(
-      interimTranscriptTimestampEnabled: true,
-    ),
-  ),
-);
-```
-
-Read `BidiGenerateContentServerContent.interimInputTranscription` for
-provisional captions. Append each `inputTranscription.text` segment in the
-default verbatim mode. With `AudioTranscriptionConfigMode.smart`, replace your
-document with each finalized result and treat omitted text as an empty
-document. Use `sourceText` to provide an initial document for voice editing.
-Omit or pass an empty `languageCodes` list to detect the language automatically.
-
-Automatic activity detection can flush audio with
-`session.signalAudioStreamEnd()`. To control turn boundaries yourself, use
-`RealtimeInputConfig.manual()` and call `signalActivityStart()` and
-`signalActivityEnd()` around each audio turn.
-
-Gemini 3.5 Transcribe Live reports utterance offsets. For word-level timing and
-speaker diarization, use file transcription. Vertex AI lists the Live model in
-the `global`, `us`, and `eu` locations. Connect with the Vertex OAuth
-configuration and check option availability for your model and endpoint.
-
-[Live transcription example](example/live_transcription_example.dart) ·
-[Gemini Developer API Live transcription guide](https://aistudio.google.com/docs/live-api/live-transcribe) ·
-[Vertex AI model availability](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-transcribe#regional-availability)
-
-</details>
-
-### How do I run a Veo video prediction?
-
-<details>
-<summary><b>Show example</b></summary>
-
-Call `client.models.predictLongRunning` with a regional Vertex AI client and a
-supported Veo model. Set `labels` to include request metadata such as an
-anonymized `safety_identifier`. Pass the returned operation name to
-`client.models.fetchPredictOperation` on the same regional client.
-When the operation is done, read the completed media from `response.videos`.
-
-[Runnable Veo example](example/prediction_example.dart) ·
-[Veo request labels](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/abuse-monitoring#pass_an_end-user_safety_identifier_in_api_calls) ·
-[Check operation status](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/video/generate-videos-from-text)
-
-</details>
-
 ### How do I generate an interactive world with Genie 4?
 
 <details>
@@ -1473,6 +1473,7 @@ See the [example/](example/) directory for complete examples:
 | [`decisions_example.dart`](example/decisions_example.dart) | Gemini Decision 1 question and answer types |
 | [`documents_example.dart`](example/documents_example.dart) | Document management within corpora |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
+| [`environment_config_example.dart`](example/environment_config_example.dart) | Configure or fork a managed Gemini Developer environment |
 | [`environment_files_example.dart`](example/environment_files_example.dart) | List and download managed environment workspace files |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`example.dart`](example/example.dart) | Stable Interactions quickstart |
