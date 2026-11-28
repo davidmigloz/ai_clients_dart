@@ -32,9 +32,12 @@ class ErrorInterceptor implements Interceptor {
       rethrow;
     } catch (error, stackTrace) {
       // Wrap unknown errors
+      final description = error.toString();
+      final safeDescription =
+          context.diagnosticRedactor?.redactString(description) ?? description;
       throw ApiException(
         statusCode: 0,
-        message: 'Unexpected error: $error',
+        message: 'Unexpected error: $safeDescription',
         stackTrace: stackTrace,
       );
     }
@@ -48,6 +51,7 @@ class ErrorInterceptor implements Interceptor {
   ) {
     final statusCode = response.statusCode;
     final body = response.body;
+    final scopedRedactor = context.diagnosticRedactor;
 
     // Try to parse error details from response body
     var excerptSource = body;
@@ -56,7 +60,10 @@ class ErrorInterceptor implements Interceptor {
 
     try {
       final decoded = jsonDecode(body);
-      final errorDetails = Redactor.continuationTokens.redactJson(decoded);
+      final continuationSafe = Redactor.continuationTokens.redactJson(decoded);
+      final errorDetails = scopedRedactor == null
+          ? continuationSafe
+          : scopedRedactor.redactJson(continuationSafe);
       if (!identical(decoded, errorDetails)) {
         excerptSource = jsonEncode(errorDetails);
       }
@@ -77,6 +84,7 @@ class ErrorInterceptor implements Interceptor {
       }
     }
     message = Redactor.continuationTokens.redactString(message);
+    if (scopedRedactor != null) message = scopedRedactor.redactString(message);
 
     // Extract request metadata from context
     final correlationId =
@@ -103,18 +111,21 @@ class ErrorInterceptor implements Interceptor {
     // Create request metadata
     final requestMetadata = RequestMetadata(
       method: context.request.method,
-      url: context.request.url,
-      headers: redactedHeaders,
+      url:
+          scopedRedactor?.redactUri(context.request.url) ?? context.request.url,
+      headers: scopedRedactor?.redactMap(redactedHeaders) ?? redactedHeaders,
       correlationId: correlationId,
       timestamp: timestamp,
       attemptNumber: attemptNumber,
     );
 
     // Create response metadata
-    final safeBody = redactor.redactString(excerptSource);
+    final safeBody = redactor.redactString(
+      scopedRedactor?.redactBody(excerptSource) ?? excerptSource,
+    );
     final responseMetadata = ResponseMetadata(
       statusCode: statusCode,
-      headers: response.headers,
+      headers: scopedRedactor?.redactMap(response.headers) ?? response.headers,
       bodyExcerpt: safeBody.length > 200
           ? safeBody.substring(0, 200)
           : safeBody,
