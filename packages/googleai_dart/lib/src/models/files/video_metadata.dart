@@ -1,4 +1,4 @@
-import '../content/media_wire_options.dart';
+import '../../utils/media_wire_options.dart';
 import '../copy_with_sentinel.dart';
 
 /// Content to extract from a video.
