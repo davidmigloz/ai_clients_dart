@@ -99,6 +99,35 @@ void main() {
     }
   });
 
+  test('parses optional descriptions and Live function behaviors', () {
+    const declaration = {
+      'name': 'turn_on_the_lights',
+      'behavior': 'NON_BLOCKING',
+    };
+    final wire = {
+      'setup': {
+        'model': 'models/gemini-3.8-live',
+        'tools': [
+          {
+            'functionDeclarations': [declaration],
+          },
+        ],
+      },
+    };
+    final setup =
+        BidiGenerateContentClientMessage.fromJson(wire)
+            as BidiGenerateContentSetup;
+    final parsed = setup.tools!.single.functionDeclarations!.single;
+    expect(parsed.description, isEmpty);
+    expect(parsed.behavior, FunctionDeclarationBehavior.nonBlocking);
+    expect(setup.toJson(), wire);
+    expect(parsed.copyWith().toJson(), declaration);
+    expect(parsed.copyWith(behavior: null, description: '').toJson(), {
+      'name': 'turn_on_the_lights',
+      'description': '',
+    });
+  });
+
   group('BidiGenerateContentClientMessage', () {
     group('fromJson dispatch', () {
       test('dispatches to BidiGenerateContentSetup for setup key', () {
