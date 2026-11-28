@@ -766,7 +766,10 @@ void main() {
     },
   );
 
-  for (final status in ['queued', 'paused_by_policy']) {
+  for (final (status, expectedStatus, unrecognizedStatus) in [
+    ('queued', InteractionStatus.queued, null),
+    ('paused_by_policy', InteractionStatus.inProgress, 'paused_by_policy'),
+  ]) {
     test('records $status without automatically resuming decode', () async {
       var requests = 0;
       final client = _client(
@@ -782,7 +785,8 @@ void main() {
           .createStream(model: _model, automaticContinuation: true)
           .toList();
       final update = events.last as InteractionStatusUpdateEvent;
-      expect(update.unrecognizedStatus, status);
+      expect(update.status, expectedStatus);
+      expect(update.unrecognizedStatus, unrecognizedStatus);
       expect(update.toJson()['status'], status);
       expect(requests, 1);
     });
