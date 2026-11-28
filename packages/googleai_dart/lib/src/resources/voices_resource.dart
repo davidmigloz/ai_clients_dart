@@ -50,8 +50,8 @@ class VoicesResource extends ResourceBase {
       'POST',
       '/{version}/voices',
       body: {'voice': voice.toCreateJson(), 'store': ?shouldStore},
-      redactor: Redactor(
-        sensitiveValues: [
+      redactor: Redactor.forSecrets(
+        secrets: [
           if (replication != null) ...[
             replication.sourceAudio.data,
             replication.consentAudio.data,
