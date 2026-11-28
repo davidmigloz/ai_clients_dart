@@ -89,7 +89,11 @@ void main() {
         const earlier = 'fixture+earlier/private';
         const current = 'fixture+current/private';
         const encoded = 'fixture%2bcurrent%2fprivate';
+        const mixed = 'fixture%2bcurrent%2Fprivate';
+        const unrelated = 'Fixture%2bcurrent%2Fprivate';
         const voice = 'voicekey_fixture_prediction';
+        const reflection =
+            '$earlier $current $encoded $mixed $voice $unrelated';
         final previousLevel = Logger.root.level;
         Logger.root.level = Level.FINE;
         addTearDown(() => Logger.root.level = previousLevel);
@@ -121,9 +125,9 @@ void main() {
               2 => _chunk(finish: 'CONTINUATION', token: current),
               _ => {
                 'error': {
-                  'message': 'Rejected $earlier $current $encoded $voice',
+                  'message': 'Rejected $reflection',
                   'details': [
-                    {'echo': '$earlier $current $encoded $voice'},
+                    {'echo': reflection},
                   ],
                 },
               },
@@ -140,8 +144,7 @@ void main() {
               tokens.length < 3 ? 200 : 400,
               headers: {
                 'content-type': 'application/json',
-                if (tokens.length == 3)
-                  'x-provider-echo': '$earlier $current $encoded $voice',
+                if (tokens.length == 3) 'x-provider-echo': reflection,
               },
             );
           }),
@@ -151,7 +154,9 @@ void main() {
           isNot(contains(earlier)),
           isNot(contains(current)),
           isNot(contains(encoded)),
+          isNot(contains(mixed)),
           isNot(contains(voice)),
+          contains(unrelated),
         );
         if (stream) {
           await expectLater(
@@ -198,6 +203,75 @@ void main() {
       },
     );
   }
+
+  test(
+    'echo redaction keeps transport disconnects resumable and excludes aborts',
+    () async {
+      const checkpoint = 'fixture+opaque/private';
+      final reflectedUrl = Uri.parse(
+        'https://fixture.example/?echo=${Uri.encodeComponent(checkpoint)}',
+      );
+      for (final aborted in [false, true]) {
+        final requests = <Object?>[];
+        Stream<List<int>> firstHop() async* {
+          yield* _stream([_chunk(text: 'Checkpoint ', token: checkpoint)]);
+          if (aborted) throw http.RequestAbortedException(reflectedUrl);
+          throw http.ClientException(
+            'Connection reset after $checkpoint',
+            reflectedUrl,
+          );
+        }
+
+        final client = _client(
+          MockClient.streaming((wire, bytes) async {
+            final body = await _body(bytes);
+            requests.add(body['continuationToken']);
+            return requests.length == 1
+                ? http.StreamedResponse(firstHop(), 200)
+                : _sse([_chunk(text: 'resumed', finish: 'STOP')]);
+          }),
+        );
+        final stream = client.models
+            .streamGenerateContent(
+              model: _model,
+              request: _request,
+              automaticContinuation: true,
+            )
+            .map((frame) => frame.text);
+
+        if (aborted) {
+          await expectLater(
+            stream,
+            emitsInOrder([
+              'Checkpoint ',
+              emitsError(
+                isA<StreamException>()
+                    .having(
+                      (e) => e.message,
+                      'message',
+                      contains('***REDACTED***'),
+                    )
+                    .having(
+                      (e) => e.cause,
+                      'transport abort',
+                      isA<http.RequestAbortedException>().having(
+                        (e) => e.uri,
+                        'URI',
+                        isNull,
+                      ),
+                    ),
+              ),
+              emitsDone,
+            ]),
+          );
+          expect(requests, [null]);
+        } else {
+          expect(await stream.toList(), ['Checkpoint ', 'resumed']);
+          expect(requests, [null, checkpoint]);
+        }
+      }
+    },
+  );
 
   test(
     'protects checkpoint echoes later in the same accepted stream',

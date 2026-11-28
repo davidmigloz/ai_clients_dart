@@ -490,9 +490,17 @@ mixin StreamingResource on ResourceBase {
     }
     final description = error.toString();
     final safeDescription = redactor.redactString(description);
-    return safeDescription == description
-        ? error
-        : StreamException(message: safeDescription);
+    if (safeDescription == description) return error;
+    // Keep a source-free transport cause so callers can distinguish network
+    // failures and explicit transport aborts without exposing the original URI.
+    final cause = switch (error) {
+      http.RequestAbortedException() => http.RequestAbortedException(),
+      http.ClientException(:final message) => http.ClientException(
+        redactor.redactString(message),
+      ),
+      _ => null,
+    };
+    return StreamException(message: safeDescription, cause: cause);
   }
 
   /// Logs streaming errors.

@@ -195,8 +195,11 @@ Stream<GenerateContentResponse> _continueGenerateContentStream(
   }
 }
 
-bool _isGenerationConnectionFailure(Exception error) =>
-    error is http.ClientException && error is! http.RequestAbortedException;
+bool _isGenerationConnectionFailure(Exception error) {
+  final cause = error is StreamException ? error.cause : error;
+  return cause is http.ClientException &&
+      cause is! http.RequestAbortedException;
+}
 
 class _GenerationStreamHop {
   String? token;
