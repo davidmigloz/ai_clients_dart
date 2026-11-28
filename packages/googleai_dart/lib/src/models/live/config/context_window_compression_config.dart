@@ -1,5 +1,5 @@
+import '../../../utils/token_count_json.dart';
 import 'sliding_window.dart';
-import 'token_count_json.dart';
 
 /// Configuration for context window compression.
 ///
