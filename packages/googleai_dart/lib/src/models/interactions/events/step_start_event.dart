@@ -30,7 +30,7 @@ class StepStartEvent extends InteractionEvent {
     }
     return StepStartEvent(
       index: index,
-      step: InteractionStep.fromJson(step),
+      step: InteractionStep.fromJson(step, partial: true),
       eventId: json['event_id'] as String?,
     );
   }

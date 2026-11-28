@@ -20,6 +20,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart) (~1.2k tokens): Image generation.
 - [tts_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tts_example.dart) (~1.3k tokens): Text-to-speech with Gemini TTS models.
 - [function_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/function_calling_example.dart) (~578 tokens): Tool calling.
+- [tool_retrieval_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tool_retrieval_example.dart): Preview tool retrieval with Gemini Developer API `v1beta`.
 - [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart) (~1k tokens): Grounding with Google Search.
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart) (~490 tokens): Text embeddings.
 - [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart) (~1.5k tokens): File uploads for prompts.

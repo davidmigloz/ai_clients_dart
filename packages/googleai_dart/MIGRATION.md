@@ -248,6 +248,37 @@ switch (tier) {
 
 ---
 
+## Handling tool retrieval variants
+
+Exhaustive switches over `InteractionTool`, `InteractionStep`,
+`StepDeltaData`, and `FunctionResultSubcontent` need to handle the new tool
+retrieval variants. Add cases for `ToolSearchTool` and
+`UnknownInteractionTool` when switching over tools. The latter preserves
+future tool search execution modes. Handle `ToolSearchCallStep`,
+`ToolSearchResultStep`, `ToolSearchCallDelta`, `ToolSearchResultDelta`, or
+`FunctionResultSubcontentFunction` where applicable.
+
+For example, before the function-declaration result variant:
+
+```dart
+String resultKind(FunctionResultSubcontent item) => switch (item) {
+  FunctionResultSubcontentText() => 'text',
+  FunctionResultSubcontentImage() => 'image',
+};
+```
+
+Handle the returned function declaration in the updated switch:
+
+```dart
+String resultKind(FunctionResultSubcontent item) => switch (item) {
+  FunctionResultSubcontentText() => 'text',
+  FunctionResultSubcontentImage() => 'image',
+  FunctionResultSubcontentFunction() => 'function',
+};
+```
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.
