@@ -209,6 +209,7 @@ export 'src/models/live/enums/end_sensitivity.dart';
 export 'src/models/live/enums/start_sensitivity.dart';
 export 'src/models/live/enums/turn_coverage.dart';
 export 'src/models/live/messages/client/client_message.dart';
+export 'src/models/live/messages/server/live_usage_metadata.dart';
 export 'src/models/live/messages/server/server_message.dart';
 // Models - Metadata
 export 'src/models/metadata/finish_reason.dart';

@@ -3,6 +3,114 @@ import 'package:test/test.dart';
 
 void main() {
   group('BidiGenerateContentServerMessage', () {
+    test('passes top-level usage through each existing message variant', () {
+      const usage = {
+        'promptTokenCount': 11,
+        'responseTokenCount': 3,
+        'responseTokensDetails': [
+          {'modality': 'AUDIO', 'tokenCount': 3},
+        ],
+      };
+      const cases = [
+        (
+          {
+            'setupComplete': {'sessionId': 'session'},
+          },
+          BidiGenerateContentSetupComplete,
+        ),
+        (
+          {
+            'serverContent': {'waitingForInput': false},
+          },
+          BidiGenerateContentServerContent,
+        ),
+        (
+          {
+            'toolCall': {'functionCalls': <Object>[]},
+          },
+          BidiGenerateContentToolCall,
+        ),
+        (
+          {
+            'toolCallCancellation': {
+              'ids': ['call'],
+            },
+          },
+          BidiGenerateContentToolCallCancellation,
+        ),
+        (
+          {
+            'goAway': {'timeLeft': '30s'},
+          },
+          GoAway,
+        ),
+        (
+          {
+            'sessionResumptionUpdate': {'resumable': true},
+          },
+          SessionResumptionUpdate,
+        ),
+        ({'futureKey': <String, dynamic>{}}, UnknownServerMessage),
+      ];
+      for (final (payload, type) in cases) {
+        final json = <String, dynamic>{...payload, 'usageMetadata': usage};
+        final message = BidiGenerateContentServerMessage.fromJson(json);
+        expect(message.runtimeType, type);
+        final parsedUsage = message.responseUsageMetadata;
+        expect(parsedUsage?.counts.promptTokenCount, 11);
+        expect(parsedUsage?.responseTokenCount, 3);
+        expect(parsedUsage?.responseTokensDetails?.single.modality, 'AUDIO');
+        expect(message.toJson(), json);
+      }
+    });
+
+    test(
+      'normalizes Vertex usage and retains the exact standalone envelope',
+      () {
+        const wire = {
+          'usageMetadata': {
+            'candidatesTokenCount': 2,
+            'candidatesTokensDetails': [
+              {'modality': 'TEXT', 'tokenCount': 2},
+            ],
+            'trafficType': 'ON_DEMAND',
+            'futureUsageDimension': 1,
+          },
+        };
+        final message = BidiGenerateContentServerMessage.fromJson(wire);
+        expect(message, isA<UnknownServerMessage>());
+        expect(message.responseUsageMetadata?.responseTokenCount, 2);
+        expect(message.responseUsageMetadata?.trafficType, 'ON_DEMAND');
+        expect(
+          message
+              .responseUsageMetadata
+              ?.responseTokensDetails
+              ?.single
+              .tokenCount,
+          2,
+        );
+        expect(message.toJson(), wire);
+      },
+    );
+
+    test('serializes constructed usage with Developer API field names', () {
+      const message = BidiGenerateContentServerContent(
+        responseUsageMetadata: LiveUsageMetadata(
+          counts: UsageMetadata(
+            candidatesTokenCount: 0,
+            candidatesTokensDetails: [],
+          ),
+        ),
+      );
+      expect(message.toJson(), {
+        'serverContent': <String, dynamic>{},
+        'usageMetadata': {
+          'responseTokenCount': 0,
+          'responseTokensDetails': <Object>[],
+        },
+      });
+    });
+
     group('fromJson dispatch', () {
       test(
         'dispatches to BidiGenerateContentSetupComplete for setupComplete key',
@@ -175,6 +283,42 @@ void main() {
   });
 
   group('BidiGenerateContentServerContent', () {
+    test('preserves turn signals and legacy nested usage', () {
+      const json = {
+        'serverContent': {
+          'turnComplete': true,
+          'turnCompleteReason': 'FUTURE_REASON',
+          'interactionStatus': 'IDLE',
+          'speechState': 'NON_SPEECH',
+          'waitingForInput': false,
+          'urlContextMetadata': {
+            'urlMetadata': [
+              {
+                'retrievedUrl': 'https://example.com/source',
+                'urlRetrievalStatus': 'URL_RETRIEVAL_STATUS_SUCCESS',
+              },
+            ],
+          },
+          'usageMetadata': {'candidatesTokenCount': 1},
+        },
+        'usageMetadata': {'responseTokenCount': 2},
+      };
+      final content =
+          BidiGenerateContentServerMessage.fromJson(json)
+              as BidiGenerateContentServerContent;
+      expect(content.turnCompleteReason, 'FUTURE_REASON');
+      expect(content.interactionStatus, 'IDLE');
+      expect(content.speechState, 'NON_SPEECH');
+      expect(content.waitingForInput, isFalse);
+      expect(
+        content.urlContextMetadata,
+        json['serverContent']!['urlContextMetadata'],
+      );
+      expect(content.usageMetadata?.candidatesTokenCount, 1);
+      expect(content.responseUsageMetadata?.responseTokenCount, 2);
+      expect(content.toJson(), json);
+    });
+
     test('serializes with serverContent wrapper key', () {
       const content = BidiGenerateContentServerContent(
         turnComplete: true,

@@ -110,6 +110,12 @@ class LiveSession {
       _messageController.addError(
         LiveSessionException(message: 'Failed to parse message: $e'),
       );
+    } on TypeError {
+      _messageController.addError(
+        const LiveSessionException(
+          message: 'Invalid Live server message fields.',
+        ),
+      );
     }
   }
 

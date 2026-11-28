@@ -105,6 +105,55 @@ const _model = 'gemini-3.8-live';
 const _deadline = Duration(seconds: 4);
 
 void main() {
+  test(
+    'Live session delivers top-level usage with and without content',
+    () async {
+      final server = await _Server.start(
+        onRealtimeInput: (socket, _) {
+          socket
+            ..add('{"usageMetadata":{"promptTokenCount":"invalid"}}')
+            ..add(
+              utf8.encode(
+                '{"serverContent":{"waitingForInput":true},'
+                '"usageMetadata":{"responseTokenCount":2}}',
+              ),
+            )
+            ..add(
+              '{"usageMetadata":{"responseTokenCount":3,"totalTokenCount":10}}',
+            );
+        },
+      );
+      final session = await _createLive(
+        GoogleAIConfig(baseUrl: server.baseUrl),
+      ).connect(model: _model).timeout(_deadline);
+
+      final messages = <BidiGenerateContentServerMessage>[];
+      final errors = <Object>[];
+      final received = Completer<void>();
+      final subscription = session.messages.listen((message) {
+        messages.add(message);
+        if (messages.length == 2) received.complete();
+      }, onError: errors.add);
+      addTearDown(subscription.cancel);
+
+      session.sendText('Check top-level usage.');
+      await received.future.timeout(_deadline);
+      expect(errors, [isA<LiveSessionException>()]);
+      expect(
+        messages.first,
+        isA<BidiGenerateContentServerContent>()
+            .having((m) => m.waitingForInput, 'waitingForInput', true)
+            .having(
+              (m) => m.responseUsageMetadata?.responseTokenCount,
+              'response tokens',
+              2,
+            ),
+      );
+      expect(messages.last.responseUsageMetadata?.counts.totalTokenCount, 10);
+      expect(messages.last.responseUsageMetadata?.responseTokenCount, 3);
+    },
+  );
+
   for (final vertex in [false, true]) {
     test(
       '${vertex ? 'Vertex' : 'Developer'} Live setup sends canonical VAD enums',
