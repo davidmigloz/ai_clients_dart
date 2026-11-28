@@ -56,7 +56,7 @@ class LiveClient {
 
   final GoogleAIConfig _config;
   final Set<LiveSession> _sessions = {};
-  final Set<Completer<LiveSession>> _pendingConnections = {};
+  final Set<Completer<void>> _pendingConnections = {};
 
   /// Creates a [LiveClient].
   LiveClient({required this._config});
@@ -103,11 +103,13 @@ class LiveClient {
     LiveConfig? liveConfig,
     String? accessToken,
   }) async {
-    final cancellation = Completer<LiveSession>();
+    final cancellation = Completer<void>();
     _pendingConnections.add(cancellation);
     try {
       return await Future.any([
-        cancellation.future,
+        cancellation.future.then<LiveSession>(
+          (_) => throw _connectionCancelled,
+        ),
         _connect(model, liveConfig, accessToken, cancellation),
       ]);
     } finally {
@@ -119,7 +121,7 @@ class LiveClient {
     String model,
     LiveConfig? liveConfig,
     String? accessToken,
-    Completer<LiveSession> cancellation,
+    Completer<void> cancellation,
   ) async {
     final isVertex = _config.apiMode == ApiMode.vertexAI;
     if (!isVertex && liveConfig?.explicitVadSignal != null) {
@@ -180,7 +182,11 @@ class LiveClient {
     final resumptionHandle = liveConfig?.sessionResumption?.handle;
     final LiveSession session;
     try {
-      final socket = await ws.connectWebSocket(uri, headers: headers);
+      final socket = await ws.connectWebSocket(
+        uri,
+        headers: headers,
+        abort: cancellation.future,
+      );
       if (cancellation.isCompleted) {
         try {
           await socket.close();
@@ -505,12 +511,12 @@ class LiveClient {
 
   /// Closes all active sessions and cancels pending connection attempts.
   ///
-  /// Pending [connect] calls fail with a [LiveConnectionException]. A socket
-  /// that upgrades after cancellation is closed without starting a session.
+  /// Pending [connect] calls fail with a [LiveConnectionException]. An
+  /// in-flight WebSocket upgrade is aborted.
   /// You can call [connect] again after closing.
   Future<void> close() async {
     for (final cancellation in _pendingConnections) {
-      cancellation.completeError(_connectionCancelled);
+      cancellation.complete();
     }
     _pendingConnections.clear();
     final active = _sessions.toList(growable: false);

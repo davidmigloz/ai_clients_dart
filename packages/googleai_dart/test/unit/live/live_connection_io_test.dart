@@ -359,32 +359,46 @@ void main() {
     },
   );
 
-  test('closing Live closes a late upgrade before sending setup', () async {
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    addTearDown(() => server.close(force: true));
+  test('closing Live disconnects a stalled native WebSocket upgrade', () async {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(server.close);
     final requested = Completer<void>();
-    final allowUpgrade = Completer<void>();
-    final frames = <Object?>[];
-    final peerFrames = Completer<List<Object?>>();
-    server.listen((request) async {
-      requested.complete();
-      await allowUpgrade.future;
-      final socket = await WebSocketTransformer.upgrade(request);
-      socket.listen(frames.add, onDone: () => peerFrames.complete(frames));
+    final peerClosed = Completer<void>();
+    server.listen((socket) {
+      addTearDown(socket.destroy);
+      socket.listen(
+        (_) {
+          if (!requested.isCompleted) requested.complete();
+        },
+        onDone: () {
+          if (!peerClosed.isCompleted) peerClosed.complete();
+        },
+        onError: (Object _) {
+          if (!peerClosed.isCompleted) peerClosed.complete();
+        },
+      );
     });
     final live = _createLive(
-      GoogleAIConfig(baseUrl: 'http://127.0.0.1:${server.port}'),
+      GoogleAIConfig(
+        baseUrl: 'http://127.0.0.1:${server.port}',
+        authProvider: const ApiKeyProvider('upgrade-secret'),
+      ),
     );
 
     final connection = expectLater(
       live.connect(model: _model),
-      throwsA(isA<LiveConnectionException>()),
+      throwsA(
+        isA<LiveConnectionException>().having(
+          (error) => error.toString(),
+          'diagnostics',
+          isNot(contains('upgrade-secret')),
+        ),
+      ),
     );
     await requested.future.timeout(_deadline);
     await live.close().timeout(_deadline);
     await connection.timeout(_deadline);
-    allowUpgrade.complete();
-    expect(await peerFrames.future.timeout(_deadline), isEmpty);
+    await peerClosed.future.timeout(_deadline);
   });
 
   test(
