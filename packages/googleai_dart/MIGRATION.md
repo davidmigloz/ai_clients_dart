@@ -95,9 +95,46 @@ bool shouldPoll(InteractionStatus status) => switch (status) {
 
 Call `create` or `createStream` with `continuationToken` for the next hop.
 `resumeStream` uses `lastEventId` to replay events from the same interaction.
-Each Dart create call submits one hop. Google's Python and JavaScript SDKs
-follow foreground continuation tokens by default.
+Dart create calls submit one hop by default. Set
+`automaticContinuation: true` to follow foreground continuation tokens.
+Google's Python and JavaScript SDKs enable that behavior by default.
 [Interactions long-decode guide](https://aistudio.google.com/docs/long-decode)
+
+Exhaustive switches over `GoogleAIException` also need a case for
+`InteractionContinuationInterruptedException`. It carries a continuation token
+when a later hop fails and the server already supplied a checkpoint.
+
+```dart
+// Before
+String describeFailure(GoogleAIException error) => switch (error) {
+  ApiException() ||
+  ValidationException() ||
+  TimeoutException() ||
+  AbortedException() ||
+  StreamException() ||
+  LiveSessionClosedException() ||
+  LiveSessionSetupException() ||
+  LiveSessionException() ||
+  LiveSessionResumptionException() ||
+  LiveConnectionException() => error.message,
+};
+
+// After
+String describeFailure(GoogleAIException error) => switch (error) {
+  InteractionContinuationInterruptedException(:final partialInteraction) =>
+    partialInteraction?.outputText ?? 'Resume from the last checkpoint.',
+  ApiException() ||
+  ValidationException() ||
+  TimeoutException() ||
+  AbortedException() ||
+  StreamException() ||
+  LiveSessionClosedException() ||
+  LiveSessionSetupException() ||
+  LiveSessionException() ||
+  LiveSessionResumptionException() ||
+  LiveConnectionException() => error.message,
+};
+```
 
 ---
 

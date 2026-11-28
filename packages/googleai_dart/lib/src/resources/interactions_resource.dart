@@ -1,8 +1,11 @@
+import 'dart:async'
+    show Completer, StreamController, StreamSubscription, Timer, unawaited;
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
 import '../client/config.dart';
+import '../errors/exceptions.dart';
 import '../models/common/service_tier.dart';
 import '../models/interactions/agent_config.dart';
 import '../models/interactions/environments/environments.dart';
@@ -10,13 +13,19 @@ import '../models/interactions/events/events.dart';
 import '../models/interactions/generation_config.dart';
 import '../models/interactions/interaction.dart';
 import '../models/interactions/interaction_input.dart';
+import '../models/interactions/interaction_status.dart';
 import '../models/interactions/response_formats/response_formats.dart';
 import '../models/interactions/response_modality.dart';
 import '../models/interactions/safety_setting.dart';
+import '../models/interactions/steps/steps.dart';
 import '../models/interactions/tools/tools.dart';
+import '../models/interactions/usage.dart';
 import '../models/interactions/webhook_config.dart';
+import '../utils/request_id.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
+
+part 'interactions_continuation.dart';
 
 /// Resource for the Interactions API.
 ///
@@ -69,7 +78,11 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// the ID that issued that token and omit [input]. For a stateless
   /// interaction, keep `store: false` and resend the original [input].
   /// Keep the [model], [generationConfig], [tools], and [systemInstruction]
-  /// consistent across hops. Each call submits one request.
+  /// consistent across hops.
+  ///
+  /// Set [automaticContinuation] to follow foreground decoding tokens and
+  /// combine the resulting steps and usage. Each hop is an additional request.
+  /// [abortTrigger] stops the active request and any remaining hops.
   ///
   /// The stable Gemini Developer API uses [responseFormat] for output options.
   /// [responseModalities] and [responseMimeType] are legacy beta parameters.
@@ -91,6 +104,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     ServiceTier? serviceTier,
     List<InteractionSafetySetting>? safetySettings,
     Map<String, String>? labels,
+    bool automaticContinuation = false,
+    Future<void>? abortTrigger,
   }) => _sendCreate(
     () => _buildCreateBody(
       model: model,
@@ -111,6 +126,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       safetySettings: safetySettings,
       labels: labels,
     ),
+    automaticContinuation: automaticContinuation && background != true,
+    abortTrigger: abortTrigger,
   );
 
   /// Creates an interaction with an agent.
@@ -191,7 +208,10 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// Use [abortTrigger] to cancel the local request and response stream. For a
   /// background interaction, use [cancel] to stop server-side execution.
   /// Use [continuationToken] to start the next decoding hop, following the
-  /// stored and stateless request rules on [create].
+  /// stored and stateless request rules on [create]. With
+  /// [automaticContinuation], each foreground hop produces its own created
+  /// and completed events. The earliest of [abortTrigger] or the configured
+  /// timeout can stop the entire call.
   /// The stable Gemini Developer API uses [responseFormat] for output options.
   /// [responseModalities] and [responseMimeType] are legacy beta parameters.
   Stream<InteractionEvent> createStream({
@@ -212,6 +232,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     ServiceTier? serviceTier,
     List<InteractionSafetySetting>? safetySettings,
     Map<String, String>? labels,
+    bool automaticContinuation = false,
     Future<void>? abortTrigger,
   }) => _sendCreateStream(
     () => _buildCreateBody(
@@ -233,6 +254,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       safetySettings: safetySettings,
       labels: labels,
     ),
+    automaticContinuation: automaticContinuation && background != true,
     abortTrigger: abortTrigger,
   );
 
@@ -306,7 +328,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       return http.Request('GET', url)..headers.addAll(_buildHeaders(sse: true));
     },
     abortTrigger: abortTrigger,
-    fromJson: InteractionEvent.fromJson,
+    fromJson: _decodeInteractionEvent,
   );
 
   Map<String, dynamic> _buildCreateBody({
@@ -375,22 +397,66 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   }
 
   Future<Interaction> _sendInteractionRequest(
-    http.Request Function() buildRequest,
-  ) async {
-    final response = await interceptorChain.execute(buildRequest());
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    return Interaction.fromJson(body);
+    http.Request Function() buildRequest, {
+    Future<void>? abortTrigger,
+    void Function()? checkActive,
+  }) async {
+    final response = await interceptorChain.execute(
+      buildRequest(),
+      abortTrigger: abortTrigger,
+      checkActive: checkActive,
+    );
+    return _decodeInteractionResponse(() {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      return Interaction.fromJson(body);
+    });
   }
 
-  Future<Interaction> _sendCreate(Map<String, dynamic> Function() buildBody) =>
-      _sendInteractionRequest(() => _buildCreateRequest(buildBody()));
+  Future<Interaction> _sendCreate(
+    Map<String, dynamic> Function() buildBody, {
+    bool automaticContinuation = false,
+    Future<void>? abortTrigger,
+  }) {
+    if (automaticContinuation) {
+      return _continueInteraction(
+        buildBody,
+        (body, abort) => _sendInteractionRequest(
+          () => _buildCreateRequest(body),
+          abortTrigger: abort.future,
+          checkActive: abort.check,
+        ),
+        timeout: config.timeout,
+        abortTrigger: abortTrigger,
+      );
+    }
+    return _sendInteractionRequest(
+      () => _buildCreateRequest(buildBody()),
+      abortTrigger: abortTrigger,
+    );
+  }
 
   Stream<InteractionEvent> _sendCreateStream(
+    Map<String, dynamic> Function() buildBody, {
+    bool automaticContinuation = false,
+    Future<void>? abortTrigger,
+  }) {
+    if (automaticContinuation) {
+      return _continueInteractionStream(
+        buildBody,
+        (body, abort) => _sendCreateStreamHop(() => body, abortTrigger: abort),
+        timeout: config.timeout,
+        abortTrigger: abortTrigger,
+      );
+    }
+    return _sendCreateStreamHop(buildBody, abortTrigger: abortTrigger);
+  }
+
+  Stream<InteractionEvent> _sendCreateStreamHop(
     Map<String, dynamic> Function() buildBody, {
     Future<void>? abortTrigger,
   }) => streamRequest(
     createRequest: () => _buildCreateRequest(buildBody(), stream: true),
     abortTrigger: abortTrigger,
-    fromJson: InteractionEvent.fromJson,
+    fromJson: _decodeInteractionEvent,
   );
 }

@@ -1,3 +1,5 @@
+import '../models/interactions/interaction.dart';
+
 /// Metadata about the HTTP request that caused an error.
 class RequestMetadata {
   /// HTTP method.
@@ -61,6 +63,7 @@ class ResponseMetadata {
 /// - [TimeoutException] — Request timeouts
 /// - [AbortedException] — Request cancellation
 /// - [StreamException] — Errors detected in streaming data
+/// - [InteractionContinuationInterruptedException] — Resumable long-decode failure
 /// - [LiveSessionClosedException] — Live session closed
 /// - [LiveSessionSetupException] — Live session setup failure
 /// - [LiveSessionException] — General Live session errors
@@ -313,6 +316,41 @@ class AbortedException extends GoogleAIException {
   @override
   String toString() =>
       'AbortedException($stage): $message [ID: $correlationId]';
+}
+
+/// Automatic continuation stopped with a server-issued checkpoint available.
+class InteractionContinuationInterruptedException extends GoogleAIException {
+  @override
+  final String message;
+
+  @override
+  final Exception cause;
+
+  @override
+  final StackTrace? stackTrace;
+
+  /// The completed output and usage so far for a unary interaction.
+  final Interaction? partialInteraction;
+
+  /// The token for resuming decoding from the last usable checkpoint.
+  final String continuationToken;
+
+  /// The interaction that issued the token, when server-side storage was used.
+  final String? interactionId;
+
+  /// The IDs of the interactions opened so far, in order.
+  final List<String> continuationIds;
+
+  /// Creates an interruption with a resumable checkpoint.
+  InteractionContinuationInterruptedException({
+    required this.message,
+    required this.cause,
+    required this.continuationToken,
+    required List<String> continuationIds,
+    this.stackTrace,
+    this.partialInteraction,
+    this.interactionId,
+  }) : continuationIds = List.unmodifiable(continuationIds);
 }
 
 /// Exception for errors detected in streaming data.

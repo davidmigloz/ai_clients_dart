@@ -25,6 +25,9 @@ class Interaction {
   /// The status of the interaction.
   final InteractionStatus status;
 
+  /// The original wire status when this client does not recognize it.
+  final String? unrecognizedStatus;
+
   /// The name of the model used for generating the interaction.
   final String? model;
 
@@ -60,6 +63,9 @@ class Interaction {
   /// A stored continuation must identify this interaction as the previous
   /// interaction. A stateless continuation must resend its original input.
   final String? continuationToken;
+
+  /// Ordered IDs of the hops combined by automatic continuation.
+  final List<String>? continuationIds;
 
   /// System instruction for the interaction.
   final String? systemInstruction;
@@ -111,6 +117,7 @@ class Interaction {
   const Interaction({
     required this.id,
     required this.status,
+    this.unrecognizedStatus,
     this.model,
     this.agent,
     this.created,
@@ -121,6 +128,7 @@ class Interaction {
     this.object = 'interaction',
     this.previousInteractionId,
     this.continuationToken,
+    this.continuationIds,
     this.systemInstruction,
     this.tools,
     this.generationConfig,
@@ -140,6 +148,11 @@ class Interaction {
   factory Interaction.fromJson(Map<String, dynamic> json) => Interaction(
     id: json['id'] as String,
     status: InteractionStatus.fromString(json['status'] as String?),
+    unrecognizedStatus: switch (json['status'] as String?) {
+      final String value when InteractionStatus.tryFromString(value) == null =>
+        value,
+      _ => null,
+    },
     model: json['model'] as String?,
     agent: json['agent'] as String?,
     created: json['created'] != null
@@ -160,6 +173,9 @@ class Interaction {
     object: json['object'] as String? ?? 'interaction',
     previousInteractionId: json['previous_interaction_id'] as String?,
     continuationToken: json['continuation_token'] as String?,
+    continuationIds: (json['continuation_ids'] as List<dynamic>?)
+        ?.map((id) => id as String)
+        .toList(),
     systemInstruction: json['system_instruction'] as String?,
     tools: (json['tools'] as List<dynamic>?)
         ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
@@ -202,7 +218,7 @@ class Interaction {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
-    'status': status.toJson(),
+    'status': unrecognizedStatus ?? status.toJson(),
     if (model != null) 'model': model,
     if (agent != null) 'agent': agent,
     if (created != null) 'created': created!.toIso8601String(),
@@ -214,6 +230,7 @@ class Interaction {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (continuationToken != null) 'continuation_token': continuationToken,
+    if (continuationIds != null) 'continuation_ids': continuationIds,
     if (systemInstruction != null) 'system_instruction': systemInstruction,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (generationConfig != null)
@@ -239,6 +256,7 @@ class Interaction {
   Interaction copyWith({
     Object? id = unsetCopyWithValue,
     Object? status = unsetCopyWithValue,
+    Object? unrecognizedStatus = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? agent = unsetCopyWithValue,
     Object? created = unsetCopyWithValue,
@@ -249,6 +267,7 @@ class Interaction {
     Object? object = unsetCopyWithValue,
     Object? previousInteractionId = unsetCopyWithValue,
     Object? continuationToken = unsetCopyWithValue,
+    Object? continuationIds = unsetCopyWithValue,
     Object? systemInstruction = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
     Object? generationConfig = unsetCopyWithValue,
@@ -268,6 +287,9 @@ class Interaction {
       status: status == unsetCopyWithValue
           ? this.status
           : status! as InteractionStatus,
+      unrecognizedStatus: unrecognizedStatus == unsetCopyWithValue
+          ? (status == unsetCopyWithValue ? this.unrecognizedStatus : null)
+          : unrecognizedStatus as String?,
       model: model == unsetCopyWithValue ? this.model : model as String?,
       agent: agent == unsetCopyWithValue ? this.agent : agent as String?,
       created: created == unsetCopyWithValue
@@ -292,6 +314,9 @@ class Interaction {
       continuationToken: continuationToken == unsetCopyWithValue
           ? this.continuationToken
           : continuationToken as String?,
+      continuationIds: continuationIds == unsetCopyWithValue
+          ? this.continuationIds
+          : continuationIds as List<String>?,
       systemInstruction: systemInstruction == unsetCopyWithValue
           ? this.systemInstruction
           : systemInstruction as String?,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import '../errors/exceptions.dart';
@@ -32,10 +33,13 @@ class InterceptorChain {
   ///
   /// The optional [abortTrigger] allows canceling the request before completion.
   ///
+  /// [checkActive] can prevent an attempt from starting after asynchronous
+  /// preparation and prevent reading a response that arrived after cancellation.
   /// Returns the HTTP response after all interceptors have processed it.
   Future<http.Response> execute(
     http.BaseRequest request, {
     Future<void>? abortTrigger,
+    void Function()? checkActive,
   }) {
     ensureNotClosed?.call();
 
@@ -45,11 +49,11 @@ class InterceptorChain {
       abortTrigger: abortTrigger,
     );
 
-    return _buildChain(0)(context);
+    return _buildChain(0, checkActive)(context);
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index) {
+  InterceptorNext _buildChain(int index, void Function()? checkActive) {
     if (index >= interceptors.length) {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
@@ -78,8 +82,23 @@ class InterceptorChain {
           return originalRequest;
         }
 
+        Future<http.Response> readResponse(http.StreamedResponse response) {
+          try {
+            checkActive?.call();
+          } catch (_) {
+            response.stream.listen(null).cancel().ignore();
+            rethrow;
+          }
+          final abort = context.abortTrigger;
+          if (checkActive == null || abort == null) {
+            return http.Response.fromStream(response);
+          }
+          return _readAbortableResponse(response, abort, checkActive);
+        }
+
         // Transport execution function
         Future<http.Response> executeTransport() async {
+          checkActive?.call();
           final requestToSend = createRequest();
           if (context.abortTrigger != null) {
             // Wrap request to enable http client's native abort support
@@ -95,7 +114,7 @@ class InterceptorChain {
               final streamedResponse = await httpClient.send(abortableRequest);
               // If we get here, request was sent successfully
               stage = AbortionStage.duringResponse;
-              return await http.Response.fromStream(streamedResponse);
+              return await readResponse(streamedResponse);
             } on http.RequestAbortedException catch (e) {
               // Convert http package's abort exception to our AbortedException
               final correlationId =
@@ -113,7 +132,7 @@ class InterceptorChain {
           } else {
             // No abort trigger - normal execution
             final streamedResponse = await httpClient.send(requestToSend);
-            return http.Response.fromStream(streamedResponse);
+            return readResponse(streamedResponse);
           }
         }
 
@@ -142,11 +161,56 @@ class InterceptorChain {
     // Recursive: call current interceptor with next in chain
     return (context) {
       final interceptor = interceptors[index];
-      final next = _buildChain(index + 1);
+      final next = _buildChain(index + 1, checkActive);
 
       return interceptor.intercept(context, next);
     };
   }
+}
+
+Future<http.Response> _readAbortableResponse(
+  http.StreamedResponse response,
+  Future<void> abortTrigger,
+  void Function() checkActive,
+) {
+  final result = Completer<http.Response>();
+  final body = BytesBuilder();
+  final subscription = response.stream.listen(
+    body.add,
+    onError: result.completeError,
+    onDone: () {
+      try {
+        checkActive();
+        result.complete(
+          http.Response.bytes(
+            body.takeBytes(),
+            response.statusCode,
+            request: response.request,
+            headers: response.headers,
+            isRedirect: response.isRedirect,
+            persistentConnection: response.persistentConnection,
+            reasonPhrase: response.reasonPhrase,
+          ),
+        );
+      } catch (error, trace) {
+        result.completeError(error, trace);
+      }
+    },
+    cancelOnError: true,
+  );
+  unawaited(
+    abortTrigger.then((_) {
+      if (result.isCompleted) return;
+      try {
+        checkActive();
+      } catch (error, trace) {
+        // A custom HTTP client can ignore Abortable; release our own reader too.
+        subscription.cancel().ignore();
+        result.completeError(error, trace);
+      }
+    }, onError: (Object _, StackTrace _) {}),
+  );
+  return result.future;
 }
 
 /// Wrapper to make a BaseRequest abortable by implementing Abortable mixin.

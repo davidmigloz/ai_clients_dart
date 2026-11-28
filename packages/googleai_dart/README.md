@@ -261,7 +261,16 @@ current hop. `createStream` with a token starts another decoding hop.
 `resumeStream` with an event ID replays the same interaction. To total usage
 across foreground hops, add the final usage from each hop. Within a hop,
 use the latest cumulative usage instead of adding each checkpoint.
-[Long-decode guide](https://aistudio.google.com/docs/long-decode)
+Set `automaticContinuation: true` on `create` or `createStream` to follow
+foreground decoding tokens. Unary calls combine the output and token usage
+from all hops. Streams keep each hop's created and completed events. A stream
+can reconnect when a connection drops at a checkpoint. If it drops after
+additional output, `InteractionContinuationInterruptedException` carries the
+last token. Discard output after that checkpoint before resuming. For an
+interrupted unary request, `partialInteraction` contains its completed output.
+Google's Python and JavaScript SDKs enable automatic continuation by default.
+[Runnable long-decode example](example/interactions_long_decode.dart) ·
+[Google's long-decode guide](https://aistudio.google.com/docs/long-decode)
 
 Select `ApiVersion.v1beta` for the managed-agent variants
 `createWithAgent(...)` and `createWithAgentStream(...)`.
@@ -745,6 +754,7 @@ See the [example/](example/) directory for complete examples:
 | [`google_search_example.dart`](example/google_search_example.dart) | Grounding with Google Search |
 | [`image_generation_example.dart`](example/image_generation_example.dart) | Image generation |
 | [`interactions_example.dart`](example/interactions_example.dart) | Stable Interactions, streaming, state and function calls |
+| [`interactions_long_decode.dart`](example/interactions_long_decode.dart) | Opt-in automatic continuation on Gemini 4 |
 | [`live_example.dart`](example/live_example.dart) | Live API WebSocket sessions |
 | [`models_example.dart`](example/models_example.dart) | List and inspect models |
 | [`oauth_refresh_example.dart`](example/oauth_refresh_example.dart) | OAuth token refresh during retries |
