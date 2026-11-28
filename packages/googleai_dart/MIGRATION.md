@@ -231,6 +231,14 @@ The `signalAudioStreamEnd()` helper sends
 start and end markers continue to use empty objects.
 [Live realtime input reference](https://aistudio.google.com/api-reference/live#BidiGenerateContentRealtimeInput)
 
+### Handling Live resumption failures
+
+`LiveClient.resume()` reports transport and setup failures as
+`LiveSessionResumptionException`. Keep the supplied handle in caller state if
+you use it for retries. The exception leaves its `handle` field unset.
+Transparent resumption is sent on Vertex AI. Gemini Developer API setup sends
+the handle while omitting the transparent setting.
+
 ### Live voice activity detection enum values
 
 Raw setup consumers should update the expected values under

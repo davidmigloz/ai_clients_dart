@@ -15,6 +15,7 @@ class SessionResumptionConfig {
   /// Vertex AI can acknowledge the last client message included in each
   /// resumption handle. Use that index to manage your outgoing message buffer.
   /// The application reconnects and replays any unacknowledged input.
+  /// [LiveClient] sends this option on Vertex AI.
   final bool? transparent;
 
   /// Creates a [SessionResumptionConfig].

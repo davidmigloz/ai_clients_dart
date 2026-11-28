@@ -144,14 +144,19 @@ class LiveClient {
     }
     _log.fine('Connecting to Live API');
 
+    final resumptionHandle = liveConfig?.sessionResumption?.handle;
     final LiveSession session;
     try {
       final socket = await ws.connectWebSocket(uri, headers: headers);
       session = LiveSession.attach(
         socket,
         onClosed: _sessions.remove,
-        redactDiagnostic: (message) =>
-            _safeSocketMessage(message, uri, credentials),
+        redactDiagnostic: (message) => _safeSocketMessage(
+          message,
+          uri,
+          credentials,
+          resumptionHandle: resumptionHandle,
+        ),
       );
       _sessions.add(session);
     } on LiveConnectionException catch (error, stackTrace) {
@@ -166,7 +171,12 @@ class LiveClient {
     } catch (error, stackTrace) {
       final cause = error is WebSocketException
           ? WebSocketException(
-              _safeSocketMessage(error.message, uri, credentials),
+              _safeSocketMessage(
+                error.message,
+                uri,
+                credentials,
+                resumptionHandle: resumptionHandle,
+              ),
             )
           : null;
       throw LiveConnectionException(
@@ -228,8 +238,13 @@ class LiveClient {
     } on LiveConnectionException catch (e) {
       throw LiveSessionResumptionException(
         message: 'Failed to resume session: ${e.message}',
-        handle: resumptionToken,
         cause: e.cause,
+      );
+    } on LiveSessionSetupException catch (e, stackTrace) {
+      throw LiveSessionResumptionException(
+        message: 'Failed to resume session: ${e.message}',
+        cause: e.cause ?? e,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -329,8 +344,9 @@ class LiveClient {
   static String _safeSocketMessage(
     String message,
     Uri uri,
-    AuthCredentials? credentials,
-  ) {
+    AuthCredentials? credentials, {
+    String? resumptionHandle,
+  }) {
     var safe = message.replaceAll(
       uri.toString(),
       _diagnosticUri(uri).toString(),
@@ -345,6 +361,7 @@ class LiveClient {
         {
             ...uri.queryParametersAll.values.expand((values) => values),
             ?credential,
+            ?resumptionHandle,
           }.where((value) => value.isNotEmpty).toList()
           ..sort((a, b) => b.length.compareTo(a.length));
     for (final value in values) {
@@ -369,8 +386,9 @@ class LiveClient {
     LiveConfig? liveConfig,
   ) async {
     // Build model path based on API mode
+    final isVertex = _config.apiMode == ApiMode.vertexAI;
     final String modelPath;
-    if (_config.apiMode == ApiMode.vertexAI) {
+    if (isVertex) {
       // Vertex AI: projects/{project}/locations/{location}/publishers/google/models/{model}
       if (model.startsWith('projects/')) {
         modelPath = model; // Already fully qualified
@@ -392,13 +410,16 @@ class LiveClient {
       modelPath = model.startsWith('models/') ? model : 'models/$model';
     }
 
+    final sessionResumption = liveConfig?.sessionResumption;
     final setup = BidiGenerateContentSetup(
       model: modelPath,
       generationConfig: liveConfig?.generationConfig,
       systemInstruction: liveConfig?.systemInstruction,
       tools: liveConfig?.tools,
       realtimeInputConfig: liveConfig?.realtimeInputConfig,
-      sessionResumption: liveConfig?.sessionResumption,
+      sessionResumption: isVertex || sessionResumption == null
+          ? sessionResumption
+          : SessionResumptionConfig(handle: sessionResumption.handle),
       contextWindowCompression: liveConfig?.contextWindowCompression,
       inputAudioTranscription: liveConfig?.inputAudioTranscription,
       outputAudioTranscription: liveConfig?.outputAudioTranscription,

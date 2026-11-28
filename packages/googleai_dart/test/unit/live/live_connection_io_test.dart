@@ -38,6 +38,7 @@ class _Handshake {
 class _Server {
   final HttpServer http;
   final handshake = Completer<_Handshake>();
+  final peerSocket = Completer<WebSocket>();
   final peerClosed = Completer<void>();
   int upgrades = 0;
 
@@ -58,6 +59,7 @@ class _Server {
       final authorization = request.headers.value('authorization');
       final apiKeyHeader = request.headers.value('x-goog-api-key');
       final socket = await WebSocketTransformer.upgrade(request);
+      peerSocket.complete(socket);
       socket.listen((data) {
         final frame = jsonDecode(data as String) as Map<String, dynamic>;
         if (handshake.isCompleted) {
@@ -222,6 +224,85 @@ void main() {
       },
     });
   });
+
+  test(
+    'Developer connect and resume leave transparent mode out of setup',
+    () async {
+      for (final resume in [false, true]) {
+        final server = await _Server.start();
+        final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+        const config = LiveConfig(
+          sessionResumption: SessionResumptionConfig(
+            handle: 'original-handle',
+            transparent: false,
+          ),
+        );
+        if (resume) {
+          await live
+              .resume(
+                model: _model,
+                resumptionToken: 'updated-handle',
+                liveConfig: config,
+              )
+              .timeout(_deadline);
+        } else {
+          await live
+              .connect(model: _model, liveConfig: config)
+              .timeout(_deadline);
+        }
+        expect((await server.handshake.future).firstMessage, {
+          'setup': {
+            'model': 'models/$_model',
+            'sessionResumption': {
+              'handle': resume ? 'updated-handle' : 'original-handle',
+            },
+          },
+        });
+        expect(config.sessionResumption?.toJson(), {
+          'handle': 'original-handle',
+          'transparent': false,
+        });
+      }
+    },
+  );
+
+  test(
+    'resume surfaces a typed setup rejection without exposing its handle',
+    () async {
+      const handle = 'resume+opaque/fixture';
+      const encodedHandle = 'resume%2bopaque%2ffixture';
+      final server = await _Server.start(setupReply: null);
+      final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+      final failed = expectLater(
+        live.resume(model: _model, resumptionToken: handle).timeout(_deadline),
+        throwsA(
+          isA<LiveSessionResumptionException>()
+              .having((error) => error.handle, 'handle', isNull)
+              .having(
+                (error) => error.cause,
+                'underlying rejection',
+                isA<LiveSessionClosedException>()
+                    .having((error) => error.code, 'close code', 1008)
+                    .having(
+                      (error) => error.reason,
+                      'close reason',
+                      'Invalid handle [redacted] ([redacted])',
+                    ),
+              ),
+        ),
+      );
+      expect((await server.handshake.future.timeout(_deadline)).firstMessage, {
+        'setup': {
+          'model': 'models/$_model',
+          'sessionResumption': {'handle': handle},
+        },
+      });
+      final socket = await server.peerSocket.future;
+      unawaited(socket.close(1008, 'Invalid handle $handle ($encodedHandle)'));
+      await failed;
+      await server.peerClosed.future.timeout(_deadline);
+    },
+  );
 
   test('closes the socket after a malformed binary setup reply', () async {
     final server = await _Server.start(setupReply: [0xff, 0xfe]);
