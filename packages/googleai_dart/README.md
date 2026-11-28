@@ -1202,6 +1202,21 @@ configuration and check option availability for your model and endpoint.
 
 </details>
 
+### How do I start a Veo video prediction?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Call `client.models.predictLongRunning` with a regional Vertex AI client and a
+supported Veo model. Set `labels` to include request metadata such as an
+anonymized `safety_identifier`. The response returns the operation name.
+
+[Runnable Veo example](example/prediction_example.dart) ·
+[Veo request labels](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/abuse-monitoring#pass_an_end-user_safety_identifier_in_api_calls) ·
+[Check operation status](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/video/generate-videos-from-text)
+
+</details>
+
 ### How do I generate an interactive world with Genie 4?
 
 <details>
@@ -1345,7 +1360,7 @@ See the [example/](example/) directory for complete examples:
 | [`operations_example.dart`](example/operations_example.dart) | Long-running operations management |
 | [`pagination_example.dart`](example/pagination_example.dart) | Paginated list results |
 | [`permissions_example.dart`](example/permissions_example.dart) | Permission management for resources |
-| [`prediction_example.dart`](example/prediction_example.dart) | Video generation with Veo model |
+| [`prediction_example.dart`](example/prediction_example.dart) | Start a Vertex AI Veo video prediction with request labels |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_retrieval_example.dart`](example/tool_retrieval_example.dart) | Client-side tool retrieval on Gemini Developer API `v1beta` |
 | [`triggers_example.dart`](example/triggers_example.dart) | Schedule and run managed agents on the Gemini Developer API `v1beta` |

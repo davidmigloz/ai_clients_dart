@@ -61,7 +61,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [operations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/operations_example.dart) (~1k tokens): Long-running operations management.
 - [pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/pagination_example.dart) (~317 tokens): Paginated list results.
 - [permissions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/permissions_example.dart) (~1.4k tokens): Permission management for resources.
-- [prediction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/prediction_example.dart) (~819 tokens): Video generation with Veo model.
+- [prediction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/prediction_example.dart): Start a Vertex AI Veo video prediction with request labels.
 - [tuned_model_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_model_generation_example.dart) (~968 tokens): Generate content with tuned models.
 - [tuned_models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_models_example.dart) (~952 tokens): Tuned model workflows.
 - [url_context_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/url_context_example.dart) (~926 tokens): URL content fetching and analysis.

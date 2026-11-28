@@ -55,6 +55,7 @@ void main() {
       final json = request.toJson();
 
       expect(json.containsKey('parameters'), isFalse);
+      expect(json.containsKey('labels'), isFalse);
       expect(json['instances'], ['test']);
     });
 
@@ -77,6 +78,7 @@ void main() {
           {'data': 'test'},
         ],
         'parameters': {'option': true},
+        'labels': {'team': 'media'},
       };
 
       final request = PredictRequest.fromJson(original);
@@ -84,6 +86,12 @@ void main() {
 
       expect(serialized['instances'], original['instances']);
       expect(serialized['parameters'], original['parameters']);
+      expect(serialized['labels'], original['labels']);
+      expect(request.copyWith().labels, {'team': 'media'});
+      expect(
+        request.copyWith(labels: null).toJson(),
+        isNot(contains('labels')),
+      );
     });
   });
 }

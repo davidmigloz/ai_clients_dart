@@ -587,17 +587,16 @@ class ModelsResource extends ResourceBase with StreamingResource {
 
   /// Performs a synchronous prediction request.
   ///
-  /// Used for models like Veo for video generation. The [model] parameter
-  /// specifies which model to use (e.g., "veo-001").
-  ///
   /// The [instances] are the required input data for the prediction,
-  /// and [parameters] are optional prediction parameters.
+  /// and [parameters] are optional prediction parameters for [model].
+  /// [labels] adds metadata where supported by the selected model.
   ///
   /// Returns a [PredictResponse] with the prediction outputs.
   Future<PredictResponse> predict({
     required String model,
     required List<dynamic> instances,
     dynamic parameters,
+    Map<String, String>? labels,
   }) async {
     final url = requestBuilder.buildUrl('/{version}/models/$model:predict');
 
@@ -606,10 +605,12 @@ class ModelsResource extends ResourceBase with StreamingResource {
     final request = PredictRequest(
       instances: instances,
       parameters: parameters,
+      labels: labels,
     );
 
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
+      ..headers.putIfAbsent('Content-Type', () => 'application/json')
       ..body = jsonEncode(request.toJson());
 
     final response = await interceptorChain.execute(httpRequest);
@@ -620,18 +621,16 @@ class ModelsResource extends ResourceBase with StreamingResource {
 
   /// Performs an asynchronous prediction request that returns a long-running operation.
   ///
-  /// Used for models like Veo for video generation that take longer to process.
-  /// The [model] parameter specifies which model to use (e.g., "veo-001").
-  ///
   /// The [instances] are the required input data for the prediction,
-  /// and [parameters] are optional prediction parameters.
+  /// and [parameters] are optional prediction parameters for [model].
+  /// Pass [labels] to add metadata on supported models such as Vertex AI Veo.
   ///
   /// Returns a [PredictLongRunningOperation] that can be polled for status and results.
-  /// Use the Operations API to check the status of the long-running operation.
   Future<PredictLongRunningOperation> predictLongRunning({
     required String model,
     required List<dynamic> instances,
     dynamic parameters,
+    Map<String, String>? labels,
   }) async {
     final url = requestBuilder.buildUrl(
       '/{version}/models/$model:predictLongRunning',
@@ -642,10 +641,12 @@ class ModelsResource extends ResourceBase with StreamingResource {
     final request = PredictLongRunningRequest(
       instances: instances,
       parameters: parameters,
+      labels: labels,
     );
 
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
+      ..headers.putIfAbsent('Content-Type', () => 'application/json')
       ..body = jsonEncode(request.toJson());
 
     final response = await interceptorChain.execute(httpRequest);
