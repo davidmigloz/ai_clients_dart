@@ -1,6 +1,23 @@
 import '../copy_with_sentinel.dart';
 import 'voice_config.dart';
 
+/// Text normalization before speech synthesis on supported v1beta models.
+extension type const SpeechTextNormalization(String value) {
+  /// Uses the service default.
+  static const unspecified = SpeechTextNormalization(
+    'TEXT_NORMALIZATION_UNSPECIFIED',
+  );
+
+  /// Lets the model decide whether to normalize the text.
+  static const auto = SpeechTextNormalization('AUTO');
+
+  /// Normalizes numbers, dates, currencies, and units.
+  static const enabled = SpeechTextNormalization('ENABLED');
+
+  /// Preserves pre-normalized text and phonetic spellings.
+  static const disabled = SpeechTextNormalization('DISABLED');
+}
+
 /// Configuration for speech synthesis.
 ///
 /// Controls voice selection and language for audio output.
@@ -16,18 +33,27 @@ class SpeechConfig {
   /// Allows configuring different voices for different speakers.
   final MultiSpeakerVoiceConfig? multiSpeakerVoiceConfig;
 
+  /// Text normalization on supported Gemini Developer API v1beta TTS models.
+  final SpeechTextNormalization? textNormalization;
+
   /// Creates a [SpeechConfig].
   const SpeechConfig({
     this.voiceConfig,
     this.languageCode,
     this.multiSpeakerVoiceConfig,
+    this.textNormalization,
   });
 
   /// Creates a configuration with a prebuilt voice.
-  factory SpeechConfig.withVoice(String voiceName, {String? languageCode}) {
+  factory SpeechConfig.withVoice(
+    String voiceName, {
+    String? languageCode,
+    SpeechTextNormalization? textNormalization,
+  }) {
     return SpeechConfig(
       voiceConfig: VoiceConfig.prebuilt(voiceName),
       languageCode: languageCode,
+      textNormalization: textNormalization,
     );
   }
 
@@ -43,6 +69,10 @@ class SpeechConfig {
               json['multiSpeakerVoiceConfig'] as Map<String, dynamic>,
             )
           : null,
+      textNormalization: switch (json['textNormalization']) {
+        final String value => SpeechTextNormalization(value),
+        _ => null,
+      },
     );
   }
 
@@ -52,6 +82,7 @@ class SpeechConfig {
     if (languageCode != null) 'languageCode': languageCode,
     if (multiSpeakerVoiceConfig != null)
       'multiSpeakerVoiceConfig': multiSpeakerVoiceConfig!.toJson(),
+    'textNormalization': ?textNormalization?.value,
   };
 
   /// Creates a copy with the given fields replaced.
@@ -59,6 +90,7 @@ class SpeechConfig {
     Object? voiceConfig = unsetCopyWithValue,
     Object? languageCode = unsetCopyWithValue,
     Object? multiSpeakerVoiceConfig = unsetCopyWithValue,
+    Object? textNormalization = unsetCopyWithValue,
   }) {
     return SpeechConfig(
       voiceConfig: voiceConfig == unsetCopyWithValue
@@ -70,11 +102,15 @@ class SpeechConfig {
       multiSpeakerVoiceConfig: multiSpeakerVoiceConfig == unsetCopyWithValue
           ? this.multiSpeakerVoiceConfig
           : multiSpeakerVoiceConfig as MultiSpeakerVoiceConfig?,
+      textNormalization: textNormalization == unsetCopyWithValue
+          ? this.textNormalization
+          : textNormalization as SpeechTextNormalization?,
     );
   }
 
   @override
   String toString() =>
       'SpeechConfig(voiceConfig: $voiceConfig, languageCode: $languageCode, '
-      'multiSpeakerVoiceConfig: $multiSpeakerVoiceConfig)';
+      'multiSpeakerVoiceConfig: $multiSpeakerVoiceConfig, '
+      'textNormalization: $textNormalization)';
 }

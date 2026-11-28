@@ -32,6 +32,7 @@ void main() {
               'voiceConfig': {
                 'prebuiltVoiceConfig': {'voiceName': 'Kore'},
               },
+              'textNormalization': 'DISABLED',
             },
           },
         });
@@ -57,7 +58,10 @@ void main() {
         ],
         generationConfig: GenerationConfig(
           responseModalities: const [ResponseModality.audio],
-          speechConfig: SpeechConfig.withVoice('Kore'),
+          speechConfig: SpeechConfig.withVoice(
+            'Kore',
+            textNormalization: SpeechTextNormalization.disabled,
+          ),
         ),
       ),
     );
