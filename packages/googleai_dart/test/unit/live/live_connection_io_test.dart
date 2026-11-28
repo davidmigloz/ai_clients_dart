@@ -196,7 +196,6 @@ void main() {
             generationConfig: LiveGenerationConfig(
               mediaResolution: MediaResolutionLevel.low,
               seed: 0,
-              thinkingConfig: ThinkingConfig(thinkingLevel: ThinkingLevel.low),
             ),
           ),
         )
@@ -216,6 +215,29 @@ void main() {
         'generationConfig': {
           'mediaResolution': 'MEDIA_RESOLUTION_LOW',
           'seed': 0,
+        },
+      },
+    });
+  });
+
+  test('Developer extended-thinking Live sends its thinking level', () async {
+    const model = 'gemini-3.8-live-extended-thinking';
+    final server = await _Server.start();
+    final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+    await live
+        .connect(
+          model: model,
+          liveConfig: const LiveConfig(
+            generationConfig: LiveGenerationConfig(
+              thinkingConfig: ThinkingConfig(thinkingLevel: ThinkingLevel.low),
+            ),
+          ),
+        )
+        .timeout(_deadline);
+    expect((await server.handshake.future).firstMessage, {
+      'setup': {
+        'model': 'models/$model',
+        'generationConfig': {
           'thinkingConfig': {'thinkingLevel': 'LOW'},
         },
       },

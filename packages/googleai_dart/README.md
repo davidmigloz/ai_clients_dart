@@ -998,9 +998,12 @@ generation settings. Use `explicitVadSignal` with supported Vertex AI models
 and set `SafetySetting.method` only on Vertex AI. Use explicit affective dialog
 and proactive audio controls with supported Gemini 2.5 Flash Live models.
 Vertex AI Gemini 3.8 Live enables both behaviors by default. Omit
-`enableAffectiveDialog` and `proactivity` for that model. Select a supported
-Live Translate model when setting `LiveGenerationConfig.translationConfig`.
-[Google Cloud model guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-live)
+`enableAffectiveDialog` and `proactivity` for that model. Use
+`ThinkingConfig.thinkingLevel` with the Developer API
+`gemini-3.8-live-extended-thinking` model. Select a supported Live Translate
+model when setting `LiveGenerationConfig.translationConfig`.
+[Google Cloud model guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-live) ·
+[Developer Live thinking](https://aistudio.google.com/docs/live-api/thinking)
 
 `message.voiceActivity` exposes server-detected speech boundaries and their
 audio offsets. With session resumption enabled, inspect
