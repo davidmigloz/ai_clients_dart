@@ -27,6 +27,7 @@ class AuthInterceptor implements Interceptor {
     RequestContext context,
     InterceptorNext next,
   ) async {
+    if (context.skipAuthentication) return next(context);
     final request = context.request;
 
     // Get credentials from auth provider (called on each request/retry)

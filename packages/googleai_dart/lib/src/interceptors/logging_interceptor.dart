@@ -117,6 +117,9 @@ class LoggingInterceptor implements Interceptor {
   ) {
     if (request is http.Request) {
       return http.Request(request.method, request.url)
+        ..followRedirects = request.followRedirects
+        ..maxRedirects = request.maxRedirects
+        ..persistentConnection = request.persistentConnection
         ..headers.addAll(request.headers)
         ..headers['X-Request-ID'] = requestId
         ..bodyBytes = request.bodyBytes

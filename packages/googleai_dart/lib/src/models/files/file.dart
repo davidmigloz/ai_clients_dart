@@ -4,7 +4,7 @@ import 'file_source.dart';
 import 'file_state.dart';
 import 'video_metadata.dart';
 
-/// Represents an uploaded file.
+/// Represents a file in the Gemini Files service.
 class File {
   /// The resource name in format `files/{file}`.
   final String name;
@@ -19,13 +19,13 @@ class File {
   final String? sizeBytes;
 
   /// Creation timestamp.
-  final DateTime createTime;
+  final DateTime? createTime;
 
   /// Last update timestamp.
-  final DateTime updateTime;
+  final DateTime? updateTime;
 
-  /// Expiration timestamp.
-  final DateTime expirationTime;
+  /// Expiration timestamp, when the file is scheduled to expire.
+  final DateTime? expirationTime;
 
   /// SHA256 hash of the file.
   final String? sha256Hash;
@@ -52,9 +52,9 @@ class File {
   const File({
     required this.name,
     required this.mimeType,
-    required this.createTime,
-    required this.updateTime,
-    required this.expirationTime,
+    this.createTime,
+    this.updateTime,
+    this.expirationTime,
     required this.uri,
     required this.state,
     this.sizeBytes,
@@ -72,9 +72,15 @@ class File {
     displayName: json['displayName'] as String?,
     mimeType: json['mimeType'] as String,
     sizeBytes: json['sizeBytes'] as String?,
-    createTime: DateTime.parse(json['createTime'] as String),
-    updateTime: DateTime.parse(json['updateTime'] as String),
-    expirationTime: DateTime.parse(json['expirationTime'] as String),
+    createTime: json['createTime'] == null
+        ? null
+        : DateTime.parse(json['createTime'] as String),
+    updateTime: json['updateTime'] == null
+        ? null
+        : DateTime.parse(json['updateTime'] as String),
+    expirationTime: json['expirationTime'] == null
+        ? null
+        : DateTime.parse(json['expirationTime'] as String),
     sha256Hash: json['sha256Hash'] as String?,
     uri: json['uri'] as String,
     downloadUri: json['downloadUri'] as String?,
@@ -96,9 +102,10 @@ class File {
     if (displayName != null) 'displayName': displayName,
     'mimeType': mimeType,
     if (sizeBytes != null) 'sizeBytes': sizeBytes,
-    'createTime': createTime.toIso8601String(),
-    'updateTime': updateTime.toIso8601String(),
-    'expirationTime': expirationTime.toIso8601String(),
+    if (createTime != null) 'createTime': createTime!.toIso8601String(),
+    if (updateTime != null) 'updateTime': updateTime!.toIso8601String(),
+    if (expirationTime != null)
+      'expirationTime': expirationTime!.toIso8601String(),
     if (sha256Hash != null) 'sha256Hash': sha256Hash,
     'uri': uri,
     if (downloadUri != null) 'downloadUri': downloadUri,
@@ -135,16 +142,16 @@ class File {
           : mimeType! as String,
       sizeBytes: sizeBytes == unsetCopyWithValue
           ? this.sizeBytes
-          : sizeBytes! as String,
+          : sizeBytes as String?,
       createTime: createTime == unsetCopyWithValue
           ? this.createTime
-          : createTime! as DateTime,
+          : createTime as DateTime?,
       updateTime: updateTime == unsetCopyWithValue
           ? this.updateTime
-          : updateTime! as DateTime,
+          : updateTime as DateTime?,
       expirationTime: expirationTime == unsetCopyWithValue
           ? this.expirationTime
-          : expirationTime! as DateTime,
+          : expirationTime as DateTime?,
       sha256Hash: sha256Hash == unsetCopyWithValue
           ? this.sha256Hash
           : sha256Hash as String?,

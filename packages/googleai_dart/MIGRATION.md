@@ -333,6 +333,25 @@ String resultKind(FunctionResultSubcontent item) => switch (item) {
 
 ---
 
+## Optional Files timestamps
+
+Gemini Files can return metadata without `createTime`, `updateTime`, or
+`expirationTime`. Their Dart types are now nullable. Check each value before
+using it.
+
+```dart
+// Before
+print(file.expirationTime.toIso8601String());
+
+// After
+final expirationTime = file.expirationTime;
+if (expirationTime != null) {
+  print(expirationTime.toIso8601String());
+}
+```
+
+---
+
 ## GenerateContent media metadata
 
 Parsed `Part` values now expose `mediaProcessing`, `audioMetadata`,

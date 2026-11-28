@@ -5,11 +5,10 @@ import 'dart:io' as io;
 import 'package:http/http.dart' as http;
 
 import '../../auth/auth_provider.dart';
-import '../../client/config.dart';
 import '../../errors/exceptions.dart';
 import '../../models/files/file.dart' as file_model;
 import '../../models/files/list_files_response.dart';
-import '../base_resource.dart';
+import 'files_resource_base.dart';
 
 /// Resource for the Files API (IO implementation).
 ///
@@ -20,7 +19,7 @@ import '../base_resource.dart';
 /// or base64-encoded data directly in your requests.
 ///
 /// See: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/send-multimodal-prompts
-class FilesResource extends ResourceBase {
+class FilesResource extends FilesResourceBase {
   /// Creates a [FilesResource].
   FilesResource({
     required super.config,
@@ -29,18 +28,6 @@ class FilesResource extends ResourceBase {
     required super.requestBuilder,
     super.ensureNotClosed,
   });
-
-  /// Validates that the Files API is only used with Google AI.
-  void _validateGoogleAIOnly() {
-    if (config.apiMode == ApiMode.vertexAI) {
-      throw UnsupportedError(
-        'Files API is only available with Google AI (Gemini API). '
-        'Vertex AI does not have a Files API. '
-        'For Vertex AI, use Cloud Storage URIs (gs://...) or base64-encoded data directly. '
-        'See: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/send-multimodal-prompts',
-      );
-    }
-  }
 
   /// Uploads a file for use in prompts.
   ///
@@ -96,7 +83,7 @@ class FilesResource extends ResourceBase {
     required String mimeType,
     String? displayName,
   }) async {
-    _validateGoogleAIOnly();
+    validateGoogleAIOnly();
 
     // Validate that exactly one input method is provided
     final inputCount = [
@@ -277,7 +264,7 @@ class FilesResource extends ResourceBase {
   ///
   /// Returns a [ListFilesResponse] with the list of files and a next page token.
   Future<ListFilesResponse> list({int? pageSize, String? pageToken}) async {
-    _validateGoogleAIOnly();
+    validateGoogleAIOnly();
 
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
@@ -305,7 +292,7 @@ class FilesResource extends ResourceBase {
   ///
   /// Returns a [File] with the file's metadata.
   Future<file_model.File> get({required String name}) async {
-    _validateGoogleAIOnly();
+    validateGoogleAIOnly();
 
     final url = requestBuilder.buildUrl('/{version}/$name');
 
@@ -323,7 +310,7 @@ class FilesResource extends ResourceBase {
   ///
   /// The [name] is the resource name of the file to delete (e.g., "files/abc123").
   Future<void> delete({required String name}) async {
-    _validateGoogleAIOnly();
+    validateGoogleAIOnly();
 
     final url = requestBuilder.buildUrl('/{version}/$name');
 
@@ -342,7 +329,7 @@ class FilesResource extends ResourceBase {
   ///
   /// **Note:** Files are automatically deleted after 48 hours.
   Future<List<int>> download({required String name}) async {
-    _validateGoogleAIOnly();
+    validateGoogleAIOnly();
 
     final url = requestBuilder.buildUrl('/{version}/$name:download');
 

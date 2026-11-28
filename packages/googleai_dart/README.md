@@ -415,6 +415,32 @@ and backend.
 
 </details>
 
+### How do I register files already in Google Cloud Storage?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use the Gemini Developer Files API with an OAuth provider. Enable the Gemini
+API, then give its service agent read access to the target Cloud Storage
+objects. Use a quota project if your OAuth setup requires one.
+
+```dart
+final result = await client.files.register(
+  uris: ['gs://my-bucket/report.pdf'],
+  authProvider: BearerTokenProvider(accessToken),
+  quotaProjectId: quotaProjectId,
+);
+final uri = result.files?.firstOrNull?.uri;
+```
+
+Registration is available on the Developer `v1` and `v1beta` routes. Pass the
+returned file URI when generating content. Vertex AI uses the Cloud Storage
+URI directly. Browser requests require a compatible CORS endpoint.
+[Full example](example/register_cloud_storage_files.dart) ·
+[Cloud Storage registration guide](https://aistudio.google.com/docs/file-input-methods#registration)
+
+</details>
+
 ### How do I use Vertex AI?
 
 <details>
