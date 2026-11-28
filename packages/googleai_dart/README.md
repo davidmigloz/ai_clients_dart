@@ -741,6 +741,7 @@ editing or verbatim transcription. For generated video, set
 the selected model. Sampling controls `temperature` and `topP` are
 deprecated upstream and available only where the model supports them.
 
+[Runnable Interactions speech example](example/interactions_speech_example.dart) ·
 [Speech generation](https://aistudio.google.com/docs/speech-generation) ·
 [Video output resolution](https://aistudio.google.com/docs/omni#output-resolution)
 
@@ -1492,6 +1493,7 @@ See the [example/](example/) directory for complete examples:
 | [`google_search_example.dart`](example/google_search_example.dart) | Grounding with Google Search |
 | [`image_generation_example.dart`](example/image_generation_example.dart) | Image generation |
 | [`interactions_media_slicing.dart`](example/interactions_media_slicing.dart) | Select pages and layers for Interactions media |
+| [`interactions_speech_example.dart`](example/interactions_speech_example.dart) | Two-speaker WAV with speech metadata on Gemini Developer API `v1beta` |
 | [`interactions_example.dart`](example/interactions_example.dart) | Stable Interactions, streaming, state and function calls |
 | [`interactions_long_decode.dart`](example/interactions_long_decode.dart) | Opt-in automatic continuation on Gemini 4 |
 | [`live_avatar_example.dart`](example/live_avatar_example.dart) | Prebuilt Live avatar video on Vertex AI v1 |
