@@ -76,6 +76,7 @@ class LoggingInterceptor implements Interceptor {
         requestId,
         stopwatch.elapsedMilliseconds,
         context.diagnosticRedactor,
+        skipResponseBody: context.skipResponseBodyDiagnostics,
       );
 
       return response;
@@ -117,14 +118,7 @@ class LoggingInterceptor implements Interceptor {
     String requestId,
   ) {
     if (request is http.Request) {
-      return http.Request(request.method, request.url)
-        ..followRedirects = request.followRedirects
-        ..maxRedirects = request.maxRedirects
-        ..persistentConnection = request.persistentConnection
-        ..headers.addAll(request.headers)
-        ..headers['X-Request-ID'] = requestId
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
+      return copyBufferedRequest(request)..headers['X-Request-ID'] = requestId;
     }
 
     // For other request types, return as-is (can't modify)
@@ -155,8 +149,9 @@ class LoggingInterceptor implements Interceptor {
     http.Response response,
     String requestId,
     int durationMs,
-    Redactor? scopedRedactor,
-  ) {
+    Redactor? scopedRedactor, {
+    required bool skipResponseBody,
+  }) {
     if (logger.level <= Level.INFO) {
       final headers = redactor.redactMap(
         scopedRedactor?.redactMap(response.headers) ?? response.headers,
@@ -165,7 +160,7 @@ class LoggingInterceptor implements Interceptor {
         ..info('RESPONSE [$requestId] ${response.statusCode} (${durationMs}ms)')
         ..fine('Headers: $headers');
 
-      if (logger.level <= Level.FINE) {
+      if (!skipResponseBody && logger.level <= Level.FINE) {
         final text = readDiagnosticBody(response);
         final body = redactor.truncate(
           redactor.redactString(scopedRedactor?.redactBody(text) ?? text),

@@ -1,5 +1,19 @@
 part of 'environments.dart';
 
+/// Compute lifecycle mode used to filter environments.
+enum EnvironmentMode {
+  /// Google provisions the environment on demand.
+  onDemand('on_demand'),
+
+  /// Your infrastructure hosts the environment.
+  selfHosted('self_hosted');
+
+  const EnvironmentMode(this.value);
+
+  /// The API wire value.
+  final String value;
+}
+
 /// The status of an [Environment]'s container.
 enum EnvironmentStatus {
   /// The environment is active.

@@ -51,7 +51,8 @@ class ErrorInterceptor implements Interceptor {
     Duration latency,
   ) {
     final statusCode = response.statusCode;
-    final body = readDiagnosticBody(response);
+    final restrictBody = context.skipResponseBodyDiagnostics;
+    final body = restrictBody ? '' : readDiagnosticBody(response);
     final scopedRedactor = context.diagnosticRedactor;
 
     // Try to parse error details from response body
@@ -60,19 +61,22 @@ class ErrorInterceptor implements Interceptor {
     final details = <Object>[];
 
     try {
-      final decoded = jsonDecode(body);
+      final decoded = jsonDecode(
+        restrictBody ? utf8.decode(response.bodyBytes) : body,
+      );
       final interactionSafe = Redactor.interactionCredentials.redactJson(
         decoded,
       );
       final errorDetails = scopedRedactor == null
           ? interactionSafe
           : scopedRedactor.redactJson(interactionSafe);
-      if (!identical(decoded, errorDetails)) {
+      if (!restrictBody && !identical(decoded, errorDetails)) {
         excerptSource = jsonEncode(errorDetails);
       }
       if (errorDetails is Map<String, dynamic>) {
         final error = errorDetails['error'];
         if (error is Map<String, dynamic>) {
+          if (restrictBody) excerptSource = jsonEncode({'error': error});
           message = error['message']?.toString() ?? message;
           final errorDetailsList = error['details'];
           if (errorDetailsList is List) {

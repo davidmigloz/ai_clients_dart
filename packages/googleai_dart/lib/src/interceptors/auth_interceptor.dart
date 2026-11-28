@@ -73,11 +73,7 @@ class AuthInterceptor implements Interceptor {
         if (request.headers.containsKey('X-Goog-Api-Key')) {
           return request;
         }
-        return http.Request(request.method, request.url)
-          ..headers.addAll(request.headers)
-          ..headers['X-Goog-Api-Key'] = apiKey
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
+        return copyBufferedRequest(request)..headers['X-Goog-Api-Key'] = apiKey;
       }
     } else {
       // Add as query parameter (default)
@@ -93,10 +89,7 @@ class AuthInterceptor implements Interceptor {
       final newUri = uri.replace(queryParameters: queryParams);
 
       if (request is http.Request) {
-        return http.Request(request.method, newUri)
-          ..headers.addAll(request.headers)
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
+        return copyBufferedRequest(request, uri: newUri);
       }
     }
 
@@ -113,11 +106,8 @@ class AuthInterceptor implements Interceptor {
       if (request.headers.containsKey('Authorization')) {
         return request;
       }
-      return http.Request(request.method, request.url)
-        ..headers.addAll(request.headers)
-        ..headers['Authorization'] = 'Bearer $bearerToken'
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
+      return copyBufferedRequest(request)
+        ..headers['Authorization'] = 'Bearer $bearerToken';
     }
 
     return request;
@@ -136,11 +126,8 @@ class AuthInterceptor implements Interceptor {
         if (request.headers.containsKey('Authorization')) {
           return request;
         }
-        return http.Request(request.method, request.url)
-          ..headers.addAll(request.headers)
-          ..headers['Authorization'] = 'Token $token'
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
+        return copyBufferedRequest(request)
+          ..headers['Authorization'] = 'Token $token';
       }
     } else {
       // Add as query parameter (default)
@@ -156,10 +143,7 @@ class AuthInterceptor implements Interceptor {
       final newUri = uri.replace(queryParameters: queryParams);
 
       if (request is http.Request) {
-        return http.Request(request.method, newUri)
-          ..headers.addAll(request.headers)
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
+        return copyBufferedRequest(request, uri: newUri);
       }
     }
 
