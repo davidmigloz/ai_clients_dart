@@ -45,13 +45,14 @@ class WebhooksResource extends ResourceBase {
       additionalHeaders: {'Content-Type': 'application/json'},
     );
 
+    final fields = {
+      'uri': webhook.uri,
+      'subscribed_events': webhook.subscribedEvents,
+      'name': ?webhook.name,
+    };
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode({
-        'uri': webhook.uri,
-        'subscribed_events': webhook.subscribedEvents,
-        'name': ?webhook.name,
-      });
+      ..body = jsonEncode(webhookId == null ? fields : {'webhook': fields});
 
     final response = await interceptorChain.execute(
       httpRequest,

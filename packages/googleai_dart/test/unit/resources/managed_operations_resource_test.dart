@@ -260,7 +260,9 @@ void main() {
             case 0:
               expect(request.url.path, '/v1beta/webhooks');
               expect(request.url.queryParameters, {'webhook_id': webhookId});
-              expect(jsonDecode(utf8.decode(request.bodyBytes)), webhookFields);
+              expect(jsonDecode(utf8.decode(request.bodyBytes)), {
+                'webhook': webhookFields,
+              });
               return _json({
                 ...webhookFields,
                 'id': webhookId,
