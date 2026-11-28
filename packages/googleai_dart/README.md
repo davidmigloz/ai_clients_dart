@@ -284,7 +284,7 @@ Select `ApiVersion.v1beta` for the managed-agent variants
 <details>
 <summary><b>Show example</b></summary>
 
-Tool retrieval is in Preview for Gemini 3.6 and later models on the Gemini
+Tool retrieval is in Preview on supported Gemini models on the Gemini
 Developer API `v1beta`. For server-side retrieval, declare `ToolSearchTool`
 and defer selected `FunctionTool` or `McpServerTool` schemas.
 
