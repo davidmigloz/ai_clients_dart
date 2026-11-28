@@ -60,7 +60,9 @@ class ErrorInterceptor implements Interceptor {
 
     try {
       final decoded = jsonDecode(body);
-      final interactionSafe = Redactor.interactionCredentials.redactJson(decoded);
+      final interactionSafe = Redactor.interactionCredentials.redactJson(
+        decoded,
+      );
       final errorDetails = scopedRedactor == null
           ? interactionSafe
           : scopedRedactor.redactJson(interactionSafe);
