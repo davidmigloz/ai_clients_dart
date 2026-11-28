@@ -101,6 +101,43 @@ follow foreground continuation tokens by default.
 
 ---
 
+## Live WebSocket authentication and proxy routes
+
+`connect(accessToken: token)` and `EphemeralTokenProvider(token)` select
+`BidiGenerateContentConstrained` on Gemini Developer API `v1beta`. The explicit
+`accessToken` takes precedence over the auth provider and configured URL
+credentials. Browsers use the query placement for ephemeral tokens. A native
+client can select `EphemeralTokenPlacement.header` to send `Authorization: Token`.
+[Ephemeral token guide](https://aistudio.google.com/docs/ephemeral-tokens)
+
+If you route Vertex AI Live through a gateway, update its WebSocket route from
+`/ws/google.cloud.aiplatform.v1.PredictionService.BidiGenerateContent` to
+`/ws/google.cloud.aiplatform.v1.LlmBidiService/BidiGenerateContent`. For the
+beta service, substitute `v1beta1`. Read the project and location from the
+fully qualified `setup.model` instead of expecting the client to append them
+as query parameters. Configure the gateway with `GoogleAIConfig.copyWith(baseUrl: ...)`.
+
+For project-scoped Vertex AI, replace `ApiKeyProvider(key)` with an OAuth
+`AuthProvider` that returns `BearerTokenCredentials`. If your gateway adds its
+own authentication, pass `const NoAuthProvider()`:
+
+```dart
+// Before
+final before = GoogleAIConfig.vertexAI(
+  projectId: projectId,
+  authProvider: ApiKeyProvider(key),
+);
+
+// After
+final after = GoogleAIConfig.vertexAI(
+  projectId: projectId,
+  authProvider: BearerTokenProvider(accessToken),
+);
+```
+[Vertex AI Live session guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session)
+
+---
+
 ## Migrating from v12.x to v13.0.0
 
 v13.0.0 raises the minimum Dart SDK from 3.9 to 3.12. Applications and packages using Dart 3.9–3.11 must upgrade their toolchain before adopting this release.

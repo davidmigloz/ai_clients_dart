@@ -648,7 +648,8 @@ Future<void> main() async {
 
   try {
     final session = await liveClient.connect(
-      model: 'gemini-2.0-flash-live-001',
+      model: 'gemini-3.8-live',
+      liveConfig: LiveConfig(generationConfig: LiveGenerationConfig.audioOnly()),
     );
 
     session.sendText('Hello! Tell me a short joke.');
@@ -660,7 +661,17 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/live_example.dart)
+Use `ApiVersion.v1beta` for the public Gemini Developer API Live endpoint.
+In browser apps, obtain a short-lived token from your server and pass it to
+`connect(accessToken: token)` or `EphemeralTokenProvider(token)` with its
+query placement. On native platforms, `EphemeralTokenProvider` also supports
+`EphemeralTokenPlacement.header`. Vertex AI Live uses an OAuth bearer token in
+native WebSocket headers. Vertex projects and locations are included in the
+fully qualified model name in setup.
+
+[Full example](example/live_example.dart) ·
+[Gemini Developer API ephemeral tokens](https://aistudio.google.com/docs/ephemeral-tokens) ·
+[Vertex AI Live sessions](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session)
 
 </details>
 

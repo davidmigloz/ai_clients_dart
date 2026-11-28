@@ -23,11 +23,10 @@ void main() async {
   try {
     // Connect to the Live API with configuration
     final session = await liveClient.connect(
-      model: 'gemini-2.0-flash-live-001',
+      model: 'gemini-3.8-live',
       liveConfig: LiveConfig(
-        generationConfig: LiveGenerationConfig.textAndAudio(
+        generationConfig: LiveGenerationConfig.audioOnly(
           speechConfig: SpeechConfig.withVoice(LiveVoices.puck),
-          temperature: 0.7,
         ),
         // Enable transcription for both input and output
         inputAudioTranscription: AudioTranscriptionConfig.enabled(),
@@ -161,11 +160,9 @@ Future<void> resumeSessionExample(
   String resumptionToken,
 ) async {
   final session = await liveClient.resume(
-    model: 'gemini-2.0-flash-live-001',
+    model: 'gemini-3.8-live',
     resumptionToken: resumptionToken,
-    liveConfig: LiveConfig(
-      generationConfig: LiveGenerationConfig.textAndAudio(),
-    ),
+    liveConfig: LiveConfig(generationConfig: LiveGenerationConfig.audioOnly()),
   );
 
   print('Session resumed! New session ID: ${session.sessionId}');
