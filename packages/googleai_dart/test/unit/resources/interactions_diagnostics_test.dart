@@ -30,7 +30,11 @@ void main() {
             'type': 'code_execution_result',
             'call_id': 'call_1',
             'result': [
-              {'type': 'text', 'text': 'hello'},
+              {
+                'type': 'text',
+                'text': 'hello',
+                'future': [1, 2],
+              },
               {'type': 'image', 'data': 'AQI=', 'mime_type': 'image/png'},
             ],
           },
@@ -88,11 +92,70 @@ void main() {
     },
   );
 
-  test('encodes and decodes the video extension selector', () {
+  test('retains diagnostic faults from every continuation hop', () async {
+    var calls = 0;
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(),
+      httpClient: MockClient((request) async {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        calls++;
+        final first = calls == 1;
+        expect(body['continuation_token'], first ? isNull : 'opaque');
+        return http.Response(
+          jsonEncode({
+            'id': 'hop_$calls',
+            'status': first ? 'requires_continuation' : 'completed',
+            if (first) 'continuation_token': 'opaque',
+            'errors': [
+              {'code': 'fault_$calls'},
+            ],
+          }),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+    );
+    addTearDown(client.close);
+    final result = await client.interactions.create(
+      model: 'gemini-3.8-flash',
+      input: const InteractionInput.text('Offline fixture'),
+      automaticContinuation: true,
+    );
+    expect(calls, 2);
+    expect(result.errors?.map((item) => item.code), ['fault_1', 'fault_2']);
+  });
+
+  test('sends the video extension selector through Interactions', () async {
     const config = InteractionVideoConfig(
       task: InteractionVideoConfigTask.extend,
     );
-    expect(config.toJson(), {'task': 'extend'});
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(),
+      httpClient: MockClient((request) async {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(request.url.path, '/v1beta/interactions');
+        expect(body['generation_config'], {
+          'video_config': {'task': 'extend'},
+        });
+        return http.Response(
+          '{"id":"clip_extension","status":"completed"}',
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+    );
+    addTearDown(client.close);
+    await client.interactions.create(
+      model: 'gemini-omni-flash-preview',
+      input: const InteractionInput.contentList([
+        TextContent(text: 'Continue the shot.'),
+        VideoContent(
+          uri: 'https://example.test/signed-clip',
+          mimeType: 'video/mp4',
+        ),
+      ]),
+      generationConfig: const InteractionGenerationConfig(videoConfig: config),
+    );
     expect(
       InteractionVideoConfig.fromJson(config.toJson()).task,
       InteractionVideoConfigTask.extend,

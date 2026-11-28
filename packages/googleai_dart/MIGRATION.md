@@ -349,8 +349,41 @@ switch (tier) {
 
 ## Reading Interactions code execution and video tasks
 
-Add `CodeExecutionLanguage.bash` and `InteractionVideoConfigTask.extend` to
-exhaustive switches over those enums.
+Add `CodeExecutionLanguage.bash` to exhaustive language switches.
+
+```dart
+// Before
+String languageName(CodeExecutionLanguage value) => switch (value) {
+  CodeExecutionLanguage.python => 'Python',
+};
+
+// After
+String languageName(CodeExecutionLanguage value) => switch (value) {
+  CodeExecutionLanguage.python => 'Python',
+  CodeExecutionLanguage.bash => 'Bash',
+};
+```
+
+Update exhaustive video-task switches as well. An existing task grouping can
+share the edit handler with the new extend case.
+
+```dart
+// Before
+bool usesExistingVideo(InteractionVideoConfigTask value) => switch (value) {
+  InteractionVideoConfigTask.textToVideo ||
+  InteractionVideoConfigTask.imageToVideo ||
+  InteractionVideoConfigTask.referenceToVideo => false,
+  InteractionVideoConfigTask.edit => true,
+};
+
+// After
+bool usesExistingVideo(InteractionVideoConfigTask value) => switch (value) {
+  InteractionVideoConfigTask.textToVideo ||
+  InteractionVideoConfigTask.imageToVideo ||
+  InteractionVideoConfigTask.referenceToVideo => false,
+  InteractionVideoConfigTask.edit || InteractionVideoConfigTask.extend => true,
+};
+```
 
 Existing code can still read `CodeExecutionResultStep.result` for a text result.
 

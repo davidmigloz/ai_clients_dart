@@ -347,6 +347,10 @@ Interaction _mergeInteractionHops(List<Interaction> hops) {
       for (final hop in hops.skip(1))
         ...?hop.steps?.skipWhile((step) => step is UserInputStep),
     ],
+    errors: hops.any((hop) => hop.errors != null)
+        ? [for (final hop in hops) ...?hop.errors]
+        : null,
+    maxTotalTokens: hops.map((hop) => hop.maxTotalTokens).nonNulls.lastOrNull,
     usage: _mergeInteractionUsage(hops),
   );
 }

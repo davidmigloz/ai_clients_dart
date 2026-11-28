@@ -79,7 +79,7 @@ enum CodeExecutionLanguage {
   /// Python >= 3.10, with numpy and simpy available.
   python,
 
-  /// Bash shell.
+  /// Bash shell on supported Gemini 3.0 and later models.
   bash,
 }
 

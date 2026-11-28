@@ -9,6 +9,7 @@ class CodeExecutionResultStep extends InteractionStep {
   final String callId;
 
   final Object _result;
+  final List<dynamic>? _wireResult;
 
   /// Text output, or an empty string when the result contains media.
   String get result => switch (_result) {
@@ -17,6 +18,8 @@ class CodeExecutionResultStep extends InteractionStep {
   };
 
   /// Structured text or media output, if the returned content is recognized.
+  ///
+  /// Use [copyWith] to supply updated content for serialization.
   List<InteractionContent>? get resultContent => switch (_result) {
     final List<InteractionContent> content => content,
     _ => null,
@@ -34,7 +37,7 @@ class CodeExecutionResultStep extends InteractionStep {
     required String this._result,
     this.isError,
     this.signature,
-  });
+  }) : _wireResult = null;
 
   /// Creates a code execution result with structured content.
   const CodeExecutionResultStep.content({
@@ -42,11 +45,13 @@ class CodeExecutionResultStep extends InteractionStep {
     required List<InteractionContent> resultContent,
     this.isError,
     this.signature,
-  }) : _result = resultContent;
+  }) : _result = resultContent,
+       _wireResult = null;
 
   const CodeExecutionResultStep._({
     required this.callId,
     required this._result,
+    this._wireResult,
     this.isError,
     this.signature,
   });
@@ -67,9 +72,11 @@ class CodeExecutionResultStep extends InteractionStep {
     // In streaming `step.start`, the step arrives as a partial skeleton and
     // `result` is populated later via `step.delta`; default to empty when
     // absent.
+    final raw = json['result'] ?? '';
     return CodeExecutionResultStep._(
       callId: callId,
-      result: _decodeResult(json['result'] ?? ''),
+      result: _decodeResult(raw),
+      wireResult: raw is List ? List<dynamic>.unmodifiable(raw) : null,
       isError: json['is_error'] as bool?,
       signature: json['signature'] as String?,
     );
@@ -79,11 +86,13 @@ class CodeExecutionResultStep extends InteractionStep {
   Map<String, dynamic> toJson() => {
     'type': type,
     'call_id': callId,
-    'result': switch (_result) {
-      final List<InteractionContent> entries =>
-        entries.map((entry) => entry.toJson()).toList(),
-      final Object raw => raw,
-    },
+    'result':
+        _wireResult ??
+        switch (_result) {
+          final List<InteractionContent> entries =>
+            entries.map((entry) => entry.toJson()).toList(),
+          final Object raw => raw,
+        },
     if (isError != null) 'is_error': isError,
     if (signature != null) 'signature': signature,
   };
@@ -107,6 +116,10 @@ class CodeExecutionResultStep extends InteractionStep {
     return CodeExecutionResultStep._(
       callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
       result: output,
+      wireResult:
+          result == unsetCopyWithValue && resultContent == unsetCopyWithValue
+          ? _wireResult
+          : null,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       signature: signature == unsetCopyWithValue
           ? this.signature
@@ -117,12 +130,11 @@ class CodeExecutionResultStep extends InteractionStep {
   static Object _decodeResult(Object raw) {
     if (raw is! List) return raw;
     try {
-      return raw
-          .map(
-            (entry) =>
-                InteractionContent.fromJson(entry as Map<String, dynamic>),
-          )
-          .toList();
+      return List<InteractionContent>.unmodifiable(
+        raw.map(
+          (entry) => InteractionContent.fromJson(entry as Map<String, dynamic>),
+        ),
+      );
     } on ArgumentError {
       return raw;
     } on TypeError {
