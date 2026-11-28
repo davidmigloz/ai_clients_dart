@@ -329,6 +329,24 @@ switch (tier) {
 
 ---
 
+## Handling Interactions speech annotations and media processing events
+
+Update exhaustive switches on `Annotation`, `InteractionStep`, and
+`StepDeltaData` to accept `SpeechAnnotation`, `ProcessingCallStep`,
+`ProcessingResultStep`, `ProcessingCallDelta`, and `ProcessingResultDelta`.
+
+Before, a media processing call's ID was available in the raw step.
+
+```dart
+final callId = step is UnknownStep ? step.toJson()['id'] as String? : null;
+```
+
+After, read the typed ID. Keep any opaque signature when replaying the step.
+
+```dart
+final callId = step is ProcessingCallStep ? step.id : null;
+```
+
 ## Handling tool retrieval variants
 
 Exhaustive switches over `InteractionTool`, `InteractionStep`,

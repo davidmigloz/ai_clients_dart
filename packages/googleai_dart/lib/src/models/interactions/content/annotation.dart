@@ -1,9 +1,9 @@
 part of 'content.dart';
 
-/// Citation information for model-generated content.
+/// Metadata attached to interaction content.
 ///
-/// This is a sealed class with 4 subtypes: [UrlCitation], [FileCitation],
-/// [PlaceCitation], and [WordInfo], plus an [UnknownAnnotation] fallback for
+/// This sealed class includes [UrlCitation], [FileCitation], [PlaceCitation],
+/// [WordInfo], and [SpeechAnnotation], plus an [UnknownAnnotation] fallback for
 /// any `type` this client does not yet model.
 sealed class Annotation {
   /// Creates an [Annotation].
@@ -19,6 +19,12 @@ sealed class Annotation {
       'file_citation' => FileCitation.fromJson(json),
       'place_citation' => PlaceCitation.fromJson(json),
       'word_info' => WordInfo.fromJson(json),
+      'speech_metadata'
+          when (json['start_index'] == null || json['start_index'] is int) &&
+              (json['end_index'] == null || json['end_index'] is int) &&
+              (json['speaker'] == null || json['speaker'] is String) &&
+              (json['style'] == null || json['style'] is String) =>
+        SpeechAnnotation.fromJson(json),
       _ => UnknownAnnotation.fromJson(json),
     };
   }

@@ -1,3 +1,4 @@
+import '../../content/media_wire_options.dart';
 import '../../copy_with_sentinel.dart';
 import '../content/content.dart';
 import '../media_resolution.dart';
@@ -21,6 +22,8 @@ part 'google_search_result_delta.dart';
 part 'image_delta.dart';
 part 'mcp_server_tool_call_delta.dart';
 part 'mcp_server_tool_result_delta.dart';
+part 'processing_call_delta.dart';
+part 'processing_result_delta.dart';
 part 'retrieval_call_delta.dart';
 part 'retrieval_result_delta.dart';
 part 'text_annotation_delta.dart';
@@ -89,6 +92,12 @@ sealed class StepDeltaData {
       'function_result' => FunctionResultDelta.fromJson(json),
       'retrieval_call' => RetrievalCallDelta.fromJson(json),
       'retrieval_result' => RetrievalResultDelta.fromJson(json),
+      'processing_call'
+          when (json['signature'] == null || json['signature'] is String) =>
+        ProcessingCallDelta.fromJson(json),
+      'processing_result'
+          when (json['signature'] == null || json['signature'] is String) =>
+        ProcessingResultDelta.fromJson(json),
       'tool_search_call' => ToolSearchCallDelta.fromJson(json),
       'tool_search_result' => ToolSearchResultDelta.fromJson(json),
       _ => UnknownStepDelta.fromJson(json),
