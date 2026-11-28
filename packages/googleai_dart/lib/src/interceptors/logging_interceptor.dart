@@ -76,6 +76,7 @@ class LoggingInterceptor implements Interceptor {
         requestId,
         stopwatch.elapsedMilliseconds,
         context.diagnosticRedactor,
+        skipResponseBody: context.skipResponseBodyDiagnostics,
       );
 
       return response;
@@ -117,71 +118,4 @@ class LoggingInterceptor implements Interceptor {
     String requestId,
   ) {
     if (request is http.Request) {
-      return http.Request(request.method, request.url)
-        ..followRedirects = request.followRedirects
-        ..maxRedirects = request.maxRedirects
-        ..persistentConnection = request.persistentConnection
-        ..headers.addAll(request.headers)
-        ..headers['X-Request-ID'] = requestId
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
-    }
-
-    // For other request types, return as-is (can't modify)
-    return request;
-  }
-
-  /// Logs HTTP request.
-  void _logRequest(
-    http.BaseRequest request,
-    String requestId,
-    Redactor? scopedRedactor,
-  ) {
-    if (logger.level <= Level.INFO) {
-      final headers = redactor.redactMap(
-        scopedRedactor?.redactMap(request.headers) ?? request.headers,
-      );
-      final safeUrl = redactor.redactString(
-        (scopedRedactor?.redactUri(request.url) ?? request.url).toString(),
-      );
-      logger
-        ..info('REQUEST [$requestId] ${request.method} $safeUrl')
-        ..fine('Headers: $headers');
-    }
-  }
-
-  /// Logs HTTP response.
-  void _logResponse(
-    http.Response response,
-    String requestId,
-    int durationMs,
-    Redactor? scopedRedactor,
-  ) {
-    if (logger.level <= Level.INFO) {
-      final headers = redactor.redactMap(
-        scopedRedactor?.redactMap(response.headers) ?? response.headers,
-      );
-      logger
-        ..info('RESPONSE [$requestId] ${response.statusCode} (${durationMs}ms)')
-        ..fine('Headers: $headers');
-
-      if (logger.level <= Level.FINE) {
-        final text = readDiagnosticBody(response);
-        final body = redactor.truncate(
-          redactor.redactString(scopedRedactor?.redactBody(text) ?? text),
-          500,
-        );
-        logger.fine('Body: $body');
-      }
-    }
-  }
-
-  /// Logs error.
-  void _logError(Object error, String requestId, int durationMs) {
-    logger.severe(
-      'ERROR [$requestId] $error (${durationMs}ms)',
-      error,
-      error is Error ? error.stackTrace : null,
-    );
-  }
-}
+      return copyBufferedRequest(request)..headers['X-Request-ID'] = requestId;

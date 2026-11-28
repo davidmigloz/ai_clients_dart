@@ -4,7 +4,10 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../client/config.dart';
+import '../client/interceptor_chain.dart';
+import '../errors/exceptions.dart';
 import '../models/interactions/environments/environments.dart';
+import '../utils/redactor.dart';
 import 'base_resource.dart';
 
 part 'environment_files_resource.dart';
@@ -49,8 +52,8 @@ class EnvironmentsResource extends ResourceBase {
 
   /// Lists environments.
   ///
-  /// [mode] filters by compute lifecycle mode. This endpoint requires the
-  /// Gemini Developer API with [ApiVersion.v1beta].
+  /// [mode] filters by compute lifecycle mode on the Gemini Developer API
+  /// with [ApiVersion.v1beta].
   /// [pageSize] caps the maximum number of environments per page and
   /// [pageToken] is used for pagination.
   Future<ListEnvironmentsResponse> list({
@@ -58,7 +61,7 @@ class EnvironmentsResource extends ResourceBase {
     int? pageSize,
     String? pageToken,
   }) async {
-    _ensureDeveloperBeta();
+    if (mode != null) _ensureDeveloperBeta();
     final queryParams = <String, String>{
       if (mode != null) 'mode': mode.value,
       if (pageSize != null) 'page_size': pageSize.toString(),

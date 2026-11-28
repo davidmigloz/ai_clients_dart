@@ -38,6 +38,7 @@ class InterceptorChain {
   /// preparation and prevent reading a response that arrived after cancellation.
   ///
   /// [diagnosticRedactor] applies additional redaction to this operation.
+  /// [skipResponseBodyDiagnostics] omits the response body from logging.
   ///
   /// Set [skipAuthentication] when the operation already supplied credentials.
   /// Returns the HTTP response after all interceptors have processed it.
@@ -47,6 +48,7 @@ class InterceptorChain {
     void Function()? checkActive,
     Redactor? diagnosticRedactor,
     bool skipAuthentication = false,
+    bool skipResponseBodyDiagnostics = false,
   }) {
     ensureNotClosed?.call();
 
@@ -56,6 +58,7 @@ class InterceptorChain {
       abortTrigger: abortTrigger,
       diagnosticRedactor: diagnosticRedactor,
       skipAuthentication: skipAuthentication,
+      skipResponseBodyDiagnostics: skipResponseBodyDiagnostics,
     );
 
     return _buildChain(0, checkActive)(context);

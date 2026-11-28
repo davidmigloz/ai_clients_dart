@@ -3,9 +3,30 @@ import 'dart:convert';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('keeps the configured route when listing without a mode', () async {
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(
+        baseUrl: 'https://example.com/gateway',
+        apiVersion: ApiVersion.v1,
+      ),
+      httpClient: MockClient((request) async {
+        expect(request.url.path, '/gateway/v1/environments');
+        expect(request.url.queryParameters, {'page_size': '5'});
+        return http.Response('{"environments":[{"id":"env"}]}', 200);
+      }),
+    );
+    addTearDown(client.close);
+
+    expect(
+      (await client.environments.list(pageSize: 5)).environments?.single.id,
+      'env',
+    );
+  });
+
   test('lists environments by compute lifecycle mode', () async {
     final client = GoogleAIClient(
       config: const GoogleAIConfig(
@@ -59,12 +80,14 @@ void main() {
     };
     final client = GoogleAIClient(
       config: const GoogleAIConfig(
-        baseUrl: 'https://example.com/proxy?route=one&route=two',
+        baseUrl: 'https://example.com/proxy?route=one&route=two&alt=media',
         authProvider: ApiKeyProvider(
           'test-key',
           placement: AuthPlacement.header,
         ),
         interactionsApiVersion: ApiVersion.v1,
+        defaultHeaders: {'Accept': 'application/octet-stream'},
+        defaultQueryParams: {'alt': 'media', 'tenant': 'third'},
       ),
       httpClient: MockClient((request) async {
         expect(request.method, 'GET');
@@ -83,6 +106,7 @@ void main() {
         );
         expect(request.url.queryParametersAll, {
           'route': ['one', 'two'],
+          'tenant': ['third'],
           'page_size': ['20'],
           'page_token': ['previous+/='],
           'recursive': ['false'],
@@ -90,6 +114,7 @@ void main() {
         expect(request.url.fragment, isEmpty);
         expect(request.headers['api-revision'], '2026-05-20');
         expect(request.headers['x-goog-api-key'], 'test-key');
+        expect(request.headers['accept'], 'application/json');
         return http.Response.bytes(
           utf8.encode(jsonEncode(wire)),
           200,
@@ -204,6 +229,49 @@ void main() {
     await expectLater(
       client.environments.files.download(environment: 'env', path: 'src/../x'),
       throwsArgumentError,
+    );
+  });
+
+  test('downloads bytes without logging workspace content at FINE', () async {
+    final previousHierarchy = hierarchicalLoggingEnabled;
+    hierarchicalLoggingEnabled = true;
+    addTearDown(() => hierarchicalLoggingEnabled = previousHierarchy);
+    final logger = Logger('GoogleAI.HTTP');
+    final previousLevel = logger.level;
+    addTearDown(() => logger.level = previousLevel);
+    final records = <LogRecord>[];
+    final subscription = logger.onRecord.listen(records.add);
+    addTearDown(subscription.cancel);
+    final bytes = [...utf8.encode('private workspace contents'), 0xff];
+
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(logLevel: Level.FINE),
+      httpClient: MockClient((request) async {
+        expect(request.url.queryParameters['alt'], 'media');
+        return http.Response.bytes(
+          bytes,
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+    addTearDown(client.close);
+
+    expect(
+      await client.environments.files.download(environment: 'env', path: 'log'),
+      bytes,
+    );
+    expect(
+      records.any((record) => record.message.startsWith('RESPONSE')),
+      isTrue,
+    );
+    expect(
+      records.any((record) => record.message.startsWith('Body:')),
+      isFalse,
+    );
+    expect(
+      records.map((record) => record.message).join(),
+      isNot(contains('private workspace contents')),
     );
   });
 

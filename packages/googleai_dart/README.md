@@ -862,7 +862,8 @@ final bytes = await client.environments.files.download(
 ```
 
 Use `nextPageToken` to continue a listing. Downloading a directory returns a
-tar archive. To find environments first, call `client.environments.list` with
+tar archive. Browser downloads require an endpoint or gateway that serves the
+bytes directly. To find environments first, call `client.environments.list` with
 an optional `EnvironmentMode.onDemand` or `EnvironmentMode.selfHosted` filter.
 
 [Runnable environment files example](example/environment_files_example.dart) ·

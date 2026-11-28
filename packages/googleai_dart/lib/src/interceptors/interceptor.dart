@@ -2,6 +2,16 @@ import 'package:http/http.dart' as http;
 
 import '../utils/redactor.dart';
 
+/// Copies a buffered request before an interceptor changes its URL or headers.
+http.Request copyBufferedRequest(http.Request request, {Uri? uri}) =>
+    http.Request(request.method, uri ?? request.url)
+      ..headers.addAll(request.headers)
+      ..followRedirects = request.followRedirects
+      ..maxRedirects = request.maxRedirects
+      ..persistentConnection = request.persistentConnection
+      ..bodyBytes = request.bodyBytes
+      ..encoding = request.encoding;
+
 /// Context for an HTTP request/response.
 class RequestContext {
   /// HTTP request.
@@ -21,6 +31,8 @@ class RequestContext {
 
   /// Whether the operation already supplied its own authentication.
   final bool skipAuthentication;
+  /// Whether to omit the response body from diagnostic logs.
+  final bool skipResponseBodyDiagnostics;
 
   /// Creates a [RequestContext].
   const RequestContext({
@@ -30,6 +42,7 @@ class RequestContext {
     this.abortTrigger,
     this.diagnosticRedactor,
     this.skipAuthentication = false,
+    this.skipResponseBodyDiagnostics = false,
   });
 
   /// Creates a copy with updated values.
@@ -46,6 +59,7 @@ class RequestContext {
       abortTrigger: abortTrigger ?? this.abortTrigger,
       diagnosticRedactor: diagnosticRedactor,
       skipAuthentication: skipAuthentication,
+      skipResponseBodyDiagnostics: skipResponseBodyDiagnostics,
     );
   }
 }
