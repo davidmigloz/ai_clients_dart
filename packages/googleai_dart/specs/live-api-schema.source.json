@@ -2,11 +2,21 @@
   "info": {
     "title": "Gemini Live API",
     "version": "v1beta",
-    "description": "Real-time bidirectional audio/video streaming via WebSocket"
+    "description": "Real-time bidirectional audio/video streaming via WebSocket",
+    "sources": [
+      "https://aistudio.google.com/api-reference/live",
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session",
+      "https://aistudio.google.com/docs/live-api/live-transcribe"
+    ],
+    "reference_commits": {
+      "googleapis/python-genai": "aa813f8bf805b6f4f3e57abb8f04b91d769e23e6",
+      "googleapis/js-genai": "719dffc91dbf38f8a5f2d90bf93efa5dc8207999"
+    }
   },
   "websocket_endpoints": {
-    "google_ai": "wss://generativelanguage.googleapis.com/{version}/models/{model}:BidiGenerateContent",
-    "vertex_ai": "wss://{location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.{version}.PredictionService.BidiGenerateContent"
+    "google_ai": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.{version}.GenerativeService.BidiGenerateContent",
+    "google_ai_constrained": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained",
+    "vertex_ai": "wss://{host}/ws/google.cloud.aiplatform.{version}.LlmBidiService/BidiGenerateContent"
   },
   "message_types": {
     "client": {
@@ -86,11 +96,11 @@
             "required": false
           },
           "activityStart": {
-            "type": "boolean",
+            "type": "object",
             "required": false
           },
           "activityEnd": {
-            "type": "boolean",
+            "type": "object",
             "required": false
           },
           "audioStreamEnd": {
@@ -153,6 +163,10 @@
           },
           "usageMetadata": {
             "type": "UsageMetadata",
+            "required": false
+          },
+          "interimInputTranscription": {
+            "type": "Transcription",
             "required": false
           }
         }
@@ -259,6 +273,9 @@
         },
         "turnCoverage": {
           "type": "TurnCoverage"
+        },
+        "interimTranscriptTimestampEnabled": {
+          "type": "boolean"
         }
       }
     },
@@ -310,8 +327,38 @@
     },
     "AudioTranscriptionConfig": {
       "fields": {
-        "enabled": {
+        "languageCodes": {
+          "type": "array",
+          "items": "string"
+        },
+        "customVocabulary": {
+          "type": "array",
+          "items": "string"
+        },
+        "wordTimestamp": {
           "type": "boolean"
+        },
+        "diarization": {
+          "type": "boolean"
+        },
+        "mode": {
+          "type": "AudioTranscriptionConfigMode"
+        },
+        "sourceText": {
+          "type": "string"
+        },
+        "languageAuto": {
+          "type": "LanguageAuto",
+          "deprecated": true
+        },
+        "languageHints": {
+          "type": "LanguageHints",
+          "deprecated": true
+        },
+        "adaptationPhrases": {
+          "type": "array",
+          "items": "string",
+          "deprecated": true
         }
       }
     },
@@ -326,6 +373,49 @@
       "fields": {
         "text": {
           "type": "string"
+        },
+        "finished": {
+          "type": "boolean"
+        },
+        "languageCode": {
+          "type": "string"
+        },
+        "speakerLabel": {
+          "type": "string"
+        },
+        "words": {
+          "type": "array",
+          "items": "WordInfo"
+        },
+        "startOffset": {
+          "type": "string"
+        },
+        "endOffset": {
+          "type": "string"
+        }
+      }
+    },
+    "LanguageAuto": {
+      "fields": {}
+    },
+    "LanguageHints": {
+      "fields": {
+        "languageCodes": {
+          "type": "array",
+          "items": "string"
+        }
+      }
+    },
+    "WordInfo": {
+      "fields": {
+        "word": {
+          "type": "string"
+        },
+        "startOffset": {
+          "type": "string"
+        },
+        "endOffset": {
+          "type": "string"
         }
       }
     }
@@ -333,26 +423,38 @@
   "enums": {
     "ActivityHandling": {
       "values": [
+        "ACTIVITY_HANDLING_UNSPECIFIED",
         "START_OF_ACTIVITY_INTERRUPTS",
         "NO_INTERRUPTION"
       ]
     },
     "StartSensitivity": {
       "values": [
-        "HIGH",
-        "LOW"
+        "START_SENSITIVITY_UNSPECIFIED",
+        "START_SENSITIVITY_HIGH",
+        "START_SENSITIVITY_LOW"
       ]
     },
     "EndSensitivity": {
       "values": [
-        "HIGH",
-        "LOW"
+        "END_SENSITIVITY_UNSPECIFIED",
+        "END_SENSITIVITY_HIGH",
+        "END_SENSITIVITY_LOW"
       ]
     },
     "TurnCoverage": {
       "values": [
+        "TURN_COVERAGE_UNSPECIFIED",
         "TURN_INCLUDES_ONLY_ACTIVITY",
-        "TURN_INCLUDES_ALL_INPUT"
+        "TURN_INCLUDES_ALL_INPUT",
+        "TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO"
+      ]
+    },
+    "AudioTranscriptionConfigMode": {
+      "values": [
+        "MODE_UNSPECIFIED",
+        "VERBATIM",
+        "SMART"
       ]
     }
   },

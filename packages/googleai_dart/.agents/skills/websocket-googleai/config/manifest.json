@@ -37,7 +37,8 @@
       "RealtimeInputConfig": [
         "automaticActivityDetection",
         "activityHandling",
-        "turnCoverage"
+        "turnCoverage",
+        "interimTranscriptTimestampEnabled"
       ],
       "SessionResumptionConfig": [
         "handle",
@@ -52,6 +53,17 @@
         "id",
         "name",
         "response"
+      ],
+      "AudioTranscriptionConfig": [
+        "languageCodes",
+        "customVocabulary",
+        "wordTimestamp",
+        "diarization",
+        "mode",
+        "sourceText",
+        "languageAuto",
+        "languageHints",
+        "adaptationPhrases"
       ]
     },
     "excluded_properties": {
@@ -326,14 +338,11 @@
     },
     "Transcription": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "config",
       "dart_class": "Transcription",
       "file": "lib/src/models/live/config/transcription.dart",
       "schema": "Transcription",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "VoiceConfig": {
       "spec": "live",
@@ -400,6 +409,20 @@
       ],
       "file": "lib/src/models/live/config/live_config.dart",
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "WordInfo": {
+      "spec": "live",
+      "kind": "config",
+      "dart_class": "LiveTranscriptionWord",
+      "file": "lib/src/models/live/config/transcription.dart",
+      "schema": "WordInfo"
+    },
+    "AudioTranscriptionConfigMode": {
+      "spec": "live",
+      "kind": "enum",
+      "dart_class": "AudioTranscriptionConfigMode",
+      "file": "lib/src/models/generation/audio_transcription_mode.dart",
+      "schema": "AudioTranscriptionConfigMode"
     }
   }
 }

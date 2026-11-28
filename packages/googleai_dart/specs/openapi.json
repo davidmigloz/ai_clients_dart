@@ -140,6 +140,31 @@
             "description": "Identifier for a `Chunk` fetched via Semantic Retriever."
           }
         },
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "name": "source",
+            "properties": [
+              "groundingPassage",
+              "semanticRetrieverChunk"
+            ]
+          }
+        ]
+      },
+      "AudioMetadata": {
+        "description": "Metadata describes the input audio content.\nSet this in `Part.audio_metadata` or `FunctionResponsePart.audio_metadata`\nwhen `inline_data` or `file_data` contains audio to configure static audio\npreprocessing.",
+        "properties": {
+          "endOffset": {
+            "description": "Optional. The end offset of the audio, relative to the start of the\naudio stream.",
+            "format": "google-duration",
+            "type": "string"
+          },
+          "startOffset": {
+            "description": "Optional. The start offset of the audio, relative to the start of the\naudio stream.",
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "AudioResponseFormat": {
@@ -194,6 +219,30 @@
         },
         "type": "object"
       },
+      "AudioTranscription": {
+        "description": "The transcription of an audio part.\nFor multi-speaker audio, each speaker segment is a separate Part with its\nown AudioTranscription carrying the speaker_label.",
+        "properties": {
+          "speakerLabel": {
+            "description": "Optional. A label identifying the speaker of this audio segment (e.g. \"spk_1\",\n\"spk_2\"). Present when diarization is set.",
+            "type": "string"
+          },
+          "text": {
+            "description": "Required. The transcription text of this audio segment.",
+            "type": "string"
+          },
+          "words": {
+            "description": "Optional. Detailed word-level transcriptions and timing details.\nPresent when word_timestamp is set.",
+            "items": {
+              "$ref": "#/components/schemas/WordInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
       "AudioTranscriptionConfig": {
         "description": "The audio transcription configuration.",
         "properties": {
@@ -241,12 +290,40 @@
             "deprecated": true,
             "description": "Optional. Specifies one or more languages in the audio."
           },
+          "mode": {
+            "description": "Optional. Configures transcription mode. Supported values: `VERBATIM`,\n`SMART`. If unspecified, defaults to `VERBATIM` transcription.\nIn `SMART` mode, the model performs disfluency removal (eliminating\nfiller words, repetitions, and false starts), light grammatical cleanup,\nautomatic formatting (paragraphs, bullet points, numbered lists), and\nminor user edits (inline self-corrections).\nTimestamps and diarization are incompatible with mode `SMART`.",
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "VERBATIM",
+              "SMART"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified transcription mode.",
+              "Verbatim transcription mode.",
+              "Smart transcription mode."
+            ]
+          },
+          "sourceText": {
+            "description": "Optional. The source text to be edited or rewritten via voice instructions.\nWhen provided in `SMART` mode, the model evaluates the audio input against\nthis text and emits the complete replacement text in the candidate response\nrather than appending to it.",
+            "type": "string"
+          },
           "wordTimestamp": {
             "description": "Optional. Configures word-level timestamp generation.",
             "type": "boolean"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Deprecated: Use top-level `language_codes` instead.",
+            "name": "language_config",
+            "properties": [
+              "languageAuto",
+              "languageHints"
+            ]
+          }
+        ]
       },
       "AuthToken": {
         "description": "A request to create an ephemeral authentication token.",
@@ -276,12 +353,6 @@
             "writeOnly": true,
             "x-google-immutable": true
           },
-          "interactionId": {
-            "description": "Optional. Input only. Immutable. The interaction ID that this token is scoped to.\nSpecific to the Live Interactions API.",
-            "type": "string",
-            "writeOnly": true,
-            "x-google-immutable": true
-          },
           "name": {
             "description": "Output only. Identifier. The token itself.",
             "readOnly": true,
@@ -303,7 +374,16 @@
             "x-google-immutable": true
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The method-specific configuration for the resulting token.",
+            "name": "config",
+            "properties": [
+              "bidiGenerateContentSetup"
+            ]
+          }
+        ]
       },
       "AutomaticActivityDetection": {
         "description": "Configures automatic detection of activity.",
@@ -586,6 +666,13 @@
             ],
             "description": "Optional. If set, enables transcription of voice input. The transcription aligns\nwith the input audio language, if configured."
           },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Optional. Labels with user-defined metadata for the request.\n\nOptional. Labels must follow standard unified Cloud label requirements:\n- Label keys must start with a letter.\n- Label keys and values can be no longer than 63 characters (Unicode\n  codepoints) and can only contain lowercase letters, numeric characters,\n  underscores, and dashes.\n- International characters are allowed.\n\nUsage:\n-  Safety identifiers from aggregators: Use the key `safety_identifier`\n   (e.g. `{\"safety_identifier\": \"user_session_123\"}`)",
+            "type": "object"
+          },
           "model": {
             "description": "Required. The model's resource name. This serves as an ID for the Model to use.\n\nFormat: `models/{model}`",
             "type": "string"
@@ -597,6 +684,14 @@
               }
             ],
             "description": "Optional. If set, enables transcription of the model's audio output. The\ntranscription aligns with the language code specified for the output\naudio, if configured."
+          },
+          "proactivity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProactivityConfig"
+              }
+            ],
+            "description": "Optional. Configures the proactivity of the model.\n\nThis allows the model to respond proactively to the input and to ignore\nirrelevant input."
           },
           "realtimeInputConfig": {
             "allOf": [
@@ -643,8 +738,12 @@
             "format": "byte",
             "type": "string"
           },
+          "displayName": {
+            "description": "Optional. Specifies the name used to refer to this blob to the model (e.g.\n\"my_blob.png\"). Used as the blob reference identifier when\n`verbalization_mode` is set to `REFERENCE_ONLY`.",
+            "type": "string"
+          },
           "mimeType": {
-            "description": "The IANA standard MIME type of the source data.\nExamples of supported types:\n- Images: image/png, image/jpeg, image/jpg, image/webp, image/heic,\nimage/heif, image/gif, image/avif\n- Audio: audio/*, video/audio/s16le, video/audio/wav\n- Video: video/*\n- Text: text/plain, text/html, text/css, text/javascript,\ntext/x-typescript, text/csv, text/markdown, text/x-python, text/xml,\ntext/rtf, video/text/timestamp\n- Applications: application/x-javascript, application/x-typescript,\napplication/x-python-code, application/json, application/x-ipynb+json,\napplication/rtf, application/pdf For additional context,\nsee [Supported file\nformats](https://ai.google.dev/gemini-api/docs/file-input-methods#supported-content-types).\n//",
+            "description": "The IANA standard MIME type of the source data.\nExamples of supported types:\n- Images: image/png, image/jpeg, image/jpg, image/webp, image/heic,\nimage/heif, image/gif, image/avif\n- Audio: audio/*, video/audio/s16le, video/audio/wav\n- Video: video/*\n- Text: text/plain, text/html, text/css, text/javascript,\ntext/x-typescript, text/csv, text/markdown, text/x-python, text/xml,\ntext/rtf, video/text/timestamp\n- Applications: application/x-javascript, application/x-typescript,\napplication/x-python-code, application/json, application/x-ipynb+json,\napplication/rtf, application/pdf For additional context,\nsee [Supported file\nformats](https://aistudio.google.com/docs/file-input-methods#supported-content-types).",
             "type": "string"
           }
         },
@@ -782,7 +881,17 @@
         "required": [
           "model"
         ],
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Specifies when this resource will expire.",
+            "name": "expiration",
+            "properties": [
+              "expireTime",
+              "ttl"
+            ]
+          }
+        ]
       },
       "CachedContentUsageMetadata": {
         "description": "Metadata on the usage of the cached content.",
@@ -822,6 +931,11 @@
             "description": "Output only. Generated content returned from the model.",
             "readOnly": true
           },
+          "continuationToken": {
+            "description": "An optional opaque continuation token returned when `finish_reason` is\n`CONTINUATION`.\nClients can pass this token in a subsequent `GenerateContentRequest` to\ncontinue generation.",
+            "format": "byte",
+            "type": "string"
+          },
           "finishMessage": {
             "description": "Optional. Output only. Details the reason why the model stopped generating tokens.\nThis is populated only when `finish_reason` is set.",
             "readOnly": true,
@@ -850,7 +964,9 @@
               "TOO_MANY_TOOL_CALLS",
               "MISSING_THOUGHT_SIGNATURE",
               "MALFORMED_RESPONSE",
-              "ESCALATION"
+              "ESCALATION",
+              "PUP_LIMITED_DISABLED",
+              "CONTINUATION"
             ],
             "readOnly": true,
             "type": "string",
@@ -875,7 +991,9 @@
               "Model called too many tools consecutively, thus the system exited\nexecution.",
               "Request has at least one thought signature missing.",
               "Finished due to malformed response.",
-              "Request was filtered by an escalation rule."
+              "Request was filtered by an escalation rule.",
+              "Indicates that token generation stopped because the user account is\nlimited or disabled due to Prohibited Use Policy (PUP) violations.",
+              "Token generation was stopped because the response reached the per-request\ntoken limit, but generation is not yet complete. The model response can\nbe continued via a subsequent request using the returned\n`continuation_token`. Note, the `max_output_tokens` is cumulative across\ncontinuation hops and must be monotonically increased or omitted."
             ]
           },
           "groundingAttributions": {
@@ -947,7 +1065,16 @@
             "description": "White space chunking configuration."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The chunking configuration to use.",
+            "name": "config",
+            "properties": [
+              "whiteSpaceConfig"
+            ]
+          }
+        ]
       },
       "CitationMetadata": {
         "description": "A collection of source attributions for a piece of content.",
@@ -1210,7 +1337,17 @@
         "required": [
           "operation"
         ],
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The value type must be consistent with the value type defined in the field\nfor the corresponding key. If the value types are not consistent, the\nresult will be an empty set. When the `CustomMetadata` has a `StringList`\nvalue type, the filtering condition should use `string_value` paired with\nan INCLUDES/EXCLUDES operation, otherwise the result will also be an empty\nset.",
+            "name": "value",
+            "properties": [
+              "stringValue",
+              "numericValue"
+            ]
+          }
+        ]
       },
       "Content": {
         "description": "The base structured datatype containing multi-part content of a message.\n\nA `Content` includes a `role` field designating the producer of the `Content`\nand a `parts` field containing multi-part data that contains the content of\nthe message turn.",
@@ -1327,7 +1464,16 @@
             "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The context window compression mechanism used.",
+            "name": "compression_mechanism",
+            "properties": [
+              "slidingWindow"
+            ]
+          }
+        ]
       },
       "Corpus": {
         "description": "A `Corpus` is a collection of `Document`s.\nA project can create up to 10 corpora.",
@@ -1354,34 +1500,6 @@
             "format": "date-time",
             "readOnly": true,
             "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "CountMessageTokensRequest": {
-        "description": "Counts the number of tokens in the `prompt` sent to a model.\n\nModels may tokenize text differently, so each model may return a different\n`token_count`.",
-        "properties": {
-          "prompt": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MessagePrompt"
-              }
-            ],
-            "description": "Required. The prompt, whose token count is to be returned."
-          }
-        },
-        "required": [
-          "prompt"
-        ],
-        "type": "object"
-      },
-      "CountMessageTokensResponse": {
-        "description": "A response from `CountMessageTokens`.\n\nIt returns the model's `token_count` for the `prompt`.",
-        "properties": {
-          "tokenCount": {
-            "description": "The number of tokens that the `model` tokenizes the `prompt` into.\n\nAlways non-negative.",
-            "format": "int32",
-            "type": "integer"
           }
         },
         "type": "object"
@@ -1430,7 +1548,7 @@
                 "$ref": "#/components/schemas/GenerateContentRequest"
               }
             ],
-            "description": "Optional. The overall input given to the `Model`. This includes the prompt as well as\nother model steering information like [system\ninstructions](https://ai.google.dev/gemini-api/docs/system-instructions),\nand/or function declarations for [function\ncalling](https://ai.google.dev/gemini-api/docs/function-calling).\n`Model`s/`Content`s and `generate_content_request`s are mutually\nexclusive. You can either send `Model` + `Content`s or a\n`generate_content_request`, but never both."
+            "description": "Optional. The overall input given to the `Model`. This includes the prompt as well as\nother model steering information like [system\ninstructions](https://aistudio.google.com/docs/text-generation#system-instructions),\nand/or function declarations for [function\ncalling](https://aistudio.google.com/docs/function-calling).\n`Model`s/`Content`s and `generate_content_request`s are mutually\nexclusive. You can either send `Model` + `Content`s or a\n`generate_content_request`, but never both."
           }
         },
         "type": "object"
@@ -1468,8 +1586,40 @@
         "type": "object"
       },
       "CreateEnvironmentRequest": {
-        "description": "Request for `CreateEnvironment`.",
+        "description": "Request for creating an environment.",
         "properties": {
+          "customConfig": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "Optional. Arbitrary customer-defined JSON configuration passed through\nto the self-hosted environment poller. Only supported when `mode` is\n`SELF_HOSTED`.",
+            "type": "object"
+          },
+          "env": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/EnvVar"
+            },
+            "description": "Environment variables to set in the sandbox environment.",
+            "type": "object"
+          },
+          "fromEnvironment": {
+            "description": "Optional. The source environment to copy/fork from.\nFormat: `environments/{environment_id}` or `{environment_id}`.\nWhen specified, `sources` and `env` must be empty.",
+            "type": "string"
+          },
+          "mode": {
+            "description": "The compute lifecycle mode for this environment.",
+            "enum": [
+              "ENVIRONMENT_MODE_UNSPECIFIED",
+              "ON_DEMAND",
+              "SELF_HOSTED"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "",
+              "",
+              ""
+            ]
+          },
           "networkAllowlist": {
             "allOf": [
               {
@@ -1496,9 +1646,23 @@
               "$ref": "#/components/schemas/Source"
             },
             "type": "array"
+          },
+          "systemInstruction": {
+            "description": "Optional. System instruction applied to interactions running in this\nenvironment. Only supported for `SELF_HOSTED` environments, where it is\nrecommended.",
+            "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Network configuration for the environment.",
+            "name": "network",
+            "properties": [
+              "networkAllowlist",
+              "networkMode"
+            ]
+          }
+        ]
       },
       "CreateFileRequest": {
         "description": "Request for `CreateFile`.",
@@ -1613,7 +1777,17 @@
             "type": "object"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The operation result, which can be either an `error` or a valid `response`.\nIf `done` == `false`, neither `error` nor `response` is set.\nIf `done` == `true`, exactly one of `error` or `response` can be set.\nSome services might not provide the result.",
+            "name": "result",
+            "properties": [
+              "error",
+              "response"
+            ]
+          }
+        ]
       },
       "CustomMetadata": {
         "description": "User provided metadata stored as key-value pairs.",
@@ -1643,7 +1817,17 @@
         "required": [
           "key"
         ],
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "name": "value",
+            "properties": [
+              "stringValue",
+              "stringListValue",
+              "numericValue"
+            ]
+          }
+        ]
       },
       "Dataset": {
         "description": "Dataset for training or validation.",
@@ -1657,7 +1841,16 @@
             "description": "Optional. Inline examples with simple input/output text."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Inline data or a reference to the data.",
+            "name": "dataset",
+            "properties": [
+              "examples"
+            ]
+          }
+        ]
       },
       "DiffChecksumsResponse": {
         "description": "Backend response for a Diff get checksums response.\nFor details on the Scotty Diff protocol,\nvisit http://go/scotty-diff-protocol.",
@@ -1831,6 +2024,39 @@
         },
         "type": "object"
       },
+      "DocumentMetadata": {
+        "description": "Metadata describes the input document content.\nSet this in `Part.document_metadata` or\n`FunctionResponsePart.document_metadata` when `inline_data` or `file_data`\ncontains a document to configure static document preprocessing.",
+        "properties": {
+          "contentLayers": {
+            "description": "Optional. Content layers to return.\nIf empty, defaults to [PAGE_IMAGE] when DocumentMetadata is set. When\nDocumentMetadata is not set, default document processing is used (for\nexample, page images for PDFs).",
+            "items": {
+              "enum": [
+                "CONTENT_LAYER_UNSPECIFIED",
+                "PAGE_IMAGE",
+                "PAGE_TEXT"
+              ],
+              "type": "string",
+              "x-google-enum-descriptions": [
+                "Default value.",
+                "Rendered page images.",
+                "Extracted page text."
+              ]
+            },
+            "type": "array"
+          },
+          "endPage": {
+            "description": "Optional. 1-indexed inclusive end page.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "startPage": {
+            "description": "Optional. 1-indexed inclusive start page.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "DownloadFileResponse": {
         "description": "Response for `DownloadFile`.",
         "type": "object"
@@ -1888,11 +2114,27 @@
         "type": "object"
       },
       "EgressRule": {
-        "description": "A network egress rule that controls which external domains the\nenvironment is allowed to reach.  Each rule identifies a target domain\nand, optionally, a set of HTTP headers to inject into every matching\noutbound request.",
+        "description": "A single domain allowlist rule with optional header injection.",
         "properties": {
-          "domain": {
-            "description": "The domain pattern to match for this rule.\nUse an exact hostname (e.g., `github.com`), a wildcard prefix\n(e.g., `*.googleapis.com`), or `*` to match all domains.",
+          "credential": {
+            "description": "Optional. Reference to a server-managed Credential resource by ID.",
             "type": "string"
+          },
+          "domain": {
+            "description": "Domain to allow outbound requests to. Supports wildcards (e.g.\n'*.googleapis.com'). Use '*' to allow all domains.",
+            "type": "string"
+          },
+          "mode": {
+            "description": "Network egress mode. Set via the `\"allowlist\": \"disabled\"` short form;\nmust be the only rule in the allowlist and cannot be combined with\n`domain`, `transform` or `credential`.",
+            "enum": [
+              "NETWORK_MODE_UNSPECIFIED",
+              "DISABLED"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. Unused.",
+              "All network egress is blocked."
+            ]
           },
           "transform": {
             "additionalProperties": {
@@ -2005,7 +2247,17 @@
             "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The output of the batch request.",
+            "name": "output",
+            "properties": [
+              "responsesFile",
+              "inlinedResponses"
+            ]
+          }
+        ]
       },
       "EmbedContentBatchStats": {
         "description": "Stats about the batch.",
@@ -2216,11 +2468,38 @@
         "description": "A generic empty message that you can re-use to avoid defining duplicated\nempty messages in your APIs. A typical example is to use it as the request\nor the response type of an API method. For instance:\n\n    service Foo {\n      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n    }",
         "type": "object"
       },
+      "EnvVar": {
+        "description": "An environment variable to set in the execution environment.",
+        "properties": {
+          "credential": {
+            "description": "Optional reference to a server-managed Credential resource by ID.",
+            "type": "string"
+          },
+          "value": {
+            "description": "Direct string value for plain environment variables.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Environment": {
         "description": "An execution environment for an agent.",
         "properties": {
           "created": {
             "description": "Output only. The time at which the environment was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "readOnly": true,
+            "type": "string"
+          },
+          "customConfig": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "Output only. Arbitrary customer-defined JSON configuration passed through to the\nself-hosted environment poller. Only populated for `self_hosted`\nenvironments when configured.",
+            "readOnly": true,
+            "type": "object"
+          },
+          "environmentKey": {
+            "description": "Output only. Secret token generated upon environment creation for self_hosted\nenvironments. Used by the self-hosted sandbox daemon to authenticate\npolling and streaming requests. Only returned when the environment is\ncreated; omitted when getting or listing environments later.",
             "readOnly": true,
             "type": "string"
           },
@@ -2240,7 +2519,22 @@
             "readOnly": true,
             "type": "string"
           },
-          "network_allowlist": {
+          "mode": {
+            "description": "Output only. The compute lifecycle mode for this environment.",
+            "enum": [
+              "ENVIRONMENT_MODE_UNSPECIFIED",
+              "ON_DEMAND",
+              "SELF_HOSTED"
+            ],
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "",
+              "",
+              ""
+            ]
+          },
+          "networkAllowlist": {
             "allOf": [
               {
                 "$ref": "#/components/schemas/EnvironmentNetworkEgressAllowlist"
@@ -2248,7 +2542,7 @@
             ],
             "description": "Allow only specific domains."
           },
-          "network_mode": {
+          "networkMode": {
             "description": "Network egress mode.",
             "enum": [
               "NETWORK_MODE_UNSPECIFIED",
@@ -2297,45 +2591,83 @@
         "required": [
           "id"
         ],
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Network configuration for the environment.",
+            "name": "network",
+            "properties": [
+              "networkAllowlist",
+              "networkMode"
+            ]
+          }
+        ]
+      },
+      "EnvironmentFile": {
+        "description": "Metadata for a file or directory within an environment.",
+        "properties": {
+          "created": {
+            "description": "Output only. The creation time of the file/directory.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "mime_type": {
+            "description": "Output only. The MIME type of the file (e.g., \"text/python\", \"image/png\").\nEmpty for directories.\nNOLINT",
+            "readOnly": true,
+            "type": "string"
+          },
+          "modified": {
+            "description": "Output only. The modification time of the file/directory.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Output only. The name of the file or directory (e.g., \"main.py\" or \"src\").",
+            "readOnly": true,
+            "type": "string"
+          },
+          "path": {
+            "description": "Output only. The full relative path within the environment\n(e.g., \"workspace/src/main.py\").",
+            "readOnly": true,
+            "type": "string"
+          },
+          "size_bytes": {
+            "description": "Output only. The size of the file/directory in bytes.\nNOLINT",
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "description": "Output only. The type of the entry.",
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "FILE",
+              "DIRECTORY"
+            ],
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified type.",
+              "A regular file.",
+              "A directory."
+            ]
+          }
+        },
         "type": "object"
       },
       "EnvironmentNetworkEgressAllowlist": {
         "description": "Network egress configuration for the environment.",
         "properties": {
           "allowlist": {
-            "description": "List of allowed domains and their configurations.",
+            "description": "List of allowed domains and their configurations. Set to `\"disabled\"`\nto block all network egress.",
             "items": {
               "$ref": "#/components/schemas/EgressRule"
             },
             "type": "array"
           }
         },
-        "type": "object"
-      },
-      "Example": {
-        "description": "An input/output example used to instruct the Model.\n\nIt demonstrates how the model should respond or format its response.",
-        "properties": {
-          "input": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Message"
-              }
-            ],
-            "description": "Required. An example of an input `Message` from the user."
-          },
-          "output": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Message"
-              }
-            ],
-            "description": "Required. An example of what the model should output given the input."
-          }
-        },
-        "required": [
-          "input",
-          "output"
-        ],
         "type": "object"
       },
       "ExecutableCode": {
@@ -2369,7 +2701,7 @@
         "type": "object"
       },
       "File": {
-        "description": "A file uploaded to the API.\nNext ID: 15",
+        "description": "A file uploaded to the API.",
         "properties": {
           "createTime": {
             "description": "Output only. The timestamp of when the `File` was created.",
@@ -2478,11 +2810,24 @@
             "readOnly": true
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Metadata for the File.",
+            "name": "metadata",
+            "properties": [
+              "videoMetadata"
+            ]
+          }
+        ]
       },
       "FileData": {
         "description": "URI based data.",
         "properties": {
+          "displayName": {
+            "description": "Optional. Specifies the name used to refer to this file to the model (e.g.\n\"my_file.pdf\"). Used as the file reference identifier when\n`verbalization_mode` is set to `REFERENCE_ONLY`.",
+            "type": "string"
+          },
           "fileUri": {
             "description": "Required. URI.",
             "type": "string"
@@ -2710,7 +3055,7 @@
             "additionalProperties": {
               "description": "Properties of the object."
             },
-            "description": "Required. The function response in JSON object format.\nCallers can use any keys of their choice that fit the function's syntax\nto return the function output, e.g. \"output\", \"result\", etc.\nIn particular, if the function call failed to execute, the response can\nhave an \"error\" key to return error details to the model.\n\nMultimedia can be included by using a subobject containing a single \"$ref\"\nkey whose value is the `inline_data.display_name` of a\n`FunctionResponsePart` holding the multimedia.\nSee https://ai.google.dev/gemini-api/docs/function-calling#multimodal.",
+            "description": "Required. The function response in JSON object format.\nCallers can use any keys of their choice that fit the function's syntax\nto return the function output, e.g. \"output\", \"result\", etc.\nIn particular, if the function call failed to execute, the response can\nhave an \"error\" key to return error details to the model.\n\nMultimedia can be included by using a subobject containing a single \"$ref\"\nkey whose value is the `inline_data.display_name` or\n`file_data.display_name` of a `FunctionResponsePart` holding the\nmultimedia. See [Multimodal function\nresponses](https://aistudio.google.com/docs/function-calling#multimodal).",
             "type": "object"
           },
           "scheduling": {
@@ -2748,16 +3093,65 @@
             "format": "byte",
             "type": "string"
           },
+          "displayName": {
+            "description": "Optional. Display name of the blob.\nUsed to provide a label or filename to distinguish blobs, and to reference\nthe blob from `FunctionResponse.response` (for example, via\n`{\"$ref\": \"DISPLAY_NAME\"}`).",
+            "type": "string"
+          },
           "mimeType": {
-            "description": "The IANA standard MIME type of the source data.\nExamples:\n  - image/png\n  - image/jpeg\nIf an unsupported MIME type is provided, an error will be returned. For a\ncomplete list of supported types, see [Supported file\nformats](https://ai.google.dev/gemini-api/docs/prompting_with_media#supported_file_formats).",
+            "description": "The IANA standard MIME type of the source data.\nExamples:\n  - image/png\n  - image/jpeg\nIf an unsupported MIME type is provided, an error will be returned. For a\ncomplete list of supported types, see [Supported file\nformats](https://aistudio.google.com/docs/file-input-methods#supported-content-types).",
             "type": "string"
           }
         },
         "type": "object"
       },
-      "FunctionResponsePart": {
-        "description": "A datatype containing media that is part of a `FunctionResponse` message.\n\nA `FunctionResponsePart` consists of data which has an associated datatype. A\n`FunctionResponsePart` can only contain one of the accepted types in\n`FunctionResponsePart.data`.\n\nA `FunctionResponsePart` must have a fixed IANA MIME type identifying the\ntype and subtype of the media if the `inline_data` field is filled with raw\nbytes.",
+      "FunctionResponseFileData": {
+        "description": "URI based data for function response.",
         "properties": {
+          "displayName": {
+            "description": "Optional. Display name of the file.\nUsed to provide a label or filename to distinguish file data, and to\nreference the file from `FunctionResponse.response` (for example, via\n`{\"$ref\": \"DISPLAY_NAME\"}`).",
+            "type": "string"
+          },
+          "fileUri": {
+            "description": "Required. URI.",
+            "type": "string"
+          },
+          "mimeType": {
+            "description": "The IANA standard MIME type of the source data.\nIf an unsupported MIME type is provided, an error will be returned. For a\ncomplete list of supported types, see [Multimodal function\nresponses](https://aistudio.google.com/docs/function-calling#multimodal)\nand [Supported file\nformats](https://aistudio.google.com/docs/file-input-methods#supported-content-types).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileUri"
+        ],
+        "type": "object"
+      },
+      "FunctionResponsePart": {
+        "description": "A datatype containing media that is part of a `FunctionResponse` message.\n\nA `FunctionResponsePart` consists of data which has an associated datatype. A\n`FunctionResponsePart` can only contain one of the accepted types in\n`FunctionResponsePart.data`.\n\nMedia can be passed as raw bytes (`inline_data`) or by URI (`file_data`) with\nan IANA MIME type identifying the type and subtype of the media.",
+        "properties": {
+          "audioMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioMetadata"
+              }
+            ],
+            "description": "Optional. Audio metadata. The metadata should only be specified while the audio\ndata is presented in inline_data or file_data."
+          },
+          "documentMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentMetadata"
+              }
+            ],
+            "description": "Optional. Document metadata. The metadata should only be specified while the\ndocument data is presented in inline_data or file_data."
+          },
+          "fileData": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FunctionResponseFileData"
+              }
+            ],
+            "description": "URI based data."
+          },
           "inlineData": {
             "allOf": [
               {
@@ -2765,9 +3159,67 @@
               }
             ],
             "description": "Inline media bytes."
+          },
+          "mediaProcessing": {
+            "description": "Optional. How the model processes this part's media for understanding.\nOnly meaningful for video parts (`inline_data` or `file_data` with video\nmime). Non-video parts ignore this field.",
+            "enum": [
+              "MEDIA_PROCESSING_UNSPECIFIED",
+              "STATIC",
+              "AGENTIC"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Defaults to model-specific processing.",
+              "Fixed-rate frame extraction. All frames placed in context.",
+              "Model-driven dynamic navigation. Recommended for most use cases."
+            ]
+          },
+          "mediaResolution": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/V1mainMediaResolution"
+              }
+            ],
+            "description": "Optional. Media resolution for the input media."
+          },
+          "spreadsheetMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpreadsheetMetadata"
+              }
+            ],
+            "description": "Optional. Spreadsheet metadata. The metadata should only be specified while the\nspreadsheet data is presented in inline_data or file_data."
+          },
+          "videoMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VideoMetadata"
+              }
+            ],
+            "description": "Optional. Video metadata. The metadata should only be specified while the video\ndata is presented in inline_data or file_data."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The data of the function response part.",
+            "name": "data",
+            "properties": [
+              "inlineData",
+              "fileData"
+            ]
+          },
+          {
+            "description": "Controls extra preprocessing of data. Set this when `inline_data` or\n`file_data` is present to configure per-part static media preprocessing.",
+            "name": "metadata",
+            "properties": [
+              "videoMetadata",
+              "documentMetadata",
+              "spreadsheetMetadata",
+              "audioMetadata"
+            ]
+          }
+        ]
       },
       "GdataMedia": {
         "description": "A reference to data stored on the filesystem, on GFS or in blobstore.",
@@ -3021,7 +3473,7 @@
             "description": "Passages provided inline with the request."
           },
           "safetySettings": {
-            "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content.\n\nThis will be enforced on the `GenerateAnswerRequest.contents` and\n`GenerateAnswerResponse.candidate`. There should not be more than one\nsetting for each `SafetyCategory` type. The API will block any contents and\nresponses that fail to meet the thresholds set by these settings. This list\noverrides the default settings for each `SafetyCategory` specified in the\nsafety_settings. If there is no `SafetySetting` for a given\n`SafetyCategory` provided in the list, the API will use the default safety\nsetting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH,\nHARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT,\nHARM_CATEGORY_HARASSMENT are supported.\nRefer to the\n[guide](https://ai.google.dev/gemini-api/docs/safety-settings)\nfor detailed information on available safety settings. Also refer to the\n[Safety guidance](https://ai.google.dev/gemini-api/docs/safety-guidance) to\nlearn how to incorporate safety considerations in your AI applications.",
+            "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content.\n\nThis will be enforced on the `GenerateAnswerRequest.contents` and\n`GenerateAnswerResponse.candidate`. There should not be more than one\nsetting for each `SafetyCategory` type. The API will block any contents and\nresponses that fail to meet the thresholds set by these settings. This list\noverrides the default settings for each `SafetyCategory` specified in the\nsafety_settings. If there is no `SafetySetting` for a given\n`SafetyCategory` provided in the list, the API will use the default safety\nsetting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH,\nHARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT,\nHARM_CATEGORY_HARASSMENT are supported.\nRefer to the\n[guide](https://aistudio.google.com/docs/safety-settings)\nfor detailed information on available safety settings. Also refer to the\n[Safety guidance](https://aistudio.google.com/docs/safety-guidance) to\nlearn how to incorporate safety considerations in your AI applications.",
             "items": {
               "$ref": "#/components/schemas/SafetySetting"
             },
@@ -3045,7 +3497,17 @@
           "contents",
           "answerStyle"
         ],
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The sources in which to ground the answer.",
+            "name": "grounding_source",
+            "properties": [
+              "inlinePassages",
+              "semanticRetriever"
+            ]
+          }
+        ]
       },
       "GenerateAnswerResponse": {
         "description": "Response from the model for a grounded answer.",
@@ -3177,21 +3639,36 @@
             "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The output of the batch request.",
+            "name": "output",
+            "properties": [
+              "responsesFile",
+              "inlinedResponses"
+            ]
+          }
+        ]
       },
       "GenerateContentRequest": {
         "description": "Request to generate a completion from the model.",
         "properties": {
           "cachedContent": {
-            "description": "Optional. The name of the content\n[cached](https://ai.google.dev/gemini-api/docs/caching) to use as context\nto serve the prediction. Format: `cachedContents/{cachedContent}`",
+            "description": "Optional. The name of the content\n[cached](https://aistudio.google.com/docs/caching) to use as context\nto serve the prediction. Format: `cachedContents/{cachedContent}`",
             "type": "string"
           },
           "contents": {
-            "description": "Required. The content of the current conversation with the model.\n\nFor single-turn queries, this is a single instance. For multi-turn queries\nlike [chat](https://ai.google.dev/gemini-api/docs/text-generation#chat),\nthis is a repeated field that contains the conversation history and the\nlatest request.",
+            "description": "Required. The content of the current conversation with the model.\n\nFor single-turn queries, this is a single instance. For multi-turn queries\nlike\n[chat](https://aistudio.google.com/docs/text-generation#multi-turn-conversations),\nthis is a repeated field that contains the conversation history and the\nlatest request.",
             "items": {
               "$ref": "#/components/schemas/Content"
             },
             "type": "array"
+          },
+          "continuationToken": {
+            "description": "Optional. An opaque continuation token used to resume generation from a\nprevious `GenerateContent` or `StreamGenerateContent` response that stopped\nwith `finish_reason` set to `CONTINUATION`. Note that `contents` is\nmandatory and must identically replicate the prompt and conversation\nhistory from the initial request when continuation token is provided in\na request.",
+            "format": "byte",
+            "type": "string"
           },
           "generationConfig": {
             "allOf": [
@@ -3201,12 +3678,19 @@
             ],
             "description": "Optional. Configuration options for model generation and outputs."
           },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Optional. Labels with user-defined metadata for the request.\n\nOptional. Labels must follow standard unified Cloud label requirements:\n- Label keys must start with a letter.\n- Label keys and values can be no longer than 63 characters (Unicode\n  codepoints) and can only contain lowercase letters, numeric characters,\n  underscores, and dashes.\n- International characters are allowed.\n\nUsage:\n-  Safety identifiers from aggregators: Use the key `safety_identifier`\n   (e.g. `{\"safety_identifier\": \"user_session_123\"}`)",
+            "type": "object"
+          },
           "model": {
             "description": "Required. The name of the `Model` to use for generating the completion.\n\nFormat: `models/{model}`.",
             "type": "string"
           },
           "safetySettings": {
-            "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content.\n\nThis will be enforced on the `GenerateContentRequest.contents` and\n`GenerateContentResponse.candidates`. There should not be more than one\nsetting for each `SafetyCategory` type. The API will block any contents and\nresponses that fail to meet the thresholds set by these settings. This list\noverrides the default settings for each `SafetyCategory` specified in the\nsafety_settings. If there is no `SafetySetting` for a given\n`SafetyCategory` provided in the list, the API will use the default safety\nsetting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH,\nHARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT,\nHARM_CATEGORY_HARASSMENT, HARM_CATEGORY_CIVIC_INTEGRITY,\nHARM_CATEGORY_JAILBREAK are supported.\nRefer to the [guide](https://ai.google.dev/gemini-api/docs/safety-settings)\nfor detailed information on available safety settings. Also refer to the\n[Safety guidance](https://ai.google.dev/gemini-api/docs/safety-guidance) to\nlearn how to incorporate safety considerations in your AI applications.",
+            "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content.\n\nThis will be enforced on the `GenerateContentRequest.contents` and\n`GenerateContentResponse.candidates`. There should not be more than one\nsetting for each `SafetyCategory` type. The API will block any contents and\nresponses that fail to meet the thresholds set by these settings. This list\noverrides the default settings for each `SafetyCategory` specified in the\nsafety_settings. If there is no `SafetySetting` for a given\n`SafetyCategory` provided in the list, the API will use the default safety\nsetting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH,\nHARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT,\nHARM_CATEGORY_HARASSMENT, HARM_CATEGORY_CIVIC_INTEGRITY,\nHARM_CATEGORY_JAILBREAK are supported.\nRefer to the [guide](https://aistudio.google.com/docs/safety-settings)\nfor detailed information on available safety settings. Also refer to the\n[Safety guidance](https://aistudio.google.com/docs/safety-guidance) to\nlearn how to incorporate safety considerations in your AI applications.",
             "items": {
               "$ref": "#/components/schemas/SafetySetting"
             },
@@ -3230,7 +3714,7 @@
                 "$ref": "#/components/schemas/Content"
               }
             ],
-            "description": "Optional. Developer set [system\ninstruction(s)](https://ai.google.dev/gemini-api/docs/system-instructions).\nCurrently, text only."
+            "description": "Optional. Developer set [system\ninstruction(s)](https://aistudio.google.com/docs/text-generation#system-instructions).\nCurrently, text only."
           },
           "toolConfig": {
             "allOf": [
@@ -3238,10 +3722,10 @@
                 "$ref": "#/components/schemas/ToolConfig"
               }
             ],
-            "description": "Optional. Tool configuration for any `Tool` specified in the request. Refer to the\n[Function calling\nguide](https://ai.google.dev/gemini-api/docs/function-calling#function_calling_mode)\nfor a usage example."
+            "description": "Optional. Tool configuration for any `Tool` specified in the request. Refer to the\n[Function calling\nguide](https://aistudio.google.com/docs/function-calling#function_calling_modes)\nfor a usage example."
           },
           "tools": {
-            "description": "Optional. A list of `Tools` the `Model` may use to generate the next response.\n\nA `Tool` is a piece of code that enables the system to interact with\nexternal systems to perform an action, or set of actions, outside of\nknowledge and scope of the `Model`. Supported `Tool`s are `Function` and\n`code_execution`. Refer to the [Function\ncalling](https://ai.google.dev/gemini-api/docs/function-calling) and the\n[Code execution](https://ai.google.dev/gemini-api/docs/code-execution)\nguides to learn more.",
+            "description": "Optional. A list of `Tools` the `Model` may use to generate the next response.\n\nA `Tool` is a piece of code that enables the system to interact with\nexternal systems to perform an action, or set of actions, outside of\nknowledge and scope of the `Model`. Supported `Tool`s are `Function` and\n`code_execution`. Refer to the [Function\ncalling](https://aistudio.google.com/docs/function-calling) and the\n[Code execution](https://aistudio.google.com/docs/code-execution)\nguides to learn more.",
             "items": {
               "$ref": "#/components/schemas/Tool"
             },
@@ -3299,70 +3783,6 @@
             ],
             "description": "Output only. Metadata on the generation requests' token usage.",
             "readOnly": true
-          }
-        },
-        "type": "object"
-      },
-      "GenerateMessageRequest": {
-        "description": "Request to generate a message response from the model.",
-        "properties": {
-          "candidateCount": {
-            "description": "Optional. The number of generated response messages to return.\n\nThis value must be between\n`[1, 8]`, inclusive. If unset, this will default to `1`.",
-            "format": "int32",
-            "type": "integer"
-          },
-          "prompt": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MessagePrompt"
-              }
-            ],
-            "description": "Required. The structured textual input given to the model as a prompt.\n\nGiven a\nprompt, the model will return what it predicts is the next message in the\ndiscussion."
-          },
-          "temperature": {
-            "description": "Optional. Controls the randomness of the output.\n\nValues can range over `[0.0,1.0]`,\ninclusive. A value closer to `1.0` will produce responses that are more\nvaried, while a value closer to `0.0` will typically result in\nless surprising responses from the model.",
-            "format": "float",
-            "type": "number"
-          },
-          "topK": {
-            "description": "Optional. The maximum number of tokens to consider when sampling.\n\nThe model uses combined Top-k and nucleus sampling.\n\nTop-k sampling considers the set of `top_k` most probable tokens.",
-            "format": "int32",
-            "type": "integer"
-          },
-          "topP": {
-            "description": "Optional. The maximum cumulative probability of tokens to consider when sampling.\n\nThe model uses combined Top-k and nucleus sampling.\n\nNucleus sampling considers the smallest set of tokens whose probability\nsum is at least `top_p`.",
-            "format": "float",
-            "type": "number"
-          }
-        },
-        "required": [
-          "prompt"
-        ],
-        "type": "object"
-      },
-      "GenerateMessageResponse": {
-        "description": "The response from the model.\n\nThis includes candidate messages and\nconversation history in the form of chronologically-ordered messages.",
-        "properties": {
-          "candidates": {
-            "description": "Candidate response messages from the model.",
-            "items": {
-              "$ref": "#/components/schemas/Message"
-            },
-            "type": "array"
-          },
-          "filters": {
-            "description": "A set of content filtering metadata for the prompt and response\ntext.\n\nThis indicates which `SafetyCategory`(s) blocked a\ncandidate from this response, the lowest `HarmProbability`\nthat triggered a block, and the HarmThreshold setting for that category.",
-            "items": {
-              "$ref": "#/components/schemas/ContentFilter"
-            },
-            "type": "array"
-          },
-          "messages": {
-            "description": "The conversation history used by the model.",
-            "items": {
-              "$ref": "#/components/schemas/Message"
-            },
-            "type": "array"
           }
         },
         "type": "object"
@@ -3495,7 +3915,7 @@
         "properties": {
           "_responseJsonSchema": {
             "deprecated": true,
-            "description": "Optional. Output schema of the generated response. This is an alternative to\n`response_schema` that accepts [JSON Schema](https://json-schema.org/).\n\nIf set, `response_schema` must be omitted, but `response_mime_type` is\nrequired.\n\nWhile the full JSON Schema may be sent, not all features are supported.\nSpecifically, only the following properties are supported:\n\n- `$id`\n- `$defs`\n- `$ref`\n- `$anchor`\n- `type`\n- `format`\n- `title`\n- `description`\n- `enum` (for strings and numbers)\n- `items`\n- `prefixItems`\n- `minItems`\n- `maxItems`\n- `minimum`\n- `maximum`\n- `anyOf`\n- `oneOf` (interpreted the same as `anyOf`)\n- `properties`\n- `additionalProperties`\n- `required`\n\nThe non-standard `propertyOrdering` property may also be set.\n\nCyclic references are unrolled to a limited degree and, as such, may only\nbe used within non-required properties. (Nullable properties are not\nsufficient.) If `$ref` is set on a sub-schema, no other properties, except\nfor than those starting as a `$`, may be set."
+            "description": "Optional. Output schema of the generated response. This is an alternative to\n`response_schema` that accepts [JSON Schema](https://json-schema.org/).\n\nIf set, `response_schema` must be omitted, but `response_mime_type` is\nrequired.\n\nWhile the full JSON Schema may be sent, not all features are supported.\nSpecifically, only the following properties are supported:\n\n- `$id`\n- `$defs`\n- `$ref`\n- `$anchor`\n- `type`\n- `format`\n- `title`\n- `description`\n- `enum` (for strings and numbers)\n- `items`\n- `prefixItems`\n- `minItems`\n- `maxItems`\n- `minimum`\n- `maximum`\n- `anyOf`\n- `oneOf` (interpreted the same as `anyOf`)\n- `properties`\n- `additionalProperties`\n- `required`\n\nThe non-standard `propertyOrdering` property may also be set.\n\nCyclic references are unrolled to a limited degree and, as such, may only\nbe used within non-required properties. (Nullable properties are not\nsufficient.) If `$ref` is set on a sub-schema, no other properties, except\nfor than those starting as a `$`, may be set.\n\nDeprecated. Use `response_format` instead."
           },
           "audioTranscriptionConfig": {
             "allOf": [
@@ -3578,7 +3998,7 @@
             "type": "boolean"
           },
           "responseMimeType": {
-            "description": "Optional. MIME type of the generated candidate text.\nSupported MIME types are:\n`text/plain`: (default) Text output.\n`application/json`: JSON response in the response candidates.\n`text/x.enum`: ENUM as a string response in the response candidates.\nRefer to the\n[docs](https://ai.google.dev/gemini-api/docs/prompting_with_media#plain_text_formats)\nfor a list of all supported text MIME types.",
+            "description": "Optional. MIME type of the generated candidate text.\nSupported MIME types are:\n`text/plain`: (default) Text output.\n`application/json`: JSON response in the response candidates.\n`text/x.enum`: ENUM as a string response in the response candidates.\nRefer to the\n[docs](https://aistudio.google.com/docs/file-input-methods#text-file-types)\nfor a list of all supported text MIME types.",
             "type": "string"
           },
           "responseModalities": {
@@ -3607,7 +4027,7 @@
               }
             ],
             "deprecated": true,
-            "description": "Optional. Output schema of the generated candidate text. Schemas must be a\nsubset of the [OpenAPI schema](https://spec.openapis.org/oas/v3.0.3#schema)\nand can be objects, primitives or arrays.\n\nIf set, a compatible `response_mime_type` must also be set.\nCompatible MIME types:\n`application/json`: Schema for JSON response.\nRefer to the [JSON text generation\nguide](https://ai.google.dev/gemini-api/docs/json-mode) for more details."
+            "description": "Optional. Output schema of the generated candidate text. Schemas must be a\nsubset of the [OpenAPI schema](https://spec.openapis.org/oas/v3.0.3#schema)\nand can be objects, primitives or arrays.\n\nIf set, a compatible `response_mime_type` must also be set.\nCompatible MIME types:\n`application/json`: Schema for JSON response.\nRefer to the [JSON text generation\nguide](https://aistudio.google.com/docs/structured-output) for more\ndetails.\n\nDeprecated. Use `response_format` instead."
           },
           "seed": {
             "description": "Optional. Seed used in decoding. If not set, the request uses a randomly generated\nseed.",
@@ -3630,7 +4050,7 @@
             "type": "array"
           },
           "temperature": {
-            "description": "Optional. Controls the randomness of the output.\n\nNote: The default value varies by model, see the `Model.temperature`\nattribute of the `Model` returned from the `getModel` function.\n\nValues can range from [0.0, 2.0].",
+            "description": "Optional. Controls the randomness of the output.\n\nNote: The default value varies by model, see the `Model.temperature`\nattribute of the `Model` returned from the `getModel` function.\n\nValues can range from [0.0, 2.0].\n\nThis field is no longer supported and is silently ignored on Gemini 3.6\nFlash and newer models.",
             "format": "float",
             "type": "number"
           },
@@ -3643,12 +4063,12 @@
             "description": "Optional. Config for thinking features.\nAn error will be returned if this field is set for models that don't\nsupport thinking."
           },
           "topK": {
-            "description": "Optional. The maximum number of tokens to consider when sampling.\n\nGemini models use Top-p (nucleus) sampling or a combination of Top-k and\nnucleus sampling. Top-k sampling considers the set of `top_k` most probable\ntokens. Models running with nucleus sampling don't allow top_k setting.\n\nNote: The default value varies by `Model` and is specified by\nthe`Model.top_p` attribute returned from the `getModel` function. An empty\n`top_k` attribute indicates that the model doesn't apply top-k sampling\nand doesn't allow setting `top_k` on requests.",
+            "description": "Optional. The maximum number of tokens to consider when sampling.\n\nGemini models use Top-p (nucleus) sampling or a combination of Top-k and\nnucleus sampling. Top-k sampling considers the set of `top_k` most probable\ntokens. Models running with nucleus sampling don't allow top_k setting.\n\nNote: The default value varies by `Model` and is specified by\nthe`Model.top_p` attribute returned from the `getModel` function. An empty\n`top_k` attribute indicates that the model doesn't apply top-k sampling\nand doesn't allow setting `top_k` on requests.\n\nThis field is no longer supported and is silently ignored on Gemini 3.6\nFlash and newer models.",
             "format": "int32",
             "type": "integer"
           },
           "topP": {
-            "description": "Optional. The maximum cumulative probability of tokens to consider when sampling.\n\nThe model uses combined Top-k and Top-p (nucleus) sampling.\n\nTokens are sorted based on their assigned probabilities so that only the\nmost likely tokens are considered. Top-k sampling directly limits the\nmaximum number of tokens to consider, while Nucleus sampling limits the\nnumber of tokens based on the cumulative probability.\n\nNote: The default value varies by `Model` and is specified by\nthe`Model.top_p` attribute returned from the `getModel` function. An empty\n`top_k` attribute indicates that the model doesn't apply top-k sampling\nand doesn't allow setting `top_k` on requests.",
+            "description": "Optional. The maximum cumulative probability of tokens to consider when sampling.\n\nThe model uses combined Top-k and Top-p (nucleus) sampling.\n\nTokens are sorted based on their assigned probabilities so that only the\nmost likely tokens are considered. Top-k sampling directly limits the\nmaximum number of tokens to consider, while Nucleus sampling limits the\nnumber of tokens based on the cumulative probability.\n\nNote: The default value varies by `Model` and is specified by\nthe`Model.top_p` attribute returned from the `getModel` function. An empty\n`top_k` attribute indicates that the model doesn't apply top-k sampling\nand doesn't allow setting `top_k` on requests.\n\nThis field is no longer supported and is silently ignored on Gemini 3.6\nFlash and newer models.",
             "format": "float",
             "type": "number"
           },
@@ -3681,6 +4101,23 @@
           "Audio.",
           "Document, e.g. PDF."
         ]
+      },
+      "GetEnvironmentFilesResponse": {
+        "description": "Response for getting an environment's files.",
+        "properties": {
+          "files": {
+            "description": "If the requested path is a directory, this contains its contents.\nIf the requested path is a file, this contains a single entry with the\nfile's metadata.\nIf alt=media was specified, this is empty (content is served via `blob`).",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentFile"
+            },
+            "type": "array"
+          },
+          "next_page_token": {
+            "description": "Pagination token for directory listing.\nNOLINT",
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "GoogleAiGenerativelanguageV1betaGroundingSupport": {
         "description": "Grounding support.",
@@ -3851,7 +4288,19 @@
             "description": "Grounding chunk from the web."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Chunk type.",
+            "name": "chunk_type",
+            "properties": [
+              "web",
+              "image",
+              "retrievedContext",
+              "maps"
+            ]
+          }
+        ]
       },
       "GroundingChunkCustomMetadata": {
         "description": "User provided metadata about the GroundingFact.",
@@ -3878,7 +4327,18 @@
             "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The value of the metadata. Can be a string, a list of strings, or a\nnumber.",
+            "name": "value",
+            "properties": [
+              "stringValue",
+              "stringListValue",
+              "numericValue"
+            ]
+          }
+        ]
       },
       "GroundingChunkStringList": {
         "description": "A list of string values.",
@@ -4014,12 +4474,12 @@
         "type": "string",
         "x-google-enum-deprecated": [
           false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
           false,
           false,
           false,
@@ -4029,12 +4489,12 @@
         ],
         "x-google-enum-descriptions": [
           "Category is unspecified.",
-          "**PaLM** - Negative or harmful comments targeting identity and/or protected\nattribute.",
-          "**PaLM** - Content that is rude, disrespectful, or profane.",
-          "**PaLM** - Describes scenarios depicting violence against an individual or\ngroup, or general descriptions of gore.",
-          "**PaLM** - Contains references to sexual acts or other lewd content.",
-          "**PaLM** - Promotes unchecked medical advice.",
-          "**PaLM** - Dangerous content that promotes, facilitates, or encourages\nharmful acts.",
+          "**PaLM** - Negative or harmful comments targeting identity and/or protected\nattribute.\nDEPRECATED: PaLM-only category, not supported by Gemini models.",
+          "**PaLM** - Content that is rude, disrespectful, or profane.\nDEPRECATED: PaLM-only category, not supported by Gemini models.",
+          "**PaLM** - Describes scenarios depicting violence against an individual or\ngroup, or general descriptions of gore.\nDEPRECATED: PaLM-only category, not supported by Gemini models.",
+          "**PaLM** - Contains references to sexual acts or other lewd content.\nDEPRECATED: PaLM-only category, not supported by Gemini models.",
+          "**PaLM** - Promotes unchecked medical advice.\nDEPRECATED: PaLM-only category, not supported by Gemini models.",
+          "**PaLM** - Dangerous content that promotes, facilitates, or encourages\nharmful acts.\nDEPRECATED: PaLM-only category, not supported by Gemini models.",
           "**Gemini** - Harassment content.",
           "**Gemini** - Hate speech and content.",
           "**Gemini** - Sexually explicit content.",
@@ -4079,7 +4539,7 @@
         "type": "object"
       },
       "Hyperparameters": {
-        "description": "Hyperparameters controlling the tuning process. Read more at\nhttps://ai.google.dev/docs/model_tuning_guidance",
+        "description": "Hyperparameters controlling the tuning process. Read more at\nhttps://aistudio.google.com/docs/model-tuning",
         "properties": {
           "batchSize": {
             "description": "Immutable. The batch size hyperparameter for tuning.\nIf not set, a default of 4 or 16 will be used based on the number of\ntraining examples.",
@@ -4106,7 +4566,17 @@
             "x-google-immutable": true
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Options for specifying learning rate during tuning.",
+            "name": "learning_rate_option",
+            "properties": [
+              "learningRate",
+              "learningRateMultiplier"
+            ]
+          }
+        ]
       },
       "Image": {
         "description": "Chunk from image search.",
@@ -4374,7 +4844,17 @@
             "readOnly": true
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The output of the request.",
+            "name": "output",
+            "properties": [
+              "error",
+              "response"
+            ]
+          }
+        ]
       },
       "InlinedEmbedContentResponses": {
         "description": "The responses to the requests in the batch.",
@@ -4460,7 +4940,17 @@
             "readOnly": true
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The output of the request.",
+            "name": "output",
+            "properties": [
+              "error",
+              "response"
+            ]
+          }
+        ]
       },
       "InlinedResponses": {
         "description": "The responses to the requests in the batch.",
@@ -4492,7 +4982,17 @@
             "description": "The requests to be processed in the batch."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Required. The source of the input.",
+            "name": "source",
+            "properties": [
+              "fileName",
+              "requests"
+            ]
+          }
+        ]
       },
       "InputEmbedContentConfig": {
         "description": "Configures the input to the batch request.",
@@ -4510,7 +5010,17 @@
             "description": "The requests to be processed in the batch."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Required. The source of the input.",
+            "name": "source",
+            "properties": [
+              "fileName",
+              "requests"
+            ]
+          }
+        ]
       },
       "InputFeedback": {
         "description": "Feedback related to the input data used to answer the question, as opposed\nto the model-generated response to the question.",
@@ -4646,7 +5156,7 @@
         "type": "object"
       },
       "ListEnvironmentsResponse": {
-        "description": "Response for `ListEnvironments`.",
+        "description": "Response for listing environments.",
         "properties": {
           "environments": {
             "description": "Environments belonging to the provided project.",
@@ -4865,7 +5375,7 @@
         "type": "object"
       },
       "McpServer": {
-        "description": "A MCPServer is a server that can be called by the model to perform actions.\nIt is a server that implements the MCP protocol.\nNext ID: 6",
+        "description": "A MCPServer is a server that can be called by the model to perform actions.\nIt is a server that implements the MCP protocol.",
         "properties": {
           "name": {
             "description": "The name of the MCPServer.",
@@ -4880,7 +5390,16 @@
             "description": "A transport that can stream HTTP requests and responses."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The transport to use to connect to the MCPServer.",
+            "name": "transport",
+            "properties": [
+              "streamableHttpTransport"
+            ]
+          }
+        ]
       },
       "Media": {
         "description": "A proto encapsulate various type of media.",
@@ -4894,60 +5413,16 @@
             "description": "Video as the only one for now.  This is mimicking Vertex proto."
           }
         },
-        "type": "object"
-      },
-      "Message": {
-        "description": "The base unit of structured text.\n\nA `Message` includes an `author` and the `content` of\nthe `Message`.\n\nThe `author` is used to tag messages when they are fed to the\nmodel as text.",
-        "properties": {
-          "author": {
-            "description": "Optional. The author of this Message.\n\nThis serves as a key for tagging\nthe content of this Message when it is fed to the model as text.\n\nThe author can be any alphanumeric string.",
-            "type": "string"
-          },
-          "citationMetadata": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CitationMetadata"
-              }
-            ],
-            "description": "Output only. Citation information for model-generated `content` in this `Message`.\n\nIf this `Message` was generated as output from the model, this field may be\npopulated with attribution information for any text included in the\n`content`. This field is used only on output.",
-            "readOnly": true
-          },
-          "content": {
-            "description": "Required. The text content of the structured `Message`.",
-            "type": "string"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Type of media.",
+            "name": "type",
+            "properties": [
+              "video"
+            ]
           }
-        },
-        "required": [
-          "content"
-        ],
-        "type": "object"
-      },
-      "MessagePrompt": {
-        "description": "All of the structured input text passed to the model as a prompt.\n\nA `MessagePrompt` contains a structured set of fields that provide context\nfor the conversation, examples of user input/model output message pairs that\nprime the model to respond in different ways, and the conversation history\nor list of messages representing the alternating turns of the conversation\nbetween the user and the model.",
-        "properties": {
-          "context": {
-            "description": "Optional. Text that should be provided to the model first to ground the response.\n\nIf not empty, this `context` will be given to the model first before the\n`examples` and `messages`. When using a `context` be sure to provide it\nwith every request to maintain continuity.\n\nThis field can be a description of your prompt to the model to help provide\ncontext and guide the responses. Examples: \"Translate the phrase from\nEnglish to French.\" or \"Given a statement, classify the sentiment as happy,\nsad or neutral.\"\n\nAnything included in this field will take precedence over message history\nif the total input size exceeds the model's `input_token_limit` and the\ninput request is truncated.",
-            "type": "string"
-          },
-          "examples": {
-            "description": "Optional. Examples of what the model should generate.\n\nThis includes both user input and the response that the model should\nemulate.\n\nThese `examples` are treated identically to conversation messages except\nthat they take precedence over the history in `messages`:\nIf the total input size exceeds the model's `input_token_limit` the input\nwill be truncated. Items will be dropped from `messages` before `examples`.",
-            "items": {
-              "$ref": "#/components/schemas/Example"
-            },
-            "type": "array"
-          },
-          "messages": {
-            "description": "Required. A snapshot of the recent conversation history sorted chronologically.\n\nTurns alternate between two authors.\n\nIf the total input size exceeds the model's `input_token_limit` the input\nwill be truncated: The oldest items will be dropped from `messages`.",
-            "items": {
-              "$ref": "#/components/schemas/Message"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "messages"
-        ],
-        "type": "object"
+        ]
       },
       "MetadataFilter": {
         "description": "User provided filter to limit retrieval based on `Chunk` or `Document` level\nmetadata values.\nExample (genre = drama OR genre = action):\n  key = \"document.custom_metadata.genre\"\n  conditions = [{string_value = \"drama\", operation = EQUAL},\n                {string_value = \"action\", operation = EQUAL}]",
@@ -5015,7 +5490,7 @@
             "type": "number"
           },
           "name": {
-            "description": "Required. The resource name of the `Model`. Refer to [Model\nvariants](https://ai.google.dev/gemini-api/docs/models/gemini#model-variations)\nfor all allowed values.\n\nFormat: `models/{model}` with a `{model}` naming convention of:\n\n* \"{base_model_id}-{version}\"\n\nExamples:\n\n* `models/gemini-1.5-flash-001`",
+            "description": "Required. The resource name of the `Model`. Refer to [Model\nvariants](https://aistudio.google.com/docs/models#model-versions)\nfor all allowed values.\n\nFormat: `models/{model}` with a `{model}` naming convention of:\n\n* \"{base_model_id}-{version}\"\n\nExamples:\n\n* `models/gemini-1.5-flash-001`",
             "type": "string"
           },
           "outputTokenLimit": {
@@ -5045,7 +5520,7 @@
             "type": "integer"
           },
           "topP": {
-            "description": "For [Nucleus\nsampling](https://ai.google.dev/gemini-api/docs/prompting-strategies#top-p).\n\nNucleus sampling considers the smallest set of tokens whose probability\nsum is at least `top_p`.\nThis value specifies default to be used by the backend while making the\ncall to the model.",
+            "description": "For [Nucleus\nsampling](https://aistudio.google.com/docs/prompting-strategies#model-parameters).\n\nNucleus sampling considers the smallest set of tokens whose probability\nsum is at least `top_p`.\nThis value specifies default to be used by the backend while making the\ncall to the model.",
             "format": "float",
             "type": "number"
           },
@@ -5183,6 +5658,22 @@
       "Part": {
         "description": "A datatype containing media that is part of a multi-part `Content` message.\n\nA `Part` consists of data which has an associated datatype. A `Part` can only\ncontain one of the accepted types in `Part.data`.\n\nA `Part` must have a fixed IANA MIME type identifying the type and subtype\nof the media if the `inline_data` field is filled with raw bytes.",
         "properties": {
+          "audioMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioMetadata"
+              }
+            ],
+            "description": "Optional. Audio metadata. The metadata should only be specified while the audio\ndata is presented in inline_data or file_data."
+          },
+          "audioTranscription": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioTranscription"
+              }
+            ],
+            "description": "Optional. Audio (input or output) transcription.\nThis is only set when this Part contains audio data."
+          },
           "codeExecutionResult": {
             "allOf": [
               {
@@ -5190,6 +5681,14 @@
               }
             ],
             "description": "Result of executing the `ExecutableCode`."
+          },
+          "documentMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentMetadata"
+              }
+            ],
+            "description": "Optional. Document metadata. The metadata should only be specified while the\ndocument data is presented in inline_data or file_data."
           },
           "executableCode": {
             "allOf": [
@@ -5231,6 +5730,20 @@
             ],
             "description": "Inline media bytes."
           },
+          "mediaProcessing": {
+            "description": "Optional. How the model processes this part's media for understanding.\nOnly meaningful for video parts (`inline_data` or `file_data` with video\nmime). Non-video parts ignore this field.",
+            "enum": [
+              "MEDIA_PROCESSING_UNSPECIFIED",
+              "STATIC",
+              "AGENTIC"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Defaults to model-specific processing.",
+              "Fixed-rate frame extraction. All frames placed in context.",
+              "Model-driven dynamic navigation. Recommended for most use cases."
+            ]
+          },
           "mediaResolution": {
             "allOf": [
               {
@@ -5245,6 +5758,22 @@
             },
             "description": "Custom metadata associated with the Part.\nAgents using genai.Part as content representation may need to keep track\nof the additional information. For example it can be name of a file/source\nfrom which the Part originates or a way to multiplex multiple Part streams.",
             "type": "object"
+          },
+          "speechMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpeechMetadata"
+              }
+            ],
+            "description": "Optional. Metadata applied to text parts to customize how they should be spoken or\nsynthesized, such as specifying speaker identity or speaking style."
+          },
+          "spreadsheetMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpreadsheetMetadata"
+              }
+            ],
+            "description": "Optional. Spreadsheet metadata. The metadata should only be specified while the\nspreadsheet data is presented in inline_data or file_data."
           },
           "text": {
             "description": "Inline text.",
@@ -5284,7 +5813,33 @@
             "description": "Optional. Video metadata. The metadata should only be specified while the video\ndata is presented in inline_data or file_data."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "name": "data",
+            "properties": [
+              "text",
+              "inlineData",
+              "functionCall",
+              "functionResponse",
+              "fileData",
+              "executableCode",
+              "codeExecutionResult",
+              "toolCall",
+              "toolResponse"
+            ]
+          },
+          {
+            "description": "Controls extra preprocessing of data. Set this when `inline_data` or\n`file_data` is present to configure per-part static media preprocessing.",
+            "name": "metadata",
+            "properties": [
+              "videoMetadata",
+              "documentMetadata",
+              "spreadsheetMetadata",
+              "audioMetadata"
+            ]
+          }
+        ]
       },
       "Permission": {
         "description": "Permission resource grants user, group or the rest of the world access to the\nPaLM API resource (e.g. a tuned model, corpus).\n\nA role is a collection of permitted operations that allows users to perform\nspecific actions on PaLM API resources. To make them available to users,\ngroups, or service accounts, you assign roles. When you assign a role, you\ngrant permissions that the role contains.\n\nThere are three concentric roles. Each role is a superset of the previous\nrole's permitted operations:\n\n- reader can use the resource (e.g. tuned model, corpus) for inference\n- writer has reader's permissions and additionally can edit and share\n- owner has writer's permissions and additionally can delete",
@@ -5356,7 +5911,7 @@
         "description": "The configuration for the prebuilt speaker to use.",
         "properties": {
           "voiceName": {
-            "description": "The name of the preset voice to use.",
+            "description": "Optional. The name of the preset voice to use.",
             "type": "string"
           }
         },
@@ -5419,6 +5974,13 @@
             "items": {},
             "type": "array"
           },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Optional. Labels with user-defined metadata for the request.\n\nOptional. Labels must follow standard unified Cloud label requirements:\n- Label keys must start with a letter.\n- Label keys and values can be no longer than 63 characters (Unicode\n  codepoints) and can only contain lowercase letters, numeric characters,\n  underscores, and dashes.\n- International characters are allowed.\n\nUsage:\n-  Safety identifiers from aggregators: Use the key `safety_identifier`\n   (e.g. `{\"safety_identifier\": \"user_session_123\"}`)",
+            "type": "object"
+          },
           "parameters": {
             "description": "Optional. The parameters that govern the prediction call."
           }
@@ -5440,7 +6002,16 @@
             "description": "The response of the video generation prediction."
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The response of the long running operation.",
+            "name": "response",
+            "properties": [
+              "generateVideoResponse"
+            ]
+          }
+        ]
       },
       "PredictRequest": {
         "description": "Request message for PredictionService.Predict.",
@@ -5449,6 +6020,13 @@
             "description": "Required. The instances that are the input to the prediction call.",
             "items": {},
             "type": "array"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Optional. Labels with user-defined metadata for the request.\n\nOptional. Labels must follow standard unified Cloud label requirements:\n- Label keys must start with a letter.\n- Label keys and values can be no longer than 63 characters (Unicode\n  codepoints) and can only contain lowercase letters, numeric characters,\n  underscores, and dashes.\n- International characters are allowed.\n\nUsage:\n-  Safety identifiers from aggregators: Use the key `safety_identifier`\n   (e.g. `{\"safety_identifier\": \"user_session_123\"}`)",
+            "type": "object"
           },
           "parameters": {
             "description": "Optional. The parameters that govern the prediction call."
@@ -5466,6 +6044,20 @@
             "description": "The outputs of the prediction call.",
             "items": {},
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProactivityConfig": {
+        "description": "Config for proactivity features.",
+        "properties": {
+          "proactiveAudio": {
+            "description": "Optional. If enabled, the model can reject responding to the last prompt. For\nexample, this allows the model to ignore out of context speech or to stay\nsilent if the user did not make a request, yet.",
+            "type": "boolean"
+          },
+          "proactiveVideo": {
+            "description": "Optional. If enabled, the system might trigger a generation on each received image.\nThis requires that `proactive_audio` is enabled. The rate of\ngeneration depends on the rate of incoming images and can cause a\nsignificant increase in cost.",
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -5521,6 +6113,10 @@
               }
             ],
             "description": "Optional. If not set, automatic activity detection is enabled by default. If\nautomatic voice detection is disabled, the client must send activity\nsignals."
+          },
+          "interimTranscriptTimestampEnabled": {
+            "description": "Optional. Configures interim transcript timestamps.",
+            "type": "boolean"
           },
           "turnCoverage": {
             "description": "Optional. Defines which input is included in the user's turn.",
@@ -6051,7 +6647,7 @@
             "type": "string"
           },
           "source": {
-            "description": "The source of the environment.\nFor GCS, this is the GCS path.\nFor GitHub, this is the GitHub path.",
+            "description": "The source of the environment.\nFor Cloud Storage, this is the Cloud Storage path.\nFor GitHub, this is the GitHub path.",
             "type": "string"
           },
           "target": {
@@ -6068,7 +6664,7 @@
             "type": "string",
             "x-google-enum-descriptions": [
               "",
-              "A GCS bucket.",
+              "A Cloud Storage bucket.",
               "Inline content.",
               "A generic repository. The protocol prefix in the source URL\nidentifies the provider (e.g., github://, gcs://)."
             ]
@@ -6113,6 +6709,22 @@
             ],
             "description": "Optional. The configuration for the multi-speaker setup.\nIt is mutually exclusive with the voice_config field."
           },
+          "textNormalization": {
+            "description": "Optional. Controls text normalization before speech synthesis.",
+            "enum": [
+              "TEXT_NORMALIZATION_UNSPECIFIED",
+              "AUTO",
+              "ENABLED",
+              "DISABLED"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified text normalization mode. Defaults to `AUTO`.",
+              "Automatically determines whether to apply text normalization based on\nthe model and speech mode.",
+              "Enables text normalization for numbers, currencies, dates, and units.",
+              "Disables text normalization for pre-normalized or phonetic inputs."
+            ]
+          },
           "voiceConfig": {
             "allOf": [
               {
@@ -6120,6 +6732,54 @@
               }
             ],
             "description": "The configuration in case of single-voice output."
+          }
+        },
+        "type": "object"
+      },
+      "SpeechMetadata": {
+        "description": "Speech metadata for `text` parts.",
+        "properties": {
+          "speaker": {
+            "description": "Optional. Optional speaker name for multi-speaker synthesis.",
+            "type": "string"
+          },
+          "style": {
+            "description": "Optional. Optional style instruction for the speech synthesis.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SpreadsheetMetadata": {
+        "description": "Metadata describes the input spreadsheet content.\nSet this in `Part.spreadsheet_metadata` or\n`FunctionResponsePart.spreadsheet_metadata` when `inline_data` or\n`file_data` contains a spreadsheet to configure static spreadsheet\npreprocessing.",
+        "properties": {
+          "contentLayers": {
+            "description": "Optional. Content layers to return.\nIf empty, defaults to [DATA, FORMULAS] when SpreadsheetMetadata is set.",
+            "items": {
+              "enum": [
+                "CONTENT_LAYER_UNSPECIFIED",
+                "DATA",
+                "FORMULAS",
+                "VISUAL"
+              ],
+              "type": "string",
+              "x-google-enum-descriptions": [
+                "Default value.",
+                "Cell values, merges, and formats.",
+                "Formula expressions and their computed results.",
+                "A rendered image of the sheet."
+              ]
+            },
+            "type": "array"
+          },
+          "sheetIndex": {
+            "description": "Optional. The 1-indexed index of the sheet to extract, in workbook order.\nIf not set, all sheets are extracted.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "visibleCells": {
+            "description": "Optional. The range of cells to extract, in A1 notation (e.g. \"A1:D10\").\nIf not set, the full occupied area of the sheet is used.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -6150,7 +6810,7 @@
         "type": "object"
       },
       "StreamableHttpTransport": {
-        "description": "A transport that can stream HTTP requests and responses.\nNext ID: 6",
+        "description": "A transport that can stream HTTP requests and responses.",
         "properties": {
           "headers": {
             "additionalProperties": {
@@ -6294,13 +6954,14 @@
             "type": "integer"
           },
           "thinkingLevel": {
-            "description": "Optional. Controls the maximum depth of the model's internal reasoning process before\nit produces a response. The default value is model-dependent. Refer to the\n[Thinking levels\nguide](https://ai.google.dev/gemini-api/docs/thinking#thinking-levels) for\nmore details. Recommended for Gemini 3 or later models. Use with earlier\nmodels results in an error.",
+            "description": "Optional. Controls the maximum depth of the model's internal reasoning process before\nit produces a response. The default value is model-dependent. Refer to the\n[Thinking levels\nguide](https://aistudio.google.com/docs/thinking#thinking-levels) for\nmore details. Recommended for Gemini 3 or later models. Use with earlier\nmodels results in an error.",
             "enum": [
               "THINKING_LEVEL_UNSPECIFIED",
               "MINIMAL",
               "LOW",
               "MEDIUM",
-              "HIGH"
+              "HIGH",
+              "XHIGH"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -6308,14 +6969,15 @@
               "Little to no thinking.",
               "Low thinking level.",
               "Medium thinking level.",
-              "High thinking level."
+              "High thinking level.",
+              "XHigh thinking level."
             ]
           }
         },
         "type": "object"
       },
       "Tool": {
-        "description": "Tool details that the model may use to generate response.\n\nA `Tool` is a piece of code that enables the system to interact with\nexternal systems to perform an action, or set of actions, outside of\nknowledge and scope of the model.\n\nNext ID: 16",
+        "description": "Tool details that the model may use to generate response.\n\nA `Tool` is a piece of code that enables the system to interact with\nexternal systems to perform an action, or set of actions, outside of\nknowledge and scope of the model.",
         "properties": {
           "codeExecution": {
             "allOf": [
@@ -6616,7 +7278,17 @@
         "required": [
           "tuningTask"
         ],
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The model used as the starting point for tuning.",
+            "name": "source_model",
+            "properties": [
+              "tunedModelSource",
+              "baseModel"
+            ]
+          }
+        ]
       },
       "TunedModelSource": {
         "description": "Tuned model as a source for training a new model.",
@@ -6649,7 +7321,16 @@
         "required": [
           "output"
         ],
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The input to the model for this example.",
+            "name": "model_input",
+            "properties": [
+              "textInput"
+            ]
+          }
+        ]
       },
       "TuningExamples": {
         "description": "A set of tuning examples. Can be training or validation data.",
@@ -6764,6 +7445,33 @@
           "Object type.",
           "Null type."
         ]
+      },
+      "UploadEnvironmentFileRequest": {
+        "description": "Request for `UploadEnvironmentFile`.",
+        "properties": {
+          "extract": {
+            "description": "Optional. If true, treats the uploaded file as a tar/tar.gz archive and\nunpacks it into `path`.",
+            "type": "boolean"
+          },
+          "overwrite": {
+            "description": "Optional. Whether to overwrite the destination file if it already exists.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "UploadEnvironmentFileResponse": {
+        "description": "Response for `UploadEnvironmentFile`.",
+        "properties": {
+          "files": {
+            "description": "List of files created or extracted in the environment.",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentFile"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
       },
       "UploadToFileSearchStoreMetadata": {
         "description": "Metadata for LongRunning UploadToFileSearchStore Operations.",
@@ -6960,7 +7668,7 @@
             "type": "array"
           },
           "totalTokenCount": {
-            "description": "Total token count for the generation request (prompt + thoughts +\nresponse candidates).",
+            "description": "Total token count for the generation request (prompt + tool-use prompt +\nthoughts + response candidates).",
             "format": "int32",
             "type": "integer"
           }
@@ -7021,7 +7729,16 @@
             ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The media resolution level.",
+            "name": "value",
+            "properties": [
+              "level"
+            ]
+          }
+        ]
       },
       "V1mainToolType": {
         "enum": [
@@ -7030,7 +7747,8 @@
           "GOOGLE_SEARCH_IMAGE",
           "URL_CONTEXT",
           "GOOGLE_MAPS",
-          "FILE_SEARCH"
+          "FILE_SEARCH",
+          "MEDIA_PROCESSING"
         ],
         "type": "string",
         "x-google-enum-descriptions": [
@@ -7039,7 +7757,8 @@
           "Image search tool, maps to Tool.google_search.search_types.image_search.",
           "URL context tool, maps to Tool.url_context.",
           "Google maps tool, maps to Tool.google_maps.",
-          "File search tool, maps to Tool.file_search."
+          "File search tool, maps to Tool.file_search.",
+          "Media processing tool types (e.g. video, audio, etc.), maps to invisible\ntools used for multimodal understanding like GOOGLE_UNDERSTANDING_VIDEO."
         ]
       },
       "V1mainTuningSnapshot": {
@@ -7085,7 +7804,17 @@
             "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "Where the video content is.",
+            "name": "content",
+            "properties": [
+              "video",
+              "uri"
+            ]
+          }
+        ]
       },
       "VideoFileMetadata": {
         "description": "Metadata for a video `File`.",
@@ -7099,9 +7828,27 @@
         "type": "object"
       },
       "VideoMetadata": {
-        "deprecated": true,
-        "description": "Deprecated: Use `GenerateContentRequest.processing_options` instead. Metadata\ndescribes the input video content.",
+        "description": "Metadata describes the input video content.\nSet this in `Part.video_metadata` or `FunctionResponsePart.video_metadata`\nwhen `inline_data` or `file_data` contains video to configure static video\npreprocessing (such as time clipping, frame rate, maximum frame count, or\nextracted content layers).",
         "properties": {
+          "contentLayers": {
+            "description": "Optional. Content layers to return.\nIf empty, defaults to [FRAMES, AUDIO].",
+            "items": {
+              "enum": [
+                "CONTENT_LAYER_UNSPECIFIED",
+                "FRAMES",
+                "AUDIO",
+                "TRANSCRIPT"
+              ],
+              "type": "string",
+              "x-google-enum-descriptions": [
+                "Default value.",
+                "Extract video frames.",
+                "Extract audio track.",
+                "Extract audio transcript."
+              ]
+            },
+            "type": "array"
+          },
           "endOffset": {
             "description": "Optional. The end offset of the video.",
             "format": "google-duration",
@@ -7130,9 +7877,23 @@
               }
             ],
             "description": "The configuration for the prebuilt voice to use."
+          },
+          "voice": {
+            "description": "Optional. The speaker identifier for synthesis.\nSupported formats:\n\n*   Speaker name for prebuilt voices (for example, `Orus` or `Kore`).\n*   Voice ID for stored voices (for example, `voice_xxx`).\n*   Voice replication key (for example, `voicekey_xxx`).",
+            "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-google-oneofs": [
+          {
+            "description": "The configuration for the speaker to use.",
+            "name": "voice_config",
+            "properties": [
+              "prebuiltVoiceConfig",
+              "voice"
+            ]
+          }
+        ]
       },
       "Web": {
         "description": "Chunk from the web.",
@@ -7168,6 +7929,29 @@
             "type": "integer"
           }
         },
+        "type": "object"
+      },
+      "WordInfo": {
+        "description": "Information about a single recognized word.",
+        "properties": {
+          "endOffset": {
+            "description": "Optional. End offset in time of the word relative to the start of the audio.",
+            "format": "google-duration",
+            "type": "string"
+          },
+          "startOffset": {
+            "description": "Optional. Start offset in time of the word relative to the start of the audio.",
+            "format": "google-duration",
+            "type": "string"
+          },
+          "word": {
+            "description": "Required. Transcript of the word.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "word"
+        ],
         "type": "object"
       }
     },
@@ -7213,7 +7997,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260731"
+    "x-google-revision": "20261126"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -8393,7 +9177,7 @@
         }
       ],
       "post": {
-        "description": "Generates a model response given an input `GenerateContentRequest`.\nRefer to the [text generation\nguide](https://ai.google.dev/gemini-api/docs/text-generation) for detailed\nusage information. Input capabilities differ between models, including\ntuned models. Refer to the [model\nguide](https://ai.google.dev/gemini-api/docs/models/gemini) and [tuning\nguide](https://ai.google.dev/gemini-api/docs/model-tuning) for details.",
+        "description": "Generates a model response given an input `GenerateContentRequest`.\nRefer to the [text generation\nguide](https://aistudio.google.com/docs/text-generation) for detailed\nusage information. Input capabilities differ between models, including\ntuned models. Refer to the [model\nguide](https://aistudio.google.com/docs/models) and [tuning\nguide](https://aistudio.google.com/docs/model-tuning) for details.",
         "operationId": "GenerateContentByDynamicId",
         "parameters": [
           {
@@ -8451,7 +9235,7 @@
         }
       ],
       "post": {
-        "description": "Generates a [streamed\nresponse](https://ai.google.dev/gemini-api/docs/text-generation?lang=python#generate-a-text-stream)\nfrom the model given an input `GenerateContentRequest`.",
+        "description": "Generates a [streamed\nresponse](https://aistudio.google.com/docs/text-generation#streaming-responses)\nfrom the model given an input `GenerateContentRequest`.",
         "operationId": "StreamGenerateContentByDynamicId",
         "parameters": [
           {
@@ -8495,7 +9279,7 @@
     },
     "/v1beta/environments": {
       "get": {
-        "description": "Lists environments (HTTP endpoint).",
+        "description": "Lists environments.",
         "operationId": "ListEnvironmentsHttp",
         "parameters": [
           {
@@ -8513,6 +9297,24 @@
             "name": "pageToken",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "Optional. Filter environments by compute lifecycle mode.",
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "enum": [
+                "ENVIRONMENT_MODE_UNSPECIFIED",
+                "ON_DEMAND",
+                "SELF_HOSTED"
+              ],
+              "type": "string",
+              "x-google-enum-descriptions": [
+                "",
+                "",
+                ""
+              ]
             }
           }
         ],
@@ -8548,7 +9350,7 @@
         }
       ],
       "post": {
-        "description": "Creates an environment (HTTP endpoint).",
+        "description": "Creates an environment.",
         "operationId": "CreateEnvironmentHttp",
         "parameters": [],
         "requestBody": {
@@ -8559,7 +9361,7 @@
               }
             }
           },
-          "description": "Required. The environment to create (HTTP request body)."
+          "description": "Required. The request body."
         },
         "responses": {
           "default": {
@@ -8579,13 +9381,225 @@
         ]
       }
     },
+    "/v1beta/environments/{environment}/files": {
+      "get": {
+        "description": "Retrieves file metadata or directory contents from an environment's\nsnapshot. To download file contents directly, pass ?alt=media or use the\nfiles.download helper.",
+        "operationId": "GetEnvironmentFilesHttpByEnvironment",
+        "parameters": [
+          {
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional. The path of the file or directory within the environment.\nIf empty, defaults to the root of the workspace.\nExample: \"workspace/src/main.py\"",
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional. If true and the path is a directory, recursively lists all files\nand subdirectories. Defaults to false (immediate children only).",
+            "in": "query",
+            "name": "recursive",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Optional. Maximum number of entries to return per page (for directory\nlisting). If unspecified, defaults to 100. Maximum is 1000.\nNOLINT",
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Optional. Pagination token for directory listing.\nNOLINT",
+            "in": "query",
+            "name": "page_token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnvironmentFilesResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ],
+        "x-google-operation-name": "GetEnvironmentFilesHttp"
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ]
+    },
+    "/v1beta/environments/{environment}/files/{path=**}": {
+      "get": {
+        "description": "Retrieves file metadata or directory contents from an environment's\nsnapshot. To download file contents directly, pass ?alt=media or use the\nfiles.download helper.",
+        "operationId": "GetEnvironmentFilesHttp",
+        "parameters": [
+          {
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "name": "path=**",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional. If true and the path is a directory, recursively lists all files\nand subdirectories. Defaults to false (immediate children only).",
+            "in": "query",
+            "name": "recursive",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Optional. Maximum number of entries to return per page (for directory\nlisting). If unspecified, defaults to 100. Maximum is 1000.\nNOLINT",
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Optional. Pagination token for directory listing.\nNOLINT",
+            "in": "query",
+            "name": "page_token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnvironmentFilesResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ],
+      "put": {
+        "description": "Uploads (creates or updates) a file in an environment's workspace.",
+        "operationId": "UploadEnvironmentFileHttp",
+        "parameters": [
+          {
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "name": "path=**",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadEnvironmentFileRequest"
+              }
+            }
+          },
+          "description": "The request body."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadEnvironmentFileResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      }
+    },
     "/v1beta/environments/{id}": {
       "delete": {
-        "description": "Deletes an environment (HTTP endpoint).",
+        "description": "Deletes an environment.",
         "operationId": "DeleteEnvironmentHttp",
         "parameters": [
           {
-            "description": "Required. The identifier of the environment to delete.",
+            "description": "Required. Resource ID segment making up resource `name`. It identifies the resource\nwithin its parent collection as described in https://google.aip.dev/122.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -8612,11 +9626,11 @@
         ]
       },
       "get": {
-        "description": "Gets an environment (HTTP endpoint).",
+        "description": "Gets an environment.",
         "operationId": "GetEnvironmentHttp",
         "parameters": [
           {
-            "description": "Required. The identifier of the environment to retrieve.",
+            "description": "Required. Resource ID segment making up resource `name`. It identifies the resource\nwithin its parent collection as described in https://google.aip.dev/122.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -8663,7 +9677,7 @@
         "operationId": "DeleteEnvironment",
         "parameters": [
           {
-            "description": "Required. The identifier of the environment to delete.",
+            "description": "Required. Resource ID segment making up resource `name`. It identifies the resource\nwithin its parent collection as described in https://google.aip.dev/122.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -8710,7 +9724,7 @@
         "operationId": "GetEnvironment",
         "parameters": [
           {
-            "description": "Required. The identifier of the environment to retrieve.",
+            "description": "Required. Resource ID segment making up resource `name`. It identifies the resource\nwithin its parent collection as described in https://google.aip.dev/122.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -8818,6 +9832,24 @@
             "name": "pageToken",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "Optional. Filter environments by compute lifecycle mode.",
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "enum": [
+                "ENVIRONMENT_MODE_UNSPECIFIED",
+                "ON_DEMAND",
+                "SELF_HOSTED"
+              ],
+              "type": "string",
+              "x-google-enum-descriptions": [
+                "",
+                "",
+                ""
+              ]
             }
           }
         ],
@@ -10036,9 +11068,121 @@
         }
       ]
     },
+    "/v1beta/interactions/{interactionsId}/auth_tokens": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ],
+      "post": {
+        "description": "Creates a short-lived auth token for client-side authentication (HTTP).",
+        "operationId": "CreateInteractionAuthTokenHttp",
+        "parameters": [
+          {
+            "description": "Part of `name`. Required. interaction_id",
+            "in": "path",
+            "name": "interactionsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HttpBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpBody"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      }
+    },
+    "/v1beta/interactions/{interactionsId}/auth_tokens/{auth_tokensId}": {
+      "delete": {
+        "description": "Deletes (revokes) an interaction auth token (HTTP).",
+        "operationId": "DeleteInteractionAuthTokenHttp",
+        "parameters": [
+          {
+            "description": "Part of `name`. Required. Resource name of the token to revoke, in the form\n`interactions/{interaction_id}/auth_tokens/{token}`, where `{token}` is the\nhex token string returned by `CreateInteractionAuthToken` (the `auth_token`\nvalue without its `auth_tokens/` prefix).",
+            "in": "path",
+            "name": "interactionsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Part of `name`. See documentation of `interactionsId`.",
+            "in": "path",
+            "name": "auth_tokensId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpBody"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ]
+    },
     "/v1beta/models": {
       "get": {
-        "description": "Lists the [`Model`s](https://ai.google.dev/gemini-api/docs/models/gemini)\navailable through the Gemini API.",
+        "description": "Lists the [`Model`s](https://aistudio.google.com/docs/models)\navailable through the Gemini API.",
         "operationId": "ListModels",
         "parameters": [
           {
@@ -10093,7 +11237,7 @@
     },
     "/v1beta/models/{model}": {
       "get": {
-        "description": "Gets information about a specific `Model` such as its version number, token\nlimits,\n[parameters](https://ai.google.dev/gemini-api/docs/models/generative-models#model-parameters)\nand other metadata. Refer to the [Gemini models\nguide](https://ai.google.dev/gemini-api/docs/models/gemini) for detailed\nmodel information.",
+        "description": "Gets information about a specific `Model` such as its version number, token\nlimits,\n[parameters](https://aistudio.google.com/docs/prompting-strategies#model-parameters)\nand other metadata. Refer to the [Gemini models\nguide](https://aistudio.google.com/docs/models) for detailed\nmodel information.",
         "operationId": "GetModel",
         "parameters": [
           {
@@ -10506,63 +11650,6 @@
         "x-google-lro": "true"
       }
     },
-    "/v1beta/models/{model}:countMessageTokens": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/alt"
-        },
-        {
-          "$ref": "#/components/parameters/callback"
-        },
-        {
-          "$ref": "#/components/parameters/prettyPrint"
-        },
-        {
-          "$ref": "#/components/parameters/_.xgafv"
-        }
-      ],
-      "post": {
-        "description": "Runs a model's tokenizer on a string and returns the token count.",
-        "operationId": "CountMessageTokens",
-        "parameters": [
-          {
-            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
-            "in": "path",
-            "name": "model",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CountMessageTokensRequest"
-              }
-            }
-          },
-          "description": "The request body."
-        },
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CountMessageTokensResponse"
-                }
-              }
-            },
-            "description": "Successful operation"
-          }
-        },
-        "security": [],
-        "tags": [
-          "generativelanguage"
-        ]
-      }
-    },
     "/v1beta/models/{model}:countTextTokens": {
       "parameters": [
         {
@@ -10636,7 +11723,7 @@
         }
       ],
       "post": {
-        "description": "Runs a model's tokenizer on input `Content` and returns the token count.\nRefer to the [tokens guide](https://ai.google.dev/gemini-api/docs/tokens)\nto learn more about tokens.",
+        "description": "Runs a model's tokenizer on input `Content` and returns the token count.\nRefer to the [tokens guide](https://aistudio.google.com/docs/tokens)\nto learn more about tokens.",
         "operationId": "CountTokens",
         "parameters": [
           {
@@ -10693,7 +11780,7 @@
         }
       ],
       "post": {
-        "description": "Generates a text embedding vector from the input `Content` using the\nspecified [Gemini Embedding\nmodel](https://ai.google.dev/gemini-api/docs/models/gemini#text-embedding).",
+        "description": "Generates a text embedding vector from the input `Content` using the\nspecified [Gemini Embedding\nmodel](https://aistudio.google.com/docs/models#specialized-task-models).",
         "operationId": "EmbedContent",
         "parameters": [
           {
@@ -10864,7 +11951,7 @@
         }
       ],
       "post": {
-        "description": "Generates a model response given an input `GenerateContentRequest`.\nRefer to the [text generation\nguide](https://ai.google.dev/gemini-api/docs/text-generation) for detailed\nusage information. Input capabilities differ between models, including\ntuned models. Refer to the [model\nguide](https://ai.google.dev/gemini-api/docs/models/gemini) and [tuning\nguide](https://ai.google.dev/gemini-api/docs/model-tuning) for details.",
+        "description": "Generates a model response given an input `GenerateContentRequest`.\nRefer to the [text generation\nguide](https://aistudio.google.com/docs/text-generation) for detailed\nusage information. Input capabilities differ between models, including\ntuned models. Refer to the [model\nguide](https://aistudio.google.com/docs/models) and [tuning\nguide](https://aistudio.google.com/docs/model-tuning) for details.",
         "operationId": "GenerateContent",
         "parameters": [
           {
@@ -10893,63 +11980,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GenerateContentResponse"
-                }
-              }
-            },
-            "description": "Successful operation"
-          }
-        },
-        "security": [],
-        "tags": [
-          "generativelanguage"
-        ]
-      }
-    },
-    "/v1beta/models/{model}:generateMessage": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/alt"
-        },
-        {
-          "$ref": "#/components/parameters/callback"
-        },
-        {
-          "$ref": "#/components/parameters/prettyPrint"
-        },
-        {
-          "$ref": "#/components/parameters/_.xgafv"
-        }
-      ],
-      "post": {
-        "description": "Generates a response from the model given an input `MessagePrompt`.",
-        "operationId": "GenerateMessage",
-        "parameters": [
-          {
-            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
-            "in": "path",
-            "name": "model",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GenerateMessageRequest"
-              }
-            }
-          },
-          "description": "The request body."
-        },
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenerateMessageResponse"
                 }
               }
             },
@@ -11035,7 +12065,7 @@
         }
       ],
       "post": {
-        "description": "Performs a prediction request.",
+        "description": "Deprecated: Performs a prediction request. Use\n`GenerativeService.GenerateContent` instead.",
         "operationId": "Predict",
         "parameters": [
           {
@@ -11092,7 +12122,7 @@
         }
       ],
       "post": {
-        "description": "Same as Predict but returns an LRO.",
+        "description": "Deprecated: Same as Predict but returns an LRO. Use the Interactions API\ninstead.",
         "operationId": "PredictLongRunning",
         "parameters": [
           {
@@ -11150,7 +12180,7 @@
         }
       ],
       "post": {
-        "description": "Generates a [streamed\nresponse](https://ai.google.dev/gemini-api/docs/text-generation?lang=python#generate-a-text-stream)\nfrom the model given an input `GenerateContentRequest`.",
+        "description": "Generates a [streamed\nresponse](https://aistudio.google.com/docs/text-generation#streaming-responses)\nfrom the model given an input `GenerateContentRequest`.",
         "operationId": "StreamGenerateContent",
         "parameters": [
           {
@@ -11956,7 +12986,7 @@
         }
       ],
       "post": {
-        "description": "Generates a model response given an input `GenerateContentRequest`.\nRefer to the [text generation\nguide](https://ai.google.dev/gemini-api/docs/text-generation) for detailed\nusage information. Input capabilities differ between models, including\ntuned models. Refer to the [model\nguide](https://ai.google.dev/gemini-api/docs/models/gemini) and [tuning\nguide](https://ai.google.dev/gemini-api/docs/model-tuning) for details.",
+        "description": "Generates a model response given an input `GenerateContentRequest`.\nRefer to the [text generation\nguide](https://aistudio.google.com/docs/text-generation) for detailed\nusage information. Input capabilities differ between models, including\ntuned models. Refer to the [model\nguide](https://aistudio.google.com/docs/models) and [tuning\nguide](https://aistudio.google.com/docs/model-tuning) for details.",
         "operationId": "GenerateContentByTunedModel",
         "parameters": [
           {
@@ -12072,7 +13102,7 @@
         }
       ],
       "post": {
-        "description": "Generates a [streamed\nresponse](https://ai.google.dev/gemini-api/docs/text-generation?lang=python#generate-a-text-stream)\nfrom the model given an input `GenerateContentRequest`.",
+        "description": "Generates a [streamed\nresponse](https://aistudio.google.com/docs/text-generation#streaming-responses)\nfrom the model given an input `GenerateContentRequest`.",
         "operationId": "StreamGenerateContentByTunedModel",
         "parameters": [
           {
@@ -12176,6 +13206,11 @@
     {
       "description": "Global Endpoint",
       "url": "https://generativelanguage.googleapis.com"
+    },
+    {
+      "description": "Regional Endpoint",
+      "url": "https://generativelanguage.us.rep.googleapis.com/",
+      "x-google-endpoint-location": "us"
     }
   ]
 }

@@ -2,17 +2,58 @@
   "specs": {
     "interactions": {
       "current_version": "v1beta",
-      "last_fetched": "2026-08-02T06:00:06.816139Z",
-      "source_url": "https://ai.google.dev/static/api/interactions.openapi.json",
+      "last_fetched": "2026-11-27T23:12:33.596802Z",
+      "source_url": "https://aistudio.google.com/api-reference/interactions.openapi.json",
       "title": "Gemini API",
-      "version_history": []
+      "version_history": [
+        {
+          "version": "v1beta",
+          "fetched_at": "2026-08-02T06:00:06.816139Z",
+          "source_url": "https://ai.google.dev/static/api/interactions.openapi.json"
+        }
+      ],
+      "sha256": "565aa2c65f09fda6a470e207a82f4d5596cd0f64769de24e208babb143352128",
+      "raw_sha256": "76210b6440354784c0dec1c92d0013b3e7bfe24e6b1a324b62eed91bf58e5fa2"
     },
     "main": {
       "current_version": "v1beta",
-      "last_fetched": "2026-08-02T06:00:05.536073Z",
+      "last_fetched": "2026-11-27T23:09:48.423620Z",
       "source_url": "https://generativelanguage.googleapis.com/$discovery/OPENAPI3_0?version=v1beta",
       "title": "Gemini API",
-      "version_history": []
+      "version_history": [
+        {
+          "version": "v1beta",
+          "fetched_at": "2026-08-02T06:00:05.536073Z",
+          "source_url": "https://generativelanguage.googleapis.com/$discovery/OPENAPI3_0?version=v1beta"
+        }
+      ],
+      "sha256": "0fd965903a2e57b27bc8da78dec2c47c748d3901ac6f6e2f7d7383926a03e1df",
+      "discovery_revision": "20261126",
+      "stable_discovery_sha256": "4743c8548012c47227f6d73c9dfd91cf9e5fe2b18582af2df020ecfaa9d8dcba"
+    },
+    "live": {
+      "current_version": "v1beta",
+      "title": "Gemini Live API",
+      "source_url": "https://aistudio.google.com/api-reference/live",
+      "cloud_source_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session",
+      "source_file": "live-api-schema.source.json",
+      "sha256": "15d65664ab4fe4101bfdf4233723546daae1b98d05f423f4f33fe10f23f906df",
+      "version_history": [],
+      "source_sha256": "23de8ee4f8e44c694d7eed82ce9a51c7e6326a16a8f1e44d2bdbbf67b7da4e3b"
+    }
+  },
+  "alignment": {
+    "date": "2026-11-28",
+    "time_zone": "Europe/Madrid",
+    "sdk_revisions": {
+      "googleapis/python-genai": {
+        "tag": "v3.6.1",
+        "commit": "aa813f8bf805b6f4f3e57abb8f04b91d769e23e6"
+      },
+      "googleapis/js-genai": {
+        "tag": "v3.6.1",
+        "commit": "719dffc91dbf38f8a5f2d90bf93efa5dc8207999"
+      }
     }
   }
 }

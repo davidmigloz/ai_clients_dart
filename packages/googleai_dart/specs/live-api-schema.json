@@ -1,212 +1,90 @@
 {
-  "info": {
-    "title": "Gemini Live API",
-    "version": "v1beta",
-    "description": "Real-time bidirectional audio/video streaming via WebSocket"
-  },
-  "websocket_endpoints": {
-    "google_ai": "wss://generativelanguage.googleapis.com/{version}/models/{model}:BidiGenerateContent",
-    "vertex_ai": "wss://{location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.{version}.PredictionService.BidiGenerateContent"
-  },
-  "message_types": {
-    "client": {
-      "BidiGenerateContentSetup": {
-        "description": "Initial session configuration",
-        "fields": {
-          "model": {
-            "type": "string",
-            "required": true
-          },
-          "generationConfig": {
-            "type": "LiveGenerationConfig",
-            "required": false
-          },
-          "systemInstruction": {
-            "type": "Content",
-            "required": false
-          },
-          "tools": {
-            "type": "array",
-            "items": "Tool",
-            "required": false
-          },
-          "realtimeInputConfig": {
-            "type": "RealtimeInputConfig",
-            "required": false
-          },
-          "sessionResumption": {
-            "type": "SessionResumptionConfig",
-            "required": false
-          },
-          "contextWindowCompression": {
-            "type": "ContextWindowCompressionConfig",
-            "required": false
-          },
-          "inputAudioTranscription": {
-            "type": "AudioTranscriptionConfig",
-            "required": false
-          },
-          "outputAudioTranscription": {
-            "type": "AudioTranscriptionConfig",
-            "required": false
-          },
-          "proactivity": {
-            "type": "ProactivityConfig",
-            "required": false
-          }
-        }
-      },
-      "BidiGenerateContentClientContent": {
-        "description": "User content/context",
-        "fields": {
-          "turns": {
-            "type": "array",
-            "items": "Content",
-            "required": true
-          },
-          "turnComplete": {
-            "type": "boolean",
-            "required": false
-          }
-        }
-      },
-      "BidiGenerateContentRealtimeInput": {
-        "description": "Real-time streaming input",
-        "fields": {
-          "audio": {
-            "type": "Blob",
-            "required": false
-          },
-          "video": {
-            "type": "Blob",
-            "required": false
-          },
-          "text": {
-            "type": "string",
-            "required": false
-          },
-          "activityStart": {
-            "type": "boolean",
-            "required": false
-          },
-          "activityEnd": {
-            "type": "boolean",
-            "required": false
-          },
-          "audioStreamEnd": {
-            "type": "boolean",
-            "required": false
-          }
-        }
-      },
-      "BidiGenerateContentToolResponse": {
-        "description": "Tool execution response",
-        "fields": {
-          "functionResponses": {
-            "type": "array",
-            "items": "FunctionResponse",
-            "required": true
-          }
+  "config_types": {
+    "AudioTranscriptionConfig": {
+      "fields": {
+        "adaptationPhrases": {
+          "deprecated": true,
+          "items": "string",
+          "type": "array"
+        },
+        "customVocabulary": {
+          "items": "string",
+          "type": "array"
+        },
+        "diarization": {
+          "type": "boolean"
+        },
+        "languageAuto": {
+          "deprecated": true,
+          "type": "LanguageAuto"
+        },
+        "languageCodes": {
+          "items": "string",
+          "type": "array"
+        },
+        "languageHints": {
+          "deprecated": true,
+          "type": "LanguageHints"
+        },
+        "mode": {
+          "type": "AudioTranscriptionConfigMode"
+        },
+        "sourceText": {
+          "type": "string"
+        },
+        "wordTimestamp": {
+          "type": "boolean"
         }
       }
     },
-    "server": {
-      "BidiGenerateContentSetupComplete": {
-        "description": "Session setup confirmation",
-        "fields": {
-          "sessionId": {
-            "type": "string",
-            "required": false
-          }
-        }
-      },
-      "BidiGenerateContentServerContent": {
-        "description": "Model-generated content",
-        "fields": {
-          "modelTurn": {
-            "type": "Content",
-            "required": false
-          },
-          "turnComplete": {
-            "type": "boolean",
-            "required": false
-          },
-          "generationComplete": {
-            "type": "boolean",
-            "required": false
-          },
-          "interrupted": {
-            "type": "boolean",
-            "required": false
-          },
-          "inputTranscription": {
-            "type": "Transcription",
-            "required": false
-          },
-          "outputTranscription": {
-            "type": "Transcription",
-            "required": false
-          },
-          "groundingMetadata": {
-            "type": "GroundingMetadata",
-            "required": false
-          },
-          "usageMetadata": {
-            "type": "UsageMetadata",
-            "required": false
-          }
-        }
-      },
-      "BidiGenerateContentToolCall": {
-        "description": "Tool execution request",
-        "fields": {
-          "functionCalls": {
-            "type": "array",
-            "items": "FunctionCall",
-            "required": true
-          }
-        }
-      },
-      "BidiGenerateContentToolCallCancellation": {
-        "description": "Cancel pending tool calls",
-        "fields": {
-          "ids": {
-            "type": "array",
-            "items": "string",
-            "required": true
-          }
-        }
-      },
-      "GoAway": {
-        "description": "Session ending notification",
-        "fields": {
-          "timeLeft": {
-            "type": "string",
-            "required": false
-          }
-        }
-      },
-      "SessionResumptionUpdate": {
-        "description": "Resumption token update",
-        "fields": {
-          "newHandle": {
-            "type": "string",
-            "required": false
-          },
-          "resumable": {
-            "type": "boolean",
-            "required": false
-          }
+    "AutomaticActivityDetection": {
+      "fields": {
+        "disabled": {
+          "type": "boolean"
+        },
+        "endOfSpeechSensitivity": {
+          "type": "EndSensitivity"
+        },
+        "prefixPaddingMs": {
+          "type": "integer"
+        },
+        "silenceDurationMs": {
+          "type": "integer"
+        },
+        "startOfSpeechSensitivity": {
+          "type": "StartSensitivity"
         }
       }
-    }
-  },
-  "config_types": {
+    },
+    "ContextWindowCompressionConfig": {
+      "fields": {
+        "slidingWindow": {
+          "type": "SlidingWindow"
+        },
+        "triggerTokens": {
+          "type": "integer"
+        }
+      }
+    },
+    "LanguageAuto": {
+      "fields": {}
+    },
+    "LanguageHints": {
+      "fields": {
+        "languageCodes": {
+          "items": "string",
+          "type": "array"
+        }
+      }
+    },
     "LiveGenerationConfig": {
       "fields": {
+        "maxOutputTokens": {
+          "type": "integer"
+        },
         "responseModalities": {
-          "type": "array",
-          "items": "string"
+          "items": "string",
+          "type": "array"
         },
         "speechConfig": {
           "type": "SpeechConfig"
@@ -214,31 +92,11 @@
         "temperature": {
           "type": "number"
         },
-        "maxOutputTokens": {
+        "topK": {
           "type": "integer"
         },
         "topP": {
           "type": "number"
-        },
-        "topK": {
-          "type": "integer"
-        }
-      }
-    },
-    "SpeechConfig": {
-      "fields": {
-        "voiceConfig": {
-          "type": "VoiceConfig"
-        },
-        "languageCode": {
-          "type": "string"
-        }
-      }
-    },
-    "VoiceConfig": {
-      "fields": {
-        "prebuiltVoiceConfig": {
-          "type": "PrebuiltVoiceConfig"
         }
       }
     },
@@ -249,35 +107,26 @@
         }
       }
     },
-    "RealtimeInputConfig": {
+    "ProactivityConfig": {
       "fields": {
-        "automaticActivityDetection": {
-          "type": "AutomaticActivityDetection"
-        },
-        "activityHandling": {
-          "type": "ActivityHandling"
-        },
-        "turnCoverage": {
-          "type": "TurnCoverage"
+        "proactiveAudio": {
+          "type": "boolean"
         }
       }
     },
-    "AutomaticActivityDetection": {
+    "RealtimeInputConfig": {
       "fields": {
-        "disabled": {
+        "activityHandling": {
+          "type": "ActivityHandling"
+        },
+        "automaticActivityDetection": {
+          "type": "AutomaticActivityDetection"
+        },
+        "interimTranscriptTimestampEnabled": {
           "type": "boolean"
         },
-        "startOfSpeechSensitivity": {
-          "type": "StartSensitivity"
-        },
-        "endOfSpeechSensitivity": {
-          "type": "EndSensitivity"
-        },
-        "prefixPaddingMs": {
-          "type": "integer"
-        },
-        "silenceDurationMs": {
-          "type": "integer"
+        "turnCoverage": {
+          "type": "TurnCoverage"
         }
       }
     },
@@ -291,16 +140,6 @@
         }
       }
     },
-    "ContextWindowCompressionConfig": {
-      "fields": {
-        "triggerTokens": {
-          "type": "integer"
-        },
-        "slidingWindow": {
-          "type": "SlidingWindow"
-        }
-      }
-    },
     "SlidingWindow": {
       "fields": {
         "targetTokens": {
@@ -308,23 +147,58 @@
         }
       }
     },
-    "AudioTranscriptionConfig": {
+    "SpeechConfig": {
       "fields": {
-        "enabled": {
-          "type": "boolean"
-        }
-      }
-    },
-    "ProactivityConfig": {
-      "fields": {
-        "proactiveAudio": {
-          "type": "boolean"
+        "languageCode": {
+          "type": "string"
+        },
+        "voiceConfig": {
+          "type": "VoiceConfig"
         }
       }
     },
     "Transcription": {
       "fields": {
+        "endOffset": {
+          "type": "string"
+        },
+        "finished": {
+          "type": "boolean"
+        },
+        "languageCode": {
+          "type": "string"
+        },
+        "speakerLabel": {
+          "type": "string"
+        },
+        "startOffset": {
+          "type": "string"
+        },
         "text": {
+          "type": "string"
+        },
+        "words": {
+          "items": "WordInfo",
+          "type": "array"
+        }
+      }
+    },
+    "VoiceConfig": {
+      "fields": {
+        "prebuiltVoiceConfig": {
+          "type": "PrebuiltVoiceConfig"
+        }
+      }
+    },
+    "WordInfo": {
+      "fields": {
+        "endOffset": {
+          "type": "string"
+        },
+        "startOffset": {
+          "type": "string"
+        },
+        "word": {
           "type": "string"
         }
       }
@@ -333,27 +207,250 @@
   "enums": {
     "ActivityHandling": {
       "values": [
+        "ACTIVITY_HANDLING_UNSPECIFIED",
         "START_OF_ACTIVITY_INTERRUPTS",
         "NO_INTERRUPTION"
       ]
     },
-    "StartSensitivity": {
+    "AudioTranscriptionConfigMode": {
       "values": [
-        "HIGH",
-        "LOW"
+        "MODE_UNSPECIFIED",
+        "VERBATIM",
+        "SMART"
       ]
     },
     "EndSensitivity": {
       "values": [
-        "HIGH",
-        "LOW"
+        "END_SENSITIVITY_UNSPECIFIED",
+        "END_SENSITIVITY_HIGH",
+        "END_SENSITIVITY_LOW"
+      ]
+    },
+    "StartSensitivity": {
+      "values": [
+        "START_SENSITIVITY_UNSPECIFIED",
+        "START_SENSITIVITY_HIGH",
+        "START_SENSITIVITY_LOW"
       ]
     },
     "TurnCoverage": {
       "values": [
+        "TURN_COVERAGE_UNSPECIFIED",
         "TURN_INCLUDES_ONLY_ACTIVITY",
-        "TURN_INCLUDES_ALL_INPUT"
+        "TURN_INCLUDES_ALL_INPUT",
+        "TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO"
       ]
+    }
+  },
+  "info": {
+    "description": "Real-time bidirectional audio/video streaming via WebSocket",
+    "reference_commits": {
+      "googleapis/js-genai": "719dffc91dbf38f8a5f2d90bf93efa5dc8207999",
+      "googleapis/python-genai": "aa813f8bf805b6f4f3e57abb8f04b91d769e23e6"
+    },
+    "sources": [
+      "https://aistudio.google.com/api-reference/live",
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session",
+      "https://aistudio.google.com/docs/live-api/live-transcribe"
+    ],
+    "title": "Gemini Live API",
+    "version": "v1beta"
+  },
+  "message_types": {
+    "client": {
+      "BidiGenerateContentClientContent": {
+        "description": "User content/context",
+        "fields": {
+          "turnComplete": {
+            "required": false,
+            "type": "boolean"
+          },
+          "turns": {
+            "items": "Content",
+            "required": true,
+            "type": "array"
+          }
+        }
+      },
+      "BidiGenerateContentRealtimeInput": {
+        "description": "Real-time streaming input",
+        "fields": {
+          "activityEnd": {
+            "required": false,
+            "type": "object"
+          },
+          "activityStart": {
+            "required": false,
+            "type": "object"
+          },
+          "audio": {
+            "required": false,
+            "type": "Blob"
+          },
+          "audioStreamEnd": {
+            "required": false,
+            "type": "boolean"
+          },
+          "text": {
+            "required": false,
+            "type": "string"
+          },
+          "video": {
+            "required": false,
+            "type": "Blob"
+          }
+        }
+      },
+      "BidiGenerateContentSetup": {
+        "description": "Initial session configuration",
+        "fields": {
+          "contextWindowCompression": {
+            "required": false,
+            "type": "ContextWindowCompressionConfig"
+          },
+          "generationConfig": {
+            "required": false,
+            "type": "LiveGenerationConfig"
+          },
+          "inputAudioTranscription": {
+            "required": false,
+            "type": "AudioTranscriptionConfig"
+          },
+          "model": {
+            "required": true,
+            "type": "string"
+          },
+          "outputAudioTranscription": {
+            "required": false,
+            "type": "AudioTranscriptionConfig"
+          },
+          "proactivity": {
+            "required": false,
+            "type": "ProactivityConfig"
+          },
+          "realtimeInputConfig": {
+            "required": false,
+            "type": "RealtimeInputConfig"
+          },
+          "sessionResumption": {
+            "required": false,
+            "type": "SessionResumptionConfig"
+          },
+          "systemInstruction": {
+            "required": false,
+            "type": "Content"
+          },
+          "tools": {
+            "items": "Tool",
+            "required": false,
+            "type": "array"
+          }
+        }
+      },
+      "BidiGenerateContentToolResponse": {
+        "description": "Tool execution response",
+        "fields": {
+          "functionResponses": {
+            "items": "FunctionResponse",
+            "required": true,
+            "type": "array"
+          }
+        }
+      }
+    },
+    "server": {
+      "BidiGenerateContentServerContent": {
+        "description": "Model-generated content",
+        "fields": {
+          "generationComplete": {
+            "required": false,
+            "type": "boolean"
+          },
+          "groundingMetadata": {
+            "required": false,
+            "type": "GroundingMetadata"
+          },
+          "inputTranscription": {
+            "required": false,
+            "type": "Transcription"
+          },
+          "interimInputTranscription": {
+            "required": false,
+            "type": "Transcription"
+          },
+          "interrupted": {
+            "required": false,
+            "type": "boolean"
+          },
+          "modelTurn": {
+            "required": false,
+            "type": "Content"
+          },
+          "outputTranscription": {
+            "required": false,
+            "type": "Transcription"
+          },
+          "turnComplete": {
+            "required": false,
+            "type": "boolean"
+          },
+          "usageMetadata": {
+            "required": false,
+            "type": "UsageMetadata"
+          }
+        }
+      },
+      "BidiGenerateContentSetupComplete": {
+        "description": "Session setup confirmation",
+        "fields": {
+          "sessionId": {
+            "required": false,
+            "type": "string"
+          }
+        }
+      },
+      "BidiGenerateContentToolCall": {
+        "description": "Tool execution request",
+        "fields": {
+          "functionCalls": {
+            "items": "FunctionCall",
+            "required": true,
+            "type": "array"
+          }
+        }
+      },
+      "BidiGenerateContentToolCallCancellation": {
+        "description": "Cancel pending tool calls",
+        "fields": {
+          "ids": {
+            "items": "string",
+            "required": true,
+            "type": "array"
+          }
+        }
+      },
+      "GoAway": {
+        "description": "Session ending notification",
+        "fields": {
+          "timeLeft": {
+            "required": false,
+            "type": "string"
+          }
+        }
+      },
+      "SessionResumptionUpdate": {
+        "description": "Resumption token update",
+        "fields": {
+          "newHandle": {
+            "required": false,
+            "type": "string"
+          },
+          "resumable": {
+            "required": false,
+            "type": "boolean"
+          }
+        }
+      }
     }
   },
   "voices": [
@@ -365,5 +462,10 @@
     "Leda",
     "Orus",
     "Zephyr"
-  ]
+  ],
+  "websocket_endpoints": {
+    "google_ai": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.{version}.GenerativeService.BidiGenerateContent",
+    "google_ai_constrained": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained",
+    "vertex_ai": "wss://{host}/ws/google.cloud.aiplatform.{version}.LlmBidiService/BidiGenerateContent"
+  }
 }
