@@ -20,7 +20,7 @@ import 'diagnostic_redaction.dart';
 /// ## Example
 ///
 /// ```dart
-/// final session = await liveClient.connect(model: 'gemini-2.0-flash-live-001');
+/// final session = await liveClient.connect(model: 'gemini-3.8-live');
 ///
 /// // Send text
 /// session.sendText('Hello!');
