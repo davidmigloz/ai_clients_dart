@@ -37,6 +37,39 @@ class Redactor {
     this.replacement = '***REDACTED***',
   });
 
+  /// Redacts the raw and commonly encoded forms of operation-specific secrets.
+  factory Redactor.forSecrets({
+    required Iterable<String> secrets,
+    List<String> redactionList = const [],
+  }) {
+    final variants = {
+      for (final secret in secrets)
+        if (secret.isNotEmpty) ..._diagnosticVariants(secret),
+    }.toList()..sort((a, b) => b.length.compareTo(a.length));
+    return Redactor(redactionList: redactionList, sensitiveValues: variants);
+  }
+
+  static final _percentEscape = RegExp(r'%[0-9A-Fa-f]{2}');
+
+  static Iterable<String> _diagnosticVariants(String secret) sync* {
+    // Provider messages can contain a JSON response as a string value.
+    final json = jsonEncode(secret);
+    final escaped = json.substring(1, json.length - 1);
+    for (final value in {secret, escaped}) {
+      yield value;
+      for (final encoded in {
+        Uri.encodeComponent(value),
+        Uri.encodeQueryComponent(value),
+      }) {
+        yield encoded;
+        yield encoded.replaceAllMapped(
+          _percentEscape,
+          (match) => match[0]!.toLowerCase(),
+        );
+      }
+    }
+  }
+
   /// Redacts sensitive fields from a map.
   ///
   /// Returns a new map with sensitive values replaced.

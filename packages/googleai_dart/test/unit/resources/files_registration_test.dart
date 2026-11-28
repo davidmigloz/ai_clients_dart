@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -87,6 +88,63 @@ void main() {
     addTearDown(client.close);
     final result = await client.files.register(uris: ['gs://bucket/path']);
     expect(result.files, isNull);
+  });
+
+  test('redacts reflected OAuth credentials from diagnostics', () async {
+    const token = 'cloud-fixture+/=bearer';
+    final encoded = Uri.encodeComponent(token);
+    final logs = <LogRecord>[];
+    final listener = Logger.root.onRecord.listen(logs.add);
+    addTearDown(listener.cancel);
+    final client = GoogleAIClient(
+      config: const GoogleAIConfig(logLevel: Level.ALL),
+      httpClient: MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'error': {
+              'message': 'Reflected diagnostic $encoded for registration',
+              'details': [
+                {token: 'Nested diagnostic $token'},
+              ],
+            },
+          }),
+          400,
+          headers: {
+            'content-type': 'application/json',
+            'x-diagnostic-echo': 'Reflected $encoded',
+          },
+        ),
+      ),
+    );
+    addTearDown(client.close);
+    await expectLater(
+      client.files.register(
+        uris: ['gs://bucket/path'],
+        authProvider: const BearerTokenProvider(token),
+      ),
+      throwsA(
+        isA<ApiException>().having(
+          (error) => [
+            error.message,
+            error.details,
+            error.responseMetadata?.headers,
+            error.responseMetadata?.bodyExcerpt,
+          ].join(' '),
+          'redacted diagnostics',
+          allOf(
+            contains('Reflected'),
+            isNot(contains(token)),
+            isNot(contains(encoded)),
+          ),
+        ),
+      ),
+    );
+    expect(logs.any((log) => log.level == Level.SEVERE), isTrue);
+    for (final log in logs) {
+      final diagnostic = '${log.message} ${log.error}';
+      expect(diagnostic, isNot(contains(token)));
+      expect(diagnostic, isNot(contains(encoded)));
+    }
   });
 
   test(

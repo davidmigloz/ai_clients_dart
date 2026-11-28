@@ -8,6 +8,7 @@ import '../../client/config.dart';
 import '../../errors/exceptions.dart';
 import '../../models/common/register_files_request.dart';
 import '../../models/common/register_files_response.dart';
+import '../../utils/redactor.dart';
 import '../base_resource.dart';
 
 /// Shared Files API behavior for the IO, web, and stub resources.
@@ -107,6 +108,10 @@ abstract class FilesResourceBase extends ResourceBase {
     final response = await interceptorChain.execute(
       request,
       skipAuthentication: true,
+      diagnosticRedactor: Redactor.forSecrets(
+        secrets: [credentials.token],
+        redactionList: const ['authorization'],
+      ),
     );
     return RegisterFilesResponse.fromJson(
       jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>,

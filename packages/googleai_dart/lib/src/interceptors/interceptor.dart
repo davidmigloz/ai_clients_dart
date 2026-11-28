@@ -18,6 +18,7 @@ class RequestContext {
 
   /// Redaction for diagnostics specific to the operation.
   final Redactor? diagnosticRedactor;
+
   /// Whether the operation already supplied its own authentication.
   final bool skipAuthentication;
 
