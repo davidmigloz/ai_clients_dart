@@ -1210,8 +1210,11 @@ final session = await liveClient.connect(
 ```
 
 Video arrives as `InlineDataPart` values with the `video/mp4` MIME type in
-the server's model turn. Reference-image avatars are restricted to select
-Google Cloud customers.
+the server's model turn. The first `session.messages` subscription receives
+early frames in order, including the MP4 initialization segment. Subscribe
+promptly to stay within the startup buffer. If it fills, the session closes
+and reports a `LiveSessionException` after the retained frames.
+Reference-image avatars are restricted to select Google Cloud customers.
 
 [Runnable example](example/live_avatar_example.dart) ·
 [Google Cloud Live avatars](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/configure-live-avatars)

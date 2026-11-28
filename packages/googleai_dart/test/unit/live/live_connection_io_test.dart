@@ -62,6 +62,7 @@ class _Server {
     required Object? setupReply,
     this.onRealtimeInput,
     this.onClientMessage,
+    this.onSetup,
   }) {
     http.listen((request) async {
       if (reject) {
@@ -96,12 +97,14 @@ class _Server {
             setupReply is String ? utf8.encode(setupReply) : setupReply,
           );
         }
+        onSetup?.call(socket);
       }, onDone: peerClosed.complete);
     });
   }
 
   final void Function(WebSocket, Map<String, dynamic>)? onRealtimeInput;
   final void Function(Map<String, dynamic>)? onClientMessage;
+  final void Function(WebSocket)? onSetup;
 
   String get baseUrl => 'http://127.0.0.1:${http.port}';
 
@@ -110,6 +113,7 @@ class _Server {
     Object? setupReply = '{"setupComplete":{"sessionId":"loopback"}}',
     void Function(WebSocket, Map<String, dynamic>)? onRealtimeInput,
     void Function(Map<String, dynamic>)? onClientMessage,
+    void Function(WebSocket)? onSetup,
   }) async {
     final server = _Server(
       await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
@@ -117,6 +121,7 @@ class _Server {
       setupReply: setupReply,
       onRealtimeInput: onRealtimeInput,
       onClientMessage: onClientMessage,
+      onSetup: onSetup,
     );
     addTearDown(() => server.http.close(force: true));
     return server;
@@ -136,6 +141,22 @@ const _developerPath =
     'GenerativeService.BidiGenerateContentConstrained';
 const _model = 'gemini-3.8-live';
 const _deadline = Duration(seconds: 4);
+
+String _avatarVideoFrame(String data) => jsonEncode({
+  'serverContent': {
+    'modelTurn': {
+      'role': 'model',
+      'parts': [
+        {
+          'inlineData': {'mimeType': 'video/mp4', 'data': data},
+        },
+      ],
+    },
+  },
+});
+
+Blob _avatarBlob(BidiGenerateContentServerContent message) =>
+    (message.modelTurn!.parts.single as InlineDataPart).inlineData;
 
 void main() {
   test('Vertex 3.8 Live sends context updates in order', () async {
@@ -224,22 +245,10 @@ void main() {
     'Vertex v1 requests a prebuilt Live avatar and receives MP4 data',
     () async {
       final server = await _Server.start(
+        onSetup: (socket) => socket.add(_avatarVideoFrame('AAABAGZ0eXA=')),
         onRealtimeInput: (socket, input) {
           expect(input, {'text': 'Hello'});
-          socket.add(
-            jsonEncode({
-              'serverContent': {
-                'modelTurn': {
-                  'role': 'model',
-                  'parts': [
-                    {
-                      'inlineData': {'mimeType': 'video/mp4', 'data': 'AQID'},
-                    },
-                  ],
-                },
-              },
-            }),
-          );
+          socket.add(_avatarVideoFrame('AAABAG1vb2Y='));
         },
       );
       final config = GoogleAIConfig.vertexAI(
@@ -281,16 +290,69 @@ void main() {
           'avatarConfig': {'avatarName': 'Ben'},
         },
       });
-      final response = session.messages.firstWhere(
-        (message) => message is BidiGenerateContentServerContent,
+      final responses = session.messages
+          .where((message) => message is BidiGenerateContentServerContent)
+          .cast<BidiGenerateContentServerContent>()
+          .take(2)
+          .toList();
+      session.sendText('Hello');
+      final blobs = (await responses.timeout(_deadline)).map(_avatarBlob);
+      expect(blobs.map((blob) => blob.mimeType), ['video/mp4', 'video/mp4']);
+      expect(blobs.map((blob) => blob.data), ['AAABAGZ0eXA=', 'AAABAG1vb2Y=']);
+    },
+  );
+
+  test(
+    'closes an overflowing avatar startup stream without losing its prefix',
+    () async {
+      final server = await _Server.start(
+        onSetup: (socket) {
+          socket.add(_avatarVideoFrame('AAABAGZ0eXA='));
+          for (var i = 0; i < 64; i++) {
+            socket.add(_avatarVideoFrame('AAABAG1vb2Y='));
+          }
+        },
       );
-      session.send(const BidiGenerateContentRealtimeInput(text: 'Hello'));
-      final content =
-          await response.timeout(_deadline) as BidiGenerateContentServerContent;
-      final part = content.modelTurn!.parts.single;
-      final blob = (part as InlineDataPart).inlineData;
-      expect(blob.mimeType, 'video/mp4');
-      expect(blob.toBytes(), [1, 2, 3]);
+      final config = GoogleAIConfig.vertexAI(
+        projectId: 'P',
+        location: 'us-central1',
+        authProvider: const BearerTokenProvider('local-fixture'),
+      ).copyWith(baseUrl: server.baseUrl, apiVersion: ApiVersion.v1);
+      final session = await _createLive(config)
+          .connect(
+            model: _model,
+            liveConfig: const LiveConfig(
+              avatarConfig: LiveAvatarConfig(avatarName: 'Ben'),
+              generationConfig: LiveGenerationConfig(
+                responseModalities: [ResponseModality.video],
+              ),
+            ),
+          )
+          .timeout(_deadline);
+
+      await server.peerClosed.future.timeout(_deadline);
+      expect(session.isConnected, isFalse);
+      final prefix = <String>[];
+      Future<void> receive() async {
+        await for (final message in session.messages) {
+          if (message is BidiGenerateContentServerContent) {
+            prefix.add(_avatarBlob(message).data);
+          }
+        }
+      }
+
+      await expectLater(
+        receive().timeout(_deadline),
+        throwsA(
+          isA<LiveSessionException>().having(
+            (error) => error.message,
+            'failure',
+            contains('startup buffer exceeded'),
+          ),
+        ),
+      );
+      expect(prefix.first, 'AAABAGZ0eXA=');
+      expect(prefix.skip(1), List.filled(63, 'AAABAG1vb2Y='));
     },
   );
 

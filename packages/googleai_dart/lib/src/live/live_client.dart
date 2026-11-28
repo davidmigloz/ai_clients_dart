@@ -203,6 +203,7 @@ class LiveClient {
         onClosed: _sessions.remove,
         allowsContextUpdates: isVertex,
         allowsRealtimeMediaResolution: !isVertex,
+        retainAvatarStartup: liveConfig?.avatarConfig != null,
         redactDiagnostic: (message, handles) => _safeSocketMessage(
           message,
           uri,

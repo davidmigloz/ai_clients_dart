@@ -42,8 +42,12 @@ import 'diagnostic_redaction.dart';
 /// await session.close();
 /// ```
 class LiveSession {
+  static const _maxAvatarStartupEvents = 64;
+  static const int _maxAvatarStartupBytes = 16 * 1024 * 1024;
+
   final WebSocket _socket;
-  final StreamController<BidiGenerateContentServerMessage> _messageController;
+  late final StreamController<BidiGenerateContentServerMessage>
+  _messageController;
   final String Function(String, Set<String>)? _redactDiagnostic;
   final bool _allowsContextUpdates;
   final bool _allowsRealtimeMediaResolution;
@@ -51,6 +55,12 @@ class LiveSession {
   StreamSubscription<WebSocketEvent>? _subscription;
   bool _isConnected = true;
   SessionResumptionUpdate? _lastResumableUpdate;
+  List<Object>? _avatarStartupEvents;
+  int _avatarStartupBytes = 0;
+  bool _setupAcknowledged = false;
+
+  bool get _bufferingAvatarStartup =>
+      _setupAcknowledged && _avatarStartupEvents != null;
 
   /// Session ID returned by the server after setup.
   String? sessionId;
@@ -72,8 +82,14 @@ class LiveSession {
     this._onClosed,
     this._redactDiagnostic,
     this._allowsContextUpdates,
-    this._allowsRealtimeMediaResolution,
-  ) : _messageController = StreamController.broadcast();
+    this._allowsRealtimeMediaResolution, {
+    required bool retainAvatarStartup,
+  }) {
+    if (retainAvatarStartup) _avatarStartupEvents = [];
+    _messageController = StreamController.broadcast(
+      onListen: retainAvatarStartup ? _deliverAvatarStartup : null,
+    );
+  }
 
   /// Creates a new [LiveSession] from an established WebSocket connection.
   factory LiveSession.fromWebSocket(WebSocket socket) =>
@@ -87,12 +103,14 @@ class LiveSession {
     String Function(String, Set<String>)? redactDiagnostic,
     bool allowsContextUpdates = true,
     bool allowsRealtimeMediaResolution = true,
+    bool retainAvatarStartup = false,
   }) => LiveSession._(
     socket,
     onClosed,
     redactDiagnostic,
     allowsContextUpdates,
     allowsRealtimeMediaResolution,
+    retainAvatarStartup: retainAvatarStartup,
   ).._startListening();
 
   void _startListening() {
@@ -110,15 +128,16 @@ class LiveSession {
       case BinaryDataReceived(:final data):
         _parseAndEmitMessage(bytes: data);
       case CloseReceived(:final code, :final reason):
-        if (!_messageController.isClosed) {
+        if (_isConnected) {
           final handles = {?resumptionToken, ?_lastResumableUpdate?.newHandle};
-          _messageController.addError(
+          _deliver(
             LiveSessionClosedException(
               code: code,
               reason:
                   _redactDiagnostic?.call(reason, handles) ??
                   redactLiveDiagnosticValues(reason, handles),
             ),
+            terminal: true,
           );
         }
         _handleDone();
@@ -126,8 +145,9 @@ class LiveSession {
   }
 
   void _parseAndEmitMessage({String? text, Uint8List? bytes}) {
-    if (_messageController.isClosed) return;
+    if (!_isConnected || _messageController.isClosed) return;
     try {
+      final wasBuffering = _bufferingAvatarStartup;
       final json =
           jsonDecode(text ?? utf8.decode(bytes!)) as Map<String, dynamic>;
       final message = BidiGenerateContentServerMessage.fromJson(json);
@@ -136,6 +156,7 @@ class LiveSession {
       switch (message) {
         case BidiGenerateContentSetupComplete(:final sessionId):
           this.sessionId = sessionId;
+          _setupAcknowledged = true;
         case final SessionResumptionUpdate update:
           final newHandle = update.newHandle;
           resumptionToken = newHandle;
@@ -147,15 +168,21 @@ class LiveSession {
           break;
       }
 
-      _messageController.add(message);
+      if (!wasBuffering && message is BidiGenerateContentSetupComplete) {
+        // The setup listener must receive the acknowledgement before the
+        // application can subscribe and receive the following avatar frames.
+        _messageController.add(message);
+      } else {
+        _deliver(message, bytes: bytes?.length ?? text!.length * 2);
+      }
     } on FormatException {
-      _messageController.addError(
+      _deliver(
         const LiveSessionException(
           message: 'Failed to parse a Live server message.',
         ),
       );
     } on TypeError {
-      _messageController.addError(
+      _deliver(
         const LiveSessionException(
           message: 'Invalid Live server message fields.',
         ),
@@ -164,8 +191,8 @@ class LiveSession {
   }
 
   void _handleError(Object error) {
-    if (!_messageController.isClosed) {
-      _messageController.addError(
+    if (_isConnected) {
+      _deliver(
         LiveSessionException(
           message: 'Live WebSocket transport failed (${error.runtimeType}).',
         ),
@@ -173,12 +200,55 @@ class LiveSession {
     }
   }
 
+  void _deliver(Object event, {int bytes = 0, bool terminal = false}) {
+    if (_messageController.isClosed) return;
+    final pending = _avatarStartupEvents;
+    if (_setupAcknowledged && pending != null) {
+      if (!terminal &&
+          (pending.length >= _maxAvatarStartupEvents ||
+              bytes > _maxAvatarStartupBytes - _avatarStartupBytes)) {
+        pending.add(
+          const LiveSessionException(
+            message: 'Live avatar startup buffer exceeded before subscription.',
+          ),
+        );
+        _handleDone();
+        _closeSocket().ignore();
+        return;
+      }
+      _avatarStartupBytes += bytes;
+      pending.add(event);
+      return;
+    }
+    _addEvent(event);
+  }
+
+  void _addEvent(Object event) {
+    if (event is BidiGenerateContentServerMessage) {
+      _messageController.add(event);
+    } else {
+      _messageController.addError(event);
+    }
+  }
+
+  void _deliverAvatarStartup() {
+    // The setup listener subscribes before acknowledgement. The first
+    // subscribe after setup belongs to the caller and gets the buffered prefix.
+    if (!_setupAcknowledged) return;
+    final pending = _avatarStartupEvents;
+    if (pending == null) return;
+    _avatarStartupEvents = null;
+    _avatarStartupBytes = 0;
+    pending.forEach(_addEvent);
+    if (!_isConnected) unawaited(_messageController.close());
+  }
+
   void _handleDone() {
     _isConnected = false;
     final onClosed = _onClosed;
     _onClosed = null;
     onClosed?.call(this);
-    if (!_messageController.isClosed) {
+    if (!_bufferingAvatarStartup && !_messageController.isClosed) {
       unawaited(_messageController.close());
     }
   }
@@ -189,7 +259,9 @@ class LiveSession {
   /// Stream of server messages.
   ///
   /// Listen to this stream to receive model responses, tool calls,
-  /// and other server events.
+  /// and other server events. For a prebuilt avatar, the first subscriber
+  /// receives frames buffered since setup. If the startup buffer fills,
+  /// it receives the buffered prefix followed by a [LiveSessionException].
   Stream<BidiGenerateContentServerMessage> get messages =>
       _messageController.stream;
 
@@ -298,18 +370,24 @@ class LiveSession {
   /// called more than once).
   Future<void> close([int? code, String? reason]) async {
     _isConnected = false;
+    _avatarStartupEvents = null;
+    _avatarStartupBytes = 0;
     try {
-      try {
-        await _subscription?.cancel();
-      } finally {
-        try {
-          await _socket.close(code, reason);
-        } on WebSocketConnectionClosed {
-          // A peer close or another caller may have closed the socket first.
-        }
-      }
+      await _closeSocket(code, reason);
     } finally {
       _handleDone();
+    }
+  }
+
+  Future<void> _closeSocket([int? code, String? reason]) async {
+    try {
+      await _subscription?.cancel();
+    } finally {
+      try {
+        await _socket.close(code, reason);
+      } on WebSocketConnectionClosed {
+        // A peer close or another caller may have closed the socket first.
+      }
     }
   }
 }
