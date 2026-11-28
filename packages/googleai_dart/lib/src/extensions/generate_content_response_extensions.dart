@@ -39,6 +39,9 @@ extension GenerateContentResponseExtensions on GenerateContentResponse {
   ///   print('Function: ${call.name}, Args: ${call.args}');
   /// }
   /// ```
+  ///
+  /// Opt-in Vertex AI argument streaming can return call fragments in this
+  /// list. Assemble the arguments before executing the function.
   List<FunctionCall> get functionCalls {
     return [
       for (final candidate in candidates ?? <Candidate>[])

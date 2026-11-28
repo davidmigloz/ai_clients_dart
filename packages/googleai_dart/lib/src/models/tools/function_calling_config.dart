@@ -64,8 +64,18 @@ class FunctionCallingConfig {
   /// When set, model will predict a function call from only allowed function names.
   final List<String>? allowedFunctionNames;
 
+  /// Streams argument fragments on supported Vertex AI models.
+  ///
+  /// Set to true on `ModelsResource.streamGenerateContent` using API version
+  /// `v1` or `v1beta1`.
+  final bool? streamFunctionCallArguments;
+
   /// Creates a [FunctionCallingConfig].
-  const FunctionCallingConfig({this.mode, this.allowedFunctionNames});
+  const FunctionCallingConfig({
+    this.mode,
+    this.allowedFunctionNames,
+    this.streamFunctionCallArguments,
+  });
 
   /// Creates a [FunctionCallingConfig] from JSON.
   factory FunctionCallingConfig.fromJson(Map<String, dynamic> json) =>
@@ -76,6 +86,8 @@ class FunctionCallingConfig {
         allowedFunctionNames: (json['allowedFunctionNames'] as List<dynamic>?)
             ?.map((e) => e as String)
             .toList(),
+        streamFunctionCallArguments:
+            json['streamFunctionCallArguments'] as bool?,
       );
 
   /// Converts to JSON.
@@ -83,12 +95,14 @@ class FunctionCallingConfig {
     if (mode != null) 'mode': functionCallingModeToString(mode!),
     if (allowedFunctionNames != null)
       'allowedFunctionNames': allowedFunctionNames,
+    'streamFunctionCallArguments': ?streamFunctionCallArguments,
   };
 
   /// Creates a copy with replaced values.
   FunctionCallingConfig copyWith({
     Object? mode = unsetCopyWithValue,
     Object? allowedFunctionNames = unsetCopyWithValue,
+    Object? streamFunctionCallArguments = unsetCopyWithValue,
   }) {
     return FunctionCallingConfig(
       mode: mode == unsetCopyWithValue
@@ -97,6 +111,10 @@ class FunctionCallingConfig {
       allowedFunctionNames: allowedFunctionNames == unsetCopyWithValue
           ? this.allowedFunctionNames
           : allowedFunctionNames as List<String>?,
+      streamFunctionCallArguments:
+          streamFunctionCallArguments == unsetCopyWithValue
+          ? this.streamFunctionCallArguments
+          : streamFunctionCallArguments as bool?,
     );
   }
 }

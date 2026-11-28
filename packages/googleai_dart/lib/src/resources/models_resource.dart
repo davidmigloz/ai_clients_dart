@@ -200,6 +200,21 @@ class ModelsResource extends ResourceBase with StreamingResource {
     Map<String, dynamic> body, {
     required bool stream,
   }) {
+    final toolConfig = body['toolConfig'] as Map<String, dynamic>?;
+    final callingConfig =
+        toolConfig?['functionCallingConfig'] as Map<String, dynamic>?;
+    final argumentsStreaming =
+        callingConfig?['streamFunctionCallArguments'] as bool?;
+    if (argumentsStreaming != null &&
+        (config.apiMode != ApiMode.vertexAI ||
+            (config.apiVersion != ApiVersion.v1 &&
+                config.apiVersion != ApiVersion.v1beta1) ||
+            (argumentsStreaming && !stream))) {
+      throw UnsupportedError(
+        'Streaming function call arguments requires Vertex AI '
+        'streamGenerateContent on v1 or v1beta1.',
+      );
+    }
     final operation = stream ? 'streamGenerateContent' : 'generateContent';
     final url = requestBuilder.buildUrl(
       '/{version}/models/$model:$operation',
