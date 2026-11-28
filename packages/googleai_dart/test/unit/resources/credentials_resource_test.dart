@@ -450,6 +450,75 @@ void main() {
     }
   });
 
+  test('redacts credential echoes inside nested provider JSON', () async {
+    const token = 'fixture+/="token';
+    const escaped = r'fixture+/=\"token';
+    const replacement = '***REDACTED***';
+    final upstream = jsonEncode({'vendor_info': token});
+    final safeUpstream = jsonEncode({'vendor_info': replacement});
+    final encoded = Uri.encodeComponent(escaped);
+    final logs = <LogRecord>[];
+    final listener = Logger.root.onRecord.listen(logs.add);
+    addTearDown(listener.cancel);
+    final client = _client(
+      MockClient((request) async {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['token'], token);
+        return http.Response(
+          jsonEncode({
+            'error': {
+              'message': 'Upstream rejected: $upstream',
+              'details': [
+                {'vendor_response': upstream, 'redirect': '/$encoded'},
+              ],
+            },
+          }),
+          400,
+          headers: {
+            'content-type': 'application/json',
+            'x-redirect': 'https://proxy.example/$encoded',
+          },
+        );
+      }),
+    );
+    expect(upstream, contains(escaped));
+
+    final matcher = isA<ApiException>()
+        .having(
+          (error) => error.message,
+          'message',
+          'Upstream rejected: $safeUpstream',
+        )
+        .having((error) => error.details, 'details', [
+          {'vendor_response': safeUpstream, 'redirect': '/$replacement'},
+        ])
+        .having(
+          (error) => error.responseMetadata?.headers['x-redirect'],
+          'response header',
+          'https://proxy.example/$replacement',
+        )
+        .having(
+          (error) => error.responseMetadata?.bodyExcerpt,
+          'response excerpt',
+          isNot(contains('fixture')),
+        );
+
+    await expectLater(
+      client.credentials.create(
+        credential: const HttpBearerConfig(token: token),
+      ),
+      throwsA(matcher),
+    );
+    expect(
+      logs.singleWhere((record) => record.error is ApiException).error,
+      matcher,
+    );
+    expect(
+      logs.map((record) => record.message),
+      everyElement(isNot(contains('fixture'))),
+    );
+  });
+
   test(
     'redacts unexpected credential response values in fine logging',
     () async {
