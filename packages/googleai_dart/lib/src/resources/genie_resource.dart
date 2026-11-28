@@ -9,6 +9,11 @@ import '../client/config.dart';
 import '../errors/exceptions.dart';
 import '../genie/genie_auth_token.dart';
 import '../genie/genie_session.dart';
+import '../genie/genie_transport.dart';
+import '../genie/genie_webrtc_peer.dart';
+import '../genie/genie_webrtc_stub.dart'
+    if (dart.library.js_interop) '../genie/genie_webrtc_browser.dart'
+    as platform;
 import '../live/websocket_connector.dart' as ws;
 import '../models/interactions/interaction.dart';
 import 'base_resource.dart';
@@ -156,7 +161,13 @@ class GenieResource extends ResourceBase {
         await socket.close();
         throw _connectionTimedOut;
       }
-      return GenieSession.attach(socket, interactionId, credential, timeout);
+      return GenieSession.attach(
+        GenieSocketTransport(socket),
+        interactionId,
+        credential,
+        timeout,
+        sendConnectFrame: true,
+      );
     }
 
     try {
@@ -176,6 +187,185 @@ class GenieResource extends ResourceBase {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  /// Negotiates a WebRTC session for a Genie 4 interaction over Developer v1beta.
+  ///
+  /// Pass a scoped [authToken] minted on a trusted server for browser use.
+  /// The browser has a default peer. Supply [peer] to attach a media element
+  /// or to integrate a host RTC binding on native Dart. The peer belongs to
+  /// this session from the start of negotiation and is closed on failure.
+  /// `receive()` provides control events. Audio and video arrive on RTP tracks.
+  Future<GenieSession> connectWebRtc(
+    String interactionId, {
+    String? authToken,
+    GenieWebRtcPeer? peer,
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    _ensureSupported();
+    _validateId(interactionId);
+    if (timeout <= Duration.zero) {
+      throw ArgumentError('Timeout must be positive.');
+    }
+    if (authToken != null && !_isScopedToken(authToken)) {
+      throw ArgumentError(
+        'authToken must be a scoped auth_tokens/... credential.',
+      );
+    }
+
+    final rtcPeer = peer ?? platform.createWebRtcPeer();
+    final abort = Completer<void>();
+    void ensureActive() {
+      if (abort.isCompleted) throw _webRtcTimedOut;
+    }
+
+    Future<GenieSession> negotiate() async {
+      final credential = authToken ?? await _resolveCredential();
+      ensureActive();
+      if (credential == null || credential.trim().isEmpty) {
+        throw const GenieConnectionException(
+          message: 'Genie requires an API key or a scoped token.',
+        );
+      }
+      if (_isWeb && !_isScopedToken(credential)) {
+        throw const GenieConnectionException(
+          message:
+              'Browser Genie WebRTC requires a scoped token created on your server.',
+        );
+      }
+
+      final channel =
+          (rtcPeer
+                ..addReceiveOnlyTransceiver(GenieWebRtcMediaKind.audio)
+                ..addReceiveOnlyTransceiver(GenieWebRtcMediaKind.video))
+              .createDataChannel('events');
+      final opened = channel.opened..ignore();
+      final offer = await rtcPeer.createOffer();
+      ensureActive();
+      if (offer.trim().isEmpty) {
+        throw const GenieConnectionException(
+          message: 'The Genie WebRTC peer produced an empty SDP offer.',
+        );
+      }
+      final answer = await _signalWebRtc(
+        interactionId,
+        credential,
+        offer,
+        abort,
+      );
+      ensureActive();
+      await rtcPeer.setAnswer(answer);
+      await opened;
+      ensureActive();
+      return GenieSession.attach(
+        GenieRtcTransport(rtcPeer, channel),
+        interactionId,
+        credential,
+        timeout,
+        sendConnectFrame: false,
+      );
+    }
+
+    try {
+      return await negotiate().timeout(
+        timeout,
+        onTimeout: () {
+          abort.complete();
+          throw _webRtcTimedOut;
+        },
+      );
+    } catch (error, stackTrace) {
+      Future<void>.sync(rtcPeer.close).ignore();
+      if (error is GenieConnectionException) rethrow;
+      // A third-party peer or HTTP transport may attach raw credentials or SDP.
+      throw GenieConnectionException(
+        message: 'Unable to negotiate the Genie WebRTC session.',
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  static const _webRtcTimedOut = GenieConnectionException(
+    message: 'Timed out negotiating the Genie WebRTC session.',
+  );
+
+  Future<String> _signalWebRtc(
+    String id,
+    String credential,
+    String offer,
+    Completer<void> abort,
+  ) async {
+    final url = requestBuilder.buildUrl(
+      '/{version}/interactions/${Uri.encodeComponent(id)}:webrtc',
+      apiVersion: ApiVersion.v1beta,
+    );
+    final query = Map.of(url.queryParametersAll)
+      ..removeWhere((key, _) => _credentialFields.contains(key.toLowerCase()));
+    final uri = Uri(
+      scheme: url.scheme,
+      host: url.host,
+      port: url.hasPort ? url.port : null,
+      path: url.path,
+      queryParameters: query.isEmpty ? null : query,
+    );
+    // Scoped signaling auth takes precedence over every inherited credential.
+    // The browser CORS allowlist does not include the WebSocket API revision.
+    final request =
+        http.AbortableRequest('POST', uri, abortTrigger: abort.future)
+          ..followRedirects = false
+          ..headers.addAll({
+            for (final entry in config.defaultHeaders.entries)
+              if (!_credentialFields.contains(entry.key.toLowerCase()) &&
+                  !const {
+                    'api-revision',
+                    'accept',
+                    'content-type',
+                  }.contains(entry.key.toLowerCase()))
+                entry.key: entry.value,
+            'content-type': 'application/json',
+            'accept': 'application/json',
+            'x-goog-api-key': credential,
+          })
+          ..body = jsonEncode({'offer_sdp': offer});
+
+    // Send directly to avoid another credential injection or SDP diagnostics.
+    final response = await httpClient.send(request);
+    if (abort.isCompleted) {
+      response.stream.listen(null).cancel().ignore();
+      throw _webRtcTimedOut;
+    }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      await response.stream.listen(null).cancel();
+      throw GenieConnectionException(
+        message:
+            'Genie WebRTC signaling failed with HTTP status ${response.statusCode}.',
+        httpStatus: response.statusCode,
+      );
+    }
+    final chunks = StreamIterator(utf8.decoder.bind(response.stream));
+    // A custom HTTP client may ignore Abortable after returning headers.
+    // Release our reader even when the response body never completes.
+    abort.future.then((_) => chunks.cancel()).ignore();
+    try {
+      final body = StringBuffer();
+      while (await chunks.moveNext()) {
+        body.write(chunks.current);
+      }
+      if (abort.isCompleted) throw _webRtcTimedOut;
+      if (jsonDecode(body.toString()) case {
+        'answer_sdp': final String answer,
+      } when answer.trim().isNotEmpty) {
+        return answer;
+      }
+    } on FormatException {
+      // The response may contain credential or connection information.
+    } finally {
+      await chunks.cancel();
+    }
+    throw const GenieConnectionException(
+      message:
+          'The Genie WebRTC signaling response is missing a valid SDP answer.',
+    );
   }
 
   static const _connectionTimedOut = GenieConnectionException(

@@ -518,13 +518,16 @@ class LiveConnectionException extends GoogleAIException {
   String toString() => 'LiveConnectionException: $message';
 }
 
-/// A Genie WebSocket connection or protocol error.
+/// A Genie transport connection, signaling, or protocol error.
 class GenieConnectionException extends GoogleAIException {
   @override
   final String message;
 
   /// The WebSocket close code, if available.
   final int? closeCode;
+
+  /// The HTTP response status from failed WebRTC signaling, if available.
+  final int? httpStatus;
 
   @override
   final StackTrace? stackTrace;
@@ -536,6 +539,7 @@ class GenieConnectionException extends GoogleAIException {
   const GenieConnectionException({
     required this.message,
     this.closeCode,
+    this.httpStatus,
     this.stackTrace,
   });
 }
