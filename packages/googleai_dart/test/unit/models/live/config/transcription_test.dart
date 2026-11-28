@@ -2,6 +2,20 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies a Live transcription word and clears explicit nulls', () {
+    const word = LiveTranscriptionWord(
+      word: 'hello',
+      startOffset: '1.000000001s',
+      endOffset: '1.820s',
+    );
+    final copy = word.copyWith(word: 'hello!', endOffset: null);
+    expect(copy.toJson(), {'word': 'hello!', 'startOffset': '1.000000001s'});
+    expect(word.copyWith().toJson(), word.toJson());
+    expect(word.copyWith(word: null, startOffset: null).toJson(), {
+      'endOffset': '1.820s',
+    });
+  });
+
   group('Transcription', () {
     test('round-trips SDK annotations including exact protobuf offsets', () {
       const json = {

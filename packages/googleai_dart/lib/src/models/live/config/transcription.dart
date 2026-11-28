@@ -131,6 +131,21 @@ class LiveTranscriptionWord {
     if (endOffset != null) 'endOffset': endOffset,
   };
 
+  /// Copies this word. Pass `null` to clear a field.
+  LiveTranscriptionWord copyWith({
+    Object? word = unsetCopyWithValue,
+    Object? startOffset = unsetCopyWithValue,
+    Object? endOffset = unsetCopyWithValue,
+  }) => LiveTranscriptionWord(
+    word: word == unsetCopyWithValue ? this.word : word as String?,
+    startOffset: startOffset == unsetCopyWithValue
+        ? this.startOffset
+        : startOffset as String?,
+    endOffset: endOffset == unsetCopyWithValue
+        ? this.endOffset
+        : endOffset as String?,
+  );
+
   @override
   String toString() =>
       'LiveTranscriptionWord(word: $word, startOffset: $startOffset, '

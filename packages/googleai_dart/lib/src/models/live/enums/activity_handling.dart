@@ -8,7 +8,10 @@ enum ActivityHandling {
   /// User activity does not interrupt model output.
   ///
   /// The model continues generating even when the user speaks.
-  noInterruption('NO_INTERRUPTION');
+  noInterruption('NO_INTERRUPTION'),
+
+  /// Use the server's default activity handling.
+  unspecified('ACTIVITY_HANDLING_UNSPECIFIED');
 
   const ActivityHandling(this.value);
 
