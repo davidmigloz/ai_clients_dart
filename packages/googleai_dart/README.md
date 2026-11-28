@@ -902,6 +902,46 @@ supported MIME types, resolution and content layers.
 
 </details>
 
+### How do I configure a managed environment?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Create managed environments with the Gemini Developer API `v1beta` preview.
+Use a stored credential reference for secrets and plain values for sandbox
+configuration.
+
+```dart
+final environment = await client.environments.create(
+  environment: const CreateEnvironmentRequest(
+    mode: EnvironmentMode.onDemand,
+    env: EnvironmentVariables.map({
+      'APP_MODE': EnvVar.literal('production'),
+      'SERVICE_TOKEN': EnvVar(credential: 'service-token'),
+    }),
+  ),
+);
+final reference = EnvironmentConfigOrId.id(environment.id);
+```
+
+Pass that reference to a managed-agent interaction on `v1beta`. Use
+`EnvironmentConfig` when defining an inline sandbox, or
+`CreateEnvironmentRequest(fromEnvironment: environment.id)` to copy an
+existing sandbox. Leave sources and variables empty when copying.
+
+For a self-hosted sandbox, create it with `EnvironmentMode.selfHosted` and
+optionally supply `customConfig` and `systemInstruction`. The create response
+returns an `environmentKey` once. Store it securely for the sandbox daemon
+and use only the environment ID in interactions. Metadata serialization,
+get, and list omit the key. Follow Google's self-hosting guide to connect the
+daemon. Sources, network settings, variables, and file snapshots apply to
+Google-hosted sandboxes.
+[Runnable environment configuration example](example/environment_config_example.dart) ·
+[Environment guide](https://aistudio.google.com/docs/agent-environment) ·
+[Self-hosted environments](https://aistudio.google.com/docs/agent-environment#self-hosted-environments)
+
+</details>
+
 ### How do I manage environment workspace files?
 
 <details>

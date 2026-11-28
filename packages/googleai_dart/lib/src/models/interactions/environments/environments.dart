@@ -7,6 +7,7 @@ part 'environment_config.dart';
 part 'environment_config_or_id.dart';
 part 'environment_file.dart';
 part 'environment_network_egress_allowlist.dart';
+part 'environment_variables.dart';
 part 'get_environment_files_response.dart';
 part 'list_environments_response.dart';
 part 'source.dart';

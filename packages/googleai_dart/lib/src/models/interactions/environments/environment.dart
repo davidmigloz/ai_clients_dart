@@ -1,6 +1,6 @@
 part of 'environments.dart';
 
-/// Compute lifecycle mode used to filter environments.
+/// Compute lifecycle mode for a managed-agent environment.
 enum EnvironmentMode {
   /// Google provisions the environment on demand.
   onDemand('on_demand'),
@@ -12,6 +12,13 @@ enum EnvironmentMode {
 
   /// The API wire value.
   final String value;
+
+  /// Parses a known lifecycle mode, returning null for other values.
+  static EnvironmentMode? fromString(String? value) => switch (value) {
+    'on_demand' => EnvironmentMode.onDemand,
+    'self_hosted' => EnvironmentMode.selfHosted,
+    _ => null,
+  };
 }
 
 /// The status of an [Environment]'s container.
@@ -74,6 +81,20 @@ class Environment {
   /// Output only. The status of the environment container.
   final EnvironmentStatus? status;
 
+  /// Output only. The compute lifecycle mode, when the service returns it.
+  final EnvironmentMode? mode;
+
+  /// The original wire string when [mode] is unrecognized.
+  final String? unrecognizedMode;
+
+  /// Output only. Customer configuration for a self-hosted environment.
+  final Map<String, dynamic>? customConfig;
+
+  /// Output only. The secret returned when a self-hosted environment is created.
+  ///
+  /// Store it securely for the sandbox daemon. Get and list responses omit it.
+  final String? environmentKey;
+
   /// Creates an [Environment].
   const Environment({
     required this.id,
@@ -85,32 +106,56 @@ class Environment {
     this.network,
     this.sources,
     this.status,
+    this.mode,
+    this.unrecognizedMode,
+    this.customConfig,
+    this.environmentKey,
   });
 
   /// Creates an [Environment] from JSON.
-  factory Environment.fromJson(Map<String, dynamic> json) => Environment(
-    id: json['id'] as String,
-    created: json['created'] != null
-        ? DateTime.parse(json['created'] as String)
-        : null,
-    updated: json['updated'] != null
-        ? DateTime.parse(json['updated'] as String)
-        : null,
-    lastAccessed: json['last_accessed'] != null
-        ? DateTime.parse(json['last_accessed'] as String)
-        : null,
-    fileCount: json['file_count'] as String?,
-    sizeBytes: json['size_bytes'] as String?,
-    network: json['network'] != null
-        ? EnvironmentNetworkEgressAllowlist.fromJson(json['network'] as Object)
-        : null,
-    sources: (json['sources'] as List<dynamic>?)
-        ?.map((e) => Source.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    status: environmentStatusFromString(json['status'] as String?),
-  );
+  factory Environment.fromJson(Map<String, dynamic> json) {
+    final id = json['id'];
+    if (id is! String) {
+      throw const FormatException('Environment: expected an ID');
+    }
+    final wireMode = json['mode'] as String?;
+    final mode = EnvironmentMode.fromString(wireMode);
+    return Environment(
+      id: id,
+      created: json['created'] != null
+          ? DateTime.parse(json['created'] as String)
+          : null,
+      updated: json['updated'] != null
+          ? DateTime.parse(json['updated'] as String)
+          : null,
+      lastAccessed: json['last_accessed'] != null
+          ? DateTime.parse(json['last_accessed'] as String)
+          : null,
+      fileCount: json['file_count'] as String?,
+      sizeBytes: json['size_bytes'] as String?,
+      network: json['network'] != null
+          ? EnvironmentNetworkEgressAllowlist.fromJson(
+              json['network'] as Object,
+            )
+          : null,
+      sources: (json['sources'] as List<dynamic>?)
+          ?.map((e) => Source.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      status: environmentStatusFromString(json['status'] as String?),
+      mode: mode,
+      unrecognizedMode: mode == null ? wireMode : null,
+      customConfig: json['custom_config'] as Map<String, dynamic>?,
+      environmentKey: json['environment_key'] as String?,
+    );
+  }
 
-  /// Converts to JSON.
+  /// Creates environment metadata without reading the one-time secret.
+  factory Environment.fromMetadataJson(Map<String, dynamic> json) =>
+      Environment.fromJson({...json}..remove('environment_key'));
+
+  /// Converts metadata to JSON.
+  ///
+  /// Read [environmentKey] directly to store a newly issued key securely.
   Map<String, dynamic> toJson() => {
     'id': id,
     if (created != null) 'created': created!.toIso8601String(),
@@ -121,6 +166,8 @@ class Environment {
     if (network != null) 'network': network!.toJson(),
     if (sources != null) 'sources': sources!.map((e) => e.toJson()).toList(),
     if (status != null) 'status': environmentStatusToString(status!),
+    'mode': ?(mode?.value ?? unrecognizedMode),
+    'custom_config': ?customConfig,
   };
 
   /// Creates a copy with replaced values.
@@ -134,6 +181,9 @@ class Environment {
     Object? network = unsetCopyWithValue,
     Object? sources = unsetCopyWithValue,
     Object? status = unsetCopyWithValue,
+    Object? mode = unsetCopyWithValue,
+    Object? customConfig = unsetCopyWithValue,
+    Object? environmentKey = unsetCopyWithValue,
   }) {
     return Environment(
       id: id == unsetCopyWithValue ? this.id : id! as String,
@@ -161,6 +211,14 @@ class Environment {
       status: status == unsetCopyWithValue
           ? this.status
           : status as EnvironmentStatus?,
+      mode: mode == unsetCopyWithValue ? this.mode : mode as EnvironmentMode?,
+      unrecognizedMode: mode == unsetCopyWithValue ? unrecognizedMode : null,
+      customConfig: customConfig == unsetCopyWithValue
+          ? this.customConfig
+          : customConfig as Map<String, dynamic>?,
+      environmentKey: environmentKey == unsetCopyWithValue
+          ? this.environmentKey
+          : environmentKey as String?,
     );
   }
 }

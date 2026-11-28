@@ -29,6 +29,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 - [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart) (~1k tokens): Grounding with Google Search.
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart) (~490 tokens): Text embeddings.
 - [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart) (~1.5k tokens): File uploads for prompts.
+- [environment_config_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/environment_config_example.dart): Configure or fork a hosted managed environment on the Gemini Developer API v1beta.
 - [environment_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/environment_files_example.dart): List and download managed environment workspace files on the Gemini Developer API v1beta.
 - [genie_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/genie_example.dart): Genie 4 creation, live JPEG frames, and completion.
 - [register_cloud_storage_files.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/register_cloud_storage_files.dart): Register Cloud Storage files with Gemini Files and OAuth.
