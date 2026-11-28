@@ -62,7 +62,9 @@
           "type": "SlidingWindow"
         },
         "triggerTokens": {
-          "type": "integer"
+          "type": "string",
+          "format": "int64",
+          "legacy_read_type": "integer"
         }
       }
     },
@@ -83,7 +85,7 @@
           "type": "integer"
         },
         "responseModalities": {
-          "items": "string",
+          "items": "ResponseModality",
           "type": "array"
         },
         "speechConfig": {
@@ -97,6 +99,24 @@
         },
         "topP": {
           "type": "number"
+        },
+        "mediaResolution": {
+          "type": "MediaResolution"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "thinkingConfig": {
+          "type": "ThinkingConfig"
+        },
+        "enableAffectiveDialog": {
+          "type": "boolean"
+        },
+        "translationConfig": {
+          "type": "TranslationConfig",
+          "backends": [
+            "google_ai"
+          ]
         }
       }
     },
@@ -111,6 +131,12 @@
       "fields": {
         "proactiveAudio": {
           "type": "boolean"
+        },
+        "proactiveVideo": {
+          "type": "boolean",
+          "backends": [
+            "google_ai"
+          ]
         }
       }
     },
@@ -133,17 +159,23 @@
     "SessionResumptionConfig": {
       "fields": {
         "handle": {
-          "type": "string"
+          "type": "string",
+          "sensitive": true
         },
         "transparent": {
-          "type": "boolean"
+          "type": "boolean",
+          "backends": [
+            "vertex_ai"
+          ]
         }
       }
     },
     "SlidingWindow": {
       "fields": {
         "targetTokens": {
-          "type": "integer"
+          "type": "string",
+          "format": "int64",
+          "legacy_read_type": "integer"
         }
       }
     },
@@ -160,7 +192,8 @@
     "Transcription": {
       "fields": {
         "endOffset": {
-          "type": "string"
+          "type": "string",
+          "format": "duration"
         },
         "finished": {
           "type": "boolean"
@@ -172,7 +205,8 @@
           "type": "string"
         },
         "startOffset": {
-          "type": "string"
+          "type": "string",
+          "format": "duration"
         },
         "text": {
           "type": "string"
@@ -193,13 +227,188 @@
     "WordInfo": {
       "fields": {
         "endOffset": {
-          "type": "string"
+          "type": "string",
+          "format": "duration"
         },
         "startOffset": {
-          "type": "string"
+          "type": "string",
+          "format": "duration"
         },
         "word": {
           "type": "string"
+        }
+      }
+    },
+    "LiveConfig": {
+      "description": "Dart connection configuration. The client inserts model and sends the supported fields in setup.",
+      "fields": {
+        "contextWindowCompression": {
+          "required": false,
+          "type": "ContextWindowCompressionConfig"
+        },
+        "generationConfig": {
+          "required": false,
+          "type": "LiveGenerationConfig"
+        },
+        "inputAudioTranscription": {
+          "required": false,
+          "type": "AudioTranscriptionConfig"
+        },
+        "outputAudioTranscription": {
+          "required": false,
+          "type": "AudioTranscriptionConfig"
+        },
+        "proactivity": {
+          "required": false,
+          "type": "ProactivityConfig"
+        },
+        "realtimeInputConfig": {
+          "required": false,
+          "type": "RealtimeInputConfig"
+        },
+        "sessionResumption": {
+          "required": false,
+          "type": "SessionResumptionConfig"
+        },
+        "systemInstruction": {
+          "required": false,
+          "type": "Content"
+        },
+        "tools": {
+          "items": "Tool",
+          "required": false,
+          "type": "array"
+        },
+        "historyConfig": {
+          "type": "HistoryConfig",
+          "required": false
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": false
+        },
+        "safetySettings": {
+          "type": "array",
+          "items": "SafetySetting",
+          "required": false
+        },
+        "explicitVadSignal": {
+          "type": "boolean",
+          "backends": [
+            "vertex_ai"
+          ],
+          "required": false
+        },
+        "avatarConfig": {
+          "type": "AvatarConfig",
+          "backends": [
+            "vertex_ai"
+          ],
+          "required": false
+        }
+      }
+    },
+    "HistoryConfig": {
+      "fields": {
+        "initialHistoryInClientContent": {
+          "type": "boolean"
+        }
+      }
+    },
+    "VoiceActivity": {
+      "fields": {
+        "type": {
+          "type": "VoiceActivityType"
+        },
+        "audioOffset": {
+          "type": "string",
+          "format": "duration"
+        }
+      }
+    },
+    "LiveUsageMetadata": {
+      "fields": {
+        "promptTokenCount": {
+          "type": "integer"
+        },
+        "cachedContentTokenCount": {
+          "type": "integer"
+        },
+        "responseTokenCount": {
+          "type": "integer"
+        },
+        "toolUsePromptTokenCount": {
+          "type": "integer"
+        },
+        "thoughtsTokenCount": {
+          "type": "integer"
+        },
+        "totalTokenCount": {
+          "type": "integer"
+        },
+        "promptTokensDetails": {
+          "type": "array",
+          "items": "ModalityTokenCount"
+        },
+        "cacheTokensDetails": {
+          "type": "array",
+          "items": "ModalityTokenCount"
+        },
+        "responseTokensDetails": {
+          "type": "array",
+          "items": "ModalityTokenCount"
+        },
+        "toolUsePromptTokensDetails": {
+          "type": "array",
+          "items": "ModalityTokenCount"
+        },
+        "candidatesTokenCount": {
+          "type": "integer",
+          "backends": [
+            "vertex_ai"
+          ],
+          "alias_of": "responseTokenCount"
+        },
+        "candidatesTokensDetails": {
+          "type": "array",
+          "items": "ModalityTokenCount",
+          "backends": [
+            "vertex_ai"
+          ],
+          "alias_of": "responseTokensDetails"
+        },
+        "trafficType": {
+          "type": "string",
+          "backends": [
+            "vertex_ai"
+          ]
+        }
+      }
+    },
+    "AvatarConfig": {
+      "backends": [
+        "vertex_ai"
+      ],
+      "fields": {
+        "avatarName": {
+          "type": "string",
+          "required": false
+        },
+        "customizedAvatar": {
+          "type": "object",
+          "availability": "select_customers",
+          "required": false
+        },
+        "audioBitrateBps": {
+          "type": "integer",
+          "required": false
+        },
+        "videoBitrateBps": {
+          "type": "integer",
+          "required": false
         }
       }
     }
@@ -240,21 +449,90 @@
         "TURN_INCLUDES_ALL_INPUT",
         "TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO"
       ]
+    },
+    "VoiceActivityType": {
+      "values": [
+        "TYPE_UNSPECIFIED",
+        "ACTIVITY_START",
+        "ACTIVITY_END"
+      ]
+    },
+    "ResponseModality": {
+      "values": [
+        "MODALITY_UNSPECIFIED",
+        "TEXT",
+        "IMAGE",
+        "AUDIO",
+        "VIDEO"
+      ],
+      "availability": {
+        "VIDEO": "Vertex AI gemini-3.8-live avatar output"
+      }
     }
   },
   "info": {
-    "description": "Real-time bidirectional audio/video streaming via WebSocket",
+    "description": "Gemini Live BidiGenerateContent WebSocket protocol",
     "reference_commits": {
       "googleapis/js-genai": "719dffc91dbf38f8a5f2d90bf93efa5dc8207999",
       "googleapis/python-genai": "aa813f8bf805b6f4f3e57abb8f04b91d769e23e6"
     },
     "sources": [
-      "https://aistudio.google.com/api-reference/live",
+      "https://aistudio.google.com/api-reference/live.md",
+      "https://aistudio.google.com/api-reference/live/bidi-generate-content.md",
+      "https://aistudio.google.com/docs/ephemeral-tokens.md",
+      "https://aistudio.google.com/docs/live-api/live-transcribe.md",
+      "https://aistudio.google.com/docs/live-api/capabilities.md",
+      "https://aistudio.google.com/docs/live-api/thinking.md",
+      "https://aistudio.google.com/docs/live-api/live-translate.md",
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/multimodal-live",
       "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session",
-      "https://aistudio.google.com/docs/live-api/live-transcribe"
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/configure-live-avatars"
     ],
     "title": "Gemini Live API",
-    "version": "v1beta"
+    "version": "v1beta",
+    "cutoff": "2026-11-28 Europe/Madrid",
+    "api_versions": {
+      "google_ai": [
+        "v1beta"
+      ],
+      "vertex_ai": [
+        "v1",
+        "v1beta1"
+      ]
+    },
+    "source_sha256": {
+      "https://aistudio.google.com/api-reference/live.md": "9064b020b88a8aca0e435761ece7ab740bc9a12191570a8033949e62bcce7689",
+      "https://aistudio.google.com/api-reference/live/bidi-generate-content.md": "28f5a254a8806f6270a9862b80e0f699f43be580920b97070ce54526759c0535",
+      "https://aistudio.google.com/docs/ephemeral-tokens.md": "e7570380e32e1e6b97236ac3e97aad6f0fe2566697ee141b6c995175513c28f4",
+      "https://aistudio.google.com/docs/live-api/live-transcribe.md": "309597302fa8f089976fb0f1366c7db1759b9f673f227fc48a6eda70ec480608",
+      "https://aistudio.google.com/docs/live-api/capabilities.md": "4bf9e6b0ddff26d311792bb0f27a78560abb24296776fe6f45fae58b385f5a9d",
+      "https://aistudio.google.com/docs/live-api/thinking.md": "8a41eaeca85d5d53a5e7b06f92443822beadd3d5e892d5c4e098d6d981f45f3e",
+      "https://aistudio.google.com/docs/live-api/live-translate.md": "a139e31f505eb504558bc7e23ee39f91c8f9548ca1789b27507dd2ea49417bf0",
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/multimodal-live": "7881bb9279e4d953b52c8217c001b0163dc00dae22c9d3e7e82e6f7697e660af",
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session": "04d536729f6bb86b8e47a071ee8140d4d4f886f51a026c21c7c39baba924f446",
+      "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/configure-live-avatars": "5b384ef20c9a87f764eebd508f32cad5e6e0c02f786e4c38c616552897baebc3"
+    },
+    "reference_tags": {
+      "googleapis/js-genai": "v3.6.1",
+      "googleapis/python-genai": "v3.6.1"
+    },
+    "related_protocols": {
+      "BidiGenerateMusic": {
+        "status": "Independent Developer API Live Music protocol",
+        "source": "https://aistudio.google.com/api-reference/live-music"
+      },
+      "Genie 4": {
+        "status": "Independent Interactions WebSocket and WebRTC protocols",
+        "source": "https://aistudio.google.com/docs/genie"
+      }
+    },
+    "exclusions": {
+      "AvatarConfig.customizedAvatar": "The official Cloud guide limits reference-image avatars to select customers.",
+      "BidiGenerateContentSetupComplete.voiceConsentSignature": "Pinned SDK field for custom voices without a public Bidi response contract at the cutoff.",
+      "BidiGenerateContentServerMessage.voiceActivityDetectionSignal": "Pinned converters recognize the opaque value, but the public Bidi reference specifies only voiceActivity.",
+      "Vertex AI Express API-key authentication": "The SDKs expose an Express transport distinct from the public project-scoped OAuth route verified by Dart.",
+      "VoiceConfig.customVoiceConfig": "Custom-voice setup has its own consent and model requirements. The prebuilt avatar path uses prebuiltVoiceConfig."
+    }
   },
   "message_types": {
     "client": {
@@ -267,8 +545,9 @@
           },
           "turns": {
             "items": "Content",
-            "required": true,
-            "type": "array"
+            "required": false,
+            "type": "array",
+            "description": "Omit when signaling turn completion with existing conversation history."
           }
         }
       },
@@ -298,6 +577,20 @@
           "video": {
             "required": false,
             "type": "Blob"
+          },
+          "mediaResolution": {
+            "type": "MediaResolution",
+            "backends": [
+              "google_ai"
+            ],
+            "required": false
+          },
+          "mediaChunks": {
+            "type": "array",
+            "items": "Blob",
+            "deprecated": true,
+            "description": "Legacy single effective media chunk. Prefer audio or video.",
+            "required": false
           }
         }
       },
@@ -344,6 +637,36 @@
             "items": "Tool",
             "required": false,
             "type": "array"
+          },
+          "historyConfig": {
+            "type": "HistoryConfig",
+            "required": false
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "required": false
+          },
+          "safetySettings": {
+            "type": "array",
+            "items": "SafetySetting",
+            "required": false
+          },
+          "explicitVadSignal": {
+            "type": "boolean",
+            "backends": [
+              "vertex_ai"
+            ],
+            "required": false
+          },
+          "avatarConfig": {
+            "type": "AvatarConfig",
+            "backends": [
+              "vertex_ai"
+            ],
+            "required": false
           }
         }
       },
@@ -354,6 +677,29 @@
             "items": "FunctionResponse",
             "required": true,
             "type": "array"
+          }
+        }
+      },
+      "BidiGenerateContentContextUpdate": {
+        "description": "Changes system instruction or tools during a supported Vertex AI session.",
+        "backends": [
+          "vertex_ai"
+        ],
+        "fields": {
+          "systemInstruction": {
+            "type": "Content",
+            "required": false
+          },
+          "tools": {
+            "type": "object",
+            "fields": {
+              "tools": {
+                "type": "array",
+                "items": "Tool"
+              }
+            },
+            "description": "An empty nested tools list clears the configured tools. Omission preserves them.",
+            "required": false
           }
         }
       }
@@ -396,7 +742,77 @@
           },
           "usageMetadata": {
             "required": false,
-            "type": "UsageMetadata"
+            "type": "UsageMetadata",
+            "compatibility": "Dart also accepts this legacy nested REST-shaped value. The public Bidi envelope uses the top-level usageMetadata field."
+          },
+          "waitingForInput": {
+            "type": "boolean",
+            "required": false
+          },
+          "turnCompleteReason": {
+            "type": "string",
+            "values": [
+              "TURN_COMPLETE_REASON_UNSPECIFIED",
+              "MALFORMED_FUNCTION_CALL",
+              "RESPONSE_REJECTED",
+              "NEED_MORE_INPUT",
+              "PROHIBITED_INPUT_CONTENT",
+              "IMAGE_PROHIBITED_INPUT_CONTENT",
+              "INPUT_TEXT_CONTAIN_PROMINENT_PERSON_PROHIBITED",
+              "INPUT_IMAGE_CELEBRITY",
+              "INPUT_IMAGE_PHOTO_REALISTIC_CHILD_PROHIBITED",
+              "INPUT_TEXT_NCII_PROHIBITED",
+              "INPUT_OTHER",
+              "INPUT_IP_PROHIBITED",
+              "BLOCKLIST",
+              "UNSAFE_PROMPT_FOR_IMAGE_GENERATION",
+              "GENERATED_IMAGE_SAFETY",
+              "GENERATED_CONTENT_SAFETY",
+              "GENERATED_AUDIO_SAFETY",
+              "GENERATED_VIDEO_SAFETY",
+              "GENERATED_CONTENT_PROHIBITED",
+              "GENERATED_CONTENT_BLOCKLIST",
+              "GENERATED_IMAGE_PROHIBITED",
+              "GENERATED_IMAGE_CELEBRITY",
+              "GENERATED_IMAGE_PROMINENT_PEOPLE_DETECTED_BY_REWRITER",
+              "GENERATED_IMAGE_IDENTIFIABLE_PEOPLE",
+              "GENERATED_IMAGE_MINORS",
+              "OUTPUT_IMAGE_IP_PROHIBITED",
+              "GENERATED_OTHER",
+              "MAX_REGENERATION_REACHED"
+            ],
+            "description": "Known pinned SDK values. Dart accepts future strings.",
+            "required": false
+          },
+          "interactionStatus": {
+            "type": "string",
+            "backends": [
+              "google_ai"
+            ],
+            "values": [
+              "INTERACTION_STATUS_UNSPECIFIED",
+              "IN_PROGRESS",
+              "REQUIRES_ACTION",
+              "IDLE"
+            ],
+            "required": false
+          },
+          "speechState": {
+            "type": "string",
+            "backends": [
+              "vertex_ai"
+            ],
+            "values": [
+              "SPEECH_STATE_UNSPECIFIED",
+              "NON_SPEECH",
+              "SPEECH"
+            ],
+            "required": false
+          },
+          "urlContextMetadata": {
+            "type": "object",
+            "schema": "UrlContextMetadata",
+            "required": false
           }
         }
       },
@@ -443,11 +859,21 @@
         "fields": {
           "newHandle": {
             "required": false,
-            "type": "string"
+            "type": "string",
+            "sensitive": true
           },
           "resumable": {
             "required": false,
             "type": "boolean"
+          },
+          "lastConsumedClientMessageIndex": {
+            "type": "string",
+            "format": "int64",
+            "backends": [
+              "vertex_ai"
+            ],
+            "description": "Index acknowledged by a transparent session resumption update.",
+            "required": false
           }
         }
       }
@@ -467,5 +893,37 @@
     "google_ai": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.{version}.GenerativeService.BidiGenerateContent",
     "google_ai_constrained": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained",
     "vertex_ai": "wss://{host}/ws/google.cloud.aiplatform.{version}.LlmBidiService/BidiGenerateContent"
+  },
+  "envelopes": {
+    "client": {
+      "message_keys": {
+        "setup": "BidiGenerateContentSetup",
+        "clientContent": "BidiGenerateContentClientContent",
+        "realtimeInput": "BidiGenerateContentRealtimeInput",
+        "toolResponse": "BidiGenerateContentToolResponse",
+        "contextUpdate": "BidiGenerateContentContextUpdate"
+      }
+    },
+    "server": {
+      "message_keys": {
+        "setupComplete": "BidiGenerateContentSetupComplete",
+        "serverContent": "BidiGenerateContentServerContent",
+        "toolCall": "BidiGenerateContentToolCall",
+        "toolCallCancellation": "BidiGenerateContentToolCallCancellation",
+        "goAway": "GoAway",
+        "sessionResumptionUpdate": "SessionResumptionUpdate"
+      },
+      "ancillary_fields": {
+        "usageMetadata": {
+          "type": "LiveUsageMetadata",
+          "required": false
+        },
+        "voiceActivity": {
+          "type": "VoiceActivity",
+          "required": false
+        }
+      },
+      "description": "Ancillary fields can accompany a message or occupy their own frame."
+    }
   }
 }

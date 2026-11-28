@@ -340,6 +340,21 @@ def extract_method_body(content: str, method_pattern: str) -> str:
         end_index = newline_index if newline_index != -1 else len(content)
         return content[body_start:end_index]
 
+    # A named-parameter group can have braces before the actual method body.
+    # Skip the complete signature before looking for a block or an arrow.
+    if match.group(0).endswith("("):
+        opening = start - 1
+    else:
+        opening = start + len(content[start:]) - len(content[start:].lstrip())
+    if content[opening:opening + 1] == "(":
+        signature_code, _ = _dart_code_and_literals(content[opening:])
+        depth = 0
+        for offset, char in enumerate(signature_code):
+            depth += (char == "(") - (char == ")")
+            if depth == 0:
+                start = opening + offset + 1
+                break
+
     brace_index = content.find("{", start)
     arrow_index = content.find("=>", start)
 
