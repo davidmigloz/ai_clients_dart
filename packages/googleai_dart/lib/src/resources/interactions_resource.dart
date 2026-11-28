@@ -24,6 +24,7 @@ import '../models/interactions/usage.dart';
 import '../models/interactions/webhook_config.dart';
 import '../utils/request_id.dart';
 import 'base_resource.dart';
+import 'genie_resource.dart';
 import 'streaming_resource.dart';
 
 part 'interactions_continuation.dart';
@@ -42,6 +43,15 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     required super.requestBuilder,
     super.ensureNotClosed,
   });
+
+  /// Creates and connects Genie 4 interactions on Developer API `v1beta`.
+  late final GenieResource genie = GenieResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   // Keep the existing revision header on beta requests for gateways that
   // use it to select the steps schema. Stable requests use that schema by

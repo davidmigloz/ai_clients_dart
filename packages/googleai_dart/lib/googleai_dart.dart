@@ -21,6 +21,9 @@ export 'src/extensions/content_extensions.dart';
 export 'src/extensions/generate_content_response_extensions.dart';
 export 'src/extensions/interaction_extensions.dart';
 // Live API
+export 'src/genie/genie_auth_token.dart';
+export 'src/genie/genie_events.dart';
+export 'src/genie/genie_session.dart';
 export 'src/live/live_client.dart';
 export 'src/live/live_session.dart';
 // Models - Auth Tokens
@@ -281,6 +284,7 @@ export 'src/models/tools/url_context.dart';
 export 'src/models/webhooks/webhooks.dart';
 export 'src/resources/credentials_resource.dart';
 export 'src/resources/decisions_resource.dart';
+export 'src/resources/genie_resource.dart';
 // Utilities
 export 'src/utils/lro_poller.dart';
 export 'src/utils/paginator.dart';

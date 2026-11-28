@@ -69,6 +69,7 @@ class ResponseMetadata {
 /// - [LiveSessionException] — General Live session errors
 /// - [LiveSessionResumptionException] — Live session resumption failure
 /// - [LiveConnectionException] — WebSocket connection failure
+/// - [GenieConnectionException] — Genie WebSocket connection or protocol failure
 sealed class GoogleAIException implements Exception {
   /// Creates a [GoogleAIException].
   const GoogleAIException();
@@ -515,4 +516,26 @@ class LiveConnectionException extends GoogleAIException {
 
   @override
   String toString() => 'LiveConnectionException: $message';
+}
+
+/// A Genie WebSocket connection or protocol error.
+class GenieConnectionException extends GoogleAIException {
+  @override
+  final String message;
+
+  /// The WebSocket close code, if available.
+  final int? closeCode;
+
+  @override
+  final StackTrace? stackTrace;
+
+  @override
+  Exception? get cause => null;
+
+  /// Creates a credential-free connection error.
+  const GenieConnectionException({
+    required this.message,
+    this.closeCode,
+    this.stackTrace,
+  });
 }

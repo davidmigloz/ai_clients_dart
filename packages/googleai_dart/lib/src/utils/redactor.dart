@@ -13,6 +13,14 @@ class Redactor {
     redactionList: continuationTokenFields,
   );
 
+  /// Field names used for interaction-scoped credentials.
+  static const interactionAuthTokenFields = ['auth_token', 'authToken'];
+
+  /// Treat opaque response tokens as credentials in HTTP diagnostics.
+  static const interactionCredentials = Redactor(
+    redactionList: [...continuationTokenFields, ...interactionAuthTokenFields],
+  );
+
   /// Fields to redact (case-insensitive).
   final List<String> redactionList;
 
@@ -111,6 +119,11 @@ class Redactor {
     return input is String ? redactString(input) : input;
   }
 
+  static final _interactionTokenPattern = RegExp(
+    r"""auth_tokens(?:/|%2f)[^&\s"'<>;,)}\]]+""",
+    caseSensitive: false,
+  );
+
   /// Redacts sensitive data from a string.
   ///
   /// This is a simple implementation that looks for key=value patterns.
@@ -152,6 +165,9 @@ class Redactor {
       );
     }
 
+    if (redactionList.any(interactionAuthTokenFields.contains)) {
+      result = result.replaceAll(_interactionTokenPattern, replacement);
+    }
     return _redactValues(result);
   }
 
