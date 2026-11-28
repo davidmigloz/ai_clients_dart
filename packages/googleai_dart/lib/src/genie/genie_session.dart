@@ -62,21 +62,22 @@ class GenieSession {
     Duration completionTimeout,
   ) {
     final session = GenieSession._(socket, id, credential, completionTimeout);
-    session._subscription = socket.events.listen(
-      session._onSocketEvent,
-      onError: (Object _, StackTrace stackTrace) => session._fail(
-        GenieConnectionException(
-          message: 'The Genie WebSocket transport failed.',
-          stackTrace: stackTrace,
+    session
+      .._subscription = socket.events.listen(
+        session._onSocketEvent,
+        onError: (Object _, StackTrace stackTrace) => session._fail(
+          GenieConnectionException(
+            message: 'The Genie WebSocket transport failed.',
+            stackTrace: stackTrace,
+          ),
         ),
-      ),
-      onDone: () => session._fail(
-        const GenieConnectionException(
-          message: 'The Genie WebSocket closed before a terminal event.',
+        onDone: () => session._fail(
+          const GenieConnectionException(
+            message: 'The Genie WebSocket closed before a terminal event.',
+          ),
         ),
-      ),
-    );
-    session._write({'event_type': 'interaction.connect', 'id': id});
+      )
+      .._write({'event_type': 'interaction.connect', 'id': id});
     return session;
   }
 
