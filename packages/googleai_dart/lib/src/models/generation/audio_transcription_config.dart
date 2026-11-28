@@ -4,8 +4,7 @@ import '../copy_with_sentinel.dart';
 ///
 /// Maps to the API schema `AudioTranscriptionConfig` and is referenced by
 /// [GenerationConfig.audioTranscriptionConfig]. This is distinct from the
-/// Live API's `AudioTranscriptionConfig`, which uses a simpler `{enabled}`
-/// shape.
+/// Live API's `AudioTranscriptionConfig`, which configures streaming audio.
 class GenerationAudioTranscriptionConfig {
   /// The list of phrases to bias the transcription towards.
   @Deprecated('Use customVocabulary instead.')

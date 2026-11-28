@@ -200,7 +200,10 @@ class LiveSession {
     send(BidiGenerateContentRealtimeInput.endActivity());
   }
 
-  /// Signals that the audio stream has ended.
+  /// Flushes audio input when automatic activity detection is enabled.
+  ///
+  /// You can resume sending audio after this signal. When using manual
+  /// activity detection, mark the end of a turn with [signalActivityEnd].
   void signalAudioStreamEnd() {
     send(const BidiGenerateContentRealtimeInput(audioStreamEnd: true));
   }

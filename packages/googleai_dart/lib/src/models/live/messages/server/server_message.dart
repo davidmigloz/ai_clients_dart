@@ -115,6 +115,12 @@ class BidiGenerateContentServerContent
   /// Only present if `inputAudioTranscription` was enabled in setup.
   final Transcription? inputTranscription;
 
+  /// A provisional input transcript while the user is speaking.
+  ///
+  /// It can change as more audio arrives. Read [inputTranscription] for
+  /// the authoritative result.
+  final Transcription? interimInputTranscription;
+
   /// Transcription of the model's output audio.
   ///
   /// Only present if `outputAudioTranscription` was enabled in setup.
@@ -133,6 +139,7 @@ class BidiGenerateContentServerContent
     this.generationComplete,
     this.interrupted,
     this.inputTranscription,
+    this.interimInputTranscription,
     this.outputTranscription,
     this.groundingMetadata,
     this.usageMetadata,
@@ -150,6 +157,11 @@ class BidiGenerateContentServerContent
       inputTranscription: json['inputTranscription'] != null
           ? Transcription.fromJson(
               json['inputTranscription'] as Map<String, dynamic>,
+            )
+          : null,
+      interimInputTranscription: json['interimInputTranscription'] != null
+          ? Transcription.fromJson(
+              json['interimInputTranscription'] as Map<String, dynamic>,
             )
           : null,
       outputTranscription: json['outputTranscription'] != null
@@ -179,6 +191,8 @@ class BidiGenerateContentServerContent
       if (interrupted != null) 'interrupted': interrupted,
       if (inputTranscription != null)
         'inputTranscription': inputTranscription!.toJson(),
+      if (interimInputTranscription != null)
+        'interimInputTranscription': interimInputTranscription!.toJson(),
       if (outputTranscription != null)
         'outputTranscription': outputTranscription!.toJson(),
       if (groundingMetadata != null)
@@ -190,7 +204,8 @@ class BidiGenerateContentServerContent
   @override
   String toString() =>
       'BidiGenerateContentServerContent(turnComplete: $turnComplete, '
-      'generationComplete: $generationComplete, interrupted: $interrupted)';
+      'generationComplete: $generationComplete, interrupted: $interrupted, '
+      'hasInterimInputTranscription: ${interimInputTranscription != null})';
 }
 
 /// Tool call request message.

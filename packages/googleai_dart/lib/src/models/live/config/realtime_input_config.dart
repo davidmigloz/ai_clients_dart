@@ -1,3 +1,4 @@
+import '../../copy_with_sentinel.dart';
 import '../enums/activity_handling.dart';
 import '../enums/turn_coverage.dart';
 import 'automatic_activity_detection.dart';
@@ -15,11 +16,15 @@ class RealtimeInputConfig {
   /// How much input is included in a turn.
   final TurnCoverage? turnCoverage;
 
+  /// Whether to include timestamps on supported interim transcripts.
+  final bool? interimTranscriptTimestampEnabled;
+
   /// Creates a [RealtimeInputConfig].
   const RealtimeInputConfig({
     this.automaticActivityDetection,
     this.activityHandling,
     this.turnCoverage,
+    this.interimTranscriptTimestampEnabled,
   });
 
   /// Creates a configuration with automatic VAD and interruption enabled.
@@ -27,22 +32,26 @@ class RealtimeInputConfig {
     int? silenceDurationMs,
     ActivityHandling activityHandling =
         ActivityHandling.startOfActivityInterrupts,
+    bool? interimTranscriptTimestampEnabled,
   }) {
     return RealtimeInputConfig(
       automaticActivityDetection: AutomaticActivityDetection.enabled(
         silenceDurationMs: silenceDurationMs,
       ),
       activityHandling: activityHandling,
+      interimTranscriptTimestampEnabled: interimTranscriptTimestampEnabled,
     );
   }
 
   /// Creates a configuration for manual VAD mode.
   factory RealtimeInputConfig.manual({
     ActivityHandling activityHandling = ActivityHandling.noInterruption,
+    bool? interimTranscriptTimestampEnabled,
   }) {
     return RealtimeInputConfig(
       automaticActivityDetection: AutomaticActivityDetection.manual(),
       activityHandling: activityHandling,
+      interimTranscriptTimestampEnabled: interimTranscriptTimestampEnabled,
     );
   }
 
@@ -60,6 +69,8 @@ class RealtimeInputConfig {
       turnCoverage: json['turnCoverage'] != null
           ? TurnCoverage.fromJson(json['turnCoverage'] as String)
           : null,
+      interimTranscriptTimestampEnabled:
+          json['interimTranscriptTimestampEnabled'] as bool?,
     );
   }
 
@@ -70,6 +81,8 @@ class RealtimeInputConfig {
     if (activityHandling != null)
       'activityHandling': activityHandling!.toJson(),
     if (turnCoverage != null) 'turnCoverage': turnCoverage!.toJson(),
+    if (interimTranscriptTimestampEnabled != null)
+      'interimTranscriptTimestampEnabled': interimTranscriptTimestampEnabled,
   };
 
   /// Creates a copy with the given fields replaced.
@@ -77,17 +90,23 @@ class RealtimeInputConfig {
     AutomaticActivityDetection? automaticActivityDetection,
     ActivityHandling? activityHandling,
     TurnCoverage? turnCoverage,
+    Object? interimTranscriptTimestampEnabled = unsetCopyWithValue,
   }) {
     return RealtimeInputConfig(
       automaticActivityDetection:
           automaticActivityDetection ?? this.automaticActivityDetection,
       activityHandling: activityHandling ?? this.activityHandling,
       turnCoverage: turnCoverage ?? this.turnCoverage,
+      interimTranscriptTimestampEnabled:
+          interimTranscriptTimestampEnabled == unsetCopyWithValue
+          ? this.interimTranscriptTimestampEnabled
+          : interimTranscriptTimestampEnabled as bool?,
     );
   }
 
   @override
   String toString() =>
       'RealtimeInputConfig(activityHandling: $activityHandling, '
-      'turnCoverage: $turnCoverage)';
+      'turnCoverage: $turnCoverage, interimTranscriptTimestampEnabled: '
+      '$interimTranscriptTimestampEnabled)';
 }

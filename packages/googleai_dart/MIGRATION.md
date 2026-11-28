@@ -173,6 +173,30 @@ final after = GoogleAIConfig.vertexAI(
 ```
 [Vertex AI Live session guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session)
 
+Live setup frames use the presence of `inputAudioTranscription` or
+`outputAudioTranscription` to request transcripts. The Dart constructors
+`AudioTranscriptionConfig.enabled()` and `AudioTranscriptionConfig.disabled()`
+continue to work. If you inspect raw setup frames in a gateway or test fixture,
+update the expected JSON. Earlier Dart releases sent this frame.
+
+```json
+{"setup":{"model":"models/gemini-3.8-live","inputAudioTranscription":{"enabled":true},"outputAudioTranscription":{"enabled":false}}}
+```
+
+The updated client sends this frame.
+
+```json
+{"setup":{"model":"models/gemini-3.8-live","inputAudioTranscription":{}}}
+```
+
+[Live API setup reference](https://aistudio.google.com/api-reference/live#BidiGenerateContentSetup)
+
+The `signalAudioStreamEnd()` helper sends
+`{"realtimeInput":{"audioStreamEnd":true}}` in place of the earlier
+`{"realtimeInput":{"audioStreamEnd":{}}}` frame. The manual VAD activity
+start and end markers continue to use empty objects.
+[Live realtime input reference](https://aistudio.google.com/api-reference/live#BidiGenerateContentRealtimeInput)
+
 ---
 
 ## Migrating from v12.x to v13.0.0

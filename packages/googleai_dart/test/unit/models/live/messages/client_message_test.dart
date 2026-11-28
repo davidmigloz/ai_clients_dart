@@ -104,6 +104,34 @@ void main() {
   });
 
   group('BidiGenerateContentSetup', () {
+    test('normalizes persisted transcription switches for the Live wire', () {
+      const persisted = {
+        'inputAudioTranscription': {
+          'enabled': true,
+          'languageCodes': ['en-US'],
+        },
+        'outputAudioTranscription': {'enabled': false, 'mode': 'VERBATIM'},
+      };
+      final liveConfig = LiveConfig.fromJson(persisted);
+      expect(liveConfig.toJson(), persisted);
+
+      final setup =
+          BidiGenerateContentClientMessage.fromJson({
+                'setup': {'model': 'models/gemini-3.8-live', ...persisted},
+              })
+              as BidiGenerateContentSetup;
+      expect(setup.inputAudioTranscription?.enabled, isTrue);
+      expect(setup.outputAudioTranscription?.enabled, isFalse);
+      expect(setup.toJson(), {
+        'setup': {
+          'model': 'models/gemini-3.8-live',
+          'inputAudioTranscription': {
+            'languageCodes': ['en-US'],
+          },
+        },
+      });
+    });
+
     test('serializes with setup wrapper key', () {
       const setup = BidiGenerateContentSetup(
         model: 'models/gemini-2.0-flash-live-001',
@@ -300,6 +328,22 @@ void main() {
   });
 
   group('BidiGenerateContentRealtimeInput', () {
+    test('sends a boolean audio end and reads legacy persisted signals', () {
+      final legacy = BidiGenerateContentRealtimeInput.fromJson({
+        'audioStreamEnd': <String, dynamic>{},
+      });
+      expect(legacy.audioStreamEnd, isTrue);
+      expect(legacy.toJson(), {
+        'realtimeInput': {'audioStreamEnd': true},
+      });
+      expect(
+        const BidiGenerateContentRealtimeInput(audioStreamEnd: false).toJson(),
+        {
+          'realtimeInput': {'audioStreamEnd': false},
+        },
+      );
+    });
+
     test('serializes text input with realtimeInput wrapper key', () {
       const input = BidiGenerateContentRealtimeInput(text: 'Hello');
 
