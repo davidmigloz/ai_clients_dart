@@ -8,11 +8,21 @@ import 'modality_token_count.dart';
 /// Token usage metadata for the request/response.
 @immutable
 class UsageMetadata {
+  final int? _initialPromptTokenCount;
+
   /// Number of tokens in the prompt.
   ///
   /// When `cachedContent` is set, this is still the total effective prompt
   /// size meaning it includes the number of tokens in the cached content.
   final int? promptTokenCount;
+
+  /// Prompt tokens in the first hop of an automatically continued generation.
+  ///
+  /// Across multiple requests, [promptTokenCount] is the billed sum. For a
+  /// single request this is equal to [promptTokenCount]. This value is
+  /// calculated by the client and is omitted from REST JSON.
+  int? get initialPromptTokenCount =>
+      _initialPromptTokenCount ?? promptTokenCount;
 
   /// Total number of tokens across all generated response candidates.
   final int? candidatesTokenCount;
@@ -74,6 +84,7 @@ class UsageMetadata {
     this.promptTokensDetails,
     this.toolUsePromptTokensDetails,
     this.serviceTier,
+    this._initialPromptTokenCount,
   });
 
   /// Creates a [UsageMetadata] from JSON.
@@ -143,6 +154,7 @@ class UsageMetadata {
     Object? promptTokensDetails = unsetCopyWithValue,
     Object? toolUsePromptTokensDetails = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? initialPromptTokenCount = unsetCopyWithValue,
   }) {
     return UsageMetadata(
       promptTokenCount: promptTokenCount == unsetCopyWithValue
@@ -179,6 +191,9 @@ class UsageMetadata {
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
+      initialPromptTokenCount: initialPromptTokenCount == unsetCopyWithValue
+          ? _initialPromptTokenCount
+          : initialPromptTokenCount as int?,
     );
   }
 
@@ -188,6 +203,7 @@ class UsageMetadata {
     const listEq = ListEquality<ModalityTokenCount>();
     return other is UsageMetadata &&
         other.promptTokenCount == promptTokenCount &&
+        other.initialPromptTokenCount == initialPromptTokenCount &&
         other.candidatesTokenCount == candidatesTokenCount &&
         other.totalTokenCount == totalTokenCount &&
         other.cachedContentTokenCount == cachedContentTokenCount &&
@@ -208,6 +224,7 @@ class UsageMetadata {
     const listEq = ListEquality<ModalityTokenCount>();
     return Object.hash(
       promptTokenCount,
+      initialPromptTokenCount,
       candidatesTokenCount,
       totalTokenCount,
       cachedContentTokenCount,
@@ -225,6 +242,7 @@ class UsageMetadata {
   String toString() =>
       'UsageMetadata('
       'promptTokenCount: $promptTokenCount, '
+      'initialPromptTokenCount: $initialPromptTokenCount, '
       'candidatesTokenCount: $candidatesTokenCount, '
       'totalTokenCount: $totalTokenCount, '
       'cachedContentTokenCount: $cachedContentTokenCount, '

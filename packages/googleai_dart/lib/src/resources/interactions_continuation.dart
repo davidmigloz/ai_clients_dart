@@ -31,11 +31,15 @@ Map<String, dynamic> _continuationBody(
 
 Future<Interaction> _continueInteraction(
   Map<String, dynamic> Function() buildBody,
-  Future<Interaction> Function(Map<String, dynamic>, _ContinuationAbort) send, {
+  Future<Interaction> Function(Map<String, dynamic>, ContinuationAbort) send, {
   required Duration timeout,
   Future<void>? abortTrigger,
 }) async {
-  final abort = _ContinuationAbort(timeout, abortTrigger);
+  final abort = ContinuationAbort(
+    'Interaction continuation',
+    timeout,
+    abortTrigger,
+  );
   try {
     await Future<void>.value();
     abort.check();
@@ -101,36 +105,18 @@ Stream<InteractionEvent> _continueInteractionStream(
   required Duration timeout,
   Future<void>? abortTrigger,
 }) {
-  late final StreamController<InteractionEvent> controller;
-  StreamSubscription<InteractionEvent>? subscription;
-  _ContinuationAbort? active;
-  controller = StreamController<InteractionEvent>(
-    // A listener may abort as soon as a continuation boundary arrives.
-    sync: true,
-    onListen: () {
-      final abort = _ContinuationAbort(timeout, abortTrigger);
-      active = abort;
-      subscription = _runInteractionStream(buildBody, send, abort).listen(
-        controller.add,
-        onError: controller.addError,
-        onDone: () => unawaited(controller.close()),
-      );
-    },
-    onPause: () => subscription?.pause(),
-    onResume: () => subscription?.resume(),
-    onCancel: () {
-      // Cancel the pending HTTP read before waiting for the async generator.
-      active?.cancelSubscription();
-      return subscription?.cancel();
-    },
+  return continuationStream(
+    operation: 'Interaction continuation',
+    timeout: timeout,
+    abortTrigger: abortTrigger,
+    run: (abort) => _runInteractionStream(buildBody, send, abort),
   );
-  return controller.stream;
 }
 
 Stream<InteractionEvent> _runInteractionStream(
   Map<String, dynamic> Function() buildBody,
   Stream<InteractionEvent> Function(Map<String, dynamic>, Future<void>) send,
-  _ContinuationAbort abort,
+  ContinuationAbort abort,
 ) async* {
   try {
     await Future<void>.value();
@@ -333,85 +319,6 @@ class _InteractionStreamHop {
     if (token == null || token == checkpoint?.token) return;
     checkpoint = (token: token, ownerId: stored ? interactionId : null);
     outputAfterCheckpoint = false;
-  }
-}
-
-class _ContinuationAbort {
-  final Duration timeout;
-  final Stopwatch _elapsed = Stopwatch()..start();
-  final Completer<void> _abort = Completer<void>();
-  late final Timer _timer;
-  bool _closed = false;
-  Exception? _failure;
-  bool subscriptionCancelled = false;
-
-  _ContinuationAbort(this.timeout, Future<void>? trigger) {
-    _timer = Timer(timeout, _timeOut);
-    if (trigger != null) {
-      unawaited(
-        trigger.then(
-          (_) => abort(AbortionStage.beforeRequest),
-          onError: (Object _, StackTrace _) {},
-        ),
-      );
-    }
-  }
-
-  void abort(AbortionStage stage) => _stop(
-    AbortedException(
-      message: 'Interaction continuation aborted by user',
-      correlationId: generateRequestId(),
-      timestamp: DateTime.now(),
-      stage: stage,
-    ),
-  );
-
-  void cancelSubscription() {
-    subscriptionCancelled = true;
-    abort(AbortionStage.duringStream);
-  }
-
-  Future<void> get future => _abort.future;
-
-  Future<T> race<T>(Future<T> response) async {
-    // Future.any handles a late response error even if cancellation wins.
-    final value = await Future.any<T>([
-      response,
-      future.then<T>((_) => throw _failure!),
-    ]);
-    check();
-    return value;
-  }
-
-  void check() {
-    if (_elapsed.elapsed >= timeout) _timeOut();
-    final current = _failure;
-    if (current != null) throw current;
-  }
-
-  void _timeOut() => _stop(
-    TimeoutException(
-      message: 'The interaction continuation deadline elapsed',
-      timeout: timeout,
-      elapsed: _elapsed.elapsed,
-    ),
-  );
-
-  Exception resolveFailure(Exception error) => switch (_failure) {
-    final TimeoutException timeout => timeout,
-    _ when error is AbortedException => error,
-    final failure => failure ?? error,
-  };
-
-  void _stop(Exception error) {
-    if (_closed || _failure != null) return;
-    _failure = error;
-    _abort.complete();
-  }
-
-  void close() {
-    _closed = true;
-    _timer.cancel();
   }
 }
 
