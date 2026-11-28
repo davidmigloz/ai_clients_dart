@@ -192,8 +192,9 @@ final class InteractionAudioProcessing {
         ),
       };
     } on TypeError {
-      if (json is Map<String, dynamic>)
+      if (json is Map<String, dynamic>) {
         return InteractionAudioProcessing._wire(json);
+      }
       rethrow;
     }
   }
@@ -284,8 +285,9 @@ final class InteractionVideoProcessing {
         ),
       };
     } on TypeError {
-      if (json is Map<String, dynamic>)
+      if (json is Map<String, dynamic>) {
         return InteractionVideoProcessing._wire(json);
+      }
       rethrow;
     }
   }
@@ -365,8 +367,9 @@ final class InteractionDocumentProcessing {
         ),
       };
     } on TypeError {
-      if (json is Map<String, dynamic>)
+      if (json is Map<String, dynamic>) {
         return InteractionDocumentProcessing._wire(json);
+      }
       rethrow;
     }
   }
