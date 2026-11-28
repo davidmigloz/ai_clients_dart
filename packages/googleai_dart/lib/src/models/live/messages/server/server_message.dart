@@ -3,6 +3,7 @@ import '../../../metadata/grounding_metadata.dart';
 import '../../../metadata/usage_metadata.dart';
 import '../../../tools/function_call.dart';
 import '../../config/transcription.dart';
+import 'live_usage_metadata.dart';
 
 /// Base class for server-to-client WebSocket messages.
 ///
@@ -13,46 +14,74 @@ import '../../config/transcription.dart';
 /// - `toolCallCancellation` for [BidiGenerateContentToolCallCancellation]
 /// - `goAway` for [GoAway]
 /// - `sessionResumptionUpdate` for [SessionResumptionUpdate]
+///
+/// Frames without a recognized wrapper use [UnknownServerMessage]. This
+/// includes usage-only frames, which still expose [responseUsageMetadata].
 sealed class BidiGenerateContentServerMessage {
+  /// Usage reported alongside the message payload at the top level.
+  ///
+  /// The server can send this by itself or together with a typed message.
+  final LiveUsageMetadata? responseUsageMetadata;
+
   /// Creates a message.
-  const BidiGenerateContentServerMessage();
+  const BidiGenerateContentServerMessage({this.responseUsageMetadata});
 
   /// Creates a message from JSON.
   ///
   /// Dispatches to the appropriate subclass based on the JSON key.
   factory BidiGenerateContentServerMessage.fromJson(Map<String, dynamic> json) {
+    final responseUsageMetadata = switch (json['usageMetadata']) {
+      final Map<String, dynamic> usage => LiveUsageMetadata.fromJson(usage),
+      _ => null,
+    };
     if (json.containsKey('setupComplete')) {
       return BidiGenerateContentSetupComplete.fromJson(
         json['setupComplete'] as Map<String, dynamic>,
+        responseUsageMetadata: responseUsageMetadata,
       );
     }
     if (json.containsKey('serverContent')) {
       return BidiGenerateContentServerContent.fromJson(
         json['serverContent'] as Map<String, dynamic>,
+        responseUsageMetadata: responseUsageMetadata,
       );
     }
     if (json.containsKey('toolCall')) {
       return BidiGenerateContentToolCall.fromJson(
         json['toolCall'] as Map<String, dynamic>,
+        responseUsageMetadata: responseUsageMetadata,
       );
     }
     if (json.containsKey('toolCallCancellation')) {
       return BidiGenerateContentToolCallCancellation.fromJson(
         json['toolCallCancellation'] as Map<String, dynamic>,
+        responseUsageMetadata: responseUsageMetadata,
       );
     }
     if (json.containsKey('goAway')) {
-      return GoAway.fromJson(json['goAway'] as Map<String, dynamic>);
+      return GoAway.fromJson(
+        json['goAway'] as Map<String, dynamic>,
+        responseUsageMetadata: responseUsageMetadata,
+      );
     }
     if (json.containsKey('sessionResumptionUpdate')) {
       return SessionResumptionUpdate.fromJson(
         json['sessionResumptionUpdate'] as Map<String, dynamic>,
+        responseUsageMetadata: responseUsageMetadata,
       );
     }
     // Return unknown message type instead of throwing to handle
     // future API additions gracefully
-    return UnknownServerMessage(json);
+    return UnknownServerMessage(
+      json,
+      responseUsageMetadata: responseUsageMetadata,
+    );
   }
+
+  Map<String, dynamic> get _responseUsageJson => {
+    if (responseUsageMetadata != null)
+      'usageMetadata': responseUsageMetadata!.toJson(),
+  };
 
   /// Converts to JSON with the message type wrapper key.
   Map<String, dynamic> toJson();
@@ -68,18 +97,26 @@ class BidiGenerateContentSetupComplete
   final String? sessionId;
 
   /// Creates a [BidiGenerateContentSetupComplete].
-  const BidiGenerateContentSetupComplete({this.sessionId});
+  const BidiGenerateContentSetupComplete({
+    this.sessionId,
+    super.responseUsageMetadata,
+  });
 
   /// Creates from JSON.
-  factory BidiGenerateContentSetupComplete.fromJson(Map<String, dynamic> json) {
+  factory BidiGenerateContentSetupComplete.fromJson(
+    Map<String, dynamic> json, {
+    LiveUsageMetadata? responseUsageMetadata,
+  }) {
     return BidiGenerateContentSetupComplete(
       sessionId: json['sessionId'] as String?,
+      responseUsageMetadata: responseUsageMetadata,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'setupComplete': {if (sessionId != null) 'sessionId': sessionId},
+    ..._responseUsageJson,
   };
 
   @override
@@ -129,8 +166,31 @@ class BidiGenerateContentServerContent
   /// Grounding metadata for the response.
   final GroundingMetadata? groundingMetadata;
 
-  /// Token usage metadata.
+  /// Token usage nested inside the content in earlier API responses.
+  ///
+  /// For usage accompanying a current Live message, see [responseUsageMetadata].
   final UsageMetadata? usageMetadata;
+
+  /// The model expects additional input before generating more content.
+  final bool? waitingForInput;
+
+  /// The server-reported reason the turn ended, when supplied.
+  ///
+  /// This is the raw wire string, such as `NEED_MORE_INPUT`.
+  final String? turnCompleteReason;
+
+  /// The server's activity status accompanying a completed turn.
+  ///
+  /// This is the raw wire string, such as `IN_PROGRESS` or `IDLE`.
+  final String? interactionStatus;
+
+  /// A change in server-side speech detection reported by Vertex AI.
+  ///
+  /// Examples include `SPEECH` and `NON_SPEECH`.
+  final String? speechState;
+
+  /// URL retrieval metadata, when the model reports it.
+  final Map<String, dynamic>? urlContextMetadata;
 
   /// Creates a [BidiGenerateContentServerContent].
   const BidiGenerateContentServerContent({
@@ -143,10 +203,19 @@ class BidiGenerateContentServerContent
     this.outputTranscription,
     this.groundingMetadata,
     this.usageMetadata,
+    this.waitingForInput,
+    this.turnCompleteReason,
+    this.interactionStatus,
+    this.speechState,
+    this.urlContextMetadata,
+    super.responseUsageMetadata,
   });
 
   /// Creates from JSON.
-  factory BidiGenerateContentServerContent.fromJson(Map<String, dynamic> json) {
+  factory BidiGenerateContentServerContent.fromJson(
+    Map<String, dynamic> json, {
+    LiveUsageMetadata? responseUsageMetadata,
+  }) {
     return BidiGenerateContentServerContent(
       modelTurn: json['modelTurn'] != null
           ? Content.fromJson(json['modelTurn'] as Map<String, dynamic>)
@@ -179,6 +248,12 @@ class BidiGenerateContentServerContent
               json['usageMetadata'] as Map<String, dynamic>,
             )
           : null,
+      waitingForInput: json['waitingForInput'] as bool?,
+      turnCompleteReason: json['turnCompleteReason'] as String?,
+      interactionStatus: json['interactionStatus'] as String?,
+      speechState: json['speechState'] as String?,
+      urlContextMetadata: json['urlContextMetadata'] as Map<String, dynamic>?,
+      responseUsageMetadata: responseUsageMetadata,
     );
   }
 
@@ -198,14 +273,23 @@ class BidiGenerateContentServerContent
       if (groundingMetadata != null)
         'groundingMetadata': groundingMetadata!.toJson(),
       if (usageMetadata != null) 'usageMetadata': usageMetadata!.toJson(),
+      if (waitingForInput != null) 'waitingForInput': waitingForInput,
+      if (turnCompleteReason != null) 'turnCompleteReason': turnCompleteReason,
+      if (interactionStatus != null) 'interactionStatus': interactionStatus,
+      if (speechState != null) 'speechState': speechState,
+      if (urlContextMetadata != null) 'urlContextMetadata': urlContextMetadata,
     },
+    ..._responseUsageJson,
   };
 
   @override
   String toString() =>
       'BidiGenerateContentServerContent(turnComplete: $turnComplete, '
       'generationComplete: $generationComplete, interrupted: $interrupted, '
-      'hasInterimInputTranscription: ${interimInputTranscription != null})';
+      'hasInterimInputTranscription: ${interimInputTranscription != null}, '
+      'waitingForInput: $waitingForInput, turnCompleteReason: $turnCompleteReason, '
+      'interactionStatus: $interactionStatus, speechState: $speechState, '
+      'hasUrlContextMetadata: ${urlContextMetadata != null})';
 }
 
 /// Tool call request message.
@@ -217,14 +301,21 @@ class BidiGenerateContentToolCall extends BidiGenerateContentServerMessage {
   final List<FunctionCall> functionCalls;
 
   /// Creates a [BidiGenerateContentToolCall].
-  const BidiGenerateContentToolCall({required this.functionCalls});
+  const BidiGenerateContentToolCall({
+    required this.functionCalls,
+    super.responseUsageMetadata,
+  });
 
   /// Creates from JSON.
-  factory BidiGenerateContentToolCall.fromJson(Map<String, dynamic> json) {
+  factory BidiGenerateContentToolCall.fromJson(
+    Map<String, dynamic> json, {
+    LiveUsageMetadata? responseUsageMetadata,
+  }) {
     return BidiGenerateContentToolCall(
       functionCalls: (json['functionCalls'] as List<dynamic>)
           .map((e) => FunctionCall.fromJson(e as Map<String, dynamic>))
           .toList(),
+      responseUsageMetadata: responseUsageMetadata,
     );
   }
 
@@ -233,6 +324,7 @@ class BidiGenerateContentToolCall extends BidiGenerateContentServerMessage {
     'toolCall': {
       'functionCalls': functionCalls.map((e) => e.toJson()).toList(),
     },
+    ..._responseUsageJson,
   };
 
   @override
@@ -250,20 +342,26 @@ class BidiGenerateContentToolCallCancellation
   final List<String> ids;
 
   /// Creates a [BidiGenerateContentToolCallCancellation].
-  const BidiGenerateContentToolCallCancellation({required this.ids});
+  const BidiGenerateContentToolCallCancellation({
+    required this.ids,
+    super.responseUsageMetadata,
+  });
 
   /// Creates from JSON.
   factory BidiGenerateContentToolCallCancellation.fromJson(
-    Map<String, dynamic> json,
-  ) {
+    Map<String, dynamic> json, {
+    LiveUsageMetadata? responseUsageMetadata,
+  }) {
     return BidiGenerateContentToolCallCancellation(
       ids: (json['ids'] as List<dynamic>).cast<String>(),
+      responseUsageMetadata: responseUsageMetadata,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'toolCallCancellation': {'ids': ids},
+    ..._responseUsageJson,
   };
 
   @override
@@ -281,16 +379,23 @@ class GoAway extends BidiGenerateContentServerMessage {
   final String? timeLeft;
 
   /// Creates a [GoAway].
-  const GoAway({this.timeLeft});
+  const GoAway({this.timeLeft, super.responseUsageMetadata});
 
   /// Creates from JSON.
-  factory GoAway.fromJson(Map<String, dynamic> json) {
-    return GoAway(timeLeft: json['timeLeft'] as String?);
+  factory GoAway.fromJson(
+    Map<String, dynamic> json, {
+    LiveUsageMetadata? responseUsageMetadata,
+  }) {
+    return GoAway(
+      timeLeft: json['timeLeft'] as String?,
+      responseUsageMetadata: responseUsageMetadata,
+    );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'goAway': {if (timeLeft != null) 'timeLeft': timeLeft},
+    ..._responseUsageJson,
   };
 
   @override
@@ -311,13 +416,21 @@ class SessionResumptionUpdate extends BidiGenerateContentServerMessage {
   final bool? resumable;
 
   /// Creates a [SessionResumptionUpdate].
-  const SessionResumptionUpdate({this.newHandle, this.resumable});
+  const SessionResumptionUpdate({
+    this.newHandle,
+    this.resumable,
+    super.responseUsageMetadata,
+  });
 
   /// Creates from JSON.
-  factory SessionResumptionUpdate.fromJson(Map<String, dynamic> json) {
+  factory SessionResumptionUpdate.fromJson(
+    Map<String, dynamic> json, {
+    LiveUsageMetadata? responseUsageMetadata,
+  }) {
     return SessionResumptionUpdate(
       newHandle: json['newHandle'] as String?,
       resumable: json['resumable'] as bool?,
+      responseUsageMetadata: responseUsageMetadata,
     );
   }
 
@@ -327,6 +440,7 @@ class SessionResumptionUpdate extends BidiGenerateContentServerMessage {
       if (newHandle != null) 'newHandle': newHandle,
       if (resumable != null) 'resumable': resumable,
     },
+    ..._responseUsageJson,
   };
 
   @override
@@ -354,10 +468,12 @@ class UnknownServerMessage extends BidiGenerateContentServerMessage {
   final Map<String, dynamic> rawJson;
 
   /// Creates an [UnknownServerMessage].
-  const UnknownServerMessage(this.rawJson);
+  const UnknownServerMessage(this.rawJson, {super.responseUsageMetadata});
 
   @override
-  Map<String, dynamic> toJson() => rawJson;
+  Map<String, dynamic> toJson() => responseUsageMetadata == null
+      ? rawJson
+      : {...rawJson, ..._responseUsageJson};
 
   @override
   String toString() => 'UnknownServerMessage(keys: ${rawJson.keys})';

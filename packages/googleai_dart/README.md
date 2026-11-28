@@ -874,6 +874,12 @@ query placement. On native platforms, `EphemeralTokenProvider` also supports
 native WebSocket headers. Vertex projects and locations are included in the
 fully qualified model name in setup.
 
+Read `message.responseUsageMetadata` for counts the server attaches to a Live
+message. Usage may arrive in its own frame or with content. The client exposes
+generated tokens as `responseTokenCount` on both backends. Use
+`BidiGenerateContentServerContent.waitingForInput` to detect when the model
+expects the user to continue.
+
 [Full example](example/live_example.dart) ·
 [Gemini Developer API ephemeral tokens](https://aistudio.google.com/docs/ephemeral-tokens) ·
 [Vertex AI Live sessions](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session)
