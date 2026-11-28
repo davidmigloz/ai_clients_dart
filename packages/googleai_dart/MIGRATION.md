@@ -212,6 +212,45 @@ The `signalAudioStreamEnd()` helper sends
 start and end markers continue to use empty objects.
 [Live realtime input reference](https://aistudio.google.com/api-reference/live#BidiGenerateContentRealtimeInput)
 
+### Live voice activity detection enum values
+
+Raw setup consumers should update the expected values under
+`realtimeInputConfig.automaticActivityDetection`. Persisted Dart JSON using
+`HIGH` or `LOW` still parses. Both `toJson()` and the enum's `value` now
+use the API's prefixed values.
+
+```json
+{"startOfSpeechSensitivity":"HIGH","endOfSpeechSensitivity":"LOW"}
+```
+
+The updated client sends these values.
+
+```json
+{"startOfSpeechSensitivity":"START_SENSITIVITY_HIGH","endOfSpeechSensitivity":"END_SENSITIVITY_LOW"}
+```
+
+Handle `unspecified` when switching exhaustively over `StartSensitivity`,
+`EndSensitivity`, `ActivityHandling`, and `TurnCoverage`. Also handle
+`TurnCoverage.turnIncludesAudioActivityAndAllVideo`.
+
+```dart
+// Before
+String turnCoverageLabel(TurnCoverage coverage) => switch (coverage) {
+  TurnCoverage.turnIncludesOnlyActivity => 'Detected activity',
+  TurnCoverage.turnIncludesAllInput => 'All input',
+};
+
+// After
+String turnCoverageLabel(TurnCoverage coverage) => switch (coverage) {
+  TurnCoverage.turnIncludesOnlyActivity => 'Detected activity',
+  TurnCoverage.turnIncludesAllInput => 'All input',
+  TurnCoverage.unspecified => 'Model default',
+  TurnCoverage.turnIncludesAudioActivityAndAllVideo => 'Audio activity and all video',
+};
+```
+
+[Live realtime input configuration reference](https://aistudio.google.com/api-reference/live#RealtimeInputConfig)
+
 ---
 
 ## Updating Vertex AI Interactions

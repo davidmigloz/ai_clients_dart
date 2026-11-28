@@ -55,8 +55,8 @@ void main() {
         final json = config.toJson();
 
         expect(json['disabled'], false);
-        expect(json['startOfSpeechSensitivity'], 'HIGH');
-        expect(json['endOfSpeechSensitivity'], 'LOW');
+        expect(json['startOfSpeechSensitivity'], 'START_SENSITIVITY_HIGH');
+        expect(json['endOfSpeechSensitivity'], 'END_SENSITIVITY_LOW');
         expect(json['prefixPaddingMs'], 100);
         expect(json['silenceDurationMs'], 500);
       });

@@ -105,6 +105,51 @@ const _model = 'gemini-3.8-live';
 const _deadline = Duration(seconds: 4);
 
 void main() {
+  for (final vertex in [false, true]) {
+    test(
+      '${vertex ? 'Vertex' : 'Developer'} Live setup sends canonical VAD enums',
+      () async {
+        final server = await _Server.start();
+        final config = vertex
+            ? GoogleAIConfig.vertexAI(
+                projectId: 'P',
+                location: 'eu',
+                authProvider: const BearerTokenProvider('local-fixture'),
+              ).copyWith(baseUrl: server.baseUrl)
+            : GoogleAIConfig(baseUrl: server.baseUrl);
+        final liveConfig = LiveConfig.fromJson({
+          'realtimeInputConfig': {
+            'automaticActivityDetection': {
+              'startOfSpeechSensitivity': 'HIGH',
+              'endOfSpeechSensitivity': 'LOW',
+            },
+            'activityHandling': 'ACTIVITY_HANDLING_UNSPECIFIED',
+            'turnCoverage': 'TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO',
+          },
+        });
+        await _createLive(
+          config,
+        ).connect(model: _model, liveConfig: liveConfig).timeout(_deadline);
+        final model = vertex
+            ? 'projects/P/locations/eu/publishers/google/models/$_model'
+            : 'models/$_model';
+        expect((await server.handshake.future).firstMessage, {
+          'setup': {
+            'model': model,
+            'realtimeInputConfig': {
+              'automaticActivityDetection': {
+                'startOfSpeechSensitivity': 'START_SENSITIVITY_HIGH',
+                'endOfSpeechSensitivity': 'END_SENSITIVITY_LOW',
+              },
+              'activityHandling': 'ACTIVITY_HANDLING_UNSPECIFIED',
+              'turnCoverage': 'TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO',
+            },
+          },
+        });
+      },
+    );
+  }
+
   test(
     'Live Transcribe sends settings and delivers interim and final frames',
     () async {

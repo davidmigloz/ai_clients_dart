@@ -3,25 +3,28 @@ enum StartSensitivity {
   /// High sensitivity - more likely to detect speech start.
   ///
   /// May result in more false positives (detecting non-speech as speech).
-  high('HIGH'),
+  high('START_SENSITIVITY_HIGH'),
 
   /// Low sensitivity - less likely to detect speech start.
   ///
   /// May result in more false negatives (missing actual speech start).
-  low('LOW');
+  low('START_SENSITIVITY_LOW'),
+
+  /// Use the backend's default sensitivity.
+  unspecified('START_SENSITIVITY_UNSPECIFIED');
 
   const StartSensitivity(this.value);
 
   /// The JSON value.
   final String value;
 
-  /// Creates from JSON value.
-  static StartSensitivity fromJson(String json) {
-    return StartSensitivity.values.firstWhere(
-      (e) => e.value == json,
-      orElse: () => throw FormatException('Unknown StartSensitivity: $json'),
-    );
-  }
+  /// Parses a wire value or a legacy `HIGH` or `LOW` value.
+  static StartSensitivity fromJson(String json) => switch (json) {
+    'HIGH' || 'START_SENSITIVITY_HIGH' => high,
+    'LOW' || 'START_SENSITIVITY_LOW' => low,
+    'START_SENSITIVITY_UNSPECIFIED' => unspecified,
+    _ => throw FormatException('Unknown StartSensitivity: $json'),
+  };
 
   /// Converts to JSON value.
   String toJson() => value;

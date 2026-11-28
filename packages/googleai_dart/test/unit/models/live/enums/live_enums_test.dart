@@ -3,6 +3,12 @@ import 'package:test/test.dart';
 
 void main() {
   group('ActivityHandling', () {
+    test('uses the documented unspecified value', () {
+      const wire = 'ACTIVITY_HANDLING_UNSPECIFIED';
+      expect(ActivityHandling.fromJson(wire), ActivityHandling.unspecified);
+      expect(ActivityHandling.unspecified.toJson(), wire);
+    });
+
     test('startOfActivityInterrupts has correct value', () {
       expect(
         ActivityHandling.startOfActivityInterrupts.value,
@@ -59,11 +65,11 @@ void main() {
 
   group('StartSensitivity', () {
     test('high has correct value', () {
-      expect(StartSensitivity.high.value, 'HIGH');
+      expect(StartSensitivity.high.value, 'START_SENSITIVITY_HIGH');
     });
 
     test('low has correct value', () {
-      expect(StartSensitivity.low.value, 'LOW');
+      expect(StartSensitivity.low.value, 'START_SENSITIVITY_LOW');
     });
 
     group('fromJson', () {
@@ -87,11 +93,18 @@ void main() {
 
     group('toJson', () {
       test('high serializes correctly', () {
-        expect(StartSensitivity.high.toJson(), 'HIGH');
+        expect(StartSensitivity.high.toJson(), 'START_SENSITIVITY_HIGH');
       });
 
       test('low serializes correctly', () {
-        expect(StartSensitivity.low.toJson(), 'LOW');
+        expect(StartSensitivity.low.toJson(), 'START_SENSITIVITY_LOW');
+      });
+
+      test('unspecified uses the documented default marker', () {
+        expect(
+          StartSensitivity.unspecified.toJson(),
+          'START_SENSITIVITY_UNSPECIFIED',
+        );
       });
     });
 
@@ -106,11 +119,11 @@ void main() {
 
   group('EndSensitivity', () {
     test('high has correct value', () {
-      expect(EndSensitivity.high.value, 'HIGH');
+      expect(EndSensitivity.high.value, 'END_SENSITIVITY_HIGH');
     });
 
     test('low has correct value', () {
-      expect(EndSensitivity.low.value, 'LOW');
+      expect(EndSensitivity.low.value, 'END_SENSITIVITY_LOW');
     });
 
     group('fromJson', () {
@@ -134,11 +147,18 @@ void main() {
 
     group('toJson', () {
       test('high serializes correctly', () {
-        expect(EndSensitivity.high.toJson(), 'HIGH');
+        expect(EndSensitivity.high.toJson(), 'END_SENSITIVITY_HIGH');
       });
 
       test('low serializes correctly', () {
-        expect(EndSensitivity.low.toJson(), 'LOW');
+        expect(EndSensitivity.low.toJson(), 'END_SENSITIVITY_LOW');
+      });
+
+      test('unspecified uses the documented default marker', () {
+        expect(
+          EndSensitivity.unspecified.toJson(),
+          'END_SENSITIVITY_UNSPECIFIED',
+        );
       });
     });
 
@@ -152,6 +172,14 @@ void main() {
   });
 
   group('TurnCoverage', () {
+    test('supports unspecified and detected audio with all video', () {
+      expect(TurnCoverage.unspecified.toJson(), 'TURN_COVERAGE_UNSPECIFIED');
+      expect(
+        TurnCoverage.turnIncludesAudioActivityAndAllVideo.toJson(),
+        'TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO',
+      );
+    });
+
     test('turnIncludesOnlyActivity has correct value', () {
       expect(
         TurnCoverage.turnIncludesOnlyActivity.value,
