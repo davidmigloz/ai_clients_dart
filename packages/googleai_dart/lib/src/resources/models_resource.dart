@@ -37,6 +37,7 @@ import '../models/safety/safety_rating.dart';
 import '../utils/redactor.dart';
 import 'base_resource.dart';
 import 'continuation_abort.dart';
+import 'generate_content_validation.dart';
 import 'operations_resource.dart';
 import 'streaming_resource.dart';
 
@@ -200,6 +201,15 @@ class ModelsResource extends ResourceBase with StreamingResource {
     Map<String, dynamic> body, {
     required bool stream,
   }) {
+    final toolConfig = body['toolConfig'] as Map<String, dynamic>?;
+    final callingConfig =
+        toolConfig?['functionCallingConfig'] as Map<String, dynamic>?;
+    final argumentsStreaming =
+        callingConfig?['streamFunctionCallArguments'] as bool?;
+    validateFunctionArgumentStreaming(
+      value: argumentsStreaming,
+      streamConfig: stream ? config : null,
+    );
     final operation = stream ? 'streamGenerateContent' : 'generateContent';
     final url = requestBuilder.buildUrl(
       '/{version}/models/$model:$operation',
@@ -228,6 +238,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required CountTokensRequest request,
     Future<void>? abortTrigger,
   }) async {
+    validateNonStreamingArguments(request.generateContentRequest);
     final url = requestBuilder.buildUrl('/{version}/models/$model:countTokens');
 
     final headers = requestBuilder.buildHeaders(
@@ -264,6 +275,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
   }) async {
+    validateNonStreamingArguments(request);
     final url = requestBuilder.buildUrl(
       '/{version}/dynamic/$dynamicId:generateContent',
     );
@@ -307,6 +319,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     Redactor? diagnosticRedactor;
     return streamRequest(
       createRequest: () {
+        validateNonStreamingArguments(request);
         // Build URL and headers
         final url = requestBuilder.buildUrl(
           '/{version}/dynamic/$dynamicId:streamGenerateContent',
@@ -875,6 +888,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required String model,
     required GenerateContentBatch batch,
   }) async {
+    validateBatchFunctionArguments(batch);
     // Auto-populate batch.model from method parameter if not set
     final effectiveBatch = batch.model == null
         ? batch.copyWith(model: 'models/$model')

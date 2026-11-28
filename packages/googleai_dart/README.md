@@ -1026,6 +1026,35 @@ all chunks.
 
 </details>
 
+### How do I stream function call arguments on Vertex AI?
+
+<details>
+<summary><b>Show configuration</b></summary>
+
+Set `FunctionCallingConfig.streamFunctionCallArguments` in the request's
+`ToolConfig` and call `client.models.streamGenerateContent()`. This preview
+feature requires Vertex AI API version `v1` or `v1beta1` and a supported
+Gemini 3 or later model. Gemini 3.1 Flash-Lite is excluded from the preview.
+
+```dart
+const toolConfig = ToolConfig(
+  functionCallingConfig: FunctionCallingConfig(
+    streamFunctionCallArguments: true,
+  ),
+);
+```
+
+Read `FunctionCall.partialArgs` for fragments and `willContinue` for the
+call boundary. Use each fragment's `jsonPath` and accumulate streamed
+string values when its `willContinue` is true. Follow-up fragments can omit
+the function name, and a final marker can have no arguments. Execute a
+function after its complete call has been assembled.
+
+[Vertex AI configuration example](example/vertex_ai_example.dart) ·
+[Google Cloud function calling guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tools/function-calling#streaming_function_call_arguments)
+
+</details>
+
 ### How do I use the Live API?
 
 <details>

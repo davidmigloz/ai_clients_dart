@@ -11,6 +11,7 @@ import '../models/models/list_tuned_models_response.dart';
 import '../models/models/operation.dart';
 import '../models/models/tuned_model.dart';
 import 'base_resource.dart';
+import 'generate_content_validation.dart';
 import 'operations_resource.dart';
 import 'permissions_resource.dart';
 import 'streaming_resource.dart';
@@ -59,6 +60,7 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
   }) async {
+    validateNonStreamingArguments(request);
     final url = requestBuilder.buildUrl(
       '/{version}/tunedModels/$tunedModel:generateContent',
     );
@@ -102,6 +104,7 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
   }) {
     return streamRequest(
       createRequest: () {
+        validateNonStreamingArguments(request);
         // Build URL and headers
         final url = requestBuilder.buildUrl(
           '/{version}/tunedModels/$tunedModel:streamGenerateContent',
@@ -141,6 +144,7 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
     required String tunedModel,
     required GenerateContentBatch batch,
   }) async {
+    validateBatchFunctionArguments(batch);
     // Auto-populate batch.model from method parameter if not set
     final effectiveBatch = batch.model == null
         ? batch.copyWith(model: 'tunedModels/$tunedModel')
