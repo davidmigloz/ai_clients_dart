@@ -60,10 +60,10 @@ void main() {
 
         final json = config.toJson();
 
-        expect(json['triggerTokens'], 10000);
+        expect(json['triggerTokens'], '10000');
         expect(json['slidingWindow'], isNotNull);
         final slidingWindow = json['slidingWindow'] as Map<String, dynamic>;
-        expect(slidingWindow['targetTokens'], 5000);
+        expect(slidingWindow['targetTokens'], '5000');
       });
 
       test('omits null fields', () {

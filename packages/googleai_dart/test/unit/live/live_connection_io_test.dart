@@ -119,6 +119,122 @@ const _model = 'gemini-3.8-live';
 const _deadline = Duration(seconds: 4);
 
 void main() {
+  test('Developer Live setup sends translation and request metadata', () async {
+    const model = 'gemini-3.5-live-translate-preview';
+    final server = await _Server.start();
+    final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+    await live
+        .connect(
+          model: model,
+          liveConfig: const LiveConfig(
+            labels: {'safety_identifier': 'local_fixture'},
+            safetySettings: [
+              SafetySetting(
+                category: HarmCategory.hateSpeech,
+                threshold: HarmBlockThreshold.blockOnlyHigh,
+              ),
+            ],
+            generationConfig: LiveGenerationConfig(
+              responseModalities: [ResponseModality.audio],
+              translationConfig: TranslationConfig(
+                targetLanguageCode: 'es',
+                echoTargetLanguage: false,
+              ),
+            ),
+            contextWindowCompression: ContextWindowCompressionConfig(
+              triggerTokens: 10000,
+              slidingWindow: SlidingWindow(targetTokens: 5000),
+            ),
+          ),
+        )
+        .timeout(_deadline);
+    expect((await server.handshake.future).firstMessage, {
+      'setup': {
+        'model': 'models/$model',
+        'labels': {'safety_identifier': 'local_fixture'},
+        'safetySettings': [
+          {
+            'category': 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold': 'BLOCK_ONLY_HIGH',
+          },
+        ],
+        'generationConfig': {
+          'responseModalities': ['AUDIO'],
+          'translationConfig': {
+            'targetLanguageCode': 'es',
+            'echoTargetLanguage': false,
+          },
+        },
+        'contextWindowCompression': {
+          'triggerTokens': '10000',
+          'slidingWindow': {'targetTokens': '5000'},
+        },
+      },
+    });
+  });
+
+  test('Vertex Live setup carries VAD and generation settings', () async {
+    final server = await _Server.start();
+    final config = GoogleAIConfig.vertexAI(
+      projectId: 'P',
+      location: 'eu',
+      authProvider: const BearerTokenProvider('local-fixture'),
+    ).copyWith(baseUrl: server.baseUrl);
+    await _createLive(config)
+        .connect(
+          model: _model,
+          liveConfig: const LiveConfig(
+            labels: {'deployment': 'fixture'},
+            explicitVadSignal: true,
+            generationConfig: LiveGenerationConfig(
+              mediaResolution: MediaResolutionLevel.low,
+              seed: 0,
+              thinkingConfig: ThinkingConfig(thinkingLevel: ThinkingLevel.low),
+              enableAffectiveDialog: true,
+            ),
+            proactivity: ProactivityConfig(
+              proactiveAudio: true,
+              proactiveVideo: true,
+            ),
+          ),
+        )
+        .timeout(_deadline);
+    expect((await server.handshake.future).firstMessage, {
+      'setup': {
+        'model': 'projects/P/locations/eu/publishers/google/models/$_model',
+        'labels': {'deployment': 'fixture'},
+        'explicitVadSignal': true,
+        'generationConfig': {
+          'mediaResolution': 'MEDIA_RESOLUTION_LOW',
+          'seed': 0,
+          'thinkingConfig': {'thinkingLevel': 'LOW'},
+          'enableAffectiveDialog': true,
+        },
+        'proactivity': {'proactiveAudio': true, 'proactiveVideo': true},
+      },
+    });
+  });
+
+  test(
+    'Developer Live rejects explicit Vertex VAD before connecting',
+    () async {
+      final server = await _Server.start();
+      final provider = _CountingProvider(const ApiKeyCredentials('fixture'));
+      final live = _createLive(
+        GoogleAIConfig(baseUrl: server.baseUrl, authProvider: provider),
+      );
+      await expectLater(
+        live.connect(
+          model: _model,
+          liveConfig: const LiveConfig(explicitVadSignal: false),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(provider.calls, 0);
+      expect(server.upgrades, 0);
+    },
+  );
+
   test('parses resumption and voice activity after malformed UTF-8', () async {
     const checkpoint = '9007199254740993';
     final server = await _Server.start(

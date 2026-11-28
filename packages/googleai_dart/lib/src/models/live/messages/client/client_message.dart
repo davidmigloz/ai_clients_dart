@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../../../content/blob.dart';
 import '../../../content/content.dart';
+import '../../../safety/safety_setting.dart';
 import '../../../tools/function_response.dart';
 import '../../../tools/tool.dart';
 import '../../config/audio_transcription_config.dart';
@@ -95,6 +96,15 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
   /// Optional. Configuration for how conversation history is handled.
   final HistoryConfig? historyConfig;
 
+  /// User-defined metadata for the Live request.
+  final Map<String, String>? labels;
+
+  /// Content safety settings for the session.
+  final List<SafetySetting>? safetySettings;
+
+  /// Enables explicit VAD signaling on a supported Vertex AI model.
+  final bool? explicitVadSignal;
+
   /// Creates a [BidiGenerateContentSetup].
   const BidiGenerateContentSetup({
     required this.model,
@@ -108,6 +118,9 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
     this.outputAudioTranscription,
     this.proactivity,
     this.historyConfig,
+    this.labels,
+    this.safetySettings,
+    this.explicitVadSignal,
   });
 
   /// Creates from JSON (inner object, not wrapped).
@@ -162,6 +175,12 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
               json['historyConfig'] as Map<String, dynamic>,
             )
           : null,
+      labels: (json['labels'] as Map?)?.cast<String, String>(),
+      safetySettings: (json['safetySettings'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .map(SafetySetting.fromJson)
+          .toList(),
+      explicitVadSignal: json['explicitVadSignal'] as bool?,
     );
   }
 
@@ -189,11 +208,20 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
         'outputAudioTranscription': {...config.toJson()}..remove('enabled'),
       if (proactivity != null) 'proactivity': proactivity!.toJson(),
       if (historyConfig != null) 'historyConfig': historyConfig!.toJson(),
+      if (labels != null) 'labels': labels,
+      if (safetySettings != null)
+        'safetySettings': safetySettings!
+            .map((setting) => setting.toJson())
+            .toList(),
+      if (explicitVadSignal != null) 'explicitVadSignal': explicitVadSignal,
     },
   };
 
   @override
-  String toString() => 'BidiGenerateContentSetup(model: $model)';
+  String toString() =>
+      'BidiGenerateContentSetup(model: $model, labelCount: ${labels?.length}, '
+      'safetySettingCount: ${safetySettings?.length}, '
+      'explicitVadSignal: $explicitVadSignal)';
 }
 
 /// Client content message for sending conversation context.

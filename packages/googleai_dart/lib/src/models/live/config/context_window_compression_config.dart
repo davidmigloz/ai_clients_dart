@@ -1,4 +1,5 @@
 import 'sliding_window.dart';
+import 'token_count_json.dart';
 
 /// Configuration for context window compression.
 ///
@@ -22,7 +23,7 @@ class ContextWindowCompressionConfig {
   /// Creates from JSON.
   factory ContextWindowCompressionConfig.fromJson(Map<String, dynamic> json) {
     return ContextWindowCompressionConfig(
-      triggerTokens: json['triggerTokens'] as int?,
+      triggerTokens: liveTokenCountFromJson(json['triggerTokens']),
       slidingWindow: json['slidingWindow'] != null
           ? SlidingWindow.fromJson(
               json['slidingWindow'] as Map<String, dynamic>,
@@ -33,7 +34,7 @@ class ContextWindowCompressionConfig {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (triggerTokens != null) 'triggerTokens': triggerTokens,
+    if (triggerTokens != null) 'triggerTokens': triggerTokens.toString(),
     if (slidingWindow != null) 'slidingWindow': slidingWindow!.toJson(),
   };
 

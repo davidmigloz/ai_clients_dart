@@ -1,3 +1,5 @@
+import 'token_count_json.dart';
+
 /// Sliding window configuration for context compression.
 ///
 /// Specifies how much context to retain when compression is triggered.
@@ -10,12 +12,14 @@ class SlidingWindow {
 
   /// Creates from JSON.
   factory SlidingWindow.fromJson(Map<String, dynamic> json) {
-    return SlidingWindow(targetTokens: json['targetTokens'] as int?);
+    return SlidingWindow(
+      targetTokens: liveTokenCountFromJson(json['targetTokens']),
+    );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (targetTokens != null) 'targetTokens': targetTokens,
+    if (targetTokens != null) 'targetTokens': targetTokens.toString(),
   };
 
   /// Creates a copy with the given fields replaced.

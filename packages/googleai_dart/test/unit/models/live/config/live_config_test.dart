@@ -3,6 +3,38 @@ import 'package:test/test.dart';
 
 void main() {
   group('LiveConfig', () {
+    test('round-trips setup options and accepts protobuf int64 strings', () {
+      const json = {
+        'labels': {'safety_identifier': 'fixture'},
+        'safetySettings': [
+          {
+            'category': 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold': 'BLOCK_ONLY_HIGH',
+          },
+        ],
+        'explicitVadSignal': false,
+        'contextWindowCompression': {
+          'triggerTokens': '10000',
+          'slidingWindow': {'targetTokens': '5000'},
+        },
+        'proactivity': {'proactiveAudio': true, 'proactiveVideo': true},
+      };
+      final config = LiveConfig.fromJson(json);
+      expect(config.safetySettings?.single.category, HarmCategory.hateSpeech);
+      expect(config.explicitVadSignal, isFalse);
+      expect(config.contextWindowCompression?.triggerTokens, 10000);
+      expect(
+        config.contextWindowCompression?.slidingWindow?.targetTokens,
+        5000,
+      );
+      expect(config.proactivity?.proactiveVideo, isTrue);
+      expect(config.toJson(), json);
+      expect(
+        config.copyWith(explicitVadSignal: null).toJson(),
+        {...json}..remove('explicitVadSignal'),
+      );
+    });
+
     group('fromJson', () {
       test('creates LiveConfig with all fields', () {
         final json = {

@@ -278,6 +278,24 @@ String turnCoverageLabel(TurnCoverage coverage) => switch (coverage) {
 
 [Live realtime input configuration reference](https://aistudio.google.com/api-reference/live#RealtimeInputConfig)
 
+### Live context compression token counts
+
+Gateway fixtures should expect decimal strings for the protobuf int64
+thresholds. The Dart constructors continue to take integers, and saved JSON
+with numeric thresholds remains readable.
+
+```json
+{"triggerTokens":10000,"slidingWindow":{"targetTokens":5000}}
+```
+
+The updated client sends this shape.
+
+```json
+{"triggerTokens":"10000","slidingWindow":{"targetTokens":"5000"}}
+```
+
+[Live compression reference](https://aistudio.google.com/api-reference/live#ContextWindowCompressionConfig)
+
 ---
 
 ## Updating Vertex AI Interactions
