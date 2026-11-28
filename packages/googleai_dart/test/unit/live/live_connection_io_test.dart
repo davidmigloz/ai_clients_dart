@@ -1321,6 +1321,7 @@ void main() {
                     functionDeclarations: [
                       FunctionDeclaration(
                         name: 'turn_on_the_lights',
+                        description: 'Turns on the lights.',
                         behavior: behavior,
                       ),
                       const FunctionDeclaration(
@@ -1341,6 +1342,7 @@ void main() {
             'functionDeclarations': [
               {
                 'name': 'turn_on_the_lights',
+                'description': 'Turns on the lights.',
                 'behavior': isVertex ? 'BLOCKING' : 'NON_BLOCKING',
               },
               {

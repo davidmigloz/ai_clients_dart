@@ -34,10 +34,8 @@ class FunctionDeclaration {
   /// The name of the function.
   final String name;
 
-  final String? _description;
-
-  /// Description of what the function does, or empty when omitted.
-  String get description => _description ?? '';
+  /// Description of what the function does.
+  final String description;
 
   /// Parameters for the function (as a Schema object).
   final Schema? parameters;
@@ -48,7 +46,7 @@ class FunctionDeclaration {
   /// Creates a [FunctionDeclaration].
   const FunctionDeclaration({
     required this.name,
-    this._description,
+    required this.description,
     this.parameters,
     this.behavior,
   });
@@ -57,7 +55,7 @@ class FunctionDeclaration {
   factory FunctionDeclaration.fromJson(Map<String, dynamic> json) =>
       FunctionDeclaration(
         name: json['name'] as String,
-        description: json['description'] as String?,
+        description: json['description'] as String,
         parameters: json['parameters'] != null
             ? Schema.fromJson(json['parameters'] as Map<String, dynamic>)
             : null,
@@ -69,7 +67,7 @@ class FunctionDeclaration {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'name': name,
-    'description': ?_description,
+    'description': description,
     'behavior': ?behavior?.toJson(),
     if (parameters != null) 'parameters': parameters!.toJson(),
   };
@@ -84,8 +82,8 @@ class FunctionDeclaration {
     return FunctionDeclaration(
       name: name == unsetCopyWithValue ? this.name : name! as String,
       description: description == unsetCopyWithValue
-          ? _description
-          : description as String?,
+          ? this.description
+          : description! as String,
       parameters: parameters == unsetCopyWithValue
           ? this.parameters
           : parameters as Schema?,

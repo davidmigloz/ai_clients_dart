@@ -99,9 +99,10 @@ void main() {
     }
   });
 
-  test('parses optional descriptions and Live function behaviors', () {
+  test('parses Live function behavior with the required description', () {
     const declaration = {
       'name': 'turn_on_the_lights',
+      'description': 'Turns on the lights.',
       'behavior': 'NON_BLOCKING',
     };
     final wire = {
@@ -118,7 +119,7 @@ void main() {
         BidiGenerateContentClientMessage.fromJson(wire)
             as BidiGenerateContentSetup;
     final parsed = setup.tools!.single.functionDeclarations!.single;
-    expect(parsed.description, isEmpty);
+    expect(parsed.description, 'Turns on the lights.');
     expect(parsed.behavior, FunctionDeclarationBehavior.nonBlocking);
     expect(setup.toJson(), wire);
     expect(parsed.copyWith().toJson(), declaration);
