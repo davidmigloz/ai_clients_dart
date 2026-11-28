@@ -1506,6 +1506,7 @@ See the [example/](example/) directory for complete examples:
 | [`pagination_example.dart`](example/pagination_example.dart) | Paginated list results |
 | [`permissions_example.dart`](example/permissions_example.dart) | Permission management for resources |
 | [`prediction_example.dart`](example/prediction_example.dart) | Start and poll a Vertex AI Veo prediction with request labels |
+| [`register_cloud_storage_files.dart`](example/register_cloud_storage_files.dart) | Register Cloud Storage files with Gemini Developer API OAuth |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_retrieval_example.dart`](example/tool_retrieval_example.dart) | Client-side tool retrieval on Gemini Developer API `v1beta` |
 | [`triggers_example.dart`](example/triggers_example.dart) | Schedule and run managed agents on the Gemini Developer API `v1beta` |
