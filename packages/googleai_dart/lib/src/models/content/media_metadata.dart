@@ -76,16 +76,27 @@ class AudioMetadata {
   final String? endOffset;
 
   /// Creates a [AudioMetadata].
-  const AudioMetadata({this.startOffset, this.endOffset});
+  const AudioMetadata({this.startOffset, this.endOffset})
+    : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const AudioMetadata._({
+    this.startOffset,
+    this.endOffset,
+    required Map<String, dynamic> wireExtensions,
+  }) : _wireExtensions = wireExtensions;
 
   /// Creates from JSON.
-  factory AudioMetadata.fromJson(Map<String, dynamic> json) => AudioMetadata(
+  factory AudioMetadata.fromJson(Map<String, dynamic> json) => AudioMetadata._(
     startOffset: json['startOffset'] as String?,
     endOffset: json['endOffset'] as String?,
+    wireExtensions: _mediaExtensions(json, const {'startOffset', 'endOffset'}),
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     if (startOffset != null) 'startOffset': startOffset,
     if (endOffset != null) 'endOffset': endOffset,
   };
@@ -94,13 +105,14 @@ class AudioMetadata {
   AudioMetadata copyWith({
     Object? startOffset = unsetCopyWithValue,
     Object? endOffset = unsetCopyWithValue,
-  }) => AudioMetadata(
+  }) => AudioMetadata._(
     startOffset: startOffset == unsetCopyWithValue
         ? this.startOffset
         : startOffset as String?,
     endOffset: endOffset == unsetCopyWithValue
         ? this.endOffset
         : endOffset as String?,
+    wireExtensions: _wireExtensions,
   );
 }
 
@@ -116,21 +128,37 @@ class DocumentMetadata {
   final List<DocumentContentLayer>? contentLayers;
 
   /// Creates a [DocumentMetadata].
-  const DocumentMetadata({this.startPage, this.endPage, this.contentLayers});
+  const DocumentMetadata({this.startPage, this.endPage, this.contentLayers})
+    : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const DocumentMetadata._({
+    this.startPage,
+    this.endPage,
+    this.contentLayers,
+    required Map<String, dynamic> wireExtensions,
+  }) : _wireExtensions = wireExtensions;
 
   /// Creates from JSON.
   factory DocumentMetadata.fromJson(Map<String, dynamic> json) =>
-      DocumentMetadata(
+      DocumentMetadata._(
         startPage: json['startPage'] as int?,
         endPage: json['endPage'] as int?,
         contentLayers: (json['contentLayers'] as List?)
             ?.cast<String>()
             .map(DocumentContentLayer.fromJson)
             .toList(),
+        wireExtensions: _mediaExtensions(json, const {
+          'startPage',
+          'endPage',
+          'contentLayers',
+        }),
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     if (startPage != null) 'startPage': startPage,
     if (endPage != null) 'endPage': endPage,
     if (contentLayers != null)
@@ -142,7 +170,7 @@ class DocumentMetadata {
     Object? startPage = unsetCopyWithValue,
     Object? endPage = unsetCopyWithValue,
     Object? contentLayers = unsetCopyWithValue,
-  }) => DocumentMetadata(
+  }) => DocumentMetadata._(
     startPage: startPage == unsetCopyWithValue
         ? this.startPage
         : startPage as int?,
@@ -150,6 +178,7 @@ class DocumentMetadata {
     contentLayers: contentLayers == unsetCopyWithValue
         ? this.contentLayers
         : contentLayers as List<DocumentContentLayer>?,
+    wireExtensions: _wireExtensions,
   );
 }
 
@@ -169,21 +198,36 @@ class SpreadsheetMetadata {
     this.visibleCells,
     this.sheetIndex,
     this.contentLayers,
-  });
+  }) : _wireExtensions = const {};
+
+  final Map<String, dynamic> _wireExtensions;
+
+  const SpreadsheetMetadata._({
+    this.visibleCells,
+    this.sheetIndex,
+    this.contentLayers,
+    required Map<String, dynamic> wireExtensions,
+  }) : _wireExtensions = wireExtensions;
 
   /// Creates from JSON.
   factory SpreadsheetMetadata.fromJson(Map<String, dynamic> json) =>
-      SpreadsheetMetadata(
+      SpreadsheetMetadata._(
         visibleCells: json['visibleCells'] as String?,
         sheetIndex: json['sheetIndex'] as int?,
         contentLayers: (json['contentLayers'] as List?)
             ?.cast<String>()
             .map(SpreadsheetContentLayer.fromJson)
             .toList(),
+        wireExtensions: _mediaExtensions(json, const {
+          'visibleCells',
+          'sheetIndex',
+          'contentLayers',
+        }),
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    ..._wireExtensions,
     if (visibleCells != null) 'visibleCells': visibleCells,
     if (sheetIndex != null) 'sheetIndex': sheetIndex,
     if (contentLayers != null)
@@ -195,7 +239,7 @@ class SpreadsheetMetadata {
     Object? visibleCells = unsetCopyWithValue,
     Object? sheetIndex = unsetCopyWithValue,
     Object? contentLayers = unsetCopyWithValue,
-  }) => SpreadsheetMetadata(
+  }) => SpreadsheetMetadata._(
     visibleCells: visibleCells == unsetCopyWithValue
         ? this.visibleCells
         : visibleCells as String?,
@@ -205,5 +249,15 @@ class SpreadsheetMetadata {
     contentLayers: contentLayers == unsetCopyWithValue
         ? this.contentLayers
         : contentLayers as List<SpreadsheetContentLayer>?,
+    wireExtensions: _wireExtensions,
   );
 }
+
+Map<String, dynamic> _mediaExtensions(
+  Map<String, dynamic> json,
+  Set<String> keys,
+) => {
+  for (final entry in json.entries)
+    if (!keys.contains(entry.key) || entry.value == null)
+      entry.key: entry.value,
+};

@@ -49,7 +49,7 @@ sealed class Part {
   /// Video metadata associated with this part.
   final VideoMetadata? videoMetadata;
 
-  /// Video interpretation approach. This is a Gemini Developer API option.
+  /// Video interpretation approach for GenerateContent.
   final MediaProcessing? mediaProcessing;
 
   /// Audio clipping options for inline bytes or a referenced file.
@@ -197,6 +197,7 @@ sealed class Part {
         audioMetadata: common.audioMetadata,
         documentMetadata: common.documentMetadata,
         spreadsheetMetadata: common.spreadsheetMetadata,
+        additionalProperties: common.additionalProperties,
       );
     }
 
@@ -470,22 +471,30 @@ class _PartCommonValues {
     videoMetadata: json['videoMetadata'] == null
         ? null
         : VideoMetadata.fromJson(json['videoMetadata'] as Map<String, dynamic>),
-    mediaProcessing: json['mediaProcessing'] == null
-        ? null
-        : MediaProcessing.fromJson(json['mediaProcessing'] as String),
-    audioMetadata: json['audioMetadata'] == null
-        ? null
-        : AudioMetadata.fromJson(json['audioMetadata'] as Map<String, dynamic>),
-    documentMetadata: json['documentMetadata'] == null
-        ? null
-        : DocumentMetadata.fromJson(
-            json['documentMetadata'] as Map<String, dynamic>,
-          ),
-    spreadsheetMetadata: json['spreadsheetMetadata'] == null
-        ? null
-        : SpreadsheetMetadata.fromJson(
-            json['spreadsheetMetadata'] as Map<String, dynamic>,
-          ),
+    mediaProcessing: _decodeMediaOption(
+      json,
+      'mediaProcessing',
+      additionalProperties,
+      (value) => MediaProcessing.fromJson(value as String),
+    ),
+    audioMetadata: _decodeMediaOption(
+      json,
+      'audioMetadata',
+      additionalProperties,
+      (value) => AudioMetadata.fromJson(value as Map<String, dynamic>),
+    ),
+    documentMetadata: _decodeMediaOption(
+      json,
+      'documentMetadata',
+      additionalProperties,
+      (value) => DocumentMetadata.fromJson(value as Map<String, dynamic>),
+    ),
+    spreadsheetMetadata: _decodeMediaOption(
+      json,
+      'spreadsheetMetadata',
+      additionalProperties,
+      (value) => SpreadsheetMetadata.fromJson(value as Map<String, dynamic>),
+    ),
     additionalProperties: additionalProperties,
   );
 
@@ -499,6 +508,25 @@ class _PartCommonValues {
   final DocumentMetadata? documentMetadata;
   final SpreadsheetMetadata? spreadsheetMetadata;
   final Map<String, dynamic> additionalProperties;
+}
+
+T? _decodeMediaOption<T>(
+  Map<String, dynamic> json,
+  String key,
+  Map<String, dynamic> additionalProperties,
+  T Function(Object value) decode,
+) {
+  if (!json.containsKey(key)) return null;
+  final value = json[key];
+  if (value != null) {
+    try {
+      return decode(value);
+    } on TypeError {
+      // Preserve newer wire shapes in the same raw form older clients used.
+    }
+  }
+  additionalProperties[key] = value;
+  return null;
 }
 
 /// Text content.

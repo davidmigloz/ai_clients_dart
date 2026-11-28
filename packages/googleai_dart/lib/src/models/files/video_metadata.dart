@@ -88,7 +88,7 @@ class VideoMetadata {
     endOffset: endOffset == unsetCopyWithValue
         ? this.endOffset
         : endOffset as String?,
-    fps: fps == unsetCopyWithValue ? this.fps : fps as double?,
+    fps: fps == unsetCopyWithValue ? this.fps : (fps as num?)?.toDouble(),
     contentLayers: contentLayers == unsetCopyWithValue
         ? this.contentLayers
         : contentLayers as List<VideoContentLayer>?,

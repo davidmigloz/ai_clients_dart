@@ -404,9 +404,10 @@ final excerpt = InlineDataPart(
 Use `SpreadsheetMetadata` to select a sheet, A1 cell range, and data, formulas
 or images. For media returned by a function, use the same metadata on a
 `FunctionResponseInlinePart` with `inlineData` or `fileData`. Video
-`MediaProcessing.static` or `MediaProcessing.agentic` is a Gemini Developer
-API option. Supported media and selection options depend on the model and
-backend.
+`MediaProcessing.static` and `MediaProcessing.agentic` select how to inspect
+video. The pinned Cloud SDKs reject explicit video processing modes in
+function results. Supported media and selection options depend on the model
+and backend.
 
 [Full example](example/generate_content_media_slicing.dart) ·
 [Document processing](https://aistudio.google.com/docs/document-processing#customize-document-processing) ·
