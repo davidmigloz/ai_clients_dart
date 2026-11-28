@@ -12,31 +12,42 @@
   "coverage": {
     "expected_properties": {
       "LiveConfig": [
-        "generationConfig",
-        "realtimeInputConfig",
-        "tools",
-        "systemInstruction",
-        "sessionResumption",
         "contextWindowCompression",
+        "generationConfig",
         "inputAudioTranscription",
         "outputAudioTranscription",
-        "proactivity"
+        "proactivity",
+        "realtimeInputConfig",
+        "sessionResumption",
+        "systemInstruction",
+        "tools",
+        "historyConfig",
+        "labels",
+        "safetySettings",
+        "explicitVadSignal",
+        "avatarConfig"
       ],
       "LiveGenerationConfig": [
+        "maxOutputTokens",
         "responseModalities",
         "speechConfig",
         "temperature",
-        "maxOutputTokens",
+        "topK",
         "topP",
-        "topK"
+        "mediaResolution",
+        "seed",
+        "thinkingConfig",
+        "enableAffectiveDialog",
+        "translationConfig"
       ],
       "SpeechConfig": [
         "voiceConfig",
         "languageCode"
       ],
       "RealtimeInputConfig": [
-        "automaticActivityDetection",
         "activityHandling",
+        "automaticActivityDetection",
+        "interimTranscriptTimestampEnabled",
         "turnCoverage"
       ],
       "SessionResumptionConfig": [
@@ -52,10 +63,121 @@
         "id",
         "name",
         "response"
+      ],
+      "AudioTranscriptionConfig": [
+        "adaptationPhrases",
+        "customVocabulary",
+        "diarization",
+        "languageAuto",
+        "languageCodes",
+        "languageHints",
+        "mode",
+        "sourceText",
+        "wordTimestamp"
+      ],
+      "HistoryConfig": [
+        "initialHistoryInClientContent"
+      ],
+      "VoiceActivity": [
+        "type",
+        "audioOffset"
+      ],
+      "ProactivityConfig": [
+        "proactiveAudio",
+        "proactiveVideo"
+      ],
+      "BidiGenerateContentClientContent": [
+        "turnComplete",
+        "turns"
+      ],
+      "BidiGenerateContentRealtimeInput": [
+        "activityEnd",
+        "activityStart",
+        "audio",
+        "audioStreamEnd",
+        "text",
+        "video",
+        "mediaResolution",
+        "mediaChunks"
+      ],
+      "BidiGenerateContentSetup": [
+        "contextWindowCompression",
+        "generationConfig",
+        "inputAudioTranscription",
+        "model",
+        "outputAudioTranscription",
+        "proactivity",
+        "realtimeInputConfig",
+        "sessionResumption",
+        "systemInstruction",
+        "tools",
+        "historyConfig",
+        "labels",
+        "safetySettings",
+        "explicitVadSignal",
+        "avatarConfig"
+      ],
+      "BidiGenerateContentToolResponse": [
+        "functionResponses"
+      ],
+      "BidiGenerateContentContextUpdate": [
+        "systemInstruction",
+        "tools"
+      ],
+      "BidiGenerateContentServerContent": [
+        "generationComplete",
+        "groundingMetadata",
+        "inputTranscription",
+        "interimInputTranscription",
+        "interrupted",
+        "modelTurn",
+        "outputTranscription",
+        "turnComplete",
+        "usageMetadata",
+        "waitingForInput",
+        "turnCompleteReason",
+        "interactionStatus",
+        "speechState",
+        "urlContextMetadata"
+      ],
+      "BidiGenerateContentSetupComplete": [
+        "sessionId"
+      ],
+      "BidiGenerateContentToolCall": [
+        "functionCalls"
+      ],
+      "BidiGenerateContentToolCallCancellation": [
+        "ids"
+      ],
+      "GoAway": [
+        "timeLeft"
+      ],
+      "SessionResumptionUpdate": [
+        "newHandle",
+        "resumable",
+        "lastConsumedClientMessageIndex"
+      ],
+      "LiveAvatarConfig": [
+        "avatarName",
+        "audioBitrateBps",
+        "videoBitrateBps"
+      ],
+      "BidiGenerateContentServerMessage": [
+        "responseUsageMetadata",
+        "voiceActivity"
       ]
     },
     "excluded_properties": {
-      "global": []
+      "global": [],
+      "AvatarConfig": [
+        "customizedAvatar"
+      ],
+      "BidiGenerateContentSetupComplete": [
+        "voiceConsentSignature"
+      ],
+      "BidiGenerateContentServerMessage": [
+        "voiceActivityDetectionSignal"
+      ]
     },
     "excluded_resources": []
   },
@@ -71,7 +193,8 @@
           "BidiGenerateContentSetup": "setup",
           "BidiGenerateContentClientContent": "clientContent",
           "BidiGenerateContentRealtimeInput": "realtimeInput",
-          "BidiGenerateContentToolResponse": "toolResponse"
+          "BidiGenerateContentToolResponse": "toolResponse",
+          "BidiGenerateContentContextUpdate": "contextUpdate"
         }
       },
       "tags": [
@@ -88,7 +211,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "BidiGenerateContentRealtimeInput": {
       "spec": "live",
@@ -100,7 +223,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "BidiGenerateContentSetup": {
       "spec": "live",
@@ -112,7 +235,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "BidiGenerateContentToolResponse": {
       "spec": "live",
@@ -124,7 +247,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "BidiGenerateContentServerMessage": {
       "spec": "live",
@@ -153,10 +276,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentServerContent",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
       "tags": [
         "acknowledged"
-      ]
+      ],
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "BidiGenerateContentSetupComplete": {
       "spec": "live",
@@ -165,10 +288,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentSetupComplete",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
       "tags": [
         "acknowledged"
-      ]
+      ],
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "BidiGenerateContentToolCall": {
       "spec": "live",
@@ -177,10 +300,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentToolCall",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
       "tags": [
         "acknowledged"
-      ]
+      ],
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "BidiGenerateContentToolCallCancellation": {
       "spec": "live",
@@ -189,10 +312,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentToolCallCancellation",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
       "tags": [
         "acknowledged"
-      ]
+      ],
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "GoAway": {
       "spec": "live",
@@ -201,10 +324,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "GoAway",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
       "tags": [
         "acknowledged"
-      ]
+      ],
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "SessionResumptionUpdate": {
       "spec": "live",
@@ -213,14 +336,14 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "SessionResumptionUpdate",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
       "tags": [
         "acknowledged"
-      ]
+      ],
+      "note": "Wire wrapper is verified by sealed-parent dispatch and offline frame fixtures. These immutable messages do not expose copyWith."
     },
     "AudioTranscriptionConfig": {
       "spec": "live",
-      "kind": "config",
+      "kind": "object",
       "dart_class": "AudioTranscriptionConfig",
       "file": "lib/src/models/live/config/audio_transcription_config.dart",
       "schema": "AudioTranscriptionConfig",
@@ -228,73 +351,59 @@
     },
     "AutomaticActivityDetection": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "AutomaticActivityDetection",
       "file": "lib/src/models/live/config/automatic_activity_detection.dart",
       "schema": "AutomaticActivityDetection",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "ContextWindowCompressionConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ContextWindowCompressionConfig",
       "file": "lib/src/models/live/config/context_window_compression_config.dart",
       "schema": "ContextWindowCompressionConfig",
-      "tags": [
-        "acknowledged"
+      "tags": [],
+      "excluded_properties": [
+        "triggerTokens"
       ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "triggerTokens has a Dart int public field and protobuf int64 string serialization. Offline fixtures check canonical string and legacy number decoding."
     },
     "LiveGenerationConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "LiveGenerationConfig",
       "file": "lib/src/models/live/config/live_generation_config.dart",
       "schema": "LiveGenerationConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "PrebuiltVoiceConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "PrebuiltVoiceConfig",
       "file": "lib/src/models/common/voice_config.dart",
       "schema": "PrebuiltVoiceConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "ProactivityConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ProactivityConfig",
       "file": "lib/src/models/live/config/proactivity_config.dart",
       "schema": "ProactivityConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "RealtimeInputConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "RealtimeInputConfig",
       "file": "lib/src/models/live/config/realtime_input_config.dart",
       "schema": "RealtimeInputConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "SessionResumptionConfig": {
       "spec": "live",
-      "kind": "config",
+      "kind": "object",
       "dart_class": "SessionResumptionConfig",
       "file": "lib/src/models/live/config/session_resumption_config.dart",
       "schema": "SessionResumptionConfig",
@@ -311,95 +420,200 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "targetTokens"
+      ],
+      "note": "targetTokens has a Dart int public field and protobuf int64 string serialization. Offline fixtures check canonical string and legacy number decoding."
     },
     "SpeechConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "SpeechConfig",
       "file": "lib/src/models/common/speech_config.dart",
       "schema": "SpeechConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "Transcription": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Transcription",
       "file": "lib/src/models/live/config/transcription.dart",
       "schema": "Transcription",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "VoiceConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "VoiceConfig",
       "file": "lib/src/models/common/voice_config.dart",
       "schema": "VoiceConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "ActivityHandling": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "ActivityHandling",
       "file": "lib/src/models/live/enums/activity_handling.dart",
       "schema": "ActivityHandling",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
-      "tags": [
-        "acknowledged"
-      ]
+      "tags": []
     },
     "EndSensitivity": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "EndSensitivity",
       "file": "lib/src/models/live/enums/end_sensitivity.dart",
       "schema": "EndSensitivity",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
-      "tags": [
-        "acknowledged"
-      ]
+      "tags": []
     },
     "StartSensitivity": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "StartSensitivity",
       "file": "lib/src/models/live/enums/start_sensitivity.dart",
       "schema": "StartSensitivity",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
-      "tags": [
-        "acknowledged"
-      ]
+      "tags": []
     },
     "TurnCoverage": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "TurnCoverage",
       "file": "lib/src/models/live/enums/turn_coverage.dart",
       "schema": "TurnCoverage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
-      "tags": [
-        "acknowledged"
-      ]
+      "tags": []
     },
     "LiveConfig": {
       "spec": "live",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "LiveConfig",
       "schema": "LiveConfig",
+      "tags": [],
+      "file": "lib/src/models/live/config/live_config.dart"
+    },
+    "WordInfo": {
+      "spec": "live",
+      "kind": "object",
+      "dart_class": "LiveTranscriptionWord",
+      "file": "lib/src/models/live/config/transcription.dart",
+      "schema": "WordInfo"
+    },
+    "AudioTranscriptionConfigMode": {
+      "spec": "live",
+      "kind": "enum",
+      "dart_class": "AudioTranscriptionConfigMode",
+      "file": "lib/src/models/generation/audio_transcription_mode.dart",
+      "schema": "AudioTranscriptionConfigMode"
+    },
+    "BidiGenerateContentContextUpdate": {
+      "spec": "live",
+      "kind": "skip",
+      "dart_class": "BidiGenerateContentContextUpdate",
+      "file": "lib/src/models/live/messages/client/client_message.dart",
+      "schema": "BidiGenerateContentContextUpdate",
+      "parent": "BidiGenerateContentClientMessage",
       "tags": [
         "acknowledged"
       ],
-      "file": "lib/src/models/live/config/live_config.dart",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Verified through sealed-parent dispatch and public loopback, including the nested tools wire wrapper. The message does not expose copyWith."
+    },
+    "HistoryConfig": {
+      "spec": "live",
+      "kind": "object",
+      "dart_class": "HistoryConfig",
+      "file": "lib/src/models/live/config/history_config.dart",
+      "schema": "HistoryConfig"
+    },
+    "VoiceActivity": {
+      "spec": "live",
+      "kind": "object",
+      "dart_class": "LiveVoiceActivity",
+      "file": "lib/src/models/live/messages/server/live_voice_activity.dart",
+      "schema": "VoiceActivity"
+    },
+    "VoiceActivityType": {
+      "spec": "live",
+      "kind": "skip",
+      "dart_class": "LiveVoiceActivityType",
+      "file": "lib/src/models/live/messages/server/live_voice_activity.dart",
+      "schema": "VoiceActivityType",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Dart uses an extension type to retain future activity strings. Offline frame tests cover the known protocol values."
+    },
+    "LiveUsageMetadata": {
+      "spec": "live",
+      "kind": "skip",
+      "dart_class": "LiveUsageMetadata",
+      "file": "lib/src/models/live/messages/server/live_usage_metadata.dart",
+      "schema": "LiveUsageMetadata",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Backend aliases and parsed wire casing are retained in the usage wrapper, which delegates counts to UsageMetadata. Public frame fixtures verify both wire shapes."
+    },
+    "AvatarConfig": {
+      "spec": "live",
+      "kind": "object",
+      "dart_class": "LiveAvatarConfig",
+      "file": "lib/src/models/live/config/live_avatar_config.dart",
+      "schema": "AvatarConfig",
+      "excluded_properties": [
+        "customizedAvatar"
+      ],
+      "note": "The official Cloud guide limits reference-image avatars to select customers."
+    },
+    "ResponseModality": {
+      "spec": "live",
+      "kind": "skip",
+      "dart_class": "ResponseModality",
+      "file": "lib/src/models/generation/response_modality.dart",
+      "schema": "ResponseModality",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The shared enum uses external encode and decode switches. JSON and Vertex loopback tests verify the wire values."
+    },
+    "SafetySetting": {
+      "spec": "live",
+      "schema": "SafetySetting",
+      "kind": "object",
+      "dart_class": "SafetySetting",
+      "file": "lib/src/models/safety/safety_setting.dart"
+    },
+    "HarmBlockMethod": {
+      "spec": "live",
+      "schema": "HarmBlockMethod",
+      "kind": "enum",
+      "dart_class": "HarmBlockMethod",
+      "file": "lib/src/models/safety/safety_setting.dart"
+    },
+    "MediaResolution": {
+      "spec": "live",
+      "schema": "MediaResolution",
+      "kind": "object",
+      "dart_class": "MediaResolution",
+      "file": "lib/src/models/content/media_resolution.dart"
+    },
+    "MediaResolutionLevel": {
+      "spec": "live",
+      "schema": "MediaResolutionLevel",
+      "kind": "enum",
+      "dart_class": "MediaResolutionLevel",
+      "file": "lib/src/models/content/media_resolution.dart"
+    },
+    "FunctionDeclaration": {
+      "spec": "live",
+      "schema": "FunctionDeclaration",
+      "kind": "object",
+      "dart_class": "FunctionDeclaration",
+      "file": "lib/src/models/tools/function_declaration.dart"
+    },
+    "FunctionDeclarationBehavior": {
+      "spec": "live",
+      "schema": "FunctionDeclarationBehavior",
+      "kind": "enum",
+      "dart_class": "FunctionDeclarationBehavior",
+      "file": "lib/src/models/tools/function_declaration.dart"
     }
   }
 }

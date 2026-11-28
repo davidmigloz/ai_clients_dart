@@ -126,9 +126,11 @@
       "tunedModels"
     ],
     "notes": {
-      "files:register": "POST /v1beta/files:register \u2014 Registers GCS files with FileService. Models (RegisterFilesRequest/RegisterFilesResponse) are implemented; resource method not yet added to the files resource.",
+      "files:register": "FilesResource inherits register from files/files_resource_base.dart. The endpoint-action scanner checks resource filenames; public route fixtures verify the delegated register path.",
       "environments:create": "Custom-verb alias of the environments resource (path /v1beta/environments:create); duplicates POST /v1beta/environments. Aliased to environments (EnvironmentsResource), which implements the REST-shaped family per the interactions spec.",
-      "environments:list": "Custom-verb alias of the environments resource (path /v1beta/environments:list); duplicates GET /v1beta/environments. Same handling as environments:create."
+      "environments:list": "Custom-verb alias of the environments resource (path /v1beta/environments:list); duplicates GET /v1beta/environments. Same handling as environments:create.",
+      "upload": "EnvironmentFilesResource.upload uses the resumable media path of EnvironmentsResource.",
+      "files": "The shared FilesResourceBase applies the download wire option across IO, web, and stub. The action scanner verifies resource filenames."
     },
     "expected_properties": {},
     "excluded_properties": {
@@ -137,11 +139,11 @@
     "resource_aliases": {
       "dynamic": "models",
       "environments:create": "environments",
-      "environments:list": "environments"
+      "environments:list": "environments",
+      "files:register": "files",
+      "upload": "environments"
     },
-    "excluded_resources": [
-      "files:register"
-    ]
+    "excluded_resources": []
   },
   "types": {
     "AgentOption": {
@@ -174,7 +176,8 @@
           "url_citation": "#/components/schemas/UrlCitation",
           "file_citation": "#/components/schemas/FileCitation",
           "place_citation": "#/components/schemas/PlaceCitation",
-          "word_info": "#/components/schemas/WordInfo"
+          "word_info": "#/components/schemas/WordInfo",
+          "speech_metadata": "#/components/schemas/SpeechAnnotation"
         }
       }
     },
@@ -1143,7 +1146,11 @@
       "schema": "RotateSigningSecretRequest",
       "kind": "object",
       "dart_class": "RotateSigningSecretRequest",
-      "file": "lib/src/models/webhooks/rotate_signing_secret_request.dart"
+      "file": "lib/src/models/webhooks/rotate_signing_secret_request.dart",
+      "excluded_properties": [
+        "id"
+      ],
+      "note": "WebhooksResource.rotateSigningSecret supplies id as a path parameter."
     },
     "RotateSigningSecretResponse": {
       "spec": "interactions",
@@ -1230,8 +1237,10 @@
           "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
           "file_search_result": "#/components/schemas/FileSearchResultDelta",
           "function_result": "#/components/schemas/FunctionResultDelta",
-          "retrieval_call": "#/components/schemas/RetrievalCallDelta",
-          "retrieval_result": "#/components/schemas/RetrievalResultDelta"
+          "processing_call": "#/components/schemas/ProcessingCallDelta",
+          "tool_search_call": "#/components/schemas/ToolSearchCallDelta",
+          "processing_result": "#/components/schemas/ProcessingResultDelta",
+          "tool_search_result": "#/components/schemas/ToolSearchResultDelta"
         }
       }
     },
@@ -1777,11 +1786,11 @@
     },
     "interactions:Retrieval": {
       "spec": "interactions",
-      "schema": "Retrieval",
       "dart_class": "RetrievalTool",
       "file": "lib/src/models/interactions/tools/retrieval_tool.dart",
-      "kind": "sealed_variant",
-      "parent": "InteractionTool"
+      "kind": "extension",
+      "parent": "InteractionTool",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:SafetySetting": {
       "spec": "interactions",
@@ -1817,7 +1826,7 @@
           "computer_use": "#/components/schemas/ComputerUse",
           "mcp_server": "#/components/schemas/McpServer",
           "file_search": "#/components/schemas/FileSearch",
-          "retrieval": "#/components/schemas/Retrieval"
+          "tool_search": "#/components/schemas/ToolSearch"
         }
       }
     },
@@ -1835,66 +1844,66 @@
     },
     "interactions:VertexAISearchConfig": {
       "spec": "interactions",
-      "schema": "VertexAISearchConfig",
       "dart_class": "VertexAISearchConfig",
       "file": "lib/src/models/interactions/tools/vertex_ai_search_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:ExaAISearchConfig": {
       "spec": "interactions",
-      "schema": "ExaAISearchConfig",
       "dart_class": "ExaAISearchConfig",
       "file": "lib/src/models/interactions/tools/exa_ai_search_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:ParallelAISearchConfig": {
       "spec": "interactions",
-      "schema": "ParallelAISearchConfig",
       "dart_class": "ParallelAISearchConfig",
       "file": "lib/src/models/interactions/tools/parallel_ai_search_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:RagStoreConfig": {
       "spec": "interactions",
-      "schema": "RagStoreConfig",
       "dart_class": "RagStoreConfig",
       "file": "lib/src/models/interactions/tools/rag_store_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:RagResource": {
       "spec": "interactions",
-      "schema": "RagResource",
       "dart_class": "RagResource",
       "file": "lib/src/models/interactions/tools/rag_store_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:RagRetrievalConfig": {
       "spec": "interactions",
-      "schema": "RagRetrievalConfig",
       "dart_class": "RagRetrievalConfig",
       "file": "lib/src/models/interactions/tools/rag_store_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:Filter": {
       "spec": "interactions",
-      "schema": "Filter",
       "dart_class": "Filter",
       "file": "lib/src/models/interactions/tools/rag_store_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:HybridSearch": {
       "spec": "interactions",
-      "schema": "HybridSearch",
       "dart_class": "HybridSearch",
       "file": "lib/src/models/interactions/tools/rag_store_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:RankService": {
       "spec": "interactions",
-      "schema": "RankService",
       "dart_class": "RankService",
       "file": "lib/src/models/interactions/tools/rag_store_config.dart",
-      "kind": "object"
+      "kind": "extension",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:Ranking": {
       "spec": "interactions",
@@ -2135,35 +2144,33 @@
     },
     "RetrievalCallDelta": {
       "spec": "interactions",
-      "schema": "RetrievalCallDelta",
       "parent": "StepDeltaData",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "RetrievalCallDelta",
-      "file": "lib/src/models/interactions/deltas/retrieval_call_delta.dart"
+      "file": "lib/src/models/interactions/deltas/retrieval_call_delta.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "RetrievalResultDelta": {
       "spec": "interactions",
-      "schema": "RetrievalResultDelta",
       "parent": "StepDeltaData",
-      "kind": "sealed_variant",
+      "kind": "extension",
       "dart_class": "RetrievalResultDelta",
-      "file": "lib/src/models/interactions/deltas/retrieval_result_delta.dart"
+      "file": "lib/src/models/interactions/deltas/retrieval_result_delta.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "RetrievalStepArguments": {
       "spec": "interactions",
-      "schema": "RetrievalStepArguments",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "RetrievalCallArguments",
       "file": "lib/src/models/interactions/deltas/retrieval_call_delta.dart",
-      "note": "Spec applies a speakeasy name-override renaming this schema's generated type to RetrievalCallArguments; Dart follows the override name."
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:Status": {
       "spec": "interactions",
-      "schema": "Status",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "Status",
       "file": "lib/src/models/batch/status.dart",
-      "note": "Reuses the existing batch Status model; the interactions google.rpc.Status shape is identical (code/message/details)."
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "RetrievalCallStep": {
       "spec": "interactions",
@@ -2249,10 +2256,10 @@
     },
     "AllowlistEntry": {
       "spec": "interactions",
-      "schema": "AllowlistEntry",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "AllowlistEntry",
-      "file": "lib/src/models/interactions/environments/allowlist_entry.dart"
+      "file": "lib/src/models/interactions/environments/allowlist_entry.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:EnvironmentNetworkEgressAllowlist": {
       "spec": "interactions",
@@ -2325,7 +2332,7 @@
       "kind": "object",
       "dart_class": "GenerationAudioTranscriptionConfig",
       "file": "lib/src/models/generation/audio_transcription_config.dart",
-      "note": "Main-spec ASR config referenced by GenerationConfig.audioTranscriptionConfig and BidiGenerateContentSetup. Dart class is prefixed because the bare name AudioTranscriptionConfig is taken by the Live API model (websocket manifest, wire shape {enabled}). Matches python-genai AudioTranscriptionConfig (7 fields incl. deprecated adaptationPhrases/languageAuto/languageHints)."
+      "note": "Core GenerateContent transcription configuration. The WebSocket manifest maps the separate Live Dart configuration."
     },
     "LanguageAuto": {
       "spec": "main",
@@ -2466,45 +2473,49 @@
     },
     "CodeMenderAgentConfig": {
       "spec": "interactions",
-      "schema": "CodeMenderAgentConfig",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "CodeMenderAgentConfig",
-      "file": "lib/src/models/interactions/agent_config.dart"
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "FindRequest": {
       "spec": "interactions",
-      "schema": "FindRequest",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "FindRequest",
-      "file": "lib/src/models/interactions/agent_config.dart"
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "FixRequest": {
       "spec": "interactions",
-      "schema": "FixRequest",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "FixRequest",
-      "file": "lib/src/models/interactions/agent_config.dart"
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "SessionConfig": {
       "spec": "interactions",
-      "schema": "SessionConfig",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "SessionConfig",
-      "file": "lib/src/models/interactions/agent_config.dart"
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "FileContent": {
       "spec": "interactions",
-      "schema": "FileContent",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "FileContent",
-      "file": "lib/src/models/interactions/agent_config.dart"
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "interactions:Environment": {
       "spec": "interactions",
       "schema": "Environment",
       "kind": "object",
       "dart_class": "Environment",
-      "file": "lib/src/models/interactions/environments/environment.dart"
+      "file": "lib/src/models/interactions/environments/environment.dart",
+      "excluded_properties": [
+        "environment_key"
+      ],
+      "note": "The one-time environment key is available on create and omitted from serialization and metadata reads."
     },
     "interactions:CreateEnvironmentRequest": {
       "spec": "interactions",
@@ -2539,10 +2550,10 @@
     },
     "TriggerCreateParams": {
       "spec": "interactions",
-      "schema": "TriggerCreateParams",
-      "kind": "object",
+      "kind": "extension",
       "dart_class": "TriggerCreateParams",
-      "file": "lib/src/models/interactions/triggers/trigger_create_params.dart"
+      "file": "lib/src/models/interactions/triggers/trigger_create_params.dart",
+      "note": "Retained Dart compatibility type. The pinned Developer Interactions snapshot does not declare this schema."
     },
     "TriggerUpdate": {
       "spec": "interactions",
@@ -2580,6 +2591,264 @@
       "tags": [
         "acknowledged"
       ]
+    },
+    "SpeechAnnotation": {
+      "spec": "interactions",
+      "schema": "SpeechAnnotation",
+      "kind": "sealed_variant",
+      "dart_class": "SpeechAnnotation",
+      "file": "lib/src/models/interactions/content/speech_annotation.dart",
+      "parent": "Annotation"
+    },
+    "ProcessingCallDelta": {
+      "spec": "interactions",
+      "schema": "ProcessingCallDelta",
+      "kind": "sealed_variant",
+      "dart_class": "ProcessingCallDelta",
+      "file": "lib/src/models/interactions/deltas/processing_call_delta.dart",
+      "parent": "StepDeltaData"
+    },
+    "ToolSearchCallDelta": {
+      "spec": "interactions",
+      "schema": "ToolSearchCallDelta",
+      "kind": "skip",
+      "dart_class": "ToolSearchCallDelta",
+      "file": "lib/src/models/interactions/deltas/tool_search_call_delta.dart",
+      "parent": "StepDeltaData",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The public wire codec is covered by unit tests. This immutable Dart type has no copyWith method."
+    },
+    "ProcessingCallStep": {
+      "spec": "interactions",
+      "schema": "ProcessingCallStep",
+      "kind": "sealed_variant",
+      "dart_class": "ProcessingCallStep",
+      "file": "lib/src/models/interactions/steps/processing_call_step.dart",
+      "parent": "InteractionStep"
+    },
+    "ToolSearchCallStep": {
+      "spec": "interactions",
+      "schema": "ToolSearchCallStep",
+      "kind": "skip",
+      "dart_class": "ToolSearchCallStep",
+      "file": "lib/src/models/interactions/steps/tool_search_call_step.dart",
+      "parent": "InteractionStep",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The public wire codec is covered by unit tests. This immutable Dart type has no copyWith method."
+    },
+    "ProcessingResultDelta": {
+      "spec": "interactions",
+      "schema": "ProcessingResultDelta",
+      "kind": "sealed_variant",
+      "dart_class": "ProcessingResultDelta",
+      "file": "lib/src/models/interactions/deltas/processing_result_delta.dart",
+      "parent": "StepDeltaData"
+    },
+    "ToolSearchResultDelta": {
+      "spec": "interactions",
+      "schema": "ToolSearchResultDelta",
+      "kind": "skip",
+      "dart_class": "ToolSearchResultDelta",
+      "file": "lib/src/models/interactions/deltas/tool_search_result_delta.dart",
+      "parent": "StepDeltaData",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The public wire codec is covered by unit tests. This immutable Dart type has no copyWith method."
+    },
+    "ProcessingResultStep": {
+      "spec": "interactions",
+      "schema": "ProcessingResultStep",
+      "kind": "sealed_variant",
+      "dart_class": "ProcessingResultStep",
+      "file": "lib/src/models/interactions/steps/processing_result_step.dart",
+      "parent": "InteractionStep"
+    },
+    "ToolSearchResultStep": {
+      "spec": "interactions",
+      "schema": "ToolSearchResultStep",
+      "kind": "skip",
+      "dart_class": "ToolSearchResultStep",
+      "file": "lib/src/models/interactions/steps/tool_search_result_step.dart",
+      "parent": "InteractionStep",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The public wire codec is covered by unit tests. This immutable Dart type has no copyWith method."
+    },
+    "ToolSearch": {
+      "spec": "interactions",
+      "schema": "ToolSearch",
+      "kind": "skip",
+      "dart_class": "ToolSearchTool",
+      "file": "lib/src/models/interactions/tools/tool_search_tool.dart",
+      "parent": "interactions:Tool",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "The public wire codec is covered by unit tests. This immutable Dart type has no copyWith method."
+    },
+    "main:AudioMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioMetadata",
+      "file": "lib/src/models/content/media_metadata.dart",
+      "schema": "AudioMetadata"
+    },
+    "main:DocumentMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DocumentMetadata",
+      "file": "lib/src/models/content/media_metadata.dart",
+      "schema": "DocumentMetadata"
+    },
+    "main:SpreadsheetMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpreadsheetMetadata",
+      "file": "lib/src/models/content/media_metadata.dart",
+      "schema": "SpreadsheetMetadata"
+    },
+    "main:SpeechMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechMetadata",
+      "file": "lib/src/models/content/speech_metadata.dart",
+      "schema": "SpeechMetadata"
+    },
+    "main:VideoMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VideoMetadata",
+      "file": "lib/src/models/files/video_metadata.dart",
+      "schema": "VideoMetadata"
+    },
+    "main:FunctionResponseBlob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionResponseBlob",
+      "file": "lib/src/models/tools/function_response.dart",
+      "schema": "FunctionResponseBlob"
+    },
+    "main:FunctionResponseFileData": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileData",
+      "file": "lib/src/models/content/file_data.dart",
+      "schema": "FunctionResponseFileData"
+    },
+    "main:FunctionResponsePart": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionResponseInlinePart",
+      "file": "lib/src/models/tools/function_response.dart",
+      "schema": "FunctionResponsePart"
+    },
+    "main:PredictRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PredictRequest",
+      "file": "lib/src/models/prediction/predict_request.dart",
+      "schema": "PredictRequest"
+    },
+    "main:PredictLongRunningRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PredictLongRunningRequest",
+      "file": "lib/src/models/prediction/predict_long_running_request.dart",
+      "schema": "PredictLongRunningRequest"
+    },
+    "main:SpeechConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechConfig",
+      "file": "lib/src/models/common/speech_config.dart",
+      "schema": "SpeechConfig"
+    },
+    "main:VoiceConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceConfig",
+      "file": "lib/src/models/common/voice_config.dart",
+      "schema": "VoiceConfig"
+    },
+    "main:WordInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTranscriptionWord",
+      "file": "lib/src/models/content/speech_metadata.dart",
+      "schema": "WordInfo"
+    },
+    "main:AudioTranscription": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AudioTranscription",
+      "file": "lib/src/models/content/speech_metadata.dart",
+      "schema": "AudioTranscription",
+      "note": "The public Developer transcription guide shows metadata-only response Parts. A public fixture verifies decoding diarization and word timing when aggregate text is absent.",
+      "excluded_properties": [
+        "text"
+      ]
+    },
+    "main:BidiGenerateContentSetup": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "BidiGenerateContentSetup",
+      "file": "lib/src/models/live/messages/client/client_message.dart",
+      "note": "Wire verification uses the WebSocket contract and public offline fixtures."
+    },
+    "main:ProactivityConfig": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ProactivityConfig",
+      "file": "lib/src/models/live/config/proactivity_config.dart",
+      "note": "Wire verification uses the WebSocket contract and public offline fixtures."
+    },
+    "main:RealtimeInputConfig": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "RealtimeInputConfig",
+      "file": "lib/src/models/live/config/realtime_input_config.dart",
+      "note": "Wire verification uses the WebSocket contract and public offline fixtures."
+    },
+    "main:EnvVar": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EnvVar",
+      "file": "lib/src/models/interactions/environments/environment_variables.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:EnvironmentFile": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EnvironmentFile",
+      "file": "lib/src/models/interactions/environments/environment_file.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:GetEnvironmentFilesResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "GetEnvironmentFilesResponse",
+      "file": "lib/src/models/interactions/environments/get_environment_files_response.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:UploadEnvironmentFileRequest": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EnvironmentFilesResource",
+      "file": "lib/src/resources/environment_files_resource.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
+    },
+    "main:UploadEnvironmentFileResponse": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "GetEnvironmentFilesResponse",
+      "file": "lib/src/models/interactions/environments/get_environment_files_response.dart",
+      "note": "Wire verification uses the Interactions contract and public offline fixtures."
     }
   }
 }

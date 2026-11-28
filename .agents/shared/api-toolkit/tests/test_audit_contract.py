@@ -44,7 +44,7 @@ EXPECTED_AUDIT_REFERENCE_CONFIG = {
         "resources_adapter": "python_client_members",
         "resources_path": "google/genai/client.py",
         "types_adapter": "python_init_exports",
-        "types_path": "google/genai/_interactions/types/__init__.py",
+        "types_path": "google/genai/_gaos/types/__init__.py",
     },
     "googleai_dart/openapi-googleai:main": {
         "repo": "googleapis/python-genai",

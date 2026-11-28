@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../utils/media_wire_options.dart';
 import '../copy_with_sentinel.dart';
 import '../files/video_metadata.dart';
 import '../tools/code_execution_result.dart';
@@ -13,7 +14,6 @@ import 'blob.dart';
 import 'file_data.dart';
 import 'media_metadata.dart';
 import 'media_resolution.dart';
-import 'media_wire_options.dart';
 import 'speech_metadata.dart';
 
 /// A single unit of content (text, media, function call, etc.).

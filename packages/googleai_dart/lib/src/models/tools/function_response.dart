@@ -1,7 +1,7 @@
+import '../../utils/media_wire_options.dart';
 import '../content/file_data.dart';
 import '../content/media_metadata.dart';
 import '../content/media_resolution.dart';
-import '../content/media_wire_options.dart';
 import '../copy_with_sentinel.dart';
 import '../files/video_metadata.dart';
 

@@ -1,8 +1,13 @@
-# Gemini Live and Genie 4 inventory
+# Gemini Live, Genie 4, and Live Music inventory
 
-Cutoff 2026-11-28 Europe/Madrid. Baseline `googleai_dart` 13.1.0 at `36a0c21803b969a9942bc42f84ac0658a6cb2f19`. Original `live-api-schema.source.json` and canonical `live-api-schema.json` both SHA-256 `16b54f24866ce7772dc939b3b0c2adbba9f9a44d424b1329809aa9295e7df49d`. The WebSocket toolkit fetch copies a local source, so a clean fetch/diff alone says nothing about upstream coverage. Refresh the source from the official API reference plus the official pinned SDK converter code. Review/promote to `live-api-schema.json`, update endpoint metadata and manifest, and explain each material difference between backend/version contracts.
+The cutoff is 2026-11-28 in Europe/Madrid. The baseline is `googleai_dart`
+13.1.0 at `36a0c21803b969a9942bc42f84ac0658a6cb2f19`. The original
+`live-api-schema.source.json` and `live-api-schema.json` both had SHA-256
+`16b54f24866ce7772dc939b3b0c2adbba9f9a44d424b1329809aa9295e7df49d`.
+The local WebSocket toolkit fetch copies a checked-in source. The pinned
+public references and SDK revisions establish the upstream contract.
 
-Sources:
+## Pinned sources
 
 - [Release notes](https://aistudio.google.com/docs/changelog), [Developer Live protocol](https://aistudio.google.com/api-reference/live), [Bidi route and envelopes](https://aistudio.google.com/api-reference/live/bidi-generate-content), [authentication](https://aistudio.google.com/docs/ephemeral-tokens), [capabilities/model differences](https://aistudio.google.com/docs/live-api/capabilities), [transcribe and voice editing](https://aistudio.google.com/docs/live-api/live-transcribe), [thinking](https://aistudio.google.com/docs/live-api/thinking), [tools](https://aistudio.google.com/docs/live-api/tools), [live translation](https://aistudio.google.com/docs/live-api/live-translate).
 - [Agent Platform Live protocol](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/multimodal-live), [Agent Platform session/auth](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session), [Agent Platform model locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations), [Agent Platform release notes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/release-notes).
@@ -10,7 +15,7 @@ Sources:
 - [JS connect](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/live.ts), [JS mappings](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/converters/_live_converters.ts), [JS types](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/types.ts), v3.6.1.
 - [Genie 4 guide](https://aistudio.google.com/docs/genie), [Python WebSocket](https://github.com/googleapis/python-genai/blob/aa813f8bf805b6f4f3e57abb8f04b91d769e23e6/google/genai/_interactions_websocket.py), [JS WebSocket](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/_interactions_websocket.ts), [JS WebRTC](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/_interactions_webrtc.ts), [scoped token SDK route](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/gaos/funcs/interactions-auth-tokens-create.ts).
 
-Optional source byte pins for reproducibility from `.md` endpoints, with the same URLs above and `.md` appended to their paths:
+Source byte pins for the Markdown endpoints above appear below. The canonical snapshot carries the complete list of Live Bidi source URLs and hashes.
 
 | Document | SHA-256 |
 | --- | --- |
@@ -22,62 +27,93 @@ Optional source byte pins for reproducibility from `.md` endpoints, with the sam
 
 ## Gemini Live connection and lifecycle
 
-| Surface | Dart coverage and disposition |
+| Surface | Dart disposition and evidence |
 | --- | --- |
-| Developer API key and custom proxy | Normal `v1beta` `/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent` already correct in Dart, incorrect in the snapshots/specs config. Preserve API-key query, scheme/port/path/query handling, and the documented default query merge unless auth conflicts are explicitly fixed. |
-| Developer ephemeral auth | Existing `authTokens.create`, provider and `connect(accessToken:)` exist but Dart sends `access_token` to the unconstrained method. Developer docs show `/v1beta/auth_tokens` and `v1beta` constrained `GenerativeService.BidiGenerateContentConstrained`, `access_token` query or `Authorization: Token`; both SDKs confirm the constrained method but their older warn text says v1alpha. Use documented `v1beta`; the Dart enum currently offers v1/v1beta only, so the older SDK v1alpha warning is not a Dart compatibility obligation. Test both explicit and provider-issued credentials. Keep keys out of surfaced errors/log messages. Public `CreateAuthTokenRequest` is the RPC wrapper, while the fetched REST discovery and SDK converters both send a bare `AuthToken` and nested `bidiGenerateContentSetup`. Existing Dart shape already matches this; omit output-only `name` and non-Bidi `interactionId` specifically in create requests if tightening it. Keep the model response parser compatible. |
-| Vertex/Agent Platform | Existing regional host selection from #306 and Vertex `projects/{project}/locations/{location}/publishers/google/models/{model}` qualification must be preserved. Dart sends the existing `PredictionService.BidiGenerateContent` path; official docs and pinned SDKs agree on `/ws/google.cloud.aiplatform.{version}.LlmBidiService/BidiGenerateContent` for ADC regional v1 and v1beta1. ADC headers native, browser WebSockets cannot pass these headers; no OAuth token in query. Both SDKs also include a Vertex Express API-key branch, distinct from project/ADC and browser support. The Cloud reference documents ADC. Location availability is model-specific. Gemini 3.8 Live lists us/eu/us-central1/asia-south1, while Gemini 3.5 Transcribe Live lists global/us/eu. Express key auth is SDK evidence. [Gemini 3.8 Live locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-live) · [Gemini 3.5 Transcribe locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-transcribe#regional-availability) |
-| Transport lifecycle | Dart starts a broadcast listener, sends setup before its handshake listener is attached, catches only `FormatException` in JSON casts, decodes binary UTF-8 outside that catch, closes a list of sessions, keeps explicitly closed sessions until client close, and resets stored resume token on null update. Review setup-before-listener/early data loss, malformed JSON and UTF-8, upgrade errors, close and cancellation, resumption acknowledged cursor and backend rules, and caller ownership. Existing idempotent close (#240), unknown envelopes and full model names are compatibility baselines. |
-| Retired model examples | `gemini-2.0-flash-live-001` shut down 2025-12-09 but remains in README, dartdoc, and examples. Use currently documented model/modality per backend. Developer `gemini-3.8-live` and `gemini-3.8-live-extended-thinking` model availability is GA, whereas Developer Live protocol docs still label the API preview. Latest thinking guide lists `low`, `medium`, `high` for extended thinking and explicitly excludes `minimal`, which conflicts with the September changelog bullet. |
+| Developer API key and proxy | `GoogleAIClient.createLiveClient()` sends an API key in the query for the public `v1beta` `GenerativeService.BidiGenerateContent` route and retains custom gateway scheme, port, path, and unrelated query parameters. [Routing](https://github.com/davidmigloz/ai_clients_dart/pull/653) · [Developer Bidi reference](https://aistudio.google.com/api-reference/live/bidi-generate-content) |
+| Developer ephemeral tokens | `authTokens.create` uses the general Developer AuthToken endpoint. `connect(accessToken: ...)` and `EphemeralTokenProvider` select the constrained `v1beta` Bidi route. Browser auth uses `access_token` in the query and native callers can choose the `Authorization: Token` header. The public route takes precedence over older SDK warning text about `v1alpha`. Loopback and browser tests cover credential precedence and sanitized failures. [Routing](https://github.com/davidmigloz/ai_clients_dart/pull/653) · [Ephemeral tokens](https://aistudio.google.com/docs/ephemeral-tokens) |
+| Vertex project and regional routing | `ApiVersion.v1` and `v1beta1` select the public `LlmBidiService/BidiGenerateContent` routes with native OAuth headers, a regional host, and a qualified project, location, and publisher model. A browser cannot attach the required OAuth header. Tests cover regional, custom gateway, and explicit model paths. Gemini 3.8 Live lists us, eu, us-central1, and asia-south1. Gemini 3.5 Transcribe Live lists global, us, and eu. [Routing](https://github.com/davidmigloz/ai_clients_dart/pull/653) · [Cloud startup and auth](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session) · [3.8 Live](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-live) · [3.5 Transcribe](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-transcribe#regional-availability) |
+| Setup, errors, and cleanup | Dart listens for setup acknowledgement before sending the first frame. Malformed text, malformed UTF-8, and bad typed fields enter the message error path. Failed setup and explicit close drain tracked sessions. Errors redact applicable auth values and both raw and URI-encoded resume handles, including checkpoints sent after setup. [Lifecycle](https://github.com/davidmigloz/ai_clients_dart/pull/671) · [Native fixtures](../../test/unit/live/live_connection_io_test.dart) |
+| Pending connections | Closing the Live client settles pending credential and setup waits and aborts native and browser WebSocket upgrades. A late credential result cannot dispatch an upgrade. The client can connect again. [Pending connections](https://github.com/davidmigloz/ai_clients_dart/pull/678) · [Native fixtures](../../test/unit/live/live_connection_io_test.dart) · [Browser fixtures](../../test/unit/live/live_connection_web_test.dart) |
+| Resumption checkpoints | `LiveSession.lastResumableUpdate` retains the last usable checkpoint separately from the latest status. Vertex transparent resumption exposes `lastConsumedClientMessageIndex` as a decimal string. Dart strips Vertex-only `transparent` from Developer setup and reports failed resume as `LiveSessionResumptionException`. The caller owns buffering and replay. [Lifecycle](https://github.com/davidmigloz/ai_clients_dart/pull/671) · [Cloud session management](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session) |
+| Models and stage | Current examples use `gemini-3.8-live`. Developer Gemini 3.8 Live models are GA while the Developer Bidi reference labels the API preview. The extended-thinking guide lists low, medium, and high. The retired `gemini-2.0-flash-live-001` remains historical. [Developer model](https://aistudio.google.com/docs/models/gemini-3.8-live) · [Thinking](https://aistudio.google.com/docs/live-api/thinking) · [Deprecations](https://aistudio.google.com/docs/deprecations) |
 
-## Bidi messages and config
+## Bidi messages and configuration
 
-| Wire schema | Baseline, delta, and disposition |
+| Wire surface | Dart disposition and evidence |
 | --- | --- |
-| Client envelope | Existing setup, clientContent, realtimeInput, toolResponse and preserved unknown variants. Add SDK/public Cloud `contextUpdate` for mid-session system instruction/tool changes and explicitly empty tools; converter paths support both, but Developer public Bidi table does not yet list the variant. Document per-model support. New variants on a public sealed type can break exhaustive switches; migration or compatible design required. |
-| Setup / `LiveConfig` | Existing required model, generation config, instructions, tools, realtime input config, resumption, compression, audio transcription, proactive audio. `historyConfig.initialHistoryInClientContent` already wired/typed in Dart but absent from snapshot. Add `labels` for Developer and Cloud regular connect; the pinned low-level Vertex setup converter disagrees with the regular connect converter and the Cloud wire reference. The SDK declares `explicitVadSignal` Vertex-only and safety settings on both backends. `avatarConfig` is in both pinned SDK maps and publicly documented for Cloud models. `voiceConsentSignature` appears on setup-complete in SDK types. [Cloud Bidi reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/live-api) · [Live avatars](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/configure-live-avatars) Preserve model normalization and ensure fields flow through the real connect setup and auth constraints. |
-| Live generation config | Existing modalities, speech, temperature, topP, topK, maxOutputTokens. Confirm and expose `thinkingConfig`, `mediaResolution`, `seed`, `enableAffectiveDialog`, `translationConfig` through setup `generationConfig` per both SDKs and the public guides. Generation config is a shared broad provider type in the SDK; do not claim every REST-only field is accepted by Live without matching evidence. `topK` is floating-point in SDK, currently `int?` in Dart. Reuse shared ThinkingConfig, MediaResolution and TranslationConfig where their wire matches. Review shared `SpeechConfig`/`VoiceConfig` with main REST owner (multi-speaker, `textNormalization`, voice string, replicated voices only where supported). |
-| `clientContent` | Existing turns and turnComplete. Public docs model turns optional, so test turn completion with no turns. Preserve constructors and prior seeded conversation history. |
-| `realtimeInput` | Existing audio, video, text, activityStart/end, audioStreamEnd. Source marks activity events boolean while runtime uses `{}` markers, correct schema. Official Developer additionally documents per-input `mediaResolution` and deprecated single-item-effective `mediaChunks`. Preserve existing send helpers, support public raw wire fields, enforce model/VAD constraints accurately, and test exact JSON frame variants. Do not present deprecated media array as preferred. |
-| `RealtimeInputConfig` / VAD | Add `interimTranscriptTimestampEnabled`. Accept documented `TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO` and enum unspecified values. Start/end wire strings should be `START_SENSITIVITY_HIGH/LOW/UNSPECIFIED` and `END_SENSITIVITY_HIGH/LOW/UNSPECIFIED`. Dart emits bare `HIGH/LOW`; accept old spelling on decoding if needed for offline data. Preserve `START_OF_ACTIVITY_INTERRUPTS` / `NO_INTERRUPTION`, add unspecified and forward-compatible enum handling. |
-| `AudioTranscriptionConfig` and `Transcription` | Dart Live `AudioTranscriptionConfig` is empty (old source erroneously expects `enabled`); two other Dart transcription types exist. Add public `languageCodes`, `customVocabulary`, `wordTimestamp`, `diarization`, `mode`, `sourceText`, and reconcile discovery/SDK-only `languageAuto`, `languageHints`, deprecated `adaptationPhrases`. Add response languageCode and optional protobuf-duration string start/end offsets, plus SDK-known `finished`, `speakerLabel`, and `words` where supported. Clearly label contradictory underlying support: public wire advertises `diarization`, dedicated Live Transcribe guide says real-time diarization is unavailable. Developer Live Transcribe is GA, initially with interim/final, language hints, vocabulary, VAD and SMART/VERBATIM. November 17 added voice editing in SMART with `sourceText`. Validate response types with separate fixtures and existing `const AudioTranscriptionConfig()` compatibility. |
-| `ProactivityConfig` / history / compression | Existing proactiveAudio; Developer wire documents `proactiveVideo`, even though the pinned SDK type only lists proactiveAudio. `historyConfig` exists in Dart. Existing `triggerTokens`/`targetTokens` models use numbers directly although protobuf int64 JSON uses a string, so test canonical string values and compatibility numeric input. `sessionResumption.transparent` is accepted by pinned Vertex converter, rejected by Developer converters and absent from public Developer reference. |
-| Server envelope ancillary fields | Public `usageMetadata` and `voiceActivity` are siblings of the union, can accompany `serverContent`, and can be standalone. JS/Python additionally type `voiceActivityDetectionSignal`. Current Dart discards outer metadata alongside a recognized message and falls back to raw for ancillary-only frames. Preserve once per origin frame without breaking consumption of known variants. Developer `UsageMetadata` uses `responseTokenCount`, `responseTokensDetails` versus shared REST candidate keys, and Cloud SDK maps Cloud `candidatesTokenCount` to its response abstraction; test both wire forms. Voice activity uses wire `type`, not SDK in-memory `voiceActivityType`, plus `audioOffset` protobuf Duration. |
-| Server content | Existing modelTurn, turnComplete, interrupted, generationComplete, groundingMetadata, final input/output transcription. Add interim input transcription, `urlContextMetadata`, `waitingForInput`, `interactionStatus` (`IN_PROGRESS`, `REQUIRES_ACTION`, `IDLE`, unspecified), and SDK `turnCompleteReason` where emitted. Cloud also documents `speechState` (`SPEECH_STATE_UNSPECIFIED`, `NON_SPEECH`, `SPEECH`). Current nested usage remains a compatibility path; reference uses outer usage. Independent final/interim/model turn ordering is valid. |
-| Setup complete, go away, resumption | `sessionId` is tracked and valid SDK compatibility though Developer setup-complete docs show `{}`. `GoAway.timeLeft` is present. Restore resumption `lastConsumedClientMessageIndex` for transparent mode; JS type/Cloud protobuf JSON represent int64 as string, Python uses int model. Test cursor, handle preservation, initial empty handle and appropriate modes. |
-| Tools/function and media | Add `FunctionDeclaration.behavior` (`BLOCKING`, `NON_BLOCKING`), `FunctionResponse.scheduling` (`SILENT`, `WHEN_IDLE`, `INTERRUPT`) and SDK `willContinue` plus function call multipart/partial args where supported via shared core scope. Validate matching `id` for Developer Live response, public async scheduling, compatibility with sync consumers, tool cancellation frames, supported MIME for audio/image input, frame processing and local transport close. |
+| Setup and generation | `LiveConfig` and `BidiGenerateContentSetup` carry labels, safety settings, history, and Vertex explicit VAD. `LiveGenerationConfig` carries media resolution, seed, thinking, affective dialogue, and translation. The decoder accepts integral numeric `topK` and the public Dart property remains `int?`. `SafetySetting.method` preserves Vertex `SEVERITY` and `PROBABILITY`. Developer Live rejects that Vertex-only argument before auth. [Setup changes](https://github.com/davidmigloz/ai_clients_dart/pull/675) · [Cloud Bidi reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/live-api) · [Developer translation](https://aistudio.google.com/docs/live-api/live-translate) |
+| Proactivity and compression | Dart carries `proactiveVideo` where the model supports it. Vertex Gemini 3.8 Live enables affective dialogue and proactive audio by default, so applications omit the older flags on that model. Cloud 2.5 fixtures cover explicit audio controls. Compression sends protobuf int64 decimal strings and continues to read previously saved integer fields. [Cloud 3.8 Live model guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-live) · [Developer Bidi reference](https://aistudio.google.com/api-reference/live) |
+| Context and real-time input | The Live context/input follow-up supports completion without resending `turns`, Vertex `sendContextUpdate` and explicit empty tools, Developer per-frame `mediaResolution`, and the deprecated `mediaChunks` wire key. Existing setup, tool response and unknown envelopes continue through the same dispatch. [Developer Bidi reference](https://aistudio.google.com/api-reference/live) · [Cloud Bidi reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/models/live-api) |
+| VAD and turn coverage | Canonical `START_SENSITIVITY_*` and `END_SENSITIVITY_*` are written, with legacy bare `HIGH` and `LOW` accepted for decoding. Enums expose unspecified values and `TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO`. [Enum alignment](https://github.com/davidmigloz/ai_clients_dart/pull/665) · [Public wire values](https://aistudio.google.com/api-reference/live) |
+| Transcription | Dart carries language hints, vocabulary, word timestamps, the diarization wire field, SMART and VERBATIM modes, and SMART voice editing with `sourceText`. It parses final and interim transcript frames, language, speaker, offsets, and words. Legacy `AudioTranscriptionConfig.enabled` controls setup object presence. The dedicated Transcribe guide limits availability even where the shared Bidi schema has a field. In particular, real-time diarization is unavailable there and SMART mode is incompatible with timestamps and diarization. [Transcription alignment](https://github.com/davidmigloz/ai_clients_dart/pull/658) · [Live Transcribe guide](https://aistudio.google.com/docs/live-api/live-transcribe) |
+| Usage and turn metadata | Dart keeps envelope `usageMetadata` alongside existing messages or standalone input. `responseUsageMetadata` normalizes Developer response and Vertex candidate count names while preserving the original wire casing. It also carries per-turn `waitingForInput`, `turnCompleteReason`, interaction status, speech state, URL context, and legacy nested usage decoding. [Response metadata](https://github.com/davidmigloz/ai_clients_dart/pull/666) · [Developer server envelope](https://aistudio.google.com/api-reference/live) |
+| Voice activity | `message.voiceActivity` carries activity type and protobuf-duration audio offset with existing messages or standalone frames. The Dart extension type retains future strings. [Lifecycle alignment](https://github.com/davidmigloz/ai_clients_dart/pull/671) · [Developer voice activity](https://aistudio.google.com/api-reference/live#VoiceActivity) |
+| Prebuilt avatars | The Vertex v1 avatar slice selects a built-in avatar in `LiveAvatarConfig` and `ResponseModality.video` with `gemini-3.8-live`. Native and browser fixtures check the setup frame and MP4 media. The first subscription receives early MP4 frames in order. The startup buffer retains up to 64 frames or 16 MiB and reports a typed error on overflow. Optional numeric compression bitrates follow the pinned SDK models. The Developer wire reference describes audio output and the prebuilt avatar path is verified for Cloud. [Cloud avatar guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/configure-live-avatars) · [Avatar implementation](https://github.com/davidmigloz/ai_clients_dart/pull/687) |
+| Shared tool responses | `FunctionDeclaration.behavior` selects blocking or asynchronous execution on supported models. `FunctionResponse` carries the provider call ID, structured response and scheduling. Vertex Live expects a single complete response, while the shared `willContinue` field is available on supporting APIs. Tool cancellation carries call IDs. Incremental function arguments belong to Vertex REST streaming and its `streamFunctionCallArguments` option. [Developer Live tools](https://aistudio.google.com/docs/live-api/tools) · [Cloud Live tools](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/asynchronous-function-calling) · [Cloud REST tools](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tools/function-calling) |
 
-Live #643 owns Live-only envelopes, configuration and session lifecycle. Core #641 owns shared REST function and media model fields that also flow through Bidi. Genie #644 owns its interaction-scoped credentials, events and transport separately. The Developer Live API remains on v1beta regardless of the version selected for REST Interactions. Exact per-contract PR acceptance: fake/native loopback connection through `createLiveClient` and `connect` with deployed route/model/auth variants and header secrecy, browser connector capability checks, stable setup/resume lifecycle, JSON fixtures for every new field/variant and existing wire forms, snapshot source + manifest reconciliation, and strict toolkit verification. Keep live provider connection tests out of default work.
+The WebSocket manifest verifies the canonical Bidi configuration and
+discriminator paths. Immutable message wrappers, open wire values and
+normalization wrappers are covered by offline Dart fixtures where the
+toolkit assumes a generated `copyWith` or fixed enum. The package also
+documents before-and-after migration for exhaustive switches.
+
+### Availability limits
+
+- The public project-scoped Vertex OAuth transport is covered. The pinned
+  SDK Express API-key transport has separate routing and authorization.
+  [Cloud session management](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session)
+- Reference-image avatars and custom-voice registration have their own
+  access and consent requirements. The public Cloud avatar example uses a
+  prebuilt avatar and prebuilt voice.
+  [Cloud avatar guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/configure-live-avatars)
+- The pinned converters name `voiceActivityDetectionSignal` and
+  `voiceConsentSignature`. The reference supplies a public response shape
+  for `voiceActivity` and no corresponding public general response contract
+  for the other fields.
+  [Developer Bidi reference](https://aistudio.google.com/api-reference/live)
+- Verification uses simulated HTTP, WebSocket, browser, and WebRTC peers.
+  Provider sessions require separate authorization.
 
 ## Genie 4
 
-- GA paid-tier Developer API model `genie-4` on **Interactions `v1beta`**, distinct from GA Interactions defaults and Gemini Live. Both pinned SDK transports explicitly reject Vertex for live Interactions. No existing Dart model/event or transport implementation. The model accepts text and/or 16:9 initial image, then steering input. Google distinguishes the model's GA release from its experimental SDK live transport surface.
-- Token resource `POST /{version}/interactions/{id}/auth_tokens` with interaction-specific auth token is distinct from Live API `/v1beta/auth_tokens`. Reconcile the pinned REST spec and SDK revision/header requirements.
-- WebSocket `/{version}/interactions/live`; first outbound map has `event_type: interaction.connect` and `id`. Use text or binary UTF-8 handling as appropriate, input envelopes for world_setup (top-level world_prompt/reference_image), user_action (key events), input text, and event batches. Server accepts singleton or `{events:[...]}` and typed/error/unknown events, including connect and step.delta. Pinned native SDK sends `x-goog-api-key` header (incl scoped token); JS browser uses scoped token in `auth_token` query because upgrade headers are unavailable. Do not forward a raw long-lived key in browser mode. Handle explicit complete/cancel versus detach, transport errors/timeouts, single active receive and cancellation, and 24 fps JPEG / 48 kHz stereo PCM media without assuming browser-only types on IO.
-- WebRTC browser signaling `POST /{version}/interactions/{id}:webrtc` with `offer_sdp` -> `answer_sdp`, scoped credential, no `api-revision` header (pinned SDK comment explains CORS). Use recvonly audio/video, `events` RTCDataChannel created before the offer, answer validation, ICE/transport events and cleanup, media tracks without JSON/base64 frame assumptions. Preserve native/stub support through a conditional adapter or explain and track a verified blocker. Test fake signaling/peer plus a relevant Chrome browser test. Docs say 65,536-byte data channel cap and recommends WebSocket for larger seed images.
-- Explicit `interaction.complete` ends inference/billing and waits for completion; `interaction.cancel` aborts server generation; `interaction.disconnect`/detach merely ends the local transport. The Genie model does not support session resumption. Verify completion versus detach with independent terminal, cancellation, error and close fixtures. Do not run actual paid sessions under this authorization.
+Genie 4 is a paid-tier Developer API model that uses Interactions
+`v1beta`. Its SDK live transports have independent preview functionality.
+
+- The interaction-scoped token endpoint
+  `POST /v1beta/interactions/{id}/auth_tokens` is separate from general
+  Bidi Live auth. Native WebSocket uses the API-key header. In browsers the
+  scoped token uses the `auth_token` query parameter.
+- The WebSocket connects through `/v1beta/interactions/live` and sends
+  `interaction.connect` before controls. Dart decodes singleton and batched
+  events, typed server outcomes, and JPEG and PCM media. Completing or
+  cancelling changes the provider interaction. Detaching closes the local
+  transport and leaves the provider interaction active.
+- Browser WebRTC sends `offer_sdp` to the interaction signaling route and
+  receives `answer_sdp`. The browser peer receives audio and video tracks
+  and sends controls with the events data channel. Native callers can use
+  the WebSocket client.
+
+[Genie 4 guide](https://aistudio.google.com/docs/genie) ·
+[WebSocket implementation](https://github.com/davidmigloz/ai_clients_dart/pull/659) ·
+[WebRTC implementation](https://github.com/davidmigloz/ai_clients_dart/pull/664)
 
 ## Live Music
 
-[#647](https://github.com/davidmigloz/ai_clients_dart/issues/647) owns the
-experimental `lyria-realtime-exp` model on the Developer `v1beta` preview
-protocol. Dart has no BidiGenerateMusic transport or schemas. Cloud's Lyria
-REST models are a separate contract.
-[Developer Live Music reference](https://aistudio.google.com/api-reference/live-music) ·
-[Generation guide](https://aistudio.google.com/docs/realtime-music-generation) ·
-[Cloud music guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/music/generate-music)
+`createLiveMusicClient()` connects to Developer API `v1beta`
+`GenerativeService.BidiGenerateMusic` for the experimental
+`lyria-realtime-exp` model. Dart supports weighted prompts, generation
+settings, PLAY, PAUSE, STOP, RESET_CONTEXT, and the model's 48 kHz stereo
+16-bit PCM. Offline tests cover setup acknowledgement, warnings, filtered
+prompts, timeouts, cancellation, and closed sessions. Cloud's Lyria REST
+models use a separate contract.
 
-Open `/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateMusic`
-with API-key auth. Python sends a header and JavaScript uses the `key` query
-parameter. Test setup and `setupComplete` ordering, fully qualified model name,
-weighted prompts, generation configuration, and PLAY, PAUSE, STOP and
-RESET_CONTEXT controls. Decode audio chunks, source metadata, filtered prompts,
-warnings and unknown frames. Test cancellation, failures and idempotent
-close. The protocol guide specifies 48 kHz stereo 16-bit PCM.
+The public Markdown protocol SHA-256 is
+`21fa98c24bd62a0a8a612aa502f0d17e1d67fa309f296617b68b5fc34e1f210f`.
+The generation guide SHA-256 is
+`e75053a3a24ccc63da76f62e7113949f0a83710f7d3283f30c9272df77de895f`.
+
+[Live Music reference](https://aistudio.google.com/api-reference/live-music) ·
+[Generation guide](https://aistudio.google.com/docs/realtime-music-generation) ·
+[Dart implementation](https://github.com/davidmigloz/ai_clients_dart/pull/667) ·
 [Pinned Python transport](https://github.com/googleapis/python-genai/blob/aa813f8bf805b6f4f3e57abb8f04b91d769e23e6/google/genai/live_music.py) ·
 [Pinned JavaScript transport](https://github.com/googleapis/js-genai/blob/719dffc91dbf38f8a5f2d90bf93efa5dc8207999/src/music.ts)
-
-The Markdown protocol and guide pins are
-`21fa98c24bd62a0a8a612aa502f0d17e1d67fa309f296617b68b5fc34e1f210f` and
-`e75053a3a24ccc63da76f62e7113949f0a83710f7d3283f30c9272df77de895f`,
-respectively, as SHA-256.

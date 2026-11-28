@@ -111,3 +111,41 @@ the canonical snapshot filenames, source metadata, manifest, README, example
 index, runnable examples, `llms.txt` and the migration guide as applicable.
 Record what is ready to release, any confirmed follow-ups and the proposed
 semantic version. Approval for version changes and publication is separate.
+
+## Delivery evidence
+
+- [Core REST delivery](core-delivery.md) reconciles all 79 core schema rows,
+  changes to discovery operations, and the older public REST gaps.
+- [Interactions delivery](interactions-delivery.md) reconciles the 42 operation
+  rows, 212 schema rows, and contracts documented outside the discovery snapshot.
+- [Live, Genie, and Live Music delivery](live.md) maps transport, authentication,
+  session lifecycle, and model capability to the documented wire and Dart entry
+  points.
+
+The proposed package version is `14.0.0`. The changes add cases to exhaustive
+switches, make Cloud Storage file timestamps optional when the service omits
+them, and align Live end-of-audio and token count wire values. The migration
+guide shows the affected Dart calls and JSON forms. To adopt stable Developer
+Interactions, set `interactionsApiVersion: ApiVersion.v1`. Developer preview
+features use `v1beta` where specified by Google.
+
+[Migration guide](../../MIGRATION.md) · [Alignment epic](https://github.com/davidmigloz/ai_clients_dart/issues/635)
+
+## Verification notes
+
+The OpenAPI manifests track the Developer REST surfaces separately. They retain
+explicit entries for compatibility types whose schemas are absent from the
+pinned contract. The WebSocket manifest records the Developer and Vertex Live
+wire alongside the public session types.
+
+- The core registration and download advisories come from action discovery
+  through filenames. `FilesResource` inherits both operations from
+  `FilesResourceBase`. Public fixtures exercise each route.
+- Interactions sibling checks report distinct types for tool arguments,
+  results, media processing, and response-format selectors. Those fields
+  have separate shapes in the pinned unions.
+- Live debug summaries omit nested configuration details. The typed codecs and
+  public frame fixtures cover those wire fields.
+- Shared verification includes Anthropic, Chroma, Mistral, Ollama, OpenAI, and
+  Open Responses. Existing diagnostics outside Gemini are recorded separately
+  from the Gemini release checks.

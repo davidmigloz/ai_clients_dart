@@ -14,10 +14,9 @@ void main() async {
     print('Generating embedding for: "Hello, world!"\n');
 
     final response = await client.models.embedContent(
-      model: 'gemini-embedding-2-preview',
+      model: 'gemini-embedding-2',
       request: EmbedContentRequest(
-        content: Content.text('Hello, world!'),
-        taskType: TaskType.retrievalDocument,
+        content: Content.text('title: Greeting | text: Hello, world!'),
       ),
     );
 
@@ -37,13 +36,12 @@ void main() async {
     ];
 
     final batchResponse = await client.models.batchEmbedContents(
-      model: 'gemini-embedding-2-preview',
+      model: 'gemini-embedding-2',
       request: BatchEmbedContentsRequest(
         requests: texts
             .map(
               (text) => EmbedContentRequest(
-                content: Content.text(text),
-                taskType: TaskType.retrievalDocument,
+                content: Content.text('title: none | text: $text'),
               ),
             )
             .toList(),

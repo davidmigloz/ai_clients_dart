@@ -14,6 +14,7 @@ Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platf
 
 - [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart) (~326 tokens): Stable Developer API Interactions quickstart.
 - [interactions_media_slicing.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_media_slicing.dart): Process selected Interactions document pages and layers.
+- [interactions_speech_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_speech_example.dart): Two-speaker WAV using Gemini Developer API v1beta.
 - [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart) (~1.2k tokens): Stable Interactions, streaming, state and function calls.
 - [interactions_long_decode.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_long_decode.dart): Opt-in automatic continuation for foreground Gemini 4 interactions.
 - [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/agents_example.dart): Create and reuse a managed agent on Gemini Developer API v1beta.

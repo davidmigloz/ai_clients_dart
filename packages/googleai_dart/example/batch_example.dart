@@ -16,7 +16,7 @@ void main() async {
     // 1. Create a batch for content generation
     print('1. Creating batch for content generation...');
     final generateBatch = await client.models.batchGenerateContent(
-      model: 'gemini-3.1-flash-preview',
+      model: 'gemini-3.8-flash',
       batch: GenerateContentBatch(
         displayName: 'Math Questions Batch',
         // model is auto-populated from the method parameter
@@ -101,7 +101,7 @@ void main() async {
     // 5. Create an async batch for embeddings
     print('5. Creating async batch for embeddings...');
     final embedBatch = await client.models.asyncBatchEmbedContent(
-      model: 'gemini-embedding-2-preview',
+      model: 'gemini-embedding-2',
       batch: EmbedContentBatch(
         displayName: 'Product Descriptions Embeddings',
         // model is auto-populated from the method parameter
@@ -111,27 +111,24 @@ void main() async {
               InlinedEmbedContentRequest(
                 request: EmbedContentRequest(
                   content: Content.text(
-                    'High-quality wireless headphones with noise cancellation.',
+                    'title: Headphones | text: Wireless noise-cancelling headphones.',
                   ),
-                  taskType: TaskType.retrievalDocument,
                 ),
                 metadata: {'product_id': 'prod1'},
               ),
               InlinedEmbedContentRequest(
                 request: EmbedContentRequest(
                   content: Content.text(
-                    'Ergonomic office chair with lumbar support and adjustable height.',
+                    'title: Office chair | text: Adjustable with lumbar support.',
                   ),
-                  taskType: TaskType.retrievalDocument,
                 ),
                 metadata: {'product_id': 'prod2'},
               ),
               InlinedEmbedContentRequest(
                 request: EmbedContentRequest(
                   content: Content.text(
-                    'Smart watch with heart rate monitor and GPS tracking.',
+                    'title: Smart watch | text: Heart rate monitor and GPS tracking.',
                   ),
-                  taskType: TaskType.retrievalDocument,
                 ),
                 metadata: {'product_id': 'prod3'},
               ),

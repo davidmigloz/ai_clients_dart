@@ -143,7 +143,8 @@ class GenerationAudioTranscriptionConfig {
       'languageAuto: $languageAuto, '
       'languageCodes: $languageCodes, '
       'languageHints: $languageHints, '
-      'wordTimestamp: $wordTimestamp)';
+      'wordTimestamp: $wordTimestamp, mode: $mode, '
+      'hasSourceText: ${sourceText != null})';
 }
 
 /// Hints to help the model select the transcription language.

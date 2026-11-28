@@ -340,6 +340,19 @@ def extract_method_body(content: str, method_pattern: str) -> str:
         end_index = newline_index if newline_index != -1 else len(content)
         return content[body_start:end_index]
 
+    # Factory codecs can have a named-parameter group before the actual body.
+    if match.group(0).startswith("factory"):
+        remainder = content[start:]
+        opening = start + len(remainder) - len(remainder.lstrip())
+        if content[opening:opening + 1] == "(":
+            signature_code, _ = _dart_code_and_literals(content[opening:])
+            depth = 0
+            for offset, char in enumerate(signature_code):
+                depth += (char == "(") - (char == ")")
+                if depth == 0:
+                    start = opening + offset + 1
+                    break
+
     brace_index = content.find("{", start)
     arrow_index = content.find("=>", start)
 

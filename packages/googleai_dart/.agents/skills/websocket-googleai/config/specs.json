@@ -6,8 +6,9 @@
       "experimental": false,
       "description": "Real-time bidirectional audio/video streaming via WebSocket",
       "websocket_endpoints": {
-        "google_ai": "wss://generativelanguage.googleapis.com/{version}/models/{model}:BidiGenerateContent",
-        "vertex_ai": "wss://{location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.{version}.PredictionService.BidiGenerateContent"
+        "google_ai": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.{version}.GenerativeService.BidiGenerateContent",
+        "google_ai_constrained": "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained",
+        "vertex_ai": "wss://{host}/ws/google.cloud.aiplatform.{version}.LlmBidiService/BidiGenerateContent"
       },
       "fetch_mode": "local_file",
       "source_file": "specs/live-api-schema.source.json"

@@ -1,4 +1,4 @@
-import '../../content/media_wire_options.dart';
+import '../../../utils/media_wire_options.dart';
 import '../../copy_with_sentinel.dart';
 import '../interaction_review_snippet.dart';
 import '../media_processing.dart';

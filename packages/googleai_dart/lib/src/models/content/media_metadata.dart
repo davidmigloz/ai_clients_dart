@@ -1,5 +1,5 @@
+import '../../utils/media_wire_options.dart';
 import '../copy_with_sentinel.dart';
-import 'media_wire_options.dart';
 
 /// Video interpretation approach for GenerateContent.
 ///

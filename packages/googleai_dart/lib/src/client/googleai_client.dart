@@ -65,7 +65,7 @@ import 'retry_wrapper.dart';
 ///
 /// // Generate content
 /// final response = await client.models.generateContent(
-///   model: 'gemini-3.5-flash',
+///   model: 'gemini-3.8-flash',
 ///   request: GenerateContentRequest(
 ///     contents: [
 ///       Content(parts: [TextPart('Hello!')], role: 'user'),
@@ -452,7 +452,7 @@ class GoogleAIClient {
   /// final liveClient = client.createLiveClient();
   ///
   /// final session = await liveClient.connect(
-  ///   model: 'gemini-2.0-flash-live-001',
+  ///   model: 'gemini-3.8-live',
   ///   liveConfig: LiveConfig(
   ///     generationConfig: LiveGenerationConfig(
   ///       responseModalities: [ResponseModality.audio, ResponseModality.text],

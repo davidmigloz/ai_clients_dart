@@ -1,4 +1,4 @@
-import '../content/media_wire_options.dart';
+import '../../utils/media_wire_options.dart';
 
 /// A layer to extract from video during static media processing.
 extension type const InteractionVideoLayer(String value) {

@@ -23,6 +23,19 @@ from api_toolkit.dart_inspect import (
 
 
 class DartInspectTests(unittest.TestCase):
+    def test_extract_method_body_skips_named_parameters(self) -> None:
+        source = """
+        factory Value.fromJson(Map<String, dynamic> json, {
+          String hint = 'unmatched )',
+          bool partial = false,
+        }) {
+          return Value(json['id']);
+        }
+        """
+        factory = extract_method_body(source, r"factory\s+Value\.fromJson")
+        self.assertIn("json['id']", factory)
+        self.assertNotIn("partial = false", factory)
+
     def test_exact_declaration_literals_ignore_comments_and_other_types(self) -> None:
         source = "// class Role { static const fake = 'critic'; }\nclass Role { static const user = 'user'; /* 'critic' */ }\nclass Other { static const tool = 'tool'; }"
         value = extract_dart_declaration(source, "Role")
