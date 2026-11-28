@@ -546,6 +546,21 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
   /// Configuration for the agent.
   final AgentConfig? agentConfig;
 
+  /// System instruction for the interaction.
+  final String? systemInstruction;
+
+  /// Tools available to the agent.
+  final List<InteractionTool>? tools;
+
+  /// Requested response modalities on the legacy beta wire format.
+  final List<InteractionResponseModality>? responseModalities;
+
+  /// Requested response media type on the legacy beta wire format.
+  final String? responseMimeType;
+
+  /// Whether to request a streamed response.
+  final bool? stream;
+
   /// Enforces the response format (a single [InteractionResponseFormat] or a list of
   /// them). Used for structured output and per-modality output configuration.
   final InteractionResponseFormatConfig? responseFormat;
@@ -587,6 +602,11 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
     required this.agent,
     this.input,
     this.agentConfig,
+    this.systemInstruction,
+    this.tools,
+    this.responseModalities,
+    this.responseMimeType,
+    this.stream,
     this.responseFormat,
     this.previousInteractionId,
     this.continuationToken,
@@ -610,6 +630,15 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
     agentConfig: json['agent_config'] != null
         ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
         : null,
+    systemInstruction: json['system_instruction'] as String?,
+    tools: (json['tools'] as List<dynamic>?)
+        ?.map((tool) => InteractionTool.fromJson(tool as Map<String, dynamic>))
+        .toList(),
+    responseModalities: (json['response_modalities'] as List<dynamic>?)
+        ?.map((value) => interactionResponseModalityFromString(value as String))
+        .toList(),
+    responseMimeType: json['response_mime_type'] as String?,
+    stream: json['stream'] as bool?,
     responseFormat: json['response_format'] != null
         ? InteractionResponseFormatConfig.fromJson(
             json['response_format'] as Object,
@@ -642,6 +671,14 @@ class CreateAgentInteractionParams extends CreateInteractionParams {
     'agent': agent,
     if (input != null) 'input': input!.toJson(),
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
+    'system_instruction': ?systemInstruction,
+    if (tools != null) 'tools': tools!.map((tool) => tool.toJson()).toList(),
+    if (responseModalities != null)
+      'response_modalities': responseModalities!
+          .map(interactionResponseModalityToString)
+          .toList(),
+    'response_mime_type': ?responseMimeType,
+    'stream': ?stream,
     if (responseFormat != null) 'response_format': responseFormat!.toJson(),
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,

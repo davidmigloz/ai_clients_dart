@@ -92,7 +92,9 @@ class TriggersResource extends ResourceBase {
 
   /// Gets a specific trigger by [id].
   Future<Trigger> get(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/triggers/$id');
+    final url = requestBuilder.buildUrl(
+      '/{version}/triggers/${encodeResourceId(id)}',
+    );
 
     final headers = _buildHeaders();
 
@@ -107,18 +109,26 @@ class TriggersResource extends ResourceBase {
   /// Updates a trigger.
   ///
   /// [id] identifies the trigger to update and [update] holds the fields to
-  /// change.
+  /// change. Pass [updateMask] to select fields explicitly using the REST
+  /// request envelope. Omitting it sends the flat update used by the SDKs.
   Future<Trigger> update({
     required String id,
     required TriggerUpdate update,
+    String? updateMask,
   }) async {
-    final url = requestBuilder.buildUrl('/{version}/triggers/$id');
+    final url = requestBuilder.buildUrl(
+      '/{version}/triggers/${encodeResourceId(id)}',
+    );
 
     final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
+    final fields = update.toJson();
+    final body = updateMask == null
+        ? fields
+        : {'id': id, 'trigger': fields, 'update_mask': updateMask};
     final httpRequest = http.Request('PATCH', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(update.toJson());
+      ..body = jsonEncode(body);
 
     final response = await interceptorChain.execute(httpRequest);
 
@@ -128,7 +138,9 @@ class TriggersResource extends ResourceBase {
 
   /// Deletes a trigger by [id].
   Future<void> delete(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/triggers/$id');
+    final url = requestBuilder.buildUrl(
+      '/{version}/triggers/${encodeResourceId(id)}',
+    );
 
     final headers = _buildHeaders();
 
@@ -139,20 +151,23 @@ class TriggersResource extends ResourceBase {
 
   /// Lists executions for the trigger identified by [triggerId].
   ///
-  /// [pageSize] caps the maximum number of executions per page and
+  /// [filter] optionally selects executions. [pageSize] caps the maximum
+  /// number of executions per page and
   /// [pageToken] is used for pagination.
   Future<ListTriggerExecutionsResponse> listExecutions({
     required String triggerId,
+    String? filter,
     int? pageSize,
     String? pageToken,
   }) async {
     final queryParams = <String, String>{
+      'filter': ?filter,
       if (pageSize != null) 'page_size': pageSize.toString(),
       'page_token': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(
-      '/{version}/triggers/$triggerId/executions',
+      '/{version}/triggers/${encodeResourceId(triggerId, name: 'triggerId')}/executions',
       queryParams: queryParams,
     );
 
@@ -169,7 +184,7 @@ class TriggersResource extends ResourceBase {
   /// Runs the trigger identified by [triggerId] immediately.
   Future<TriggerExecution> run({required String triggerId}) async {
     final url = requestBuilder.buildUrl(
-      '/{version}/triggers/$triggerId/executions',
+      '/{version}/triggers/${encodeResourceId(triggerId, name: 'triggerId')}/executions',
     );
 
     final headers = _buildHeaders();

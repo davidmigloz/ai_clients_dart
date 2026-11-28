@@ -7,6 +7,7 @@ import '../models/webhooks/rotate_signing_secret_request.dart';
 import '../models/webhooks/rotate_signing_secret_response.dart';
 import '../models/webhooks/webhook.dart';
 import '../models/webhooks/webhook_update.dart';
+import '../utils/redactor.dart';
 import 'base_resource.dart';
 
 /// Resource for the Webhooks API.
@@ -16,6 +17,10 @@ import 'base_resource.dart';
 ///
 /// **Note:** the Webhooks API is part of the experimental Interactions API.
 class WebhooksResource extends ResourceBase {
+  static const _signingSecretDiagnostics = Redactor(
+    redactionList: ['secret', 'new_signing_secret', 'newSigningSecret'],
+  );
+
   /// Creates a [WebhooksResource].
   WebhooksResource({
     required super.config,
@@ -29,20 +34,33 @@ class WebhooksResource extends ResourceBase {
   ///
   /// Returns the created webhook with its server-assigned [Webhook.id],
   /// [Webhook.signingSecrets], and [Webhook.newSigningSecret] populated.
-  Future<Webhook> create({required Webhook webhook}) async {
-    final url = requestBuilder.buildUrl('/{version}/webhooks');
+  /// Supply [webhookId] to request a specific ID.
+  Future<Webhook> create({required Webhook webhook, String? webhookId}) async {
+    final url = requestBuilder.buildUrl(
+      '/{version}/webhooks',
+      queryParams: {'webhook_id': ?webhookId},
+    );
 
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
     );
 
+    final fields = {
+      'uri': webhook.uri,
+      'subscribed_events': webhook.subscribedEvents,
+      'name': ?webhook.name,
+    };
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(webhook.toJson());
+      ..body = jsonEncode(webhookId == null ? fields : {'webhook': fields});
 
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      diagnosticRedactor: _signingSecretDiagnostics,
+    );
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final responseBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     return Webhook.fromJson(responseBody);
   }
 
@@ -52,8 +70,8 @@ class WebhooksResource extends ResourceBase {
   /// max 1000). [pageToken] is used for pagination.
   Future<ListWebhooksResponse> list({int? pageSize, String? pageToken}) async {
     final queryParams = <String, String>{
-      if (pageSize != null) 'pageSize': pageSize.toString(),
-      'pageToken': ?pageToken,
+      if (pageSize != null) 'page_size': pageSize.toString(),
+      'page_token': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(
@@ -73,7 +91,9 @@ class WebhooksResource extends ResourceBase {
 
   /// Gets a specific webhook by [id].
   Future<Webhook> get(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/webhooks/$id');
+    final url = requestBuilder.buildUrl(
+      '/{version}/webhooks/${encodeResourceId(id)}',
+    );
 
     final headers = requestBuilder.buildHeaders();
 
@@ -95,10 +115,10 @@ class WebhooksResource extends ResourceBase {
     required WebhookUpdate update,
     String? updateMask,
   }) async {
-    final queryParams = <String, String>{'updateMask': ?updateMask};
+    final queryParams = <String, String>{'update_mask': ?updateMask};
 
     final url = requestBuilder.buildUrl(
-      '/{version}/webhooks/$id',
+      '/{version}/webhooks/${encodeResourceId(id)}',
       queryParams: queryParams,
     );
 
@@ -118,7 +138,9 @@ class WebhooksResource extends ResourceBase {
 
   /// Deletes a webhook by [id].
   Future<void> delete(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/webhooks/$id');
+    final url = requestBuilder.buildUrl(
+      '/{version}/webhooks/${encodeResourceId(id)}',
+    );
 
     final headers = requestBuilder.buildHeaders();
 
@@ -132,7 +154,9 @@ class WebhooksResource extends ResourceBase {
   /// The server delivers a ping payload to the registered URI; this method
   /// returns once the request has been accepted (no response body to parse).
   Future<void> ping(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/webhooks/$id:ping');
+    final url = requestBuilder.buildUrl(
+      '/{version}/webhooks/${encodeResourceId(id)}:ping',
+    );
 
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -154,7 +178,7 @@ class WebhooksResource extends ResourceBase {
     RotateSigningSecretRequest? request,
   }) async {
     final url = requestBuilder.buildUrl(
-      '/{version}/webhooks/$id:rotateSigningSecret',
+      '/{version}/webhooks/${encodeResourceId(id)}:rotateSigningSecret',
     );
 
     final headers = requestBuilder.buildHeaders(
@@ -167,9 +191,13 @@ class WebhooksResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = body;
 
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      diagnosticRedactor: _signingSecretDiagnostics,
+    );
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final responseBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     return RotateSigningSecretResponse.fromJson(responseBody);
   }
 }

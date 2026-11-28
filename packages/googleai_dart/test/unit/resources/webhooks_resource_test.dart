@@ -114,8 +114,10 @@ void main() {
       final req = capturedRequests.single;
       expect(req.method, 'GET');
       expect(req.url.path, '/v1beta/webhooks');
-      expect(req.url.queryParameters['pageSize'], '25');
-      expect(req.url.queryParameters['pageToken'], 'token-1');
+      expect(req.url.queryParameters, {
+        'page_size': '25',
+        'page_token': 'token-1',
+      });
 
       expect(response.webhooks, hasLength(1));
       expect(response.webhooks!.first.id, 'wh_1');
@@ -156,7 +158,7 @@ void main() {
       final req = capturedRequests.single;
       expect(req.method, 'PATCH');
       expect(req.url.path, '/v1beta/webhooks/wh_42');
-      expect(req.url.queryParameters['updateMask'], 'name');
+      expect(req.url.queryParameters, {'update_mask': 'name'});
 
       final body =
           jsonDecode(utf8.decode(capturedBodies.single!))

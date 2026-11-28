@@ -17,33 +17,27 @@ Future<void> main() async {
   }
 
   final client = GoogleAIClient.withApiKey(apiKey);
+  final parent = Platform.environment['GOOGLE_GENAI_AGENT_PARENT'];
 
   try {
     // 1. Create an agent with a remote environment and a couple of tools.
     final agent = await client.agents.create(
+      parent: parent,
       agent: const Agent(
-        baseAgent: 'deep-research-pro-preview-12-2025',
+        baseAgent: 'antigravity-preview-09-2026',
         description: 'Research assistant with web access',
         systemInstruction: 'You are a meticulous research assistant.',
         baseEnvironment: EnvironmentConfigOrId.config(
           EnvironmentConfig(
             sources: [
               Source(
-                type: SourceType.gcs,
-                source: 'gs://my-bucket/knowledge',
-                target: '/mnt/knowledge',
+                type: SourceType.inline,
+                content: '# Notes\nReview the task before writing the summary.',
+                target: 'notes.md',
               ),
             ],
             network: EnvironmentNetworkAllowlist(
-              allowlist: [
-                AllowlistEntry(domain: 'wikipedia.org'),
-                AllowlistEntry(
-                  domain: 'api.example.com',
-                  transform: [
-                    {'x-goog-api-key': 'REDACTED'},
-                  ],
-                ),
-              ],
+              allowlist: [AllowlistEntry(domain: 'wikipedia.org')],
             ),
           ),
         ),

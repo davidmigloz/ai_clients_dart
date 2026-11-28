@@ -147,11 +147,14 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// [agent] names a supported managed agent, for example
   /// `deep-research-preview-04-2026`. Agent, environment, and webhook
   /// availability depend on the backend and configured API version.
+  /// [responseModalities] and [responseMimeType] are legacy beta parameters.
   Future<Interaction> createWithAgent({
     required String agent,
     InteractionInput? input,
     AgentConfig? agentConfig,
     InteractionResponseFormatConfig? responseFormat,
+    List<InteractionResponseModality>? responseModalities,
+    String? responseMimeType,
     String? previousInteractionId,
     String? continuationToken,
     bool? background,
@@ -169,6 +172,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       input: input,
       agentConfig: agentConfig,
       responseFormat: responseFormat,
+      responseModalities: responseModalities,
+      responseMimeType: responseMimeType,
       previousInteractionId: previousInteractionId,
       continuationToken: continuationToken,
       background: background,
@@ -307,11 +312,14 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// can continue after the stream disconnects. Use [resumeStream] with the
   /// interaction ID to attach again. [abortTrigger] cancels the local stream
   /// and [cancel] stops the background interaction on the server.
+  /// [responseModalities] and [responseMimeType] are legacy beta parameters.
   Stream<InteractionEvent> createWithAgentStream({
     required String agent,
     required InteractionInput input,
     AgentConfig? agentConfig,
     InteractionResponseFormatConfig? responseFormat,
+    List<InteractionResponseModality>? responseModalities,
+    String? responseMimeType,
     String? previousInteractionId,
     String? continuationToken,
     bool? background,
@@ -330,6 +338,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       input: input,
       agentConfig: agentConfig,
       responseFormat: responseFormat,
+      responseModalities: responseModalities,
+      responseMimeType: responseMimeType,
       previousInteractionId: previousInteractionId,
       continuationToken: continuationToken,
       background: background,
