@@ -905,7 +905,9 @@ await client.environments.files.upload(
 ```
 
 Set `extract: true` to unpack an archive into the destination directory, or
-`overwrite: true` to replace files already there.
+`overwrite: true` to replace files already there. Pass an `abortTrigger` to
+cancel the local upload. The configured timeout covers authentication and
+all chunks.
 
 [Runnable environment files example](example/environment_files_example.dart) ·
 [Google's environment files guide](https://aistudio.google.com/docs/agent-environment#download-files-from-the-environment)

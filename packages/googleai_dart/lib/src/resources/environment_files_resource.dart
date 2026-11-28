@@ -89,6 +89,8 @@ class EnvironmentFilesResource {
   ///
   /// The client starts an authenticated resumable session and sends the bytes
   /// in chunks. The result contains the metadata of the uploaded files.
+  /// [abortTrigger] cancels the local upload. The configured timeout covers
+  /// authentication and all transfer requests together.
   Future<GetEnvironmentFilesResponse> upload({
     required String environment,
     required String path,
@@ -96,6 +98,7 @@ class EnvironmentFilesResource {
     String mimeType = 'application/octet-stream',
     bool? extract,
     bool? overwrite,
+    Future<void>? abortTrigger,
   }) async {
     _environments._ensureDeveloperBeta();
     _environments.ensureNotClosed?.call();
@@ -107,7 +110,32 @@ class EnvironmentFilesResource {
         'A MIME type is required.',
       );
     }
+    final operation = _EnvironmentUploadOperation(_environments.config.timeout);
     final data = Uint8List.fromList(bytes);
+    try {
+      return await operation.run(
+        () => _upload(operation, endpoint, data, mimeType, extract, overwrite),
+        abortTrigger,
+      );
+    } on AbortedException catch (error) {
+      // A transport abort can embed the signed session URL in its reason.
+      throw AbortedException(
+        message: 'Environment upload aborted.',
+        correlationId: error.correlationId,
+        timestamp: error.timestamp,
+        stage: error.stage,
+      );
+    }
+  }
+
+  Future<GetEnvironmentFilesResponse> _upload(
+    _EnvironmentUploadOperation operation,
+    String endpoint,
+    Uint8List data,
+    String mimeType,
+    bool? extract,
+    bool? overwrite,
+  ) async {
     final url = _environments.requestBuilder.buildUploadUrl(
       '/upload$endpoint',
       queryParams: {
@@ -129,12 +157,15 @@ class EnvironmentFilesResource {
     final handshake = await AuthInterceptor(config: _environments.config)
         .intercept(
           RequestContext(request: start),
-          (context) => _sendUpload(context.request as http.Request, 'start'),
+          (context) =>
+              _sendUpload(context.request as http.Request, 'start', operation),
         );
+    operation.checkActive();
     final session = _uploadSession(handshake, url);
 
     var offset = 0;
     while (true) {
+      operation.checkActive();
       final end = min(offset + _uploadChunkSize, data.length);
       final isFinal = end == data.length;
       // The signed session URL is the sole credential for these requests.
@@ -144,7 +175,8 @@ class EnvironmentFilesResource {
             ? 'upload, finalize'
             : 'upload'
         ..bodyBytes = Uint8List.sublistView(data, offset, end);
-      final response = await _sendUpload(chunk, 'transfer');
+      final response = await _sendUpload(chunk, 'transfer', operation);
+      operation.checkActive();
       final status = response.headers['x-goog-upload-status'];
       if (status != null && status != (isFinal ? 'final' : 'active')) {
         throw ApiException(
@@ -157,33 +189,24 @@ class EnvironmentFilesResource {
     }
   }
 
-  Future<http.Response> _sendUpload(http.Request request, String phase) async {
-    final abort = Completer<void>();
-    final limit = _environments.config.timeout;
-    TimeoutException timeoutError() => TimeoutException(
-      message: 'Environment upload $phase timed out.',
-      timeout: limit,
-      elapsed: limit,
-    );
+  Future<http.Response> _sendUpload(
+    http.Request request,
+    String phase,
+    _EnvironmentUploadOperation operation,
+  ) async {
+    operation
+      ..checkActive()
+      ..stage = AbortionStage.duringRequest;
     request.followRedirects = false;
     final http.Response response;
     try {
-      response = await _mediaTransport
-          .execute(
-            request,
-            abortTrigger: abort.future,
-            checkActive: () {
-              if (abort.isCompleted) throw timeoutError();
-            },
-          )
-          .timeout(
-            limit,
-            onTimeout: () {
-              abort.complete();
-              throw timeoutError();
-            },
-          );
+      response = await _mediaTransport.execute(
+        request,
+        abortTrigger: operation.abort,
+        checkActive: operation.checkActive,
+      );
     } on http.ClientException {
+      operation.checkActive();
       // Transport errors can contain the upload URL and its session credential.
       throw ApiException(
         statusCode: 0,
@@ -365,5 +388,75 @@ class EnvironmentFilesResource {
       );
     }
     return '$base/${segments.map(Uri.encodeComponent).join('/')}';
+  }
+}
+
+class _EnvironmentUploadOperation {
+  final Duration timeout;
+  final _elapsed = Stopwatch()..start();
+  final _abort = Completer<void>();
+  GoogleAIException? _failure;
+  AbortionStage stage = AbortionStage.beforeRequest;
+
+  _EnvironmentUploadOperation(this.timeout);
+
+  Future<void> get abort => _abort.future;
+
+  Future<T> run<T>(Future<T> Function() upload, Future<void>? trigger) async {
+    final timer = Timer(timeout, _timeOut);
+    // Clear the callback after completion so a long-lived caller future does
+    // not retain the operation and its transport subscriptions.
+    void Function()? cancel = _cancel;
+    if (trigger != null) {
+      unawaited(
+        trigger.then(
+          (_) => cancel?.call(),
+          onError: (Object _, StackTrace _) {},
+        ),
+      );
+    }
+    try {
+      final result = await Future.any([
+        abort.then<T>((_) => throw _failure!),
+        Future<T>.microtask(() {
+          checkActive();
+          return upload();
+        }),
+      ]);
+      checkActive();
+      return result;
+    } finally {
+      cancel = null;
+      timer.cancel();
+    }
+  }
+
+  void checkActive() {
+    if (_elapsed.elapsed >= timeout) _timeOut();
+    final failure = _failure;
+    if (failure != null) throw failure;
+  }
+
+  void _cancel() => _stop(
+    AbortedException(
+      message: 'Environment upload aborted by user.',
+      correlationId: generateRequestId(),
+      timestamp: DateTime.now(),
+      stage: stage,
+    ),
+  );
+
+  void _timeOut() => _stop(
+    TimeoutException(
+      message: 'The environment upload deadline elapsed.',
+      timeout: timeout,
+      elapsed: _elapsed.elapsed,
+    ),
+  );
+
+  void _stop(GoogleAIException failure) {
+    if (_abort.isCompleted) return;
+    _failure = failure;
+    _abort.complete();
   }
 }

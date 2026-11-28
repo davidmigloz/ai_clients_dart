@@ -1,4 +1,5 @@
-import 'dart:async' show Completer;
+import 'dart:async'
+    show Completer, StreamController, ZoneSpecification, runZoned;
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -14,6 +15,17 @@ class _UploadClient extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) =>
       _handle(request);
+}
+
+class _PendingAuth implements AuthProvider {
+  final requested = Completer<void>();
+  final credentials = Completer<AuthCredentials>();
+
+  @override
+  Future<AuthCredentials> getCredentials() {
+    requested.complete();
+    return credentials.future;
+  }
 }
 
 http.StreamedResponse _response(
@@ -325,6 +337,194 @@ void main() {
       expect(call, 2);
     },
   );
+
+  test(
+    'cancels pending authentication without starting a late request',
+    () async {
+      final auth = _PendingAuth();
+      final abort = Completer<void>();
+      var requests = 0;
+      final client = GoogleAIClient(
+        config: GoogleAIConfig(authProvider: auth),
+        httpClient: _UploadClient((request) async {
+          requests++;
+          return _response(200, headers: {'x-goog-upload-url': session});
+        }),
+      );
+      addTearDown(client.close);
+
+      final result = expectLater(
+        client.environments.files.upload(
+          environment: 'env',
+          path: 'new.txt',
+          bytes: const [1],
+          abortTrigger: abort.future,
+        ),
+        throwsA(
+          isA<AbortedException>()
+              .having((e) => e.stage, 'stage', AbortionStage.beforeRequest)
+              .having((e) => e.reason, 'reason', isNull),
+        ),
+      );
+      await auth.requested.future;
+      abort.complete();
+      await result;
+      auth.credentials.complete(const NoAuthCredentials());
+      await Future<void>.delayed(Duration.zero);
+      expect(requests, 0);
+    },
+  );
+
+  test('applies the upload deadline while authentication is pending', () async {
+    final auth = _PendingAuth();
+    final client = GoogleAIClient(
+      config: GoogleAIConfig(
+        authProvider: auth,
+        timeout: const Duration(milliseconds: 50),
+      ),
+      httpClient: _UploadClient((request) async => fail('Unexpected request.')),
+    );
+    addTearDown(client.close);
+
+    final result = expectLater(
+      client.environments.files.upload(
+        environment: 'env',
+        path: 'new.txt',
+        bytes: const [1],
+      ),
+      throwsA(isA<TimeoutException>()),
+    );
+    await auth.requested.future;
+    await result;
+    auth.credentials.completeError(StateError('Late authentication error'));
+    await Future<void>.delayed(Duration.zero);
+  });
+
+  test('uses the same deadline for auth and reading transfer bytes', () async {
+    const timeout = Duration(seconds: 20);
+    final auth = _PendingAuth();
+    final transferListening = Completer<void>();
+    final transferReaderCancelled = Completer<void>();
+    final body = StreamController<List<int>>(
+      onListen: transferListening.complete,
+      onCancel: transferReaderCancelled.complete,
+    );
+    addTearDown(body.close);
+    void Function()? expire;
+    var deadlines = 0;
+    var requests = 0;
+    final client = GoogleAIClient(
+      config: GoogleAIConfig(authProvider: auth, timeout: timeout),
+      httpClient: _UploadClient((request) async {
+        if (requests++ == 0) {
+          return _response(200, headers: {'x-goog-upload-url': session});
+        }
+        return http.StreamedResponse(body.stream, 200);
+      }),
+    );
+    addTearDown(client.close);
+
+    final result = expectLater(
+      runZoned(
+        () => client.environments.files.upload(
+          environment: 'env',
+          path: 'new.txt',
+          bytes: const [1],
+        ),
+        zoneSpecification: ZoneSpecification(
+          createTimer: (self, parent, zone, duration, callback) {
+            if (duration == timeout) {
+              deadlines++;
+              expire = callback;
+            }
+            return parent.createTimer(zone, duration, callback);
+          },
+        ),
+      ),
+      throwsA(isA<TimeoutException>()),
+    );
+    await auth.requested.future;
+    expect(deadlines, 1);
+    final expireDuringAuth = expire!;
+    auth.credentials.complete(const NoAuthCredentials());
+    await transferListening.future;
+    expect(deadlines, 1);
+    expect(expire, same(expireDuringAuth));
+    expireDuringAuth();
+    await result;
+    await transferReaderCancelled.future;
+    expect(requests, 2);
+  });
+
+  test('does not dispatch another chunk after cancellation', () async {
+    final abort = Completer<void>();
+    var requests = 0;
+    final client = GoogleAIClient(
+      httpClient: _UploadClient((request) async {
+        switch (requests++) {
+          case 0:
+            return _response(200, headers: {'x-goog-upload-url': session});
+          case 1:
+            expect(request.headers['x-goog-upload-command'], 'upload');
+            return http.StreamedResponse(
+              Stream<List<int>>.multi((controller) {
+                controller.addSync(const []);
+                abort.complete();
+                controller.closeSync();
+              }),
+              200,
+              headers: {'x-goog-upload-status': 'active'},
+            );
+          default:
+            fail('Dispatched a chunk after cancellation.');
+        }
+      }),
+    );
+    addTearDown(client.close);
+
+    await expectLater(
+      client.environments.files.upload(
+        environment: 'env',
+        path: 'new.txt',
+        bytes: Uint8List(chunkSize + 1),
+        abortTrigger: abort.future,
+      ),
+      throwsA(isA<AbortedException>()),
+    );
+    expect(requests, 2);
+  });
+
+  test('removes the signed session URL from transport abort reasons', () async {
+    var requests = 0;
+    final client = GoogleAIClient(
+      httpClient: _UploadClient((request) async {
+        if (requests++ == 0) {
+          return _response(200, headers: {'x-goog-upload-url': session});
+        }
+        throw http.RequestAbortedException(request.url);
+      }),
+    );
+    addTearDown(client.close);
+
+    await expectLater(
+      client.environments.files.upload(
+        environment: 'env',
+        path: 'new.txt',
+        bytes: const [1],
+      ),
+      throwsA(
+        isA<AbortedException>()
+            .having((e) => e.reason, 'reason', isNull)
+            .having((e) => e.cause, 'cause', isNull)
+            .having(
+              (e) => e.toString(),
+              'diagnostic',
+              isNot(contains('upload_id')),
+            ),
+      ),
+    );
+    expect(requests, 2);
+  });
 
   test('requires a workspace-relative destination path', () async {
     final client = GoogleAIClient(
