@@ -9,6 +9,7 @@ import '../../../tools/tool.dart';
 import '../../config/audio_transcription_config.dart';
 import '../../config/context_window_compression_config.dart';
 import '../../config/history_config.dart';
+import '../../config/live_avatar_config.dart';
 import '../../config/live_generation_config.dart';
 import '../../config/proactivity_config.dart';
 import '../../config/realtime_input_config.dart';
@@ -118,6 +119,9 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
   /// Enables explicit VAD signaling on a supported Vertex AI model.
   final bool? explicitVadSignal;
 
+  /// Prebuilt avatar configuration for a supported Vertex AI Live model.
+  final LiveAvatarConfig? avatarConfig;
+
   /// Creates a [BidiGenerateContentSetup].
   const BidiGenerateContentSetup({
     required this.model,
@@ -134,6 +138,7 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
     this.labels,
     this.safetySettings,
     this.explicitVadSignal,
+    this.avatarConfig,
   });
 
   /// Creates from JSON (inner object, not wrapped).
@@ -194,6 +199,11 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
           .map(SafetySetting.fromJson)
           .toList(),
       explicitVadSignal: json['explicitVadSignal'] as bool?,
+      avatarConfig: json['avatarConfig'] != null
+          ? LiveAvatarConfig.fromJson(
+              json['avatarConfig'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -227,6 +237,7 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
             .map((setting) => setting.toJson())
             .toList(),
       if (explicitVadSignal != null) 'explicitVadSignal': explicitVadSignal,
+      if (avatarConfig != null) 'avatarConfig': avatarConfig!.toJson(),
     },
   };
 
@@ -234,7 +245,7 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
   String toString() =>
       'BidiGenerateContentSetup(model: $model, labelCount: ${labels?.length}, '
       'safetySettingCount: ${safetySettings?.length}, '
-      'explicitVadSignal: $explicitVadSignal)';
+      'explicitVadSignal: $explicitVadSignal, avatarConfig: $avatarConfig)';
 }
 
 /// Client content message for sending conversation context.

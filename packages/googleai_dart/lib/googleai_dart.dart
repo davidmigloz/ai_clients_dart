@@ -203,6 +203,7 @@ export 'src/models/live/config/audio_transcription_config.dart';
 export 'src/models/live/config/automatic_activity_detection.dart';
 export 'src/models/live/config/context_window_compression_config.dart';
 export 'src/models/live/config/history_config.dart';
+export 'src/models/live/config/live_avatar_config.dart';
 export 'src/models/live/config/live_config.dart';
 export 'src/models/live/config/live_generation_config.dart';
 export 'src/models/live/config/proactivity_config.dart';
