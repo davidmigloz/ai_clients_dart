@@ -89,7 +89,7 @@ mixin StreamingResource on ResourceBase {
     required http.Request Function() createRequest,
     required T Function(Map<String, dynamic>) fromJson,
     Future<void>? abortTrigger,
-    Redactor? diagnosticRedactor,
+    Redactor? Function()? resolveDiagnosticRedactor,
   }) {
     final requestAbort = Completer<void>();
     StreamSubscription<List<int>>? bodySubscription;
@@ -98,6 +98,7 @@ mixin StreamingResource on ResourceBase {
     late StreamController<T> controller;
     var stopped = false;
     var requestId = generateRequestId();
+    Redactor? diagnosticRedactor;
 
     void stop({bool abort = true}) {
       if (stopped) return;
@@ -112,7 +113,12 @@ mixin StreamingResource on ResourceBase {
 
     void finish([Object? error, StackTrace? stackTrace]) {
       if (stopped) return;
-      if (error != null) controller.addError(error, stackTrace);
+      if (error != null) {
+        controller.addError(
+          _safeStreamError(error, diagnosticRedactor),
+          stackTrace,
+        );
+      }
       stop(abort: error != null);
       unawaited(controller.close());
     }
@@ -121,6 +127,7 @@ mixin StreamingResource on ResourceBase {
       try {
         ensureNotClosed?.call();
         final request = createRequest();
+        diagnosticRedactor = resolveDiagnosticRedactor?.call();
         requestId = request.headers['X-Request-ID'] ?? requestId;
         final prepared = await prepareStreamingRequest(request);
         if (stopped) return;
@@ -209,7 +216,7 @@ mixin StreamingResource on ResourceBase {
       } catch (error, trace) {
         if (!stopped) {
           _logStreamError(
-            diagnosticRedactor?.redactString(error.toString()) ?? error,
+            _safeStreamError(error, diagnosticRedactor),
             requestId,
           );
           finish(error, trace);
@@ -474,6 +481,18 @@ mixin StreamingResource on ResourceBase {
       message: message,
       details: details,
     );
+  }
+
+  Object _safeStreamError(Object error, Redactor? redactor) {
+    if (redactor == null) return error;
+    if (error is FormatException) {
+      return FormatException('Invalid streaming response.', null, error.offset);
+    }
+    final description = error.toString();
+    final safeDescription = redactor.redactString(description);
+    return safeDescription == description
+        ? error
+        : StreamException(message: safeDescription);
   }
 
   /// Logs streaming errors.

@@ -180,6 +180,9 @@ void main() {
               headers: {'content-type': 'text/event-stream; charset=utf-8'},
             );
           }
+          if (calls == 4) {
+            return http.Response('invalid response for $voiceKey', 200);
+          }
           return http.Response(body, 400);
         }),
       );
@@ -242,12 +245,69 @@ void main() {
           ),
         ),
       );
-      expect(calls, 3);
+      await expectLater(
+        client.models.generateContent(
+          model: 'gemini-3.8-flash-tts',
+          request: request,
+        ),
+        throwsA(
+          isA<FormatException>()
+              .having((error) => error.source, 'source', isNull)
+              .having(
+                (error) => error.toString(),
+                'description',
+                isNot(contains(voiceKey)),
+              ),
+        ),
+      );
+      expect(calls, 4);
       expect(logs.where((log) => log.level == Level.FINE), isNotEmpty);
       for (final log in logs) {
         expect('${log.message}${log.error}', isNot(contains(voiceKey)));
         expect('${log.message}${log.error}', isNot(contains(speakerKey)));
       }
+    },
+  );
+
+  test(
+    'captures lazy stream speaker keys before sending the request',
+    () async {
+      const voiceKey = 'voicekey_late_speaker_fixture';
+      final speakers = <SpeakerVoiceConfig>[];
+      final client = GoogleAIClient(
+        config: const GoogleAIConfig(),
+        httpClient: MockClient((request) {
+          expect(request.body, contains(voiceKey));
+          throw http.ClientException('Connection failed for $voiceKey');
+        }),
+      );
+      addTearDown(client.close);
+      final stream = client.models.streamGenerateContent(
+        model: 'gemini-3.8-flash-tts',
+        request: GenerateContentRequest(
+          contents: [Content.text('Narration')],
+          generationConfig: GenerationConfig(
+            speechConfig: SpeechConfig(
+              multiSpeakerVoiceConfig: MultiSpeakerVoiceConfig(
+                speakerVoiceConfigs: speakers,
+              ),
+            ),
+          ),
+        ),
+      );
+      speakers.add(
+        const SpeakerVoiceConfig(voiceConfig: VoiceConfig(voice: voiceKey)),
+      );
+      await expectLater(
+        stream,
+        emitsError(
+          isA<StreamException>().having(
+            (error) => error.message,
+            'message',
+            'ClientException: Connection failed for ***REDACTED***',
+          ),
+        ),
+      );
     },
   );
 
