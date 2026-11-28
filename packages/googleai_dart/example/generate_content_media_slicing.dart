@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:googleai_dart/googleai_dart.dart';
 
@@ -12,7 +12,7 @@ Future<void> main(List<String> args) async {
     return;
   }
 
-  final bytes = await File(args.single).readAsBytes();
+  final bytes = await io.File(args.single).readAsBytes();
   final client = GoogleAIClient.fromEnvironment();
   try {
     final response = await client.models.generateContent(

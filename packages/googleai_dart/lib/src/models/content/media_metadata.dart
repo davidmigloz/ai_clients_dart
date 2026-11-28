@@ -85,8 +85,8 @@ class AudioMetadata {
   const AudioMetadata._({
     this.startOffset,
     this.endOffset,
-    required Map<String, dynamic> wireExtensions,
-  }) : _wireExtensions = wireExtensions;
+    required this._wireExtensions,
+  });
 
   /// Creates from JSON.
   factory AudioMetadata.fromJson(Map<String, dynamic> json) => AudioMetadata._(
@@ -138,8 +138,8 @@ class DocumentMetadata {
     this.startPage,
     this.endPage,
     this.contentLayers,
-    required Map<String, dynamic> wireExtensions,
-  }) : _wireExtensions = wireExtensions;
+    required this._wireExtensions,
+  });
 
   /// Creates from JSON.
   factory DocumentMetadata.fromJson(Map<String, dynamic> json) =>
@@ -207,8 +207,8 @@ class SpreadsheetMetadata {
     this.visibleCells,
     this.sheetIndex,
     this.contentLayers,
-    required Map<String, dynamic> wireExtensions,
-  }) : _wireExtensions = wireExtensions;
+    required this._wireExtensions,
+  });
 
   /// Creates from JSON.
   factory SpreadsheetMetadata.fromJson(Map<String, dynamic> json) =>

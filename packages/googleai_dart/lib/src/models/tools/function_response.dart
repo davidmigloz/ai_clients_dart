@@ -136,8 +136,8 @@ class FunctionResponseInlinePart {
     this.audioMetadata,
     this.documentMetadata,
     this.spreadsheetMetadata,
-    required Map<String, dynamic> wireExtensions,
-  }) : _wireExtensions = wireExtensions;
+    required this._wireExtensions,
+  });
 
   /// Creates from JSON.
   factory FunctionResponseInlinePart.fromJson(Map<String, dynamic> json) {

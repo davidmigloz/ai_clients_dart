@@ -58,8 +58,8 @@ class VideoMetadata {
     this.endOffset,
     this.fps,
     this.contentLayers,
-    required Map<String, dynamic> wireExtensions,
-  }) : _wireExtensions = wireExtensions;
+    required this._wireExtensions,
+  });
 
   /// Creates from JSON.
   factory VideoMetadata.fromJson(Map<String, dynamic> json) => VideoMetadata._(

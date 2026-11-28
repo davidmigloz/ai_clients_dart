@@ -84,9 +84,9 @@ void main() {
       }),
     );
     addTearDown(client.close);
-    final request = GenerateContentRequest(
+    const request = GenerateContentRequest(
       contents: [
-        const Content(
+        Content(
           parts: [
             InlineDataPart(
               Blob(
