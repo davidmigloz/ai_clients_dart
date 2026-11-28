@@ -1,6 +1,6 @@
 part of 'environments_resource.dart';
 
-/// Lists and downloads files from a managed environment workspace.
+/// Lists, downloads, and uploads files in a managed environment workspace.
 ///
 /// Available on the Gemini Developer API with [ApiVersion.v1beta].
 class EnvironmentFilesResource {
@@ -19,7 +19,10 @@ class EnvironmentFilesResource {
     ],
   );
 
-  late final _downloadTransport = InterceptorChain(
+  static const int _uploadChunkSize = 8 * 1024 * 1024;
+
+  // Signed URL transfers run without auth, logging, or automatic replay.
+  late final _mediaTransport = InterceptorChain(
     httpClient: _environments.httpClient,
     interceptors: const [],
     ensureNotClosed: _environments.ensureNotClosed,
@@ -76,6 +79,202 @@ class EnvironmentFilesResource {
       media: true,
     );
     return response.bodyBytes;
+  }
+
+  /// Uploads [bytes] to a workspace-relative [path].
+  ///
+  /// Pass the environment ID or its `environments/{id}` resource name.
+  /// Set [extract] to unpack an archive into the destination directory and
+  /// [overwrite] to allow replacement of existing files.
+  ///
+  /// The client starts an authenticated resumable session and sends the bytes
+  /// in chunks. The result contains the metadata of the uploaded files.
+  /// [abortTrigger] cancels the local upload. The configured timeout covers
+  /// authentication and all transfer requests together.
+  Future<GetEnvironmentFilesResponse> upload({
+    required String environment,
+    required String path,
+    required List<int> bytes,
+    String mimeType = 'application/octet-stream',
+    bool? extract,
+    bool? overwrite,
+    Future<void>? abortTrigger,
+  }) async {
+    _environments._ensureDeveloperBeta();
+    _environments.ensureNotClosed?.call();
+    final endpoint = _endpoint(environment, path, allowRoot: false);
+    if (mimeType.trim().isEmpty) {
+      throw ArgumentError.value(
+        mimeType,
+        'mimeType',
+        'A MIME type is required.',
+      );
+    }
+    final operation = _EnvironmentUploadOperation(_environments.config.timeout);
+    final data = Uint8List.fromList(bytes);
+    try {
+      return await operation.run(
+        () => _upload(operation, endpoint, data, mimeType, extract, overwrite),
+        abortTrigger,
+      );
+    } on AbortedException catch (error) {
+      // A transport abort can embed the signed session URL in its reason.
+      throw AbortedException(
+        message: 'Environment upload aborted.',
+        correlationId: error.correlationId,
+        timestamp: error.timestamp,
+        stage: error.stage,
+      );
+    }
+  }
+
+  Future<GetEnvironmentFilesResponse> _upload(
+    _EnvironmentUploadOperation operation,
+    String endpoint,
+    Uint8List data,
+    String mimeType,
+    bool? extract,
+    bool? overwrite,
+  ) async {
+    final url = _environments.requestBuilder.buildUploadUrl(
+      '/upload$endpoint',
+      queryParams: {
+        if (extract != null) 'extract': extract.toString(),
+        if (overwrite != null) 'overwrite': overwrite.toString(),
+      },
+    );
+    final start = http.Request('PUT', url)
+      ..headers.addAll(
+        _environments._buildHeaders({
+          'Accept': '*/*',
+          'X-Goog-Upload-Command': 'start',
+          'X-Goog-Upload-Protocol': 'resumable',
+          'X-Goog-Upload-Header-Content-Length': '${data.length}',
+          'X-Goog-Upload-Header-Content-Type': mimeType,
+        }),
+      )
+      ..headers.remove('content-type');
+    final handshake = await AuthInterceptor(config: _environments.config)
+        .intercept(
+          RequestContext(request: start),
+          (context) =>
+              _sendUpload(context.request as http.Request, 'start', operation),
+        );
+    operation.checkActive();
+    final session = _uploadSession(handshake, url);
+
+    var offset = 0;
+    while (true) {
+      operation.checkActive();
+      final end = min(offset + _uploadChunkSize, data.length);
+      final isFinal = end == data.length;
+      // The signed session URL is the sole credential for these requests.
+      final chunk = http.Request('POST', session)
+        ..headers['x-goog-upload-offset'] = '$offset'
+        ..headers['x-goog-upload-command'] = isFinal
+            ? 'upload, finalize'
+            : 'upload'
+        ..bodyBytes = Uint8List.sublistView(data, offset, end);
+      final response = await _sendUpload(chunk, 'transfer', operation);
+      operation.checkActive();
+      final status = response.headers['x-goog-upload-status'];
+      if (status != null && status != (isFinal ? 'final' : 'active')) {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: 'Environment upload returned an unexpected session status.',
+        );
+      }
+      if (isFinal) return _parseUploadResult(response, status);
+      offset = end;
+    }
+  }
+
+  Future<http.Response> _sendUpload(
+    http.Request request,
+    String phase,
+    _EnvironmentUploadOperation operation,
+  ) async {
+    operation
+      ..checkActive()
+      ..stage = AbortionStage.duringRequest;
+    request.followRedirects = false;
+    final http.Response response;
+    try {
+      response = await _mediaTransport.execute(
+        request,
+        abortTrigger: operation.abort,
+        checkActive: operation.checkActive,
+      );
+    } on http.ClientException {
+      operation.checkActive();
+      // Transport errors can contain the upload URL and its session credential.
+      throw ApiException(
+        statusCode: 0,
+        message: 'Environment upload $phase failed.',
+      );
+    }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Environment upload $phase failed.',
+      );
+    }
+    return response;
+  }
+
+  static Uri _uploadSession(http.Response response, Uri startUrl) {
+    final sessionHeader = response.headers['x-goog-upload-url'];
+    final session = sessionHeader == null ? null : Uri.tryParse(sessionHeader);
+    if (session == null ||
+        session.host.isEmpty ||
+        session.userInfo.isNotEmpty ||
+        session.hasFragment ||
+        !(session.scheme == 'https' ||
+            (session.scheme == 'http' && session.origin == startUrl.origin))) {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message:
+            'Environment upload returned a missing or invalid session URL.',
+      );
+    }
+    return session;
+  }
+
+  static GetEnvironmentFilesResponse _parseUploadResult(
+    http.Response response,
+    String? status,
+  ) {
+    try {
+      if (response.bodyBytes.isEmpty && status == 'final') {
+        return const GetEnvironmentFilesResponse();
+      }
+      final json = jsonDecode(utf8.decode(response.bodyBytes));
+      if (json is Map<String, dynamic>) {
+        if (json.containsKey('files') || json.containsKey('next_page_token')) {
+          return GetEnvironmentFilesResponse.fromJson(json);
+        }
+        final file = json['file'];
+        if (file is Map<String, dynamic>) {
+          return GetEnvironmentFilesResponse(
+            files: [EnvironmentFile.fromJson(file)],
+          );
+        }
+        if (json.containsKey('name') || json.containsKey('path')) {
+          return GetEnvironmentFilesResponse(
+            files: [EnvironmentFile.fromJson(json)],
+          );
+        }
+        if (json.isEmpty) return const GetEnvironmentFilesResponse();
+      }
+    } on FormatException {
+      // JSON and UTF-8 failures can include the original response contents.
+    } on TypeError {
+      // Report invalid metadata without exposing returned values.
+    }
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: 'Environment upload returned invalid file metadata.',
+    );
   }
 
   Future<http.Response> _get(
@@ -139,7 +338,7 @@ class EnvironmentFilesResource {
         ..followRedirects = false
         ..headers['accept'] = '*/*';
       try {
-        response = await _downloadTransport.execute(request);
+        response = await _mediaTransport.execute(request);
       } on http.ClientException {
         throw const ApiException(
           statusCode: 0,
@@ -156,7 +355,11 @@ class EnvironmentFilesResource {
     return response;
   }
 
-  static String _endpoint(String environment, String path) {
+  static String _endpoint(
+    String environment,
+    String path, {
+    bool allowRoot = true,
+  }) {
     const prefix = 'environments/';
     final id = environment.startsWith(prefix)
         ? environment.substring(prefix.length)
@@ -167,7 +370,14 @@ class EnvironmentFilesResource {
 
     final relativePath = path.replaceFirst(RegExp(r'^/+'), '');
     final base = '/{version}/environments/${Uri.encodeComponent(id)}/files';
-    if (relativePath.isEmpty) return base;
+    if (relativePath.isEmpty) {
+      if (allowRoot) return base;
+      throw ArgumentError.value(
+        path,
+        'path',
+        'A destination path is required.',
+      );
+    }
 
     final segments = relativePath.split('/');
     if (segments.any((segment) => segment == '.' || segment == '..')) {
@@ -178,5 +388,75 @@ class EnvironmentFilesResource {
       );
     }
     return '$base/${segments.map(Uri.encodeComponent).join('/')}';
+  }
+}
+
+class _EnvironmentUploadOperation {
+  final Duration timeout;
+  final _elapsed = Stopwatch()..start();
+  final _abort = Completer<void>();
+  GoogleAIException? _failure;
+  AbortionStage stage = AbortionStage.beforeRequest;
+
+  _EnvironmentUploadOperation(this.timeout);
+
+  Future<void> get abort => _abort.future;
+
+  Future<T> run<T>(Future<T> Function() upload, Future<void>? trigger) async {
+    final timer = Timer(timeout, _timeOut);
+    // Clear the callback after completion so a long-lived caller future does
+    // not retain the operation and its transport subscriptions.
+    void Function()? cancel = _cancel;
+    if (trigger != null) {
+      unawaited(
+        trigger.then(
+          (_) => cancel?.call(),
+          onError: (Object _, StackTrace _) {},
+        ),
+      );
+    }
+    try {
+      final result = await Future.any([
+        abort.then<T>((_) => throw _failure!),
+        Future<T>.microtask(() {
+          checkActive();
+          return upload();
+        }),
+      ]);
+      checkActive();
+      return result;
+    } finally {
+      cancel = null;
+      timer.cancel();
+    }
+  }
+
+  void checkActive() {
+    if (_elapsed.elapsed >= timeout) _timeOut();
+    final failure = _failure;
+    if (failure != null) throw failure;
+  }
+
+  void _cancel() => _stop(
+    AbortedException(
+      message: 'Environment upload aborted by user.',
+      correlationId: generateRequestId(),
+      timestamp: DateTime.now(),
+      stage: stage,
+    ),
+  );
+
+  void _timeOut() => _stop(
+    TimeoutException(
+      message: 'The environment upload deadline elapsed.',
+      timeout: timeout,
+      elapsed: _elapsed.elapsed,
+    ),
+  );
+
+  void _stop(GoogleAIException failure) {
+    if (_abort.isCompleted) return;
+    _failure = failure;
+    _abort.complete();
   }
 }

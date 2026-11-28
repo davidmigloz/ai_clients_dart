@@ -1,4 +1,6 @@
+import 'dart:async' show Completer, Timer, unawaited;
 import 'dart:convert';
+import 'dart:math' show min;
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -6,8 +8,11 @@ import 'package:http/http.dart' as http;
 import '../client/config.dart';
 import '../client/interceptor_chain.dart';
 import '../errors/exceptions.dart';
+import '../interceptors/auth_interceptor.dart';
+import '../interceptors/interceptor.dart';
 import '../models/interactions/environments/environments.dart';
 import '../utils/redactor.dart';
+import '../utils/request_id.dart';
 import 'base_resource.dart';
 
 part 'environment_files_resource.dart';
