@@ -126,7 +126,7 @@
       "tunedModels"
     ],
     "notes": {
-      "files:register": "FilesResource.register implements the authenticated GCS registration method.",
+      "files:register": "FilesResource inherits register from files/files_resource_base.dart. The endpoint-action scanner checks resource filenames; public route fixtures verify the delegated register path.",
       "environments:create": "Custom-verb alias of the environments resource (path /v1beta/environments:create); duplicates POST /v1beta/environments. Aliased to environments (EnvironmentsResource), which implements the REST-shaped family per the interactions spec.",
       "environments:list": "Custom-verb alias of the environments resource (path /v1beta/environments:list); duplicates GET /v1beta/environments. Same handling as environments:create.",
       "upload": "EnvironmentFilesResource.upload uses the resumable media path of EnvironmentsResource."
@@ -2331,7 +2331,7 @@
       "kind": "object",
       "dart_class": "GenerationAudioTranscriptionConfig",
       "file": "lib/src/models/generation/audio_transcription_config.dart",
-      "note": "Main-spec ASR config referenced by GenerationConfig.audioTranscriptionConfig and BidiGenerateContentSetup. Dart class is prefixed because the bare name AudioTranscriptionConfig is taken by the Live API model (websocket manifest, wire shape {enabled}). Matches python-genai AudioTranscriptionConfig (7 fields incl. deprecated adaptationPhrases/languageAuto/languageHints)."
+      "note": "Core GenerateContent transcription configuration. The WebSocket manifest maps the separate Live Dart configuration."
     },
     "LanguageAuto": {
       "spec": "main",
