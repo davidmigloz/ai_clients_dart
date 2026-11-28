@@ -21,6 +21,20 @@ class _CountingProvider implements AuthProvider {
   }
 }
 
+class _PendingProvider implements AuthProvider {
+  final requested = Completer<void>();
+  final initialCredentials = Completer<AuthCredentials>();
+
+  @override
+  Future<AuthCredentials> getCredentials() {
+    if (requested.isCompleted) {
+      return Future.value(const ApiKeyCredentials('next-fixture'));
+    }
+    requested.complete();
+    return initialCredentials.future;
+  }
+}
+
 class _Handshake {
   final Uri uri;
   final String? authorization;
@@ -419,6 +433,95 @@ void main() {
       );
       expect(provider.calls, 0);
       expect(server.upgrades, 0);
+    },
+  );
+
+  test(
+    'closing Live cancels a pending credential lookup and allows reuse',
+    () async {
+      final provider = _PendingProvider();
+      final server = await _Server.start();
+      final live = _createLive(
+        GoogleAIConfig(baseUrl: server.baseUrl, authProvider: provider),
+      );
+
+      final connection = expectLater(
+        live.connect(model: _model),
+        throwsA(isA<LiveConnectionException>()),
+      );
+      await provider.requested.future.timeout(_deadline);
+      await live.close().timeout(_deadline);
+      await connection.timeout(_deadline);
+
+      provider.initialCredentials.complete(
+        const ApiKeyCredentials('late-fixture'),
+      );
+      final next = await live.connect(model: _model).timeout(_deadline);
+      expect(next.isConnected, isTrue);
+      expect(
+        (await server.handshake.future).uri.queryParameters['key'],
+        'next-fixture',
+      );
+      expect(server.upgrades, 1);
+    },
+  );
+
+  test('closing Live disconnects a stalled native WebSocket upgrade', () async {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(server.close);
+    final requested = Completer<void>();
+    final peerClosed = Completer<void>();
+    server.listen((socket) {
+      addTearDown(socket.destroy);
+      socket.listen(
+        (_) {
+          if (!requested.isCompleted) requested.complete();
+        },
+        onDone: () {
+          if (!peerClosed.isCompleted) peerClosed.complete();
+        },
+        onError: (Object _) {
+          if (!peerClosed.isCompleted) peerClosed.complete();
+        },
+      );
+    });
+    final live = _createLive(
+      GoogleAIConfig(
+        baseUrl: 'http://127.0.0.1:${server.port}',
+        authProvider: const ApiKeyProvider('upgrade-secret'),
+      ),
+    );
+
+    final connection = expectLater(
+      live.connect(model: _model),
+      throwsA(
+        isA<LiveConnectionException>().having(
+          (error) => error.toString(),
+          'diagnostics',
+          isNot(contains('upgrade-secret')),
+        ),
+      ),
+    );
+    await requested.future.timeout(_deadline);
+    await live.close().timeout(_deadline);
+    await connection.timeout(_deadline);
+    await peerClosed.future.timeout(_deadline);
+  });
+
+  test(
+    'closing Live cancels a session waiting for setup acknowledgement',
+    () async {
+      final server = await _Server.start(setupReply: null);
+      final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+
+      final connection = expectLater(
+        live.connect(model: _model),
+        throwsA(isA<LiveConnectionException>()),
+      );
+      await server.handshake.future.timeout(_deadline);
+      await live.close().timeout(_deadline);
+      await connection.timeout(_deadline);
+      await server.peerClosed.future.timeout(_deadline);
     },
   );
 

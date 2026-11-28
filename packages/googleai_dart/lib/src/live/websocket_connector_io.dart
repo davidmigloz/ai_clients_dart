@@ -11,6 +11,7 @@ import 'package:web_socket/web_socket.dart';
 Future<WebSocket> connectWebSocket(
   Uri uri, {
   Map<String, String>? headers,
+  Future<void>? abort,
 }) async {
   if (!uri.isScheme('ws') && !uri.isScheme('wss')) {
     throw ArgumentError.value(
@@ -20,16 +21,24 @@ Future<WebSocket> connectWebSocket(
     );
   }
 
-  final io.WebSocket ioSocket;
+  final upgradeClient = abort == null ? null : io.HttpClient();
+  var upgrading = true;
+  abort?.then((_) {
+    if (upgrading) upgradeClient?.close(force: true);
+  }).ignore();
   try {
-    // Use dart:io WebSocket which supports custom headers
-    ioSocket = await io.WebSocket.connect(uri.toString(), headers: headers);
+    final socket = await io.WebSocket.connect(
+      uri.toString(),
+      headers: headers,
+      customClient: upgradeClient,
+    );
+    return _IOWebSocketWrapper(socket);
   } on io.WebSocketException catch (e) {
     throw WebSocketException(e.message);
+  } finally {
+    upgrading = false;
+    upgradeClient?.close();
   }
-
-  // Wrap in the platform-independent WebSocket interface
-  return _IOWebSocketWrapper(ioSocket);
 }
 
 /// Wrapper around dart:io WebSocket to implement the web_socket package interface.
