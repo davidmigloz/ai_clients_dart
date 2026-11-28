@@ -81,6 +81,7 @@ void main() {
       expect(req.headers['Api-Revision'], '2026-05-20');
       expect(req.url.queryParameters['page_size'], '5');
       expect(req.url.queryParameters['page_token'], 'p');
+      expect(req.url.queryParameters, isNot(contains('mode')));
       expect(result.environments, hasLength(1));
       expect(result.nextPageToken, 'tok');
     });

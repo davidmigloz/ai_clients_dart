@@ -1,9 +1,13 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../client/config.dart';
 import '../models/interactions/environments/environments.dart';
 import 'base_resource.dart';
+
+part 'environment_files_resource.dart';
 
 /// Resource for the Environments API.
 ///
@@ -21,6 +25,9 @@ class EnvironmentsResource extends ResourceBase {
     required super.requestBuilder,
     super.ensureNotClosed,
   });
+
+  /// Files and directories in an environment's workspace snapshot.
+  late final files = EnvironmentFilesResource._(this);
 
   /// The Interactions API schema revision this client targets.
   ///
@@ -42,13 +49,18 @@ class EnvironmentsResource extends ResourceBase {
 
   /// Lists environments.
   ///
+  /// [mode] filters by compute lifecycle mode. This endpoint requires the
+  /// Gemini Developer API with [ApiVersion.v1beta].
   /// [pageSize] caps the maximum number of environments per page and
   /// [pageToken] is used for pagination.
   Future<ListEnvironmentsResponse> list({
+    EnvironmentMode? mode,
     int? pageSize,
     String? pageToken,
   }) async {
+    _ensureDeveloperBeta();
     final queryParams = <String, String>{
+      if (mode != null) 'mode': mode.value,
       if (pageSize != null) 'page_size': pageSize.toString(),
       'page_token': ?pageToken,
     };
@@ -64,7 +76,8 @@ class EnvironmentsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final responseBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     return ListEnvironmentsResponse.fromJson(responseBody);
   }
 
@@ -112,5 +125,15 @@ class EnvironmentsResource extends ResourceBase {
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
     await interceptorChain.execute(httpRequest);
+  }
+
+  void _ensureDeveloperBeta() {
+    if (config.apiMode != ApiMode.googleAI ||
+        config.apiVersion != ApiVersion.v1beta) {
+      throw UnsupportedError(
+        'Environments require the Gemini Developer API with '
+        'ApiVersion.v1beta.',
+      );
+    }
   }
 }

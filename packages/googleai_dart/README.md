@@ -837,6 +837,39 @@ supported MIME types, resolution and content layers.
 
 </details>
 
+### How do I browse a managed environment's files?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.environments.files` with the Gemini Developer API `v1beta`. Pass a
+workspace-relative path to inspect one file or list a directory. Omit the path
+to list or download the workspace root.
+
+```dart
+final listing = await client.environments.files.list(
+  environment: environmentId,
+  path: 'artifacts',
+  recursive: true,
+);
+for (final entry in listing.files ?? const <EnvironmentFile>[]) {
+  print('${entry.path} (${entry.sizeBytes ?? 'unknown size'})');
+}
+final bytes = await client.environments.files.download(
+  environment: environmentId,
+  path: 'artifacts/report.pdf',
+);
+```
+
+Use `nextPageToken` to continue a listing. Downloading a directory returns a
+tar archive. To find environments first, call `client.environments.list` with
+an optional `EnvironmentMode.onDemand` or `EnvironmentMode.selfHosted` filter.
+
+[Runnable environment files example](example/environment_files_example.dart) ·
+[Google's environment files guide](https://aistudio.google.com/docs/agent-environment#download-files-from-the-environment)
+
+</details>
+
 ### How do I use the Live API?
 
 <details>
@@ -1050,6 +1083,7 @@ See the [example/](example/) directory for complete examples:
 | [`decisions_example.dart`](example/decisions_example.dart) | Gemini Decision 1 question and answer types |
 | [`documents_example.dart`](example/documents_example.dart) | Document management within corpora |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
+| [`environment_files_example.dart`](example/environment_files_example.dart) | List and download managed environment workspace files |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`example.dart`](example/example.dart) | Stable Interactions quickstart |
 | [`file_search_example.dart`](example/file_search_example.dart) | File search with semantic retrieval |

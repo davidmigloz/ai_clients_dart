@@ -288,6 +288,7 @@ export 'src/models/tools/url_context.dart';
 export 'src/models/webhooks/webhooks.dart';
 export 'src/resources/credentials_resource.dart';
 export 'src/resources/decisions_resource.dart';
+export 'src/resources/environments_resource.dart' show EnvironmentFilesResource;
 export 'src/resources/genie_resource.dart';
 // Utilities
 export 'src/utils/lro_poller.dart';
