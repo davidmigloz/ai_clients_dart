@@ -11,6 +11,94 @@ class _ImmutableTranscriptionConfig extends AudioTranscriptionConfig {
 }
 
 void main() {
+  test('keeps omitted and explicitly empty client turns distinct', () {
+    const omitted = {
+      'clientContent': {'turnComplete': true},
+    };
+    const empty = {
+      'clientContent': {'turns': <Object>[], 'turnComplete': true},
+    };
+    for (final json in [omitted, empty]) {
+      final content =
+          BidiGenerateContentClientMessage.fromJson(json)
+              as BidiGenerateContentClientContent;
+      expect(content.turns, isEmpty);
+      expect(content.toJson(), json);
+    }
+  });
+
+  test(
+    'context updates preserve the tool-list wrapper and clear semantics',
+    () {
+      const replacing = {
+        'contextUpdate': {
+          'tools': {
+            'tools': [
+              {
+                'functionDeclarations': [
+                  {'name': 'lookup', 'description': 'Look up a fact.'},
+                ],
+              },
+            ],
+          },
+        },
+      };
+      final replace =
+          BidiGenerateContentClientMessage.fromJson(replacing)
+              as BidiGenerateContentContextUpdate;
+      expect(replace.tools?.single.functionDeclarations?.single.name, 'lookup');
+      expect(replace.toJson(), replacing);
+
+      final clear = BidiGenerateContentContextUpdate.fromJson({
+        'tools': <String, dynamic>{},
+      });
+      expect(clear.tools, isEmpty);
+      expect(clear.toJson(), {
+        'contextUpdate': {
+          'tools': {'tools': <Object>[]},
+        },
+      });
+      expect(const BidiGenerateContentContextUpdate().toJson(), {
+        'contextUpdate': <String, dynamic>{},
+      });
+    },
+  );
+
+  test('realtime input round-trips per-input resolution and legacy media', () {
+    const wire = {
+      'realtimeInput': {
+        'mediaChunks': [
+          {'mimeType': 'image/jpeg', 'data': 'AQID'},
+        ],
+        'mediaResolution': {'level': 'MEDIA_RESOLUTION_MEDIUM'},
+      },
+    };
+    final message =
+        BidiGenerateContentClientMessage.fromJson(wire)
+            as BidiGenerateContentRealtimeInput;
+    expect(message.mediaResolution?.level, MediaResolutionLevel.medium);
+    expect(message.toJson(), wire);
+  });
+
+  test('retains type-invalid context updates as raw messages', () {
+    for (final value in [
+      'future context format',
+      {
+        'tools': [1],
+      },
+      {
+        'tools': {
+          'tools': [1],
+        },
+      },
+    ]) {
+      final wire = {'contextUpdate': value};
+      final message = BidiGenerateContentClientMessage.fromJson(wire);
+      expect(message, isA<UnknownClientMessage>());
+      expect(message.toJson(), wire);
+    }
+  });
+
   group('BidiGenerateContentClientMessage', () {
     group('fromJson dispatch', () {
       test('dispatches to BidiGenerateContentSetup for setup key', () {
