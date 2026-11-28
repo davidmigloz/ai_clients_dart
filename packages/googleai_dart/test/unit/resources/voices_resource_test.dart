@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 http.Response _json(Object value) => http.Response(
@@ -143,6 +144,110 @@ void main() {
           ),
         ),
       );
+    },
+  );
+
+  test(
+    'keeps voice keys off diagnostics on unary and streamed errors',
+    () async {
+      const voiceKey = 'voicekey_private_fixture';
+      const speakerKey = 'voicekey_second_fixture';
+      final previousLevel = Logger.root.level;
+      Logger.root.level = Level.FINE;
+      addTearDown(() => Logger.root.level = previousLevel);
+      final logs = <LogRecord>[];
+      final subscription = Logger.root.onRecord.listen(logs.add);
+      addTearDown(subscription.cancel);
+      final body = jsonEncode({
+        'error': {
+          'message': 'Invalid voice: $voiceKey and $speakerKey',
+          'details': [
+            {'echo': voiceKey, 'query': speakerKey},
+          ],
+        },
+      });
+      var calls = 0;
+      final client = GoogleAIClient(
+        config: const GoogleAIConfig(logLevel: Level.FINE),
+        httpClient: MockClient((request) async {
+          expect(request.body, contains(voiceKey));
+          expect(request.body, contains(speakerKey));
+          calls++;
+          if (calls == 3) {
+            return http.Response(
+              'event: error\ndata: $body\n\n',
+              200,
+              headers: {'content-type': 'text/event-stream; charset=utf-8'},
+            );
+          }
+          return http.Response(body, 400);
+        }),
+      );
+      addTearDown(client.close);
+      final request = GenerateContentRequest(
+        contents: [Content.text('Narration')],
+        generationConfig: const GenerationConfig(
+          speechConfig: SpeechConfig(
+            voiceConfig: VoiceConfig(voice: voiceKey),
+            multiSpeakerVoiceConfig: MultiSpeakerVoiceConfig(
+              speakerVoiceConfigs: [
+                SpeakerVoiceConfig(voiceConfig: VoiceConfig(voice: speakerKey)),
+              ],
+            ),
+          ),
+        ),
+      );
+      final safeDiagnostics = allOf(
+        contains('***REDACTED***'),
+        isNot(contains(voiceKey)),
+        isNot(contains(speakerKey)),
+      );
+      final httpError = isA<ApiException>()
+          .having((error) => error.message, 'message', safeDiagnostics)
+          .having(
+            (error) => error.details.toString(),
+            'details',
+            safeDiagnostics,
+          );
+      await expectLater(
+        client.models.generateContent(
+          model: 'gemini-3.8-flash-tts',
+          request: request,
+        ),
+        throwsA(
+          httpError.having(
+            (error) => error.responseMetadata?.bodyExcerpt,
+            'response excerpt',
+            safeDiagnostics,
+          ),
+        ),
+      );
+      await expectLater(
+        client.models.streamGenerateContent(
+          model: 'gemini-3.8-flash-tts',
+          request: request,
+        ),
+        emitsError(httpError),
+      );
+      await expectLater(
+        client.models.streamGenerateContent(
+          model: 'gemini-3.8-flash-tts',
+          request: request,
+        ),
+        emitsError(
+          isA<StreamException>().having(
+            (error) => error.partialData,
+            'partial SSE data',
+            safeDiagnostics,
+          ),
+        ),
+      );
+      expect(calls, 3);
+      expect(logs.where((log) => log.level == Level.FINE), isNotEmpty);
+      for (final log in logs) {
+        expect('${log.message}${log.error}', isNot(contains(voiceKey)));
+        expect('${log.message}${log.error}', isNot(contains(speakerKey)));
+      }
     },
   );
 

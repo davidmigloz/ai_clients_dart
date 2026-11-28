@@ -1005,7 +1005,9 @@ control messages ends the stream with an error.
 <summary><b>Show example</b></summary>
 
 Use `client.voices` with the Gemini Developer API `v1beta`. A designed voice
-has a reusable ID and can return preview audio.
+has a reusable ID and can return preview audio. Set
+`PromptedVoice.baseVoice` to remix a prebuilt or stored designed voice on a
+paid project.
 
 ```dart
 final created = await client.voices.create(
@@ -1029,6 +1031,7 @@ stored IDs or expiring client-managed replication keys.
 
 [Full example](example/voices_example.dart) ·
 [Voice design](https://aistudio.google.com/docs/voice-design) ·
+[Voice remixing](https://aistudio.google.com/docs/voice-remixing) ·
 [Voice replication and consent](https://aistudio.google.com/docs/voice-replication)
 
 </details>

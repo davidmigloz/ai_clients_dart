@@ -6,6 +6,7 @@ import '../client/config.dart';
 import '../errors/exceptions.dart';
 import '../models/batch/embed_content_batch.dart';
 import '../models/batch/generate_content_batch.dart';
+import '../models/common/voice_config.dart';
 import '../models/content/part.dart';
 import '../models/embeddings/batch_embed_contents_request.dart';
 import '../models/embeddings/batch_embed_contents_response.dart';
@@ -25,6 +26,7 @@ import '../models/prediction/predict_long_running_operation.dart';
 import '../models/prediction/predict_long_running_request.dart';
 import '../models/prediction/predict_request.dart';
 import '../models/prediction/predict_response.dart';
+import '../utils/redactor.dart';
 import 'base_resource.dart';
 import 'operations_resource.dart';
 import 'streaming_resource.dart';
@@ -73,6 +75,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
+      diagnosticRedactor: _voiceKeyRedactor(request),
     );
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -99,6 +102,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
   }) {
+    final diagnosticRedactor = _voiceKeyRedactor(request);
     return streamRequest(
       createRequest: () {
         // Build URL and headers (uses endpoint config precedence)
@@ -118,11 +122,17 @@ class ModelsResource extends ResourceBase with StreamingResource {
         return httpRequest;
       },
       abortTrigger: abortTrigger,
+      diagnosticRedactor: diagnosticRedactor,
       fromJson: (json) {
         final sseEvent = json['_event'] as String?;
         final error = json['error'];
         if (sseEvent == 'error' || error != null) {
-          throwInlineStreamError(json, sseEvent, error);
+          throwInlineStreamError(
+            json,
+            sseEvent,
+            error,
+            redactor: diagnosticRedactor ?? Redactor.continuationTokens,
+          );
         }
         return GenerateContentResponse.fromJson(json);
       },
@@ -194,6 +204,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
+      diagnosticRedactor: _voiceKeyRedactor(request),
     );
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -217,6 +228,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required GenerateContentRequest request,
     Future<void>? abortTrigger,
   }) {
+    final diagnosticRedactor = _voiceKeyRedactor(request);
     return streamRequest(
       createRequest: () {
         // Build URL and headers
@@ -236,14 +248,39 @@ class ModelsResource extends ResourceBase with StreamingResource {
         return httpRequest;
       },
       abortTrigger: abortTrigger,
+      diagnosticRedactor: diagnosticRedactor,
       fromJson: (json) {
         final sseEvent = json['_event'] as String?;
         final error = json['error'];
         if (sseEvent == 'error' || error != null) {
-          throwInlineStreamError(json, sseEvent, error);
+          throwInlineStreamError(
+            json,
+            sseEvent,
+            error,
+            redactor: diagnosticRedactor ?? Redactor.continuationTokens,
+          );
         }
         return GenerateContentResponse.fromJson(json);
       },
+    );
+  }
+
+  Redactor? _voiceKeyRedactor(GenerateContentRequest request) {
+    final speech = request.generationConfig?.speechConfig;
+    final voices = [
+      speech?.voiceConfig?.voice,
+      for (final speaker
+          in speech?.multiSpeakerVoiceConfig?.speakerVoiceConfigs ??
+              const <SpeakerVoiceConfig>[])
+        speaker.voiceConfig?.voice,
+    ];
+    final keys = voices.whereType<String>().where(
+      (voice) => voice.startsWith('voicekey_'),
+    );
+    if (keys.isEmpty) return null;
+    return Redactor.forSecrets(
+      secrets: keys,
+      redactionList: Redactor.continuationTokenFields,
     );
   }
 
