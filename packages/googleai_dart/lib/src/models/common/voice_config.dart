@@ -7,8 +7,11 @@ class VoiceConfig {
   /// Configuration for prebuilt voices.
   final PrebuiltVoiceConfig? prebuiltVoiceConfig;
 
+  /// A Gemini Developer API custom voice ID or client-managed replication key.
+  final String? voice;
+
   /// Creates a [VoiceConfig].
-  const VoiceConfig({this.prebuiltVoiceConfig});
+  const VoiceConfig({this.prebuiltVoiceConfig, this.voice});
 
   /// Creates a configuration using a prebuilt voice.
   factory VoiceConfig.prebuilt(String voiceName) {
@@ -25,6 +28,7 @@ class VoiceConfig {
               json['prebuiltVoiceConfig'] as Map<String, dynamic>,
             )
           : null,
+      voice: json['voice'] as String?,
     );
   }
 
@@ -32,19 +36,26 @@ class VoiceConfig {
   Map<String, dynamic> toJson() => {
     if (prebuiltVoiceConfig != null)
       'prebuiltVoiceConfig': prebuiltVoiceConfig!.toJson(),
+    'voice': ?voice,
   };
 
   /// Creates a copy with the given fields replaced.
-  VoiceConfig copyWith({Object? prebuiltVoiceConfig = unsetCopyWithValue}) {
+  VoiceConfig copyWith({
+    Object? prebuiltVoiceConfig = unsetCopyWithValue,
+    Object? voice = unsetCopyWithValue,
+  }) {
     return VoiceConfig(
       prebuiltVoiceConfig: prebuiltVoiceConfig == unsetCopyWithValue
           ? this.prebuiltVoiceConfig
           : prebuiltVoiceConfig as PrebuiltVoiceConfig?,
+      voice: voice == unsetCopyWithValue ? this.voice : voice as String?,
     );
   }
 
   @override
-  String toString() => 'VoiceConfig(prebuiltVoiceConfig: $prebuiltVoiceConfig)';
+  String toString() =>
+      'VoiceConfig(prebuiltVoiceConfig: $prebuiltVoiceConfig, '
+      'customVoiceConfigured: ${voice != null})';
 }
 
 /// Configuration for prebuilt voices.
