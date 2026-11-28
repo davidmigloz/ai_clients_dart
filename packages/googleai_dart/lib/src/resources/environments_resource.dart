@@ -22,6 +22,9 @@ part 'environment_files_resource.dart';
 /// Provides CRUD operations on execution [Environment]s (sandboxes) that
 /// agents and interactions can run in.
 ///
+/// Creation and metadata reads record only the HTTP status and timing in
+/// response diagnostics to protect environment keys.
+///
 /// **Note:** the Environments API is part of the experimental Interactions
 /// API.
 class EnvironmentsResource extends ResourceBase {
@@ -95,6 +98,7 @@ class EnvironmentsResource extends ResourceBase {
     final response = await interceptorChain.execute(
       httpRequest,
       diagnosticRedactor: _environmentDiagnostics,
+      statusOnlyResponseDiagnostics: true,
     );
     return _decodeEnvironmentResponse(
       response,
@@ -105,8 +109,7 @@ class EnvironmentsResource extends ResourceBase {
   /// Creates a new [Environment].
   ///
   /// Returns the server-assigned [Environment.id]. Self-hosted creation also
-  /// returns a one-time [Environment.environmentKey]. Response diagnostics
-  /// contain the HTTP status and timing to keep that key private.
+  /// returns a one-time [Environment.environmentKey].
   /// The new configuration options require the Gemini Developer API
   /// with [ApiVersion.v1beta].
   Future<Environment> create({
@@ -153,6 +156,7 @@ class EnvironmentsResource extends ResourceBase {
     final response = await interceptorChain.execute(
       httpRequest,
       diagnosticRedactor: _environmentDiagnostics,
+      statusOnlyResponseDiagnostics: true,
     );
     return _decodeEnvironmentResponse(response, Environment.fromMetadataJson);
   }
