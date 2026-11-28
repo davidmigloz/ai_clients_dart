@@ -24,6 +24,7 @@ export 'src/extensions/interaction_extensions.dart';
 export 'src/genie/genie_auth_token.dart';
 export 'src/genie/genie_events.dart';
 export 'src/genie/genie_session.dart';
+export 'src/genie/genie_webrtc_peer.dart';
 export 'src/live/live_client.dart';
 export 'src/live/live_session.dart';
 // Models - Auth Tokens

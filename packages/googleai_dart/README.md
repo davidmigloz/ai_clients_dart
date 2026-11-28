@@ -970,12 +970,25 @@ interaction running.
 For browsers, create the interaction and mint a scoped credential with
 `await genie.createAuthToken(interaction.id)` on your backend. Pass the
 returned `authToken` to `connect(interaction.id, authToken: ...)` in the browser.
-Native clients can also authenticate with a paid-tier Gemini API key. The Dart
-client supports WebSocket media delivery. WebRTC signaling is tracked separately.
+Native clients can also authenticate with a paid-tier Gemini API key.
 
-[Full example](example/genie_example.dart) ·
-[Genie 4 guide](https://aistudio.google.com/docs/genie) ·
-[WebRTC tracking issue](https://github.com/davidmigloz/ai_clients_dart/issues/644)
+In a browser, use `connectWebRtc(...)` with the same scoped token and a
+`BrowserGenieWebRtcPeer(mediaElement: video)` from
+`package:googleai_dart/genie_web.dart`. Genie delivers video and Opus audio as
+native media tracks. The `events` data channel carries typed control events,
+including the terminal acknowledgement. Keep a WebRTC seed JPEG under 48 KB
+so the complete JSON frame fits the 64 KiB default SCTP limit.
+
+Compile the [browser example](example/genie_webrtc_example.dart) with
+`dart compile js example/genie_webrtc_example.dart -o genie.js` and load it
+with `<script defer src="genie.js"></script>` on an HTTPS or localhost page.
+Use the interaction ID and scoped token supplied by your backend. The browser
+may require a user gesture to play audio. On native Dart or Flutter, pass a
+`GenieWebRtcPeer` backed by a host WebRTC binding, or use the package's
+WebSocket transport.
+
+[Native WebSocket example](example/genie_example.dart) ·
+[Genie 4 guide](https://aistudio.google.com/docs/genie)
 
 </details>
 
@@ -1048,6 +1061,7 @@ See the [example/](example/) directory for complete examples:
 | [`generate_content_media_slicing.dart`](example/generate_content_media_slicing.dart) | GenerateContent PDF page selection |
 | [`generated_files_example.dart`](example/generated_files_example.dart) | Generated files for video outputs |
 | [`genie_example.dart`](example/genie_example.dart) | Genie 4 world setup, JPEG frames, and WebSocket completion |
+| [`genie_webrtc_example.dart`](example/genie_webrtc_example.dart) | Genie 4 browser WebRTC and native playback |
 | [`google_maps_example.dart`](example/google_maps_example.dart) | Google Maps grounding |
 | [`google_search_example.dart`](example/google_search_example.dart) | Grounding with Google Search |
 | [`image_generation_example.dart`](example/image_generation_example.dart) | Image generation |
@@ -1091,7 +1105,7 @@ See the [example/](example/) directory for complete examples:
 | Webhooks (Experimental) | ✅ Full |
 | Auth Tokens | ✅ Full |
 | Live API (WebSocket) | ✅ Full |
-| Genie 4 | Paid-tier Gemini Developer API `v1beta` WebSocket |
+| Genie 4 | Paid-tier Gemini Developer API `v1beta` WebSocket and WebRTC |
 
 ## Official Documentation
 

@@ -9,10 +9,11 @@ import '../errors/exceptions.dart';
 import '../models/interactions/deltas/deltas.dart';
 import '../models/interactions/events/events.dart';
 import 'genie_events.dart';
+import 'genie_transport.dart';
 
 enum _SessionState { open, completing, terminal, detached, failed }
 
-/// A dedicated WebSocket session for one Genie 4 interaction.
+/// A live transport session for one Genie 4 interaction.
 ///
 /// Send one [GenieWorldSetup] before other input. Call [complete] or [cancel]
 /// to stop server generation. [detach] only closes the local transport.
@@ -23,7 +24,7 @@ class GenieSession {
   /// The server interaction this connection was opened against.
   final String id;
 
-  final WebSocket _socket;
+  final GenieTransport _transport;
   final Set<Pattern> _credentialForms;
   final Duration _completionTimeout;
   final _pending = Queue<GenieServerEvent>();
@@ -39,7 +40,7 @@ class GenieSession {
   int _pendingMediaLength = 0;
 
   GenieSession._(
-    this._socket,
+    this._transport,
     this.id,
     String credential,
     this._completionTimeout,
@@ -53,31 +54,39 @@ class GenieSession {
             RegExp(RegExp.escape(encoded), caseSensitive: false),
       };
 
-  /// Attaches to a socket and sends the initial live interaction event.
+  /// Attaches an established transport to its live interaction.
   @internal
   static GenieSession attach(
-    WebSocket socket,
+    GenieTransport transport,
     String id,
     String credential,
-    Duration completionTimeout,
-  ) {
-    final session = GenieSession._(socket, id, credential, completionTimeout);
-    session
-      .._subscription = socket.events.listen(
-        session._onSocketEvent,
-        onError: (Object _, StackTrace stackTrace) => session._fail(
-          GenieConnectionException(
-            message: 'The Genie WebSocket transport failed.',
-            stackTrace: stackTrace,
-          ),
+    Duration completionTimeout, {
+    required bool sendConnectFrame,
+  }) {
+    final session = GenieSession._(
+      transport,
+      id,
+      credential,
+      completionTimeout,
+    );
+    session._subscription = transport.events.listen(
+      session._onSocketEvent,
+      onError: (Object _, StackTrace stackTrace) => session._fail(
+        GenieConnectionException(
+          message: 'The Genie ${transport.name} transport failed.',
+          stackTrace: stackTrace,
         ),
-        onDone: () => session._fail(
-          const GenieConnectionException(
-            message: 'The Genie WebSocket closed before a terminal event.',
-          ),
+      ),
+      onDone: () => session._fail(
+        GenieConnectionException(
+          message:
+              'The Genie ${transport.name} closed before a terminal event.',
         ),
-      )
-      .._write({'event_type': 'interaction.connect', 'id': id});
+      ),
+    );
+    if (sendConnectFrame) {
+      session._write({'event_type': 'interaction.connect', 'id': id});
+    }
     return session;
   }
 
@@ -205,7 +214,7 @@ class GenieSession {
     _pendingMediaLength = 0;
     if (_canRead) {
       try {
-        _socket.sendText('{"event_type":"interaction.disconnect"}');
+        _transport.sendText('{"event_type":"interaction.disconnect"}');
       } catch (_) {
         // The disconnect frame is best-effort when the transport has failed.
       }
@@ -225,11 +234,18 @@ class GenieSession {
   }
 
   void _write(Map<String, dynamic> payload) {
+    final text = jsonEncode(payload);
+    final limit = _transport.maxMessageSize;
+    if (limit != null && utf8.encode(text).length > limit) {
+      throw ArgumentError(
+        'The Genie WebRTC message exceeds the $limit-byte SCTP limit.',
+      );
+    }
     try {
-      _socket.sendText(jsonEncode(payload));
+      _transport.sendText(text);
     } catch (_, stackTrace) {
       final error = GenieConnectionException(
-        message: 'Unable to send on the Genie WebSocket.',
+        message: 'Unable to send on the Genie ${_transport.name}.',
         stackTrace: stackTrace,
       );
       _fail(error);
@@ -248,7 +264,8 @@ class GenieSession {
         case CloseReceived(:final code):
           _fail(
             GenieConnectionException(
-              message: 'The Genie WebSocket closed before a terminal event.',
+              message:
+                  'The Genie ${_transport.name} closed before a terminal event.',
               closeCode: code,
             ),
           );
@@ -287,7 +304,7 @@ class GenieSession {
     }
     if (controlOverflow) {
       try {
-        _socket.sendText('{"event_type":"interaction.cancel"}');
+        _transport.sendText('{"event_type":"interaction.cancel"}');
       } catch (_) {
         // The socket may have disconnected before it could cancel.
       }
@@ -410,7 +427,7 @@ class GenieSession {
 
   Future<void> _closeTransport() async {
     try {
-      await _socket.close();
+      await _transport.close();
     } catch (_) {
       // A closed transport already has the desired state.
     } finally {
