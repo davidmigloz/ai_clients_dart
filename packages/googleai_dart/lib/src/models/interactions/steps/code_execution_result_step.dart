@@ -76,7 +76,7 @@ class CodeExecutionResultStep extends InteractionStep {
     return CodeExecutionResultStep._(
       callId: callId,
       result: _decodeResult(raw),
-      wireResult: raw is List ? List<dynamic>.unmodifiable(raw) : null,
+      wireResult: raw is List ? raw.map(_copyJsonValue).toList() : null,
       isError: json['is_error'] as bool?,
       signature: json['signature'] as String?,
     );
@@ -86,13 +86,14 @@ class CodeExecutionResultStep extends InteractionStep {
   Map<String, dynamic> toJson() => {
     'type': type,
     'call_id': callId,
-    'result':
-        _wireResult ??
-        switch (_result) {
-          final List<InteractionContent> entries =>
-            entries.map((entry) => entry.toJson()).toList(),
-          final Object raw => raw,
-        },
+    'result': _copyJsonValue(
+      _wireResult ??
+          switch (_result) {
+            final List<InteractionContent> entries =>
+              entries.map((entry) => entry.toJson()).toList(),
+            final Object raw => raw,
+          },
+    ),
     if (isError != null) 'is_error': isError,
     if (signature != null) 'signature': signature,
   };
@@ -141,4 +142,15 @@ class CodeExecutionResultStep extends InteractionStep {
       return raw;
     }
   }
+
+  static Object? _copyJsonValue(Object? value) => switch (value) {
+    final Map<String, dynamic> object => {
+      for (final entry in object.entries)
+        entry.key: _copyJsonValue(entry.value),
+    },
+    final List<dynamic> array => [
+      for (final item in array) _copyJsonValue(item),
+    ],
+    _ => value,
+  };
 }

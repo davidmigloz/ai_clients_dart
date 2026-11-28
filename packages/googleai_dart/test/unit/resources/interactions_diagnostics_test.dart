@@ -81,6 +81,11 @@ void main() {
         isA<TextContent>(),
         isA<ImageContent>(),
       ]);
+      final copy = structured.copyWith(signature: 'AQI=');
+      final serialized = copy.toJson()['result'] as List<dynamic>;
+      (serialized.first as Map<String, dynamic>)['text'] = 'changed externally';
+      expect((structured.resultContent!.first as TextContent).text, 'hello');
+      expect(copy.toJson()['result'], structured.toJson()['result']);
       expect(structured.copyWith(result: 'replacement').resultContent, isNull);
       expect((steps[2] as CodeExecutionResultStep).result, 'legacy text');
       expect((steps[3] as CodeExecutionResultStep).resultContent, isNull);
