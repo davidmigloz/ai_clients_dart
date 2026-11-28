@@ -5,15 +5,10 @@
 /// - Generate speech with a prebuilt voice
 /// - Control delivery with audio tags (e.g. `[whispers]`, `[excited]`)
 /// - Produce multi-speaker dialogue with distinct voices per speaker
-/// - Save the returned PCM audio as a playable WAV file
+/// - Save the returned audio as a WAV file
 ///
-/// Supported models:
-/// - `gemini-3.1-flash-tts-preview`
-/// - `gemini-2.5-flash-preview-tts`
-/// - `gemini-2.5-pro-preview-tts`
-///
-/// The API returns 24 kHz, 16-bit, mono PCM in an `InlineDataPart`. Wrap the
-/// bytes with a WAV header (see `_pcmToWav` below) before writing `.wav`.
+/// Use Gemini Developer API v1beta. Gemini 3.8 TTS returns WAV on unary
+/// requests. The example also handles headerless PCM reported as audio/l16.
 library;
 
 import 'dart:convert';
@@ -22,7 +17,7 @@ import 'dart:typed_data';
 
 import 'package:googleai_dart/googleai_dart.dart';
 
-const _model = 'gemini-3.1-flash-tts-preview';
+const _model = 'gemini-3.8-flash-tts';
 
 void main() async {
   final client = GoogleAIClient.fromEnvironment();
@@ -34,7 +29,17 @@ void main() async {
     final single = await client.models.generateContent(
       model: _model,
       request: GenerateContentRequest(
-        contents: [Content.text('Say cheerfully: Have a wonderful day!')],
+        contents: const [
+          Content(
+            role: 'user',
+            parts: [
+              TextPart(
+                'Have a wonderful day!',
+                speechMetadata: SpeechMetadata(style: 'Cheerful and friendly'),
+              ),
+            ],
+          ),
+        ],
         generationConfig: GenerationConfig(
           responseModalities: const [ResponseModality.audio],
           speechConfig: SpeechConfig.withVoice('Kore'),
@@ -71,20 +76,28 @@ void main() async {
 
     // Example 3: Multi-speaker dialogue with one voice per speaker.
     //
-    // Each turn in the transcript must be prefixed with the speaker label
-    // declared in `speakerVoiceConfigs`.
+    // Match the speaker name on each part to its configured voice.
     print('\n=== Multi-speaker ===\n');
 
     final dialogue = await client.models.generateContent(
       model: _model,
-      request: GenerateContentRequest(
+      request: const GenerateContentRequest(
         contents: [
-          Content.text(
-            "Joe: How's it going today, Jane?\n"
-            'Jane: Not too bad, how about you?',
+          Content(
+            role: 'user',
+            parts: [
+              TextPart(
+                "How's it going today, Jane?",
+                speechMetadata: SpeechMetadata(speaker: 'Joe'),
+              ),
+              TextPart(
+                'Not too bad, how about you?',
+                speechMetadata: SpeechMetadata(speaker: 'Jane'),
+              ),
+            ],
           ),
         ],
-        generationConfig: const GenerationConfig(
+        generationConfig: GenerationConfig(
           responseModalities: [ResponseModality.audio],
           speechConfig: SpeechConfig(
             multiSpeakerVoiceConfig: MultiSpeakerVoiceConfig(
@@ -118,14 +131,20 @@ Future<void> _saveAudio(
   GenerateContentResponse response,
   String filename,
 ) async {
-  final base64Audio = response.data;
-  if (base64Audio == null) {
+  final parts = response.candidates?.firstOrNull?.content?.parts ?? const [];
+  final audio = parts.whereType<InlineDataPart>().firstOrNull;
+  if (audio == null) {
     print('No audio in response.');
     return;
   }
 
-  final pcm = base64Decode(base64Audio);
-  final wav = _pcmToWav(pcm);
+  final mimeType = audio.inlineData.mimeType.split(';').first.toLowerCase();
+  final bytes = base64Decode(audio.inlineData.data);
+  final wav = switch (mimeType) {
+    'audio/wav' => bytes,
+    'audio/l16' => _pcmToWav(bytes),
+    _ => throw FormatException('Unsupported audio type: $mimeType'),
+  };
   await io.File(filename).writeAsBytes(wav);
   print('Saved $filename (${wav.length} bytes).');
 }

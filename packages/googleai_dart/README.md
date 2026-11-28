@@ -560,10 +560,15 @@ Future<void> main() async {
 <details>
 <summary><b>Show example</b></summary>
 
-Gemini TTS models reuse the same `generateContent` endpoint with `ResponseModality.audio` and a `SpeechConfig`. Use audio tags in square brackets (e.g. `[whispers]`, `[excited]`) to steer delivery. The response carries 24 kHz, 16-bit, mono PCM in `response.data` — wrap it in a WAV header before writing `.wav`.
+Use Gemini Developer API `v1beta` with `generateContent`,
+`ResponseModality.audio`, and a `SpeechConfig`. Gemini 3.8 TTS returns
+`audio/wav` by default for unary requests. Write the decoded WAV bytes as
+returned. If an older model or a streaming request returns headerless
+`audio/l16`, use the reported MIME type to choose how to save or play it.
 
 ```dart
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:googleai_dart/googleai_dart.dart';
 
@@ -572,10 +577,18 @@ Future<void> main() async {
 
   try {
     final response = await client.models.generateContent(
-      model: 'gemini-3.1-flash-tts-preview',
+      model: 'gemini-3.8-flash-tts',
       request: GenerateContentRequest(
-        contents: [
-          Content.text('[excited] Welcome to the show! [short pause] Let\'s begin.'),
+        contents: const [
+          Content(
+            role: 'user',
+            parts: [
+              TextPart(
+                'Welcome to the show!',
+                speechMetadata: SpeechMetadata(style: 'Excited and warm'),
+              ),
+            ],
+          ),
         ],
         generationConfig: GenerationConfig(
           responseModalities: const [ResponseModality.audio],
@@ -584,9 +597,9 @@ Future<void> main() async {
       ),
     );
 
-    final pcm = response.data;
-    if (pcm != null) {
-      print('Received ${base64Decode(pcm).length} bytes of PCM audio');
+    final wav = response.data;
+    if (wav != null) {
+      await File('welcome.wav').writeAsBytes(base64Decode(wav));
     }
   } finally {
     client.close();
@@ -594,12 +607,13 @@ Future<void> main() async {
 }
 ```
 
-→ [Full example](example/tts_example.dart)
+For transcription with `gemini-3.5-transcribe`, request speaker diarization
+or word timing through `GenerationAudioTranscriptionConfig`. Read the
+result from `Part.audioTranscription`.
 
-On supported Gemini Developer API `v1beta` models, set
-`TextPart.speechMetadata` to supply per-part speaker and style instructions.
-If the response includes audio transcription, read it from
-`Part.audioTranscription`, including any speaker labels and word timing.
+[Speech example](example/tts_example.dart) ·
+[GenerateContent speech guide](https://aistudio.google.com/docs/speech-generation?generate-content=true) ·
+[Audio transcription guide](https://aistudio.google.com/docs/transcribe?generate-content=true)
 
 </details>
 
