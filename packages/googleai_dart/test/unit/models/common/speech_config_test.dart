@@ -2,6 +2,16 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'preserves future text normalization selectors and supports clearing',
+    () {
+      final decoded = SpeechConfig.fromJson({'textNormalization': 'FUTURE'});
+      expect(decoded.textNormalization?.value, 'FUTURE');
+      expect(decoded.toJson(), {'textNormalization': 'FUTURE'});
+      expect(decoded.copyWith(textNormalization: null).toJson(), isEmpty);
+    },
+  );
+
   group('SpeechConfig', () {
     group('fromJson', () {
       test('creates SpeechConfig with all fields', () {
