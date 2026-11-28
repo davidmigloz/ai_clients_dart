@@ -3,6 +3,13 @@ import 'dart:convert';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
+class _ImmutableTranscriptionConfig extends AudioTranscriptionConfig {
+  const _ImmutableTranscriptionConfig() : super(enabled: true);
+
+  @override
+  Map<String, dynamic> toJson() => const {'enabled': true, 'mode': 'SMART'};
+}
+
 void main() {
   group('BidiGenerateContentClientMessage', () {
     group('fromJson dispatch', () {
@@ -130,6 +137,24 @@ void main() {
           },
         },
       });
+    });
+
+    test('leaves immutable transcription config JSON untouched', () {
+      const config = _ImmutableTranscriptionConfig();
+      const setup = BidiGenerateContentSetup(
+        model: 'models/gemini-3.8-live',
+        inputAudioTranscription: config,
+        outputAudioTranscription: config,
+      );
+
+      expect(setup.toJson(), {
+        'setup': {
+          'model': 'models/gemini-3.8-live',
+          'inputAudioTranscription': {'mode': 'SMART'},
+          'outputAudioTranscription': {'mode': 'SMART'},
+        },
+      });
+      expect(config.toJson(), {'enabled': true, 'mode': 'SMART'});
     });
 
     test('serializes with setup wrapper key', () {

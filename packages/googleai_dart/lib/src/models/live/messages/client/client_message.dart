@@ -183,10 +183,10 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
       // The Live protocol uses object presence as the enable flag.
       if (inputAudioTranscription case final config?
           when config.enabled != false)
-        'inputAudioTranscription': config.toJson()..remove('enabled'),
+        'inputAudioTranscription': {...config.toJson()}..remove('enabled'),
       if (outputAudioTranscription case final config?
           when config.enabled != false)
-        'outputAudioTranscription': config.toJson()..remove('enabled'),
+        'outputAudioTranscription': {...config.toJson()}..remove('enabled'),
       if (proactivity != null) 'proactivity': proactivity!.toJson(),
       if (historyConfig != null) 'historyConfig': historyConfig!.toJson(),
     },
