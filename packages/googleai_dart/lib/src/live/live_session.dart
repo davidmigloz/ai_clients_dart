@@ -10,6 +10,7 @@ import '../models/content/content.dart';
 import '../models/live/messages/client/client_message.dart';
 import '../models/live/messages/server/server_message.dart';
 import '../models/tools/function_response.dart';
+import 'diagnostic_redaction.dart';
 
 /// A live streaming session with the Gemini Live API.
 ///
@@ -42,7 +43,7 @@ import '../models/tools/function_response.dart';
 class LiveSession {
   final WebSocket _socket;
   final StreamController<BidiGenerateContentServerMessage> _messageController;
-  final String Function(String)? _redactDiagnostic;
+  final String Function(String, Set<String>)? _redactDiagnostic;
   void Function(LiveSession)? _onClosed;
   StreamSubscription<WebSocketEvent>? _subscription;
   bool _isConnected = true;
@@ -75,7 +76,7 @@ class LiveSession {
   factory LiveSession.attach(
     WebSocket socket, {
     void Function(LiveSession)? onClosed,
-    String Function(String)? redactDiagnostic,
+    String Function(String, Set<String>)? redactDiagnostic,
   }) => LiveSession._(socket, onClosed, redactDiagnostic).._startListening();
 
   void _startListening() {
@@ -94,10 +95,13 @@ class LiveSession {
         _parseAndEmitMessage(bytes: data);
       case CloseReceived(:final code, :final reason):
         if (!_messageController.isClosed) {
+          final handles = {?resumptionToken, ?_lastResumableUpdate?.newHandle};
           _messageController.addError(
             LiveSessionClosedException(
               code: code,
-              reason: _redactDiagnostic?.call(reason) ?? reason,
+              reason:
+                  _redactDiagnostic?.call(reason, handles) ??
+                  redactLiveDiagnosticValues(reason, handles),
             ),
           );
         }

@@ -11,6 +11,7 @@ import '../models/live/config/live_config.dart';
 import '../models/live/config/session_resumption_config.dart';
 import '../models/live/messages/client/client_message.dart';
 import '../models/live/messages/server/server_message.dart';
+import 'diagnostic_redaction.dart';
 import 'live_session.dart';
 import 'websocket_connector.dart' as ws;
 
@@ -151,11 +152,11 @@ class LiveClient {
       session = LiveSession.attach(
         socket,
         onClosed: _sessions.remove,
-        redactDiagnostic: (message) => _safeSocketMessage(
+        redactDiagnostic: (message, handles) => _safeSocketMessage(
           message,
           uri,
           credentials,
-          resumptionHandle: resumptionHandle,
+          resumeHandles: {?resumptionHandle, ...handles},
         ),
       );
       _sessions.add(session);
@@ -175,7 +176,7 @@ class LiveClient {
                 error.message,
                 uri,
                 credentials,
-                resumptionHandle: resumptionHandle,
+                resumeHandles: {?resumptionHandle},
               ),
             )
           : null;
@@ -345,9 +346,9 @@ class LiveClient {
     String message,
     Uri uri,
     AuthCredentials? credentials, {
-    String? resumptionHandle,
+    Set<String> resumeHandles = const {},
   }) {
-    var safe = message.replaceAll(
+    final safe = message.replaceAll(
       uri.toString(),
       _diagnosticUri(uri).toString(),
     );
@@ -357,27 +358,11 @@ class LiveClient {
       EphemeralTokenCredentials(:final token) => token,
       _ => null,
     };
-    final values =
-        {
-            ...uri.queryParametersAll.values.expand((values) => values),
-            ?credential,
-            ?resumptionHandle,
-          }.where((value) => value.isNotEmpty).toList()
-          ..sort((a, b) => b.length.compareTo(a.length));
-    for (final value in values) {
-      safe = safe.replaceAll(value, '[redacted]');
-      for (final encoded in {
-        Uri.encodeComponent(value),
-        Uri.encodeQueryComponent(value),
-      }) {
-        if (encoded == value) continue;
-        safe = safe.replaceAll(
-          RegExp(RegExp.escape(encoded), caseSensitive: false),
-          '[redacted]',
-        );
-      }
-    }
-    return safe;
+    return redactLiveDiagnosticValues(safe, {
+      ...uri.queryParametersAll.values.expand((values) => values),
+      ?credential,
+      ...resumeHandles,
+    });
   }
 
   Future<void> _setupSession(

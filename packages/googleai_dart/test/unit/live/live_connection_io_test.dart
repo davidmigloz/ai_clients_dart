@@ -304,6 +304,62 @@ void main() {
     },
   );
 
+  test(
+    'close diagnostics redact current and retained Live checkpoints',
+    () async {
+      const retained = 'retain+old/x';
+      const current = 'current+new/y';
+      final server = await _Server.start();
+      final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
+      final session = await live.connect(model: _model).timeout(_deadline);
+      final checkpointSeen = Completer<void>();
+      final closed = Completer<LiveSessionClosedException>();
+      final subscription = session.messages.listen(
+        (message) {
+          if (message case SessionResumptionUpdate(newHandle: current)) {
+            checkpointSeen.complete();
+          }
+        },
+        onError: (Object error) =>
+            closed.complete(error as LiveSessionClosedException),
+      );
+      addTearDown(subscription.cancel);
+      final socket = await server.peerSocket.future;
+      socket
+        ..add(
+          jsonEncode({
+            'sessionResumptionUpdate': {
+              'newHandle': retained,
+              'resumable': true,
+            },
+          }),
+        )
+        ..add(
+          jsonEncode({
+            'sessionResumptionUpdate': {
+              'newHandle': current,
+              'resumable': false,
+            },
+          }),
+        );
+      await checkpointSeen.future.timeout(_deadline);
+      expect(session.resumptionToken, current);
+      expect(session.lastResumableUpdate?.newHandle, retained);
+      unawaited(
+        socket.close(
+          1008,
+          'Rejected $retained (retain%2bold%2fx) and $current (current%2bnew%2fy)',
+        ),
+      );
+      final error = await closed.future.timeout(_deadline);
+      expect(error.code, 1008);
+      expect(
+        error.reason,
+        'Rejected [redacted] ([redacted]) and [redacted] ([redacted])',
+      );
+    },
+  );
+
   test('closes the socket after a malformed binary setup reply', () async {
     final server = await _Server.start(setupReply: [0xff, 0xfe]);
     final live = _createLive(GoogleAIConfig(baseUrl: server.baseUrl));
