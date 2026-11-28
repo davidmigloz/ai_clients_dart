@@ -7,6 +7,7 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../live/live_client.dart';
+import '../live/live_music_client.dart';
 import '../models/models/operation.dart';
 import '../resources/agents_resource.dart';
 import '../resources/auth_tokens_resource.dart';
@@ -467,6 +468,15 @@ class GoogleAIClient {
   LiveClient createLiveClient() {
     _ensureNotClosed();
     return LiveClient(config: config);
+  }
+
+  /// Creates a client for experimental Lyria RealTime music generation.
+  ///
+  /// Available on the Gemini Developer API with [ApiVersion.v1beta].
+  /// Close the returned client when finished.
+  LiveMusicClient createLiveMusicClient() {
+    _ensureNotClosed();
+    return LiveMusicClient(config: config);
   }
 
   /// Throws a [StateError] if this client has been closed.

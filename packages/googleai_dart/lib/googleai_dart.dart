@@ -25,6 +25,7 @@ export 'src/genie/genie_auth_token.dart';
 export 'src/genie/genie_events.dart';
 export 'src/genie/genie_session.dart';
 export 'src/live/live_client.dart';
+export 'src/live/live_music_client.dart';
 export 'src/live/live_session.dart';
 // Models - Auth Tokens
 export 'src/models/auth/auth_token.dart';
@@ -211,6 +212,8 @@ export 'src/models/live/enums/start_sensitivity.dart';
 export 'src/models/live/enums/turn_coverage.dart';
 export 'src/models/live/messages/client/client_message.dart';
 export 'src/models/live/messages/server/server_message.dart';
+export 'src/models/live/music/live_music_generation_config.dart';
+export 'src/models/live/music/live_music_server_message.dart';
 // Models - Metadata
 export 'src/models/metadata/finish_reason.dart';
 export 'src/models/metadata/grounding_chunk.dart';
