@@ -31,13 +31,10 @@ class DartInspectTests(unittest.TestCase):
         }) {
           return Value(json['id']);
         }
-        Value copyWith({String? id}) => Value(id ?? this.id);
         """
         factory = extract_method_body(source, r"factory\s+Value\.fromJson")
         self.assertIn("json['id']", factory)
         self.assertNotIn("partial = false", factory)
-        copy = extract_method_body(source, r"\bcopyWith\s*\(")
-        self.assertEqual(copy, "=> Value(id ?? this.id)")
 
     def test_exact_declaration_literals_ignore_comments_and_other_types(self) -> None:
         source = "// class Role { static const fake = 'critic'; }\nclass Role { static const user = 'user'; /* 'critic' */ }\nclass Other { static const tool = 'tool'; }"

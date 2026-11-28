@@ -572,6 +572,48 @@
         "acknowledged"
       ],
       "note": "The shared enum uses external encode and decode switches. JSON and Vertex loopback tests verify the wire values."
+    },
+    "SafetySetting": {
+      "spec": "live",
+      "schema": "SafetySetting",
+      "kind": "object",
+      "dart_class": "SafetySetting",
+      "file": "lib/src/models/safety/safety_setting.dart"
+    },
+    "HarmBlockMethod": {
+      "spec": "live",
+      "schema": "HarmBlockMethod",
+      "kind": "enum",
+      "dart_class": "HarmBlockMethod",
+      "file": "lib/src/models/safety/safety_setting.dart"
+    },
+    "MediaResolution": {
+      "spec": "live",
+      "schema": "MediaResolution",
+      "kind": "object",
+      "dart_class": "MediaResolution",
+      "file": "lib/src/models/content/media_resolution.dart"
+    },
+    "MediaResolutionLevel": {
+      "spec": "live",
+      "schema": "MediaResolutionLevel",
+      "kind": "enum",
+      "dart_class": "MediaResolutionLevel",
+      "file": "lib/src/models/content/media_resolution.dart"
+    },
+    "FunctionDeclaration": {
+      "spec": "live",
+      "schema": "FunctionDeclaration",
+      "kind": "object",
+      "dart_class": "FunctionDeclaration",
+      "file": "lib/src/models/tools/function_declaration.dart"
+    },
+    "FunctionDeclarationBehavior": {
+      "spec": "live",
+      "schema": "FunctionDeclarationBehavior",
+      "kind": "enum",
+      "dart_class": "FunctionDeclarationBehavior",
+      "file": "lib/src/models/tools/function_declaration.dart"
     }
   }
 }

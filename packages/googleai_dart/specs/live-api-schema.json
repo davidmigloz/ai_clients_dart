@@ -101,7 +101,7 @@
           "type": "number"
         },
         "mediaResolution": {
-          "type": "MediaResolution"
+          "type": "MediaResolutionLevel"
         },
         "seed": {
           "type": "integer"
@@ -411,6 +411,58 @@
           "required": false
         }
       }
+    },
+    "SafetySetting": {
+      "description": "Blocking category and threshold. Vertex also supports selecting a scoring method.",
+      "fields": {
+        "category": {
+          "type": "HarmCategory",
+          "required": true
+        },
+        "threshold": {
+          "type": "HarmBlockThreshold",
+          "required": true
+        },
+        "method": {
+          "type": "HarmBlockMethod",
+          "required": false,
+          "availability": "Vertex AI"
+        }
+      }
+    },
+    "MediaResolution": {
+      "description": "Per-input media resolution on Gemini Developer Live.",
+      "fields": {
+        "level": {
+          "type": "MediaResolutionLevel",
+          "required": false
+        },
+        "numTokens": {
+          "type": "integer",
+          "required": false
+        }
+      }
+    },
+    "FunctionDeclaration": {
+      "description": "Declaration of a Live tool. Blocking semantics depend on the backend and model.",
+      "fields": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "required": true
+        },
+        "parameters": {
+          "type": "Schema",
+          "required": false
+        },
+        "behavior": {
+          "type": "FunctionDeclarationBehavior",
+          "required": false
+        }
+      }
     }
   },
   "enums": {
@@ -468,6 +520,30 @@
       "availability": {
         "VIDEO": "Vertex AI gemini-3.8-live avatar output"
       }
+    },
+    "HarmBlockMethod": {
+      "values": [
+        "HARM_BLOCK_METHOD_UNSPECIFIED",
+        "SEVERITY",
+        "PROBABILITY"
+      ],
+      "availability": "Vertex AI"
+    },
+    "MediaResolutionLevel": {
+      "values": [
+        "MEDIA_RESOLUTION_UNSPECIFIED",
+        "MEDIA_RESOLUTION_LOW",
+        "MEDIA_RESOLUTION_MEDIUM",
+        "MEDIA_RESOLUTION_HIGH",
+        "MEDIA_RESOLUTION_ULTRA_HIGH"
+      ]
+    },
+    "FunctionDeclarationBehavior": {
+      "values": [
+        "UNSPECIFIED",
+        "BLOCKING",
+        "NON_BLOCKING"
+      ]
     }
   },
   "info": {

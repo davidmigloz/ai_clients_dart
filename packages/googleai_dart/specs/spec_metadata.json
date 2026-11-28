@@ -37,9 +37,9 @@
       "source_url": "https://aistudio.google.com/api-reference/live",
       "cloud_source_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/start-manage-session",
       "source_file": "live-api-schema.source.json",
-      "sha256": "096985bc6976cc7e5d7937de723da057c42106fbe8c76d6f9f6fc85c6130d818",
+      "sha256": "669aad1d9a3102e06c33a43b44d5f4d6c5c600f9ce04f02ecce8bc0164edfb70",
       "version_history": [],
-      "source_sha256": "096985bc6976cc7e5d7937de723da057c42106fbe8c76d6f9f6fc85c6130d818"
+      "source_sha256": "669aad1d9a3102e06c33a43b44d5f4d6c5c600f9ce04f02ecce8bc0164edfb70"
     }
   },
   "alignment": {
